@@ -6,8 +6,8 @@ Validates that:
 1. Browser execution enforces zero-knowledge network boundaries via CSP (connect-src 'self').
 2. Web Worker file processing executes in-memory without initiating network requests.
 3. No tracking or telemetry scripts (Google Analytics, Sentry, Mixpanel, Segment) exist.
-4. The /api/enrich endpoint accepts ONLY rsID tokens (matching ^rs[0-9]+$) and rejects any
-   payload containing genotypes, coordinates, patient identifiers, or raw DNA data.
+4. The client application NEVER transmits user variants or positive findings to any backend.
+5. The /api/enrich manifest endpoint returns static release provenance with zero input acceptance.
 """
 
 import json
@@ -17,15 +17,16 @@ from pathlib import Path
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
+
 class TestZeroKnowledgePrivacy(unittest.TestCase):
     def test_csp_connect_src_isolation(self):
         """Verifies Content Security Policy forbids third-party exfiltration."""
         vercel_json_path = WEB_DIR / "vercel.json"
         self.assertTrue(vercel_json_path.exists(), "vercel.json must exist")
-        
+
         with open(vercel_json_path, "r", encoding="utf-8") as f:
             vercel_config = json.load(f)
-            
+
         csp_found = False
         for route in vercel_config.get("headers", []):
             for header in route.get("headers", []):
@@ -49,14 +50,14 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
             r"datadoghq",
             r"loggly",
         ]
-        
+
         target_files = [
             WEB_DIR / "index.html",
             WEB_DIR / "src" / "app.js",
             WEB_DIR / "src" / "worker.js",
-            WEB_DIR / "src" / "redis-client.js",
+            WEB_DIR / "src" / "knowledge-base.js",
         ]
-        
+
         for file_path in target_files:
             self.assertTrue(file_path.exists(), f"File {file_path} must exist")
             content = file_path.read_text(encoding="utf-8")
@@ -68,34 +69,32 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         """Verifies worker.js contains 0 network dispatch functions (fetch/XMLHttpRequest/WebSocket)."""
         worker_path = WEB_DIR / "src" / "worker.js"
         content = worker_path.read_text(encoding="utf-8")
-        
-        # Worker must rely strictly on onmessage / postMessage and in-memory logic
+
         self.assertNotIn("fetch(", content, "worker.js must not perform fetch() calls")
         self.assertNotIn("XMLHttpRequest", content, "worker.js must not instantiate XMLHttpRequest")
         self.assertNotIn("WebSocket", content, "worker.js must not establish WebSocket connections")
         self.assertIn("onmessage", content, "worker.js must communicate via message passing")
         self.assertIn("postMessage", content, "worker.js must return results via message passing")
 
-    def test_enrich_endpoint_restricts_payload_to_rsids_only(self):
-        """Verifies /api/enrich only transmits rsID lists and strips or rejects raw data."""
-        enrich_client_path = WEB_DIR / "src" / "redis-client.js"
-        content = enrich_client_path.read_text(encoding="utf-8")
-        
-        # The body sent to /api/enrich must only be { rsids: ... }
-        self.assertIn("body: JSON.stringify({ rsids:", content)
-        self.assertNotIn("genotype", content)
-        self.assertNotIn("chromosome", content)
-        self.assertNotIn("position", content)
+    def test_app_does_not_exfiltrate_user_variant_findings(self):
+        """Verifies app.js does not transmit positive findings or state.records over the network."""
+        app_path = WEB_DIR / "src" / "app.js"
+        content = app_path.read_text(encoding="utf-8")
 
-    def test_enrich_backend_validates_rsid_token_format(self):
-        """Verifies backend api/enrich.js enforces strict rsID regex and limits batch size."""
+        # Must not map records to POST body
+        self.assertNotIn("state.records.map(", content, "app.js must not map state.records to network payload")
+        self.assertNotIn("triggerRedisEnrichment", content, "Leaky enrichment trigger must be removed")
+
+    def test_enrich_endpoint_is_zero_knowledge_manifest(self):
+        """Verifies backend api/enrich.js is a certified zero-knowledge manifest endpoint."""
         enrich_backend_path = WEB_DIR / "api" / "enrich.js"
         self.assertTrue(enrich_backend_path.exists(), "api/enrich.js must exist")
         content = enrich_backend_path.read_text(encoding="utf-8")
-        
-        # Must check rsids array presence and validate against rsID regex or format
-        self.assertIn("!Array.isArray(rsids)", content)
-        self.assertIn("MAX_BATCH = 100", content)
+
+        # Must declare zero knowledge certified
+        self.assertIn("zero_knowledge_certified: true", content)
+        self.assertIn("clinvar_release: \"2024-06\"", content)
+        self.assertIn("dbsnp_build: 156", content)
 
 
 if __name__ == "__main__":

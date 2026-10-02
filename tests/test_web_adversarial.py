@@ -185,17 +185,16 @@ def run_adversarial_suite():
         results["tests"].append("Test 5: Filter Transitions")
 
         # -------------------------------------------------------------
-        # TEST 6: Redis Live Enrichment Button Resilience
+        # TEST 6: Zero-Knowledge Knowledge-Base Provenance Badge
         # -------------------------------------------------------------
-        print("\n[TEST 6] Testing Redis Live Enrichment Trigger...")
-        btn_redis = page.locator("#btn-enrich-redis")
-        btn_redis.click()
-        page.wait_for_selector("#redis-stats-banner:not(.hidden)", timeout=5000)
-        redis_latency = page.locator("#redis-latency").text_content()
-        redis_hits = page.locator("#redis-hits-count").text_content()
-        print(f"  [PASS] Redis banner active: Latency = {redis_latency}, Hits = {redis_hits}")
+        print("\n[TEST 6] Testing Zero-Knowledge KB Provenance Badge...")
+        badge = page.locator("#kb-provenance-badge")
+        assert badge.is_visible(), "Knowledge base provenance badge must be visible"
+        badge_text = badge.text_content()
+        assert "ClinVar 2024-06" in badge_text, f"Unexpected badge text: {badge_text}"
+        print(f"  [PASS] Zero-knowledge KB badge verified: {badge_text}")
         results["passed"] += 1
-        results["tests"].append("Test 6: Redis Enrichment Trigger")
+        results["tests"].append("Test 6: KB Provenance Badge")
 
         # -------------------------------------------------------------
         # TEST 7: ADVERSARIAL FILE INGESTION (XSS Injection in DNA)
