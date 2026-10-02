@@ -182,12 +182,18 @@ GENE_INHERITANCE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "MTHFR": {
         "mode": "Autosomal Recessive / Biomarker Modifier",
-        "disease": "Homocysteine & Folate Metabolism Variation",
-        "omim": "607093",
+        "disease": "Methylenetetrahydrofolate Reductase Deficiency / Homocysteine Modifier",
+        "omim": "236250",   # Disease OMIM (severe MTHFR deficiency). Common SNPs C677T/A1298C
+                            # are biomarker modifiers and do NOT carry this disease OMIM directly.
         "carrier_freq_nfe": 0.45,
         "carrier_freq_global": 0.35,
         "penetrance": 0.05,
-        "description": "Thermolabile enzyme variant with modest reduction in 5-MTHF synthesis.",
+        "description": (
+            "Common thermolabile variants (C677T rs1801133, A1298C rs1801131) modestly reduce 5-MTHF "
+            "synthesis and mildly elevate homocysteine. These SNPs are biomarker modifiers with low "
+            "individual clinical penetrance (~5%). Rare biallelic severe mutations cause homocystinuria "
+            "(OMIM 236250) with high penetrance. OMIM 607093 is the gene locus entry only."
+        ),
     },
 }
 
