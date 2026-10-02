@@ -1,74 +1,106 @@
-# GenomePulse — Zero-Knowledge Variome Explorer
+# GenomePulse — Zero-Knowledge Clinical Variome Explorer
 
-A modern, privacy-first consumer genomics analysis platform designed for **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files.
+A modern, privacy-first consumer genomics analysis platform supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files.
 
 ---
 
-## 🛡️ Core Architecture
+## 🛡️ Privacy Architecture
 
-- **Zero-Knowledge Client-Side Processing**: Raw DNA files (15–30 MB, ~700,000 to 1,000,000 SNPs) are streamed and parsed entirely inside the user's browser using a multi-threaded **Web Worker**. The raw genetic sequence never leaves the client device.
-- **Embedded Clinical Knowledge Base**: Instant 0ms offline annotation for high-priority loci:
-  - **ClinVar 2026.1**: Pathogenicity, review stars (0–4), and conditions.
-  - **ACMG Secondary Findings v3.2**: 81 actionable genes (*BRCA1/2*, *HFE*, *LDLR*, *TP53*, etc.).
-  - **Human Protein Atlas (HPA)**: Normal human tissue protein abundance and subcellular localization.
-  - **CPIC Pharmacogenomics (PGx)**: Drug metabolism alerts for Clopidogrel (*CYP2C19*), Warfarin (*VKORC1*), Statins (*SLCO1B1*), and 5-FU (*DPYD*).
-  - **gnomAD**: Continental allele frequencies and gene constraint pLI scores.
-- **Redis Edge Caching**:
-  - The browser extracts only the flagged/relevant rsIDs (~150–500 variants, ~2 KB payload) and queries `/api/enrich`.
-  - Redis returns cached clinical data in **~3 milliseconds**.
-  - Cache misses query upstream APIs and write to Redis with a 30-day TTL (`SETEX`).
+**Raw DNA data never leaves your device.**
+
+| Stage | Where it runs | What is transmitted |
+|:---|:---|:---|
+| File parsing (23andMe / VCF) | Browser Web Worker | Nothing |
+| Variant classification & segregation | Browser (JS knowledge base) | Nothing |
+| Compound heterozygote detection | Browser | Nothing |
+| Redis enrichment (optional) | Vercel `/api/enrich` serverless | **rsID identifiers only** (~150–500 variant IDs, ~2 KB) |
+
+The `/api/enrich` endpoint receives only rsID identifiers — not genotypes, not personal data. It returns cached clinical annotations from the embedded knowledge base or Upstash Redis.
+
+> **Note on enrichment data:** When Upstash Redis is not configured or a variant is not yet cached, the endpoint returns an **offline embedded knowledge-base stub** labelled `evidence_tier: embedded_kb_fallback`. This is not a live query to ClinVar, Ensembl, or AlphaFold. Verified live-source data requires wiring a live enrichment step into the cache-miss path of `api/enrich.js`.
+
+---
+
+## 🧬 Genomic Pipeline
+
+```
+User uploads 23andMe / VCF file
+       │
+       ▼
+ [Web Worker — browser only]
+ ├─ File format detection (23andMe v3-v5, AncestryDNA, MyHeritage, VCF 4.2)
+ ├─ SNP line parsing (~700K–1M variants)
+ ├─ Genotype normalization (strand flip, GT parsing)
+ └─ Variant classification against embedded knowledge base
+       │
+       ▼
+ [Main Thread — browser only]
+ ├─ APOE ε diplotype synthesis (rs429358 × rs7412)
+ ├─ Compound heterozygote detection (HFE C282Y/H63D, CFTR multi-locus)
+ ├─ Mendelian segregation reports (Hardy-Weinberg, carrier prior, offspring risk)
+ ├─ Independent assortment multi-locus joint probability (Mendel's 2nd Law)
+ └─ Pedigree partner scenario simulation
+       │
+       ▼ (optional, rsIDs only)
+ [Vercel /api/enrich — serverless]
+ ├─ Upstash Redis MGET (~3 ms cache hit)
+ └─ Embedded KB fallback stub (evidence_tier: embedded_kb_fallback)
+       │
+       ▼
+ UI: variant table, drawer inspection, biotools panel, export (Markdown / CSV)
+```
+
+---
+
+## 🔒 Security Headers (Vercel)
+
+All responses include:
+
+| Header | Value |
+|:---|:---|
+| `Content-Security-Policy` | Scripts: self + Tailwind CDN; Fonts: Typekit; No frames |
+| `X-Frame-Options` | `DENY` |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | Camera, microphone, geolocation all denied |
+
+CORS on `/api/enrich` defaults to **same-origin** (no wildcard). Set `ALLOWED_ORIGIN` in Vercel env vars if your frontend is on a custom domain.
 
 ---
 
 ## 🚀 Deployment Options
 
-### 1. Vercel Deployment (Recommended)
+### 1. Vercel (Recommended)
 
-1. Push your repository to GitHub.
-2. Import the project into [Vercel](https://vercel.com).
-3. Set the Root Directory to `web` (or leave default).
-4. (Optional) In the Vercel Project Settings, add your Upstash Redis credentials:
-   - `UPSTASH_REDIS_REST_URL`: `https://...upstash.io`
-   - `UPSTASH_REDIS_REST_TOKEN`: `A...`
-5. Click **Deploy**. Your app is globally distributed at zero cost.
-
----
+1. Push repository to GitHub.
+2. Import into [Vercel](https://vercel.com), set **Root Directory** to `web/`.
+3. *(Optional)* Add Upstash Redis env vars in Project Settings → Environment Variables:
+   - `UPSTASH_REDIS_REST_URL` — `https://...upstash.io`
+   - `UPSTASH_REDIS_REST_TOKEN` — `A...`
+   - `ALLOWED_ORIGIN` — your custom domain (e.g. `https://genomepulse.example.com`) if not on `.vercel.app`
+4. Click **Deploy**.
 
 ### 2. Docker & Docker Compose
 
-Run the web application together with a persistent Redis container with one command:
-
 ```bash
-docker compose up -d
-```
-
-- Web App: `http://localhost:8080`
-- Redis Cache: `localhost:6379`
-
-To stop:
-```bash
+docker compose up -d   # Web: http://localhost:8080  Redis: localhost:6379
 docker compose down
 ```
 
----
-
-### 3. Local Development (Instant Browser Preview)
-
-You can launch a local HTTP server with Python:
+### 3. Local Development
 
 ```bash
 cd web
 python -m http.server 8000
+# Open http://localhost:8000
 ```
-
-Open `http://localhost:8000` in any browser.
 
 ---
 
 ## 📊 File Format Support
 
 | Format | Auto-Detection | Allele Merging | Genome Builds |
-| :--- | :--- | :--- | :--- |
+|:---|:---|:---|:---|
 | **23andMe** (v3, v4, v5) | `# rsid chromosome position genotype` | Native | GRCh37, GRCh38 |
 | **AncestryDNA** | `# rsid chromosome position allele1 allele2` | Automatic | GRCh37 |
 | **MyHeritage** | `"RSID","CHROMOSOME","POSITION","RESULT"` | CSV unquoting | GRCh37 |
@@ -78,8 +110,13 @@ Open `http://localhost:8000` in any browser.
 
 ## 🎨 Developer Tooling: Font Kit Studio
 
-Font Kit Studio is maintained as dedicated developer and design tooling located in `tools/font-kit-studio/`:
-- **Standalone Workbench**: Open `tools/font-kit-studio/font_kit_studio_v0.1.1.html` directly in your browser.
-- **External Previewing**: Enter GenomePulse's local URL (e.g. `http://localhost:8788`) into Font Kit Studio's Target URL input to inspect typography, design tokens, and breakpoints externally without embedding developer tooling in the clinical app bundle.
-- **Production Cleanliness**: Zero developer iframe modals or bridge overhead inside the core clinical application.
+Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studio/` and is **not bundled** in the production clinical app.
 
+- **Standalone Workbench:** Open `tools/font-kit-studio/font_kit_studio_v0.1.1.html` directly in your browser.
+- **External Previewing:** Point Font Kit Studio's Target URL at your running GenomePulse local instance to inspect typography tokens externally.
+
+---
+
+## 📋 Audit
+
+See [`AUDIT_LEDGER.md`](../AUDIT_LEDGER.md) for the full architecture and ground truth audit log, issue register, and remediation history.
