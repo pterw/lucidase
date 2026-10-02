@@ -4,15 +4,20 @@
  * Endpoint: POST /api/enrich
  * Body: { rsids: ["rs429358", "rs1800562", ...] }
  *
- * Checks Upstash Redis / Redis for cached clinical, proteomic, and literature data.
- * Cache hits resolve in ~3-5ms. Cache misses query live upstream sources and warm Redis.
+ * Checks Upstash Redis for cached clinical data.
+ * Cache hits resolve in ~3-5ms.
+ * Cache misses return an offline embedded knowledge-base stub (NOT live API data).
+ * Set UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN to enable real caching.
  */
 
 export default async function handler(req, res) {
-  // CORS & Security headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // CORS: same-origin only by default; set ALLOWED_ORIGIN env var for custom domain.
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || null;
+  if (allowedOrigin) {
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -32,7 +37,7 @@ export default async function handler(req, res) {
   // Limit batch size to protect resources
   const requestedRsids = rsids.slice(0, 200);
 
-  // Check Redis configuration (Upstash REST API or standard Redis)
+  // Check Redis configuration (Upstash REST API)
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
   const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
   const redisEnabled = Boolean(upstashUrl && upstashToken);
@@ -73,23 +78,26 @@ export default async function handler(req, res) {
           }
         });
 
-        // Warm cache for misses (TTL: 30 days = 2,592,000s)
+        // Cache misses: return offline embedded KB stub and warm cache with TTL 30 days.
+        // NOTE: This does NOT query live ClinVar/Ensembl/AlphaFold. It returns a
+        // clearly-labeled offline stub. Integrate a live enrichment step here to
+        // replace stubs with verified data before caching.
         if (missesToFetch.length > 0) {
           cacheMisses = missesToFetch.length;
           const pipelineCommands = [];
 
           for (const missId of missesToFetch) {
-            const enriched = generateFallbackEnrichment(missId);
-            results[missId] = enriched;
+            const stub = buildOfflineStub(missId);
+            results[missId] = stub;
             pipelineCommands.push([
               "SETEX",
               `variant:${missId.toLowerCase()}`,
               2592000,
-              JSON.stringify(enriched)
+              JSON.stringify(stub)
             ]);
           }
 
-          // Execute pipeline to Upstash
+          // Warm cache with stubs (replace with live-enriched data when available)
           await fetch(`${upstashUrl}/pipeline`, {
             method: "POST",
             headers: {
@@ -102,20 +110,20 @@ export default async function handler(req, res) {
       } else {
         // Fallback if Redis REST failed
         requestedRsids.forEach(id => {
-          results[id] = generateFallbackEnrichment(id);
+          results[id] = buildOfflineStub(id);
           cacheMisses++;
         });
       }
     } catch {
       requestedRsids.forEach(id => {
-        results[id] = generateFallbackEnrichment(id);
+        results[id] = buildOfflineStub(id);
         cacheMisses++;
       });
     }
   } else {
-    // Redis unconfigured: return simulated instant enrichment with setup instructions
+    // Redis unconfigured: return offline stubs with setup instructions
     requestedRsids.forEach(id => {
-      results[id] = generateFallbackEnrichment(id);
+      results[id] = buildOfflineStub(id);
     });
   }
 
@@ -127,7 +135,7 @@ export default async function handler(req, res) {
   return res.status(200).json({
     status: "ok",
     redis_enabled: redisEnabled,
-    redis_provider: redisEnabled ? "Upstash Redis" : "None (Add UPSTASH_REDIS_REST_URL in Vercel)",
+    redis_provider: redisEnabled ? "Upstash Redis" : "None (Add UPSTASH_REDIS_REST_URL in Vercel env vars)",
     cache_hits: cacheHits,
     cache_misses: cacheMisses,
     duration_ms: durationMs,
@@ -136,78 +144,68 @@ export default async function handler(req, res) {
   });
 }
 
-function generateFallbackEnrichment(rsid) {
+/**
+ * Build an offline knowledge-base stub for a given rsID.
+ *
+ * IMPORTANT: This is NOT a live query to ClinVar, Ensembl, AlphaFold, or ENCODE.
+ * Data is derived from the embedded client-side knowledge base.
+ * evidence_tier is set to "embedded_kb_fallback" to distinguish from verified data.
+ * No fabricated star ratings, PubMed IDs, or ACMG rationale are included.
+ */
+function buildOfflineStub(rsid) {
   const norm = rsid.toLowerCase();
-  let gene = "GENE";
-  let uniprot = "P00000";
-  let plddt = 85.0;
-  let mode = "Autosomal Recessive";
-  let prior = 0.02;
+  let gene = null;
+  let uniprot = null;
+  let plddt = null;
+  let mode = null;
+  let prior = null;
 
   if (norm === "rs429358" || norm === "rs7412") {
-    gene = "APOE";
-    uniprot = "P02649";
-    plddt = 75.5;
-    mode = "Co-Dominant Complex Alleles";
-    prior = 0.25;
+    gene = "APOE"; uniprot = "P02649"; plddt = 75.5;
+    mode = "Co-Dominant Complex Alleles"; prior = 0.25;
   } else if (norm === "rs1800562" || norm === "rs1799945") {
-    gene = "HFE";
-    uniprot = "P55899";
-    plddt = 86.4;
-    mode = "Autosomal Recessive";
-    prior = 0.10;
+    gene = "HFE"; uniprot = "P55899"; plddt = 86.4;
+    mode = "Autosomal Recessive"; prior = 0.10;
   } else if (norm === "rs6025") {
-    gene = "F5";
-    uniprot = "P12259";
-    plddt = 82.1;
-    mode = "Autosomal Dominant / Incomplete Penetrance";
-    prior = 0.05;
+    gene = "F5"; uniprot = "P12259"; plddt = 82.1;
+    mode = "Autosomal Dominant / Incomplete Penetrance"; prior = 0.05;
   } else if (norm === "rs1799963") {
-    gene = "F2";
-    uniprot = "P00734";
-    plddt = 89.2;
-    mode = "Autosomal Dominant / Incomplete Penetrance";
-    prior = 0.02;
+    gene = "F2"; uniprot = "P00734"; plddt = 89.2;
+    mode = "Autosomal Dominant / Incomplete Penetrance"; prior = 0.02;
   } else if (norm === "rs113993960") {
-    gene = "CFTR";
-    uniprot = "P13569";
-    plddt = 84.8;
-    mode = "Autosomal Recessive";
-    prior = 0.03;
+    gene = "CFTR"; uniprot = "P13569"; plddt = 84.8;
+    mode = "Autosomal Recessive"; prior = 0.03;
   }
 
   return {
     rsid,
     gene,
-    last_updated: new Date().toISOString(),
-    source: "ClinVar / Ensembl VEP / AlphaFold DB / ENCODE cCREs",
-    evidence_tier: "Tier 1 Verified",
-    citation_count: 18,
-    recent_pubmed_ids: [34123456, 33987654, 31987650],
-    clinvar: {
-      accession: `VCV_${norm}`,
-      stars: 4,
-      review_status: "practice guideline / expert panel reviewed"
-    },
-    ensembl: {
-      transcript: "MANE Select Canonical",
-      alphamissense: "verified clinical missense effect",
-      loeuf: 0.65
-    },
-    alphafold: {
+    evidence_tier: "embedded_kb_fallback",
+    source: "offline_embedded_kb",
+    note: "No live API query was performed. Data reflects the embedded client-side knowledge base only.",
+    clinvar: gene ? {
+      accession: null,
+      stars: null,
+      review_status: "not_queried"
+    } : null,
+    ensembl: gene ? {
+      transcript: "not_queried",
+      alphamissense: "not_queried",
+      loeuf: null
+    } : null,
+    alphafold: uniprot ? {
       uniprot_id: uniprot,
       plddt,
-      folding_status: "Confidently folded tertiary structure with active site coordination"
-    },
-    encode: {
-      tpm_expression_summary: "Robust Type A tissue-specific expression confirmed across ENCODE RNA-seq biosamples"
-    },
-    segregation: {
+      folding_status: "not_queried"
+    } : null,
+    encode: gene ? {
+      tpm_expression_summary: "not_queried"
+    } : null,
+    segregation: mode ? {
       mode,
       carrier_prior: prior,
       risk_unscreened: Math.round(prior * 0.25 * 1000) / 1000,
       risk_carrier: 0.25
-    },
-    acmg_classification_rationale: "Established across multiple clinical review consensus panels and functional structural studies."
+    } : null
   };
 }
