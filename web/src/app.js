@@ -6,8 +6,7 @@
  * filtering, sorting, variant inspection drawer, and Redis enrichment.
  */
 
-import { RedisEnricher } from "./redis-client.js";
-import { simulateOffspringPedigree, BIOTOOLS_GENE_INSIGHTS, computeSegregationReport } from "./knowledge-base.js";
+import { simulateOffspringPedigree, BIOTOOLS_GENE_INSIGHTS, computeSegregationReport, KB_MANIFEST } from "./knowledge-base.js";
 
 // Global Application State
 const state = {
@@ -106,7 +105,6 @@ function initEventListeners() {
   const filterButtons = document.querySelectorAll("[data-filter]");
   const btnExportMd = document.getElementById("btn-export-md");
   const btnExportCsv = document.getElementById("btn-export-csv");
-  const btnEnrichRedis = document.getElementById("btn-enrich-redis");
   const btnCloseDrawer = document.getElementById("btn-close-drawer");
   const btnInspectApoe = document.getElementById("btn-inspect-apoe");
 
@@ -186,8 +184,6 @@ function initEventListeners() {
   btnExportMd.addEventListener("click", exportMarkdownReport);
   btnExportCsv.addEventListener("click", exportCsvReport);
 
-  // Redis live enrichment
-  btnEnrichRedis.addEventListener("click", triggerRedisEnrichment);
 
   // Detail drawer close
   if (btnCloseDrawer) {
@@ -804,33 +800,6 @@ function renderDrawerBiotools(record) {
 function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
   if (drawer) drawer.classList.add("translate-x-full");
-}
-
-async function triggerRedisEnrichment() {
-  const btn = document.getElementById("btn-enrich-redis");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="loading loading-spinner loading-xs mr-1"></span> Querying Edge…`;
-
-  try {
-    const rsids = state.records.map(r => r.rsid).filter(id => id.startsWith("rs"));
-    const startTime = performance.now();
-    const result = await RedisEnricher.enrichBatch(rsids);
-    const latency = Math.round(performance.now() - startTime);
-
-    const banner = document.getElementById("redis-stats-banner");
-    banner.classList.remove("hidden");
-    document.getElementById("redis-latency").textContent = `${latency} ms`;
-    document.getElementById("redis-hits-count").textContent = `${result.hits.length} hits`;
-    document.getElementById("redis-misses-count").textContent = `${result.misses.length} misses`;
-
-    const indicator = document.getElementById("redis-status-indicator");
-    indicator.textContent = `Redis Active (${latency}ms)`;
-  } catch (err) {
-    console.warn("Redis edge enrichment warning:", err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `⚡ Redis Live Enrich`;
-  }
 }
 
 function exportMarkdownReport() {

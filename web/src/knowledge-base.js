@@ -8,6 +8,15 @@
  * - CPIC Pharmacogenomics (PGx) drug metabolism alerts
  * - gnomAD continental allele frequencies & pLI constraint scores
  */
+export const KB_MANIFEST = {
+  release_version: "2026.10.02",
+  release_date: "2026-10-02",
+  clinvar_release: "2024-06",
+  dbsnp_build: 156,
+  acmg_sf_version: "v3.2 (81 genes)",
+  variant_count: 60,
+  zero_knowledge: true
+};
 
 export const ACMG_SF_GENES = new Set([
   "ACTA2", "ACTC1", "APC", "APOB", "ATP7B", "BAG3", "BMPR1A", "BRCA1", "BRCA2", "BTD",
