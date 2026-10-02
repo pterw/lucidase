@@ -30,7 +30,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 from playwright.sync_api import sync_playwright, expect
 
-WEB_DIR = Path(__file__).parent / "web"
+WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 PORT = 8765
 BASE_URL = f"http://127.0.0.1:{PORT}"
 

@@ -9,7 +9,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from playwright.sync_api import sync_playwright
 
-WEB_DIR = Path(__file__).parent / "web"
+WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 PORT = 8766
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):

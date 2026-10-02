@@ -16,7 +16,13 @@ Tests:
 
 from __future__ import annotations
 
+import sys
 import unittest
+from pathlib import Path
+
+# Ensure repo root is on sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from genomic_parser import GenomicParser, VariantCall
 from variant_annotator import VariantAnnotator, ACMG_SF_GENES
 
