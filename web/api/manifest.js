@@ -16,10 +16,13 @@ const MANIFEST = {
   release_date: "2026-10-02",
   clinvar_release: "2024-06",
   dbsnp_build: 156,
-  acmg_sf_list: "ACMG Secondary Findings v3.2 (81 genes)",
-  variant_count: 60,
-  sha256: "e59868d4ccca9ad33fcc849a1cadc13efe2714848c1566da44fd7626832af5d3",
-  zero_knowledge_certified: true,
+  variant_count: 14,
+  sha256: "2bf6cffdbff070af2d7ec7d2fba714897ef48d9e52d5ee7f1e8cbbb6151ead9f",
+  privacy_guarantees: {
+    local_analysis: true,
+    genomic_uploads: false,
+    variant_identifiers_transmitted: false
+  },
   privacy_policy: "All primary genomic analysis is performed locally in-browser via Web Workers. No raw genotypes, rsIDs, or derived health indicators are received by this service."
 };
 

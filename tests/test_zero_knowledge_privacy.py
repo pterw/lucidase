@@ -85,14 +85,16 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         self.assertNotIn("state.records.map(", content, "app.js must not map state.records to network payload")
         self.assertNotIn("triggerRedisEnrichment", content, "Leaky enrichment trigger must be removed")
 
-    def test_enrich_endpoint_is_zero_knowledge_manifest(self):
-        """Verifies backend api/enrich.js is a certified zero-knowledge manifest endpoint."""
-        enrich_backend_path = WEB_DIR / "api" / "enrich.js"
-        self.assertTrue(enrich_backend_path.exists(), "api/enrich.js must exist")
-        content = enrich_backend_path.read_text(encoding="utf-8")
+    def test_manifest_endpoint_guarantees(self):
+        """Verifies backend api/manifest.js serves manifest with verifiable privacy guarantees."""
+        manifest_backend_path = WEB_DIR / "api" / "manifest.js"
+        self.assertTrue(manifest_backend_path.exists(), "api/manifest.js must exist")
+        content = manifest_backend_path.read_text(encoding="utf-8")
 
-        # Must declare zero knowledge certified
-        self.assertIn("zero_knowledge_certified: true", content)
+        # Must declare honest verifiable privacy guarantees
+        self.assertIn("local_analysis: true", content)
+        self.assertIn("genomic_uploads: false", content)
+        self.assertIn("variant_identifiers_transmitted: false", content)
         self.assertIn("clinvar_release: \"2024-06\"", content)
         self.assertIn("dbsnp_build: 156", content)
 

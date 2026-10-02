@@ -3,7 +3,7 @@
   "name": "genomepulse",
   "builds": [
     {
-      "src": "api/enrich.js",
+      "src": "api/manifest.js",
       "use": "@vercel/node"
     },
     {
@@ -13,8 +13,12 @@
   ],
   "routes": [
     {
+      "src": "/api/manifest",
+      "dest": "/api/manifest.js"
+    },
+    {
       "src": "/api/enrich",
-      "dest": "/api/enrich.js"
+      "dest": "/api/manifest.js"
     },
     {
       "src": "/(.*)",
