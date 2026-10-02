@@ -16,7 +16,7 @@ dist/
 node_modules/
 .npm/
 
-# Caches & scratch directories
+# Caches & local runtime artifacts
 .biotools_cache/
 .matplotlib_cache/
 .uv_cache/
@@ -24,10 +24,25 @@ scratch/
 *.tmp
 *.log
 
-# Large transient raw query dumps & zip archives
+# Local tool binaries (uv, uvw, uvx)
+bin/
+
+# Downloaded AlphaFold structure data
+alphafold_data/
+
+# Third-party license copies (fetched at runtime)
+.licenses/
+
+# Large test fixtures (regenerate via test suite)
 test_vep.json
 test_encode_expr.json
+
+# Archives (built from source)
 *.zip
+
+# Development screenshots (keep in docs/ if needed)
+/live_*.png
+/web_*.png
 
 # OS & IDE
 .DS_Store
