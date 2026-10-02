@@ -47,6 +47,9 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-010 | `web/index.html` | CPIC metabolizer UI | Microarray wildtype calls at single SNPs (e.g. *CYP2C19\*2* GG) were displayed without warning that untested star alleles (*3, *17) can alter phenotype. Drawer now disclaims single-SNP limitations. | REMEDIATED |
 | P1-011 | `web/api/enrich.js` | Payload validation | Endpoint accepted unbounded request arrays (up to 200) without strict regex validation (^rs\d+$) or rejection of extraneous fields (genotypes, chromosomes). Now capped at MAX_BATCH = 100 with regex token validation. | REMEDIATED |
 | P1-012 | `web/src/app.js`, `web/index.html` | 815 | 'Redis Live Enrich' button triggered POST `/api/enrich` with `state.records.map(r => r.rsid)`, leaking the user's positive clinical findings over the network. Retired the button and banner, replaced with transparent local KB Provenance badge, and refactored `/api/enrich` into a zero-knowledge manifest endpoint. | REMEDIATED |
+| P1-013 | `web/api/enrich.js`, `web/vercel.json` | Endpoint naming | Retaining `/api/enrich` created semantic debt for an endpoint that serves a release manifest. Renamed to `web/api/manifest.js` (`/api/manifest`), retaining an alias route for backward compatibility. | REMEDIATED |
+| P1-014 | `web/api/manifest.js`, `web/src/knowledge-base.js` | Nomenclature | Replaced misleading cryptographic claims ('zero_knowledge_certified: true') with verifiable architectural invariants: `local_analysis: true`, `genomic_uploads: false`, `variant_identifiers_transmitted: false`. | REMEDIATED |
+| P1-015 | `tools/build_canonical_kb.py` | Provenance Pipeline | Upgraded pipeline from passive JSON serializer to genuine upstream ingestion and QC validation engine tracing all 14 core loci to dbSNP Build 156, ClinVar 2024-06, Ensembl 112 / MANE v1.3, AlphaFold DB v4, gnomAD v4.1, HPA v23, and CPIC 2024. | REMEDIATED |
 
 ---
 
