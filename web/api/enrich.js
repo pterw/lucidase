@@ -34,8 +34,24 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid request. Provide an array of rsIDs in { rsids: [...] }." });
   }
 
-  // Limit batch size to protect resources
-  const requestedRsids = rsids.slice(0, 200);
+  // Reject payloads that contain extraneous fields (genotypes, chromosomes, etc.)
+  const allowedKeys = new Set(["rsids"]);
+  for (const key of Object.keys(req.body)) {
+    if (!allowedKeys.has(key)) {
+      return res.status(400).json({ error: `Forbidden field '${key}'. Only 'rsids' is accepted.` });
+    }
+  }
+
+  // Limit batch size to protect resources and validate format (^rs[0-9]+$)
+  const MAX_BATCH = 100;
+  const RSID_REGEX = /^rs\d+$/i;
+  const validRsids = rsids.filter(id => typeof id === "string" && RSID_REGEX.test(id.trim()));
+
+  if (validRsids.length === 0) {
+    return res.status(400).json({ error: "No valid rsIDs provided. Expected tokens matching ^rs[0-9]+$." });
+  }
+
+  const requestedRsids = validRsids.slice(0, MAX_BATCH);
 
   // Check Redis configuration (Upstash REST API)
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
