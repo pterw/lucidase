@@ -23,6 +23,8 @@ node_modules/
 scratch/
 *.tmp
 *.log
+*.db
+*.sqlite
 
 # Local tool binaries (uv, uvw, uvx)
 bin/

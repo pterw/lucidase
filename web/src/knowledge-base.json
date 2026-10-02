@@ -1,0 +1,686 @@
+{
+  "manifest": {
+    "schema_version": "1.0.0",
+    "release_version": "2026.10.02",
+    "release_date": "2026-10-02",
+    "clinvar_release": "2024-06",
+    "dbsnp_build": 156,
+    "acmg_sf_list": "ACMG Secondary Findings v3.2 (81 genes)",
+    "variant_count": 13,
+    "sha256": "e59868d4ccca9ad33fcc849a1cadc13efe2714848c1566da44fd7626832af5d3",
+    "zero_knowledge_certified": true,
+    "privacy_policy": "Zero-upload local evaluation. No genotypes or patient data are sent to online endpoints."
+  },
+  "variants": {
+    "rs429358": {
+      "rsid": "rs429358",
+      "gene": "APOE",
+      "name": "APOE-e4 determinant (Cys130Arg)",
+      "chrom": "19",
+      "pos_grch37": 45411941,
+      "pos_grch38": 44908684,
+      "ref": "T",
+      "alt": "C",
+      "clinvar_id": "VCV000017864",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.15,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "cerebral cortex": "Medium",
+        "plasma": "High"
+      },
+      "hpa_subcellular": [
+        "Secreted",
+        "Endoplasmic reticulum"
+      ],
+      "genotypes": {
+        "CC": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 5.0,
+          "repute": "Bad",
+          "phenotype": "APOE e4/e4 homozygote: ~12-15x elevated risk for late-onset Alzheimer's disease.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "CT": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 3.5,
+          "repute": "Bad",
+          "phenotype": "APOE e4 carrier (e3/e4 or e2/e4): ~3-4x increased risk for late-onset Alzheimer's disease.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "TT": {
+          "category": "Trait",
+          "significance": "Common / Benign",
+          "magnitude": 1.0,
+          "repute": "Good",
+          "phenotype": "Non-e4 carrier at rs429358 (e3 or e2 allele). Average or baseline Alzheimer's risk.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs7412": {
+      "rsid": "rs7412",
+      "gene": "APOE",
+      "name": "APOE-e2 determinant (Arg176Cys)",
+      "chrom": "19",
+      "pos_grch37": 45412079,
+      "pos_grch38": 44908822,
+      "ref": "C",
+      "alt": "T",
+      "clinvar_id": "VCV000017865",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.08,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "cerebral cortex": "Medium"
+      },
+      "hpa_subcellular": [
+        "Secreted"
+      ],
+      "genotypes": {
+        "TT": {
+          "category": "Trait",
+          "significance": "Protective / Benign",
+          "magnitude": 2.5,
+          "repute": "Good",
+          "phenotype": "APOE e2/e2: Protective against Alzheimer's disease; rare association with Type III hyperlipoproteinemia.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "CT": {
+          "category": "Trait",
+          "significance": "Protective / Benign",
+          "magnitude": 2.0,
+          "repute": "Good",
+          "phenotype": "APOE e2 carrier: Moderate protective effect against Alzheimer's disease.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "CC": {
+          "category": "Trait",
+          "significance": "Common / Benign",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Common allele (encodes normal Arg176).",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs1800562": {
+      "rsid": "rs1800562",
+      "gene": "HFE",
+      "name": "HFE C282Y",
+      "chrom": "6",
+      "pos_grch37": 26093141,
+      "pos_grch38": 26092913,
+      "ref": "G",
+      "alt": "A",
+      "clinvar_id": "VCV000000009",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": true,
+      "gnomad_af": 0.06,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "duodenum": "High",
+        "spleen": "Medium"
+      },
+      "hpa_subcellular": [
+        "Plasma membrane",
+        "Endoplasmic reticulum"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 4.5,
+          "repute": "Bad",
+          "phenotype": "Hereditary Hemochromatosis Type 1 (C282Y homozygote). High risk of iron overload; regular ferritin monitoring advised.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Carrier",
+          "significance": "Pathogenic (Carrier)",
+          "magnitude": 2.0,
+          "repute": "Neutral",
+          "phenotype": "Carrier for Hereditary Hemochromatosis (C282Y heterozygote). Low individual risk unless compound heterozygous with H63D.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal wild-type HFE C282 allele.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs1799945": {
+      "rsid": "rs1799945",
+      "gene": "HFE",
+      "name": "HFE H63D",
+      "chrom": "6",
+      "pos_grch37": 26092913,
+      "pos_grch38": 26091179,
+      "ref": "C",
+      "alt": "G",
+      "clinvar_id": "VCV000000013",
+      "clinvar_stars": 2,
+      "acmg_sf_actionable": true,
+      "gnomad_af": 0.14,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "duodenum": "High"
+      },
+      "hpa_subcellular": [
+        "Plasma membrane"
+      ],
+      "genotypes": {
+        "GG": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 2.0,
+          "repute": "Neutral",
+          "phenotype": "H63D homozygote: mild modifier for iron absorption; rarely causes clinical hemochromatosis alone.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "CG": {
+          "category": "Carrier",
+          "significance": "Risk Factor (Carrier)",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "H63D carrier: common variant with minimal clinical significance unless paired with C282Y.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "CC": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal wild-type HFE H63 allele.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs6025": {
+      "rsid": "rs6025",
+      "gene": "F5",
+      "name": "Factor V Leiden (R506Q)",
+      "chrom": "1",
+      "pos_grch37": 169519049,
+      "pos_grch38": 169549811,
+      "ref": "C",
+      "alt": "T",
+      "clinvar_id": "VCV000003058",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.03,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "plasma": "High"
+      },
+      "hpa_subcellular": [
+        "Secreted"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 5.0,
+          "repute": "Bad",
+          "phenotype": "Factor V Leiden homozygote: 50-80x increased lifetime risk of deep vein thrombosis (DVT) and pulmonary embolism.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Risk Factor",
+          "significance": "Pathogenic",
+          "magnitude": 3.0,
+          "repute": "Bad",
+          "phenotype": "Factor V Leiden heterozygote: 4-8x increased risk of venous thromboembolism. Caution with oral contraceptives or prolonged immobility.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal wild-type Factor V.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs1799963": {
+      "rsid": "rs1799963",
+      "gene": "F2",
+      "name": "Prothrombin G20210A",
+      "chrom": "11",
+      "pos_grch37": 46761055,
+      "pos_grch38": 46739905,
+      "ref": "G",
+      "alt": "A",
+      "clinvar_id": "VCV000003059",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.02,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "plasma": "High"
+      },
+      "hpa_subcellular": [
+        "Secreted"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 4.5,
+          "repute": "Bad",
+          "phenotype": "Prothrombin G20210A homozygote: markedly elevated prothrombin levels and substantial thrombophilia risk.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Risk Factor",
+          "significance": "Pathogenic",
+          "magnitude": 2.8,
+          "repute": "Bad",
+          "phenotype": "Prothrombin G20210A heterozygote: ~2-3x increased risk of venous thrombosis.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal wild-type Prothrombin.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs4244285": {
+      "rsid": "rs4244285",
+      "gene": "CYP2C19",
+      "name": "CYP2C19*2 (Loss of Function)",
+      "chrom": "10",
+      "pos_grch37": 96541604,
+      "pos_grch38": 94781859,
+      "ref": "G",
+      "alt": "A",
+      "clinvar_id": "VCV000013589",
+      "clinvar_stars": 4,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.15,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "duodenum": "Medium"
+      },
+      "hpa_subcellular": [
+        "Endoplasmic reticulum membrane"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.0,
+          "repute": "Bad",
+          "phenotype": "CYP2C19 Poor Metabolizer (*2/*2): Significantly impaired clopidogrel (Plavix) activation; alternative antiplatelet (ticagrelor/prasugrel) strongly indicated by CPIC.",
+          "drug_response": "Clopidogrel, Omeprazole, Escitalopram",
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.5,
+          "repute": "Neutral",
+          "phenotype": "CYP2C19 Intermediate Metabolizer (*1/*2): Reduced clopidogrel activation; CPIC recommends alternative agent for acute coronary syndrome.",
+          "drug_response": "Clopidogrel",
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Pharmacogenomics",
+          "significance": "Normal Response",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "CYP2C19 Normal Metabolizer (*1/*1): Standard clopidogrel dosing effective.",
+          "drug_response": "Clopidogrel",
+          "is_carrier": false
+        }
+      }
+    },
+    "rs9923231": {
+      "rsid": "rs9923231",
+      "gene": "VKORC1",
+      "name": "VKORC1 -1639G>A (Warfarin Sensitivity)",
+      "chrom": "16",
+      "pos_grch37": 31107689,
+      "pos_grch38": 31103689,
+      "ref": "C",
+      "alt": "T",
+      "clinvar_id": "VCV000009624",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.39,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "placenta": "Medium"
+      },
+      "hpa_subcellular": [
+        "Endoplasmic reticulum membrane"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3.5,
+          "repute": "Neutral",
+          "phenotype": "High Warfarin sensitivity: Requires significantly reduced starting dose to avoid bleeding complications (CPIC Level A guideline).",
+          "drug_response": "Warfarin",
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.0,
+          "repute": "Neutral",
+          "phenotype": "Intermediate Warfarin sensitivity: Moderate dose reduction typically required.",
+          "drug_response": "Warfarin",
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Pharmacogenomics",
+          "significance": "Normal Response",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal Warfarin dose requirement.",
+          "drug_response": "Warfarin",
+          "is_carrier": false
+        }
+      }
+    },
+    "rs4149056": {
+      "rsid": "rs4149056",
+      "gene": "SLCO1B1",
+      "name": "SLCO1B1*5 (Statin-Induced Myopathy)",
+      "chrom": "12",
+      "pos_grch37": 21331549,
+      "pos_grch38": 21178615,
+      "ref": "T",
+      "alt": "C",
+      "clinvar_id": "VCV000009623",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.15,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High"
+      },
+      "hpa_subcellular": [
+        "Plasma membrane"
+      ],
+      "genotypes": {
+        "CC": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.0,
+          "repute": "Bad",
+          "phenotype": "Poor SLCO1B1 transport function: 17x elevated risk of simvastatin-induced skeletal myopathy / rhabdomyolysis. CPIC recommends rosuvastatin or lower dose.",
+          "drug_response": "Simvastatin, Atorvastatin",
+          "is_carrier": false
+        },
+        "CT": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.5,
+          "repute": "Neutral",
+          "phenotype": "Intermediate SLCO1B1 function: 4.5x elevated risk of simvastatin-induced myopathy.",
+          "drug_response": "Simvastatin",
+          "is_carrier": false
+        },
+        "TT": {
+          "category": "Pharmacogenomics",
+          "significance": "Normal Response",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal SLCO1B1 transporter function: Standard statin tolerance.",
+          "drug_response": "Statins",
+          "is_carrier": false
+        }
+      }
+    },
+    "rs1801133": {
+      "rsid": "rs1801133",
+      "gene": "MTHFR",
+      "name": "MTHFR C677T (Ala222Val)",
+      "chrom": "1",
+      "pos_grch37": 11856378,
+      "pos_grch38": 11796321,
+      "ref": "G",
+      "alt": "A",
+      "clinvar_id": "VCV000003520",
+      "clinvar_stars": 1,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.32,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "kidney": "Medium",
+        "brain": "Medium"
+      },
+      "hpa_subcellular": [
+        "Cytoplasm"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 2.5,
+          "repute": "Neutral",
+          "phenotype": "MTHFR 677TT homozygote (~30% normal enzyme activity): Mild predisposition to elevated plasma homocysteine if folate intake is inadequate.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "MTHFR 677CT heterozygote (~65% normal enzyme activity): Generally benign with normal dietary folate.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal MTHFR 677CC wild-type activity.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs4988235": {
+      "rsid": "rs4988235",
+      "gene": "MCM6 / LCT",
+      "name": "Lactase Persistence C/T-13910",
+      "chrom": "1",
+      "pos_grch37": 0,
+      "pos_grch38": 0,
+      "ref": "N",
+      "alt": "N",
+      "clinvar_id": "VCV_rs4988235",
+      "clinvar_stars": 1,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.5,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "small intestine": "High",
+        "duodenum": "High"
+      },
+      "hpa_subcellular": [
+        "Brush border membrane"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.0,
+          "repute": "Good",
+          "phenotype": "Lactase persistent: Capable of digesting dairy lactose normally in adulthood.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.0,
+          "repute": "Good",
+          "phenotype": "Lactase persistent (carrier): Normal adult dairy lactose tolerance.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.2,
+          "repute": "Neutral",
+          "phenotype": "Lactase non-persistent: Predisposition to adult lactose intolerance / dairy sensitivity.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs671": {
+      "rsid": "rs671",
+      "gene": "ALDH2",
+      "name": "ALDH2*2 Glu504Lys (Alcohol Flush)",
+      "chrom": "1",
+      "pos_grch37": 0,
+      "pos_grch38": 0,
+      "ref": "N",
+      "alt": "N",
+      "clinvar_id": "VCV_rs671",
+      "clinvar_stars": 1,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.05,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "liver": "High",
+        "kidney": "High",
+        "heart": "Medium"
+      },
+      "hpa_subcellular": [
+        "Mitochondria"
+      ],
+      "genotypes": {
+        "AA": {
+          "category": "Trait",
+          "significance": "Trait / Risk",
+          "magnitude": 3.0,
+          "repute": "Bad",
+          "phenotype": "ALDH2 inactive homozygote: Severe facial flushing, nausea, and tachycardia with alcohol ingestion. Strong protection against alcoholism.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "AG": {
+          "category": "Trait",
+          "significance": "Trait / Risk",
+          "magnitude": 2.0,
+          "repute": "Neutral",
+          "phenotype": "ALDH2*2 carrier: Moderate facial flushing and acetaldehyde buildup upon alcohol consumption.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "GG": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal ALDH2 wild-type activity.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    },
+    "rs113993960": {
+      "rsid": "rs113993960",
+      "gene": "CFTR",
+      "name": "CFTR p.Phe508del (deltaF508)",
+      "chrom": "7",
+      "pos_grch37": 117199644,
+      "pos_grch38": 117559590,
+      "ref": "CTT",
+      "alt": "C",
+      "clinvar_id": "VCV000007105",
+      "clinvar_stars": 3,
+      "acmg_sf_actionable": false,
+      "gnomad_af": 0.015,
+      "gnomad_pli": 0.0,
+      "hpa_tissues": {
+        "pancreas": "High",
+        "lung": "High",
+        "duodenum": "High"
+      },
+      "hpa_subcellular": [
+        "Plasma membrane",
+        "Apical membrane"
+      ],
+      "genotypes": {
+        "DD": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 5.0,
+          "repute": "Bad",
+          "phenotype": "Cystic Fibrosis homozygote (F508del/F508del): Severe classical cystic fibrosis.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "DI": {
+          "category": "Carrier",
+          "significance": "Pathogenic (Carrier)",
+          "magnitude": 3.0,
+          "repute": "Neutral",
+          "phenotype": "Cystic Fibrosis Carrier (deltaF508 heterozygote). Asymptomatic carrier; 1 in 4 risk with carrier partner.",
+          "drug_response": null,
+          "is_carrier": false
+        },
+        "II": {
+          "category": "Benign",
+          "significance": "Benign",
+          "magnitude": 0.0,
+          "repute": "Good",
+          "phenotype": "Normal wild-type CFTR.",
+          "drug_response": null,
+          "is_carrier": false
+        }
+      }
+    }
+  }
+}
