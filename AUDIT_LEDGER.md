@@ -1,4 +1,4 @@
-﻿# GenomePulse - Architecture & Ground Truth Audit Ledger
+# GenomePulse - Architecture & Ground Truth Audit Ledger
 
 > **Deployment target:** Vercel (static frontend + serverless `/api/enrich`)
 > **Privacy model:** Local-First / Client-Side Only - raw genotyping data never leaves the browser
@@ -40,6 +40,12 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-003 | `web/vercel.json` | 24-41 | Missing `Content-Security-Policy` header. Without CSP the app is vulnerable to XSS that could exfiltrate locally-parsed genomic identifiers. | REMEDIATED |
 | P1-004 | `segregation_engine.py` | 183-191 | MTHFR `omim: 607093` was the gene entry OMIM, not a disease phenotype OMIM. Common MTHFR variants (C677T, A1298C) are biomarker modifiers; the severe-deficiency phenotype OMIM is 236250. | REMEDIATED |
 | P1-005 | `biotools_orchestrator.py` | 31-43, 102, 116 | Hardcoded absolute Windows paths (`C:\Users\peter\...`). Non-portable - Vercel/Linux would not resolve these. Python orchestrator is desktop-only tooling (not Vercel-deployed), so this is a documentation note. | DOCUMENTED - deferred |
+| P1-006 | `genomic_parser.py`, `worker.js` | VCF parser | Naïve VCF genotype parsing split on `/` or `|` and indexed string slices directly, causing corruption on multiallelic calls (`1/2`), haploid calls (`1`), partial calls (`0/.`), and indels (`TTC`, `AC,G`). | REMEDIATED |
+| P1-007 | `variant_annotator.py`, `worker.js` | APOE resolver | If rs7412 was missing while rs429358 was TT, software emitted "Non-ε4 (presumed ε3/ε3)", masking ε2/ε2 Type III Hyperlipoproteinemia risk. Single-SNP presumption is biologically invalid. | REMEDIATED |
+| P1-008 | `genomic_parser.py`, `worker.js` | Sex classifier | Binary "Male/Female" classifier falsely asserted certainty on 47,XXY (Klinefelter), 45,X (Turner), or sparse array data instead of reporting observed sex-chromosome signal compatibility. | REMEDIATED |
+| P1-009 | `web/index.html` | ACMG UI button & drawer | Conflated ACMG SF v3.2 (81 actionable genes for secondary findings) with ACMG/AMP 2015 28-criteria variant classification. UI now explicitly labels ACMG SF v3.2 with clear classification disclaimers. | REMEDIATED |
+| P1-010 | `web/index.html` | CPIC metabolizer UI | Microarray wildtype calls at single SNPs (e.g. *CYP2C19\*2* GG) were displayed without warning that untested star alleles (*3, *17) can alter phenotype. Drawer now disclaims single-SNP limitations. | REMEDIATED |
+| P1-011 | `web/api/enrich.js` | Payload validation | Endpoint accepted unbounded request arrays (up to 200) without strict regex validation (^rs\d+$) or rejection of extraneous fields (genotypes, chromosomes). Now capped at MAX_BATCH = 100 with regex token validation. | REMEDIATED |
 
 ---
 
@@ -79,6 +85,9 @@ Full static and dynamic audit of all repository files and runtime paths:
 | `c8e49cd` | P2-007 | `docs(task): update design spec to reflect font-studio extraction` |
 | `b9b7bf3` | P2-006 | `fix(demo): add synthetic-data disclaimer to demo sample` |
 | `b3d3e9c` | P2-008 | `chore(gitignore): strengthen ignore rules for production` |
+| `bf6d407` | P1-006, P1-007, P1-008, P1-009, P1-010 | `fix(pipeline): harden VCF parsing, APOE two-locus gating, and karyotypic sex signal` |
+| `6b25d51` | P1-011 | `fix(security): enforce rsID-only batch validation and size limits in enrich endpoint` |
+| `c952b73` | Testing / Verification | `test(audit): add scientific QA audit and zero-knowledge privacy test suites` |
 
 ---
 
