@@ -7,7 +7,6 @@
  */
 
 import { RedisEnricher } from "./redis-client.js";
-import { FontStudio } from "./font-studio.js";
 import { simulateOffspringPedigree, BIOTOOLS_GENE_INSIGHTS, computeSegregationReport } from "./knowledge-base.js";
 
 // Global Application State
@@ -25,8 +24,7 @@ const state = {
   searchQuery: "",
   sortBy: "magnitude",
   redisStats: null,
-  theme: localStorage.getItem("genomepulse-theme") || "light",
-  fontStudio: null
+  theme: localStorage.getItem("genomepulse-theme") || "light"
 };
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
@@ -35,14 +33,12 @@ function initApp() {
   initTheme();
   initWorker();
   initEventListeners();
-  state.fontStudio = new FontStudio();
   window.__genomePulse = {
     state,
     processText,
     exportMarkdownReport,
     exportCsvReport,
-    setTheme,
-    fontStudio: state.fontStudio
+    setTheme
   };
 }
 
