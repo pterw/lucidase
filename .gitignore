@@ -36,11 +36,14 @@ alphafold_data/
 # Large test fixtures (regenerate via test suite)
 test_vep.json
 test_encode_expr.json
+tests/test_vep.json
+tests/test_encode_expr.json
 
 # Archives (built from source)
 *.zip
 
 # Development screenshots (keep in docs/ if needed)
+/*.png
 /live_*.png
 /web_*.png
 
