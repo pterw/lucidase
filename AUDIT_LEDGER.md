@@ -46,6 +46,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-009 | `web/index.html` | ACMG UI button & drawer | Conflated ACMG SF v3.2 (81 actionable genes for secondary findings) with ACMG/AMP 2015 28-criteria variant classification. UI now explicitly labels ACMG SF v3.2 with clear classification disclaimers. | REMEDIATED |
 | P1-010 | `web/index.html` | CPIC metabolizer UI | Microarray wildtype calls at single SNPs (e.g. *CYP2C19\*2* GG) were displayed without warning that untested star alleles (*3, *17) can alter phenotype. Drawer now disclaims single-SNP limitations. | REMEDIATED |
 | P1-011 | `web/api/enrich.js` | Payload validation | Endpoint accepted unbounded request arrays (up to 200) without strict regex validation (^rs\d+$) or rejection of extraneous fields (genotypes, chromosomes). Now capped at MAX_BATCH = 100 with regex token validation. | REMEDIATED |
+| P1-012 | `web/src/app.js`, `web/index.html` | 815 | 'Redis Live Enrich' button triggered POST `/api/enrich` with `state.records.map(r => r.rsid)`, leaking the user's positive clinical findings over the network. Retired the button and banner, replaced with transparent local KB Provenance badge, and refactored `/api/enrich` into a zero-knowledge manifest endpoint. | REMEDIATED |
 
 ---
 
