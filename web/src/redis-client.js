@@ -35,22 +35,23 @@ export class RedisEnricher {
         cache_misses: data.cache_misses || 0
       };
     } catch (err) {
-      // Local development or offline mock fallback
-      console.warn("Redis enrichment fallback:", err.message);
-      const hits = rsids.slice(0, 100);
+      // Local development or offline mode — no network request succeeded.
+      // Return an honest stub: evidence_tier is "embedded_kb_fallback", not live-verified.
+      console.warn("Redis enrichment offline fallback:", err.message);
+      const stubs = rsids.slice(0, 100);
       return {
-        status: "offline_mock",
+        status: "offline_stub",
         redis_enabled: false,
-        hits: hits,
+        hits: stubs,
         misses: [],
-        cache_hits: hits.length,
-        cache_misses: 0,
-        duration_ms: 3,
-        variants: Object.fromEntries(hits.map(id => [id, {
+        cache_hits: 0,
+        cache_misses: stubs.length,
+        duration_ms: 0,
+        variants: Object.fromEntries(stubs.map(id => [id, {
           rsid: id,
-          source: "Embedded Offline Knowledge Base",
-          evidence_tier: "Tier 1 Verified",
-          cached: true
+          source: "offline_embedded_kb",
+          evidence_tier: "embedded_kb_fallback",
+          note: "No network request was made. Clinical data is not verified from live sources."
         }]))
       };
     }
