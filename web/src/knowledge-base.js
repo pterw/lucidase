@@ -14,8 +14,11 @@ export const KB_MANIFEST = {
   clinvar_release: "2024-06",
   dbsnp_build: 156,
   acmg_sf_version: "v3.2 (81 genes)",
-  variant_count: 60,
-  zero_knowledge: true
+  variant_count: 14,
+  sha256: "2bf6cffdbff070af2d7ec7d2fba714897ef48d9e52d5ee7f1e8cbbb6151ead9f",
+  local_analysis: true,
+  genomic_uploads: false,
+  variant_identifiers_transmitted: false
 };
 
 export const ACMG_SF_GENES = new Set([
