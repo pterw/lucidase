@@ -144,10 +144,26 @@ function parseGenomicText(text, fileName = "") {
       const gtIdx = formatStr.split(":").indexOf("GT");
       if (gtIdx >= 0) {
         const gt = sampleStr.split(":")[gtIdx];
-        if (gt === "0/0" || gt === "0|0") genotype = ref + ref;
-        else if (gt === "0/1" || gt === "0|1" || gt === "1|0") genotype = [ref, alt].sort().join("");
-        else if (gt === "1/1" || gt === "1|1") genotype = alt + alt;
-        else genotype = "--";
+        const altAlleles = alt.split(",");
+        const alleleTable = [ref, ...altAlleles];
+        const tokens = gt.split(/[/|]/);
+        if (tokens.length === 1 && tokens[0] !== "." && tokens[0] !== "") {
+          const idx = parseInt(tokens[0], 10);
+          const a = alleleTable[idx] || "";
+          genotype = a ? a + a : "--";
+        } else if (tokens.length >= 2) {
+          if (tokens[0] === "." || tokens[1] === ".") {
+            genotype = "--";
+          } else {
+            const i0 = parseInt(tokens[0], 10);
+            const i1 = parseInt(tokens[1], 10);
+            const a0 = alleleTable[i0] || "";
+            const a1 = alleleTable[i1] || "";
+            genotype = (a0 && a1) ? [a0, a1].sort().join("") : "--";
+          }
+        } else {
+          genotype = "--";
+        }
       }
     } else {
       // 23andMe or Ancestry tab-delimited
@@ -262,19 +278,21 @@ function parseGenomicText(text, fileName = "") {
   const callRate = totalSnps > 0 ? (calledSnps / totalSnps) : 0;
   const hetRate = calledSnps > 0 ? (hetCount / calledSnps) : 0;
 
-  // Infer biological sex
+  // Infer biological sex-chromosome karyotype signal
   let inferredSex = "Unknown (Insufficient X markers)";
   let xHetRate = 0;
   if (xCalled >= 10) {
     xHetRate = xHet / xCalled;
-    if (xHetRate > 0.08) {
-      inferredSex = "Female (XX)";
-    } else if (xHetRate < 0.02 && yCalled >= 5) {
-      inferredSex = "Male (XY)";
-    } else if (xHetRate < 0.03) {
-      inferredSex = "Male (XY, Hemizygous X)";
+    if (xHetRate > 0.08 && yCalled >= 5) {
+      inferredSex = "Atypical (High X Heterozygosity with Y Markers - e.g. 47,XXY or Mosaicism)";
+    } else if (xHetRate > 0.08) {
+      inferredSex = "Compatible with XX Karyotype (Heterozygous X)";
+    } else if (xHetRate < 0.03 && yCalled >= 5) {
+      inferredSex = "Compatible with XY Karyotype (Hemizygous X & Y Present)";
+    } else if (xHetRate < 0.03 && yCalled === 0) {
+      inferredSex = "Hemizygous X with No Y Markers Observed (Consistent with 45,X Turner or Sparse Y Coverage)";
     } else {
-      inferredSex = "Undetermined / Atypical";
+      inferredSex = "Indeterminate Sex-Chromosome Signal";
     }
   }
 
@@ -424,40 +442,20 @@ function resolveApoeDiplotype(gt429, gt741) {
     riskRatio = "1.5–2× Intermediate Risk";
     lifetimeRisk = "15–20% lifetime Alzheimer's risk";
     phenotype = "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4.";
-  } else if (n429 === "CT") {
-    diplotype = "ε4 Carrier";
-    label = "APOE ε4 Carrier (presumed ε3/ε4)";
-    category = "Carrier";
-    significance = "Risk Factor / Carrier";
-    magnitude = 3.8;
-    repute = "Bad";
-    riskRatio = "~3× Increased Risk";
-    lifetimeRisk = "~25–30% lifetime Alzheimer's risk";
-    phenotype = "APOE ε4 Carrier: One ε4 copy detected at rs429358. Confers increased lifetime risk of late-onset Alzheimer's disease.";
-  } else if (n429 === "TT") {
-    diplotype = "Non-ε4";
-    label = "APOE Non-ε4 (presumed ε3/ε3)";
-    category = "Carrier";
-    significance = "Normal / Baseline";
-    magnitude = 1.2;
-    repute = "Good";
-    riskRatio = "1.0× (Baseline)";
-    lifetimeRisk = "10–15% lifetime Alzheimer's risk";
-    phenotype = "APOE non-ε4 genotype detected at rs429358 (presumed baseline ε3 or protective ε2).";
-  } else if (n741 === "CT") {
-    diplotype = "ε2 Carrier";
-    label = "APOE ε2 Carrier (presumed ε2/ε3)";
-    category = "Carrier";
-    significance = "Protective / Carrier";
-    magnitude = 2.0;
-    repute = "Good";
-    riskRatio = "0.6× (Protective)";
-    lifetimeRisk = "5–8% lifetime Alzheimer's risk";
-    phenotype = "APOE ε2 protective allele detected at rs7412.";
-  } else {
+  } else if (!n429 || !n741) {
     diplotype = "Indeterminate";
+    label = "APOE Indeterminate (Missing rs429358 or rs7412)";
+    category = "Trait";
+    significance = "Incomplete Loci";
+    magnitude = 1.0;
+    repute = "Neutral";
+    riskRatio = "Unknown";
+    lifetimeRisk = "Cannot determine without both loci";
+    phenotype = "Both rs429358 (codon 112) and rs7412 (codon 158) must be genotyped to determine an APOE diplotype. A single locus cannot distinguish ε3 from ε2 or ε4 without unsupported assumptions.";
+  } else {
+    diplotype = "Atypical";
     label = `APOE (${n429 || '?'}/${n741 || '?'})`;
-    category = "Carrier";
+    category = "Trait";
     significance = "Uncertain";
     magnitude = 1.0;
     repute = "Neutral";

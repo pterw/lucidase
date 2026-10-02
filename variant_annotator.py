@@ -822,39 +822,19 @@ class VariantAnnotator:
                 "allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 "
                 "and ε3/ε4, as the ε2 allele partially mitigates ε4 risk."
             )
-        elif gt_429 == "CT":
-            diplotype = "ε4 Carrier"
-            label = "APOE ε4 Carrier (presumed ε3/ε4)"
-            category = "Carrier"
-            significance = "Risk Factor / Carrier"
-            magnitude = 3.8
-            repute = "Bad"
-            risk_ratio = "~3× Increased Risk"
-            lifetime_risk = "~25–30% lifetime Alzheimer's risk"
+        elif not gt_429 or not gt_741:
+            diplotype = "Indeterminate"
+            label = "APOE Indeterminate (Missing rs429358 or rs7412)"
+            category = "Trait"
+            significance = "Incomplete Loci"
+            magnitude = 1.0
+            repute = "Neutral"
+            risk_ratio = "Unknown"
+            lifetime_risk = "Cannot determine without both loci"
             phenotype = (
-                "APOE ε4 Carrier: One ε4 copy detected at rs429358. Confers increased lifetime risk of "
-                "late-onset Alzheimer's disease."
+                "Both rs429358 (codon 112) and rs7412 (codon 158) must be genotyped to determine an APOE diplotype. "
+                "A single locus cannot distinguish ε3 from ε2 or ε4 without unsupported population assumptions."
             )
-        elif gt_429 == "TT":
-            diplotype = "Non-ε4"
-            label = "APOE Non-ε4 (presumed ε3/ε3)"
-            category = "Carrier"
-            significance = "Normal / Baseline"
-            magnitude = 1.2
-            repute = "Good"
-            risk_ratio = "1.0× (Baseline)"
-            lifetime_risk = "10–15% lifetime Alzheimer's risk"
-            phenotype = "APOE non-ε4 genotype detected at rs429358 (presumed baseline ε3 or protective ε2)."
-        elif gt_741 == "CT":
-            diplotype = "ε2 Carrier"
-            label = "APOE ε2 Carrier (presumed ε2/ε3)"
-            category = "Carrier"
-            significance = "Protective / Carrier"
-            magnitude = 2.0
-            repute = "Good"
-            risk_ratio = "0.6× (Protective)"
-            lifetime_risk = "5–8% lifetime Alzheimer's risk"
-            phenotype = "APOE ε2 protective allele detected at rs7412."
         else:
             diplotype = "Indeterminate"
             label = f"APOE ({gt_429 or '?'}/{gt_741 or '?'})"

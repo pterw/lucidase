@@ -220,17 +220,31 @@ class GenomicParser:
                     parts[3],
                     parts[4],
                 )
-                gt = ref + alt
+                gt = "--"
                 if len(parts) >= 10:
                     sample_gt = parts[9].split(":")[0]
-                    if sample_gt in ("0/0", "0|0"):
-                        gt = ref + ref
-                    elif sample_gt in ("1/1", "1|1"):
-                        gt = alt + alt
-                    elif sample_gt in ("0/1", "0|1", "1/0", "1|0"):
-                        gt = ref + alt
-                    elif sample_gt in ("./.", ".|."):
-                        gt = "--"
+                    alt_alleles = alt.split(",")
+                    allele_table = [ref] + alt_alleles
+                    tokens = re.split(r"[/|]", sample_gt)
+                    if len(tokens) == 1 and tokens[0] not in (".", ""):
+                        # Haploid / hemizygous call (e.g. non-PAR X, Y, MT)
+                        try:
+                            idx = int(tokens[0])
+                            a = allele_table[idx] if idx < len(allele_table) else ""
+                            gt = a + a if a else "--"
+                        except ValueError:
+                            gt = "--"
+                    elif len(tokens) >= 2:
+                        if tokens[0] == "." or tokens[1] == ".":
+                            gt = "--"
+                        else:
+                            try:
+                                i0, i1 = int(tokens[0]), int(tokens[1])
+                                a0 = allele_table[i0] if i0 < len(allele_table) else ""
+                                a1 = allele_table[i1] if i1 < len(allele_table) else ""
+                                gt = "".join(sorted([a0, a1])) if (a0 and a1) else "--"
+                            except ValueError:
+                                gt = "--"
             else:
                 # Default tab or space split fallback
                 parts = re.split(r"[\t,]+", raw)
@@ -270,17 +284,19 @@ class GenomicParser:
                 elif v.chrom == "MT":
                     mt_calls += 1
 
-        # Infer Biological Sex
+        # Infer Observed Sex-Chromosome Signal
         x_het_rate = (x_het / x_total) if x_total > 50 else 0.0
         if x_total > 50:
-            if x_het_rate > 0.12:
-                inferred_sex = "Female (XX) - High X Heterozygosity"
+            if x_het_rate > 0.12 and y_calls > 10:
+                inferred_sex = "Atypical (High X Heterozygosity with Y Markers - e.g. 47,XXY or Mosaicism)"
+            elif x_het_rate > 0.12:
+                inferred_sex = "Compatible with XX Karyotype (High X Heterozygosity)"
             elif x_het_rate < 0.03 and y_calls > 10:
-                inferred_sex = "Male (XY) - Hemizygous X & Y Calls Present"
-            elif x_het_rate < 0.03:
-                inferred_sex = "Male (XY) or Hemizygous X"
+                inferred_sex = "Compatible with XY Karyotype (Hemizygous X & Y Calls Present)"
+            elif x_het_rate < 0.03 and y_calls == 0:
+                inferred_sex = "Hemizygous X with No Y Markers Observed (Consistent with 45,X Turner or Sparse Y Coverage)"
             else:
-                inferred_sex = "Indeterminate / Borderline"
+                inferred_sex = "Indeterminate Sex-Chromosome Signal"
         else:
             inferred_sex = "Unknown (Insufficient X markers)"
 
