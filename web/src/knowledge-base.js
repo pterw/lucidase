@@ -9,17 +9,48 @@
  * - gnomAD continental allele frequencies & pLI constraint scores
  */
 export const KB_MANIFEST = {
+  schema_version: "3.0.0",
   release_version: "2026.10.02",
   release_date: "2026-10-02",
-  clinvar_release: "2024-06",
+  clinvar_release: "Release 2024-06",
   dbsnp_build: 156,
   acmg_sf_version: "v3.2 (81 genes)",
   variant_count: 14,
-  sha256: "2bf6cffdbff070af2d7ec7d2fba714897ef48d9e52d5ee7f1e8cbbb6151ead9f",
+  sha256: "ad3c3cb5e04df46ff89b18effb0f2d0647ef41eccaaebbd6a65a2cf040838edd",
   local_analysis: true,
   genomic_uploads: false,
-  variant_identifiers_transmitted: false
+  variant_identifiers_transmitted: false,
+  guardrail: "Absence of a finding must never imply absence of genetic risk. GenomePulse analyzes only specifically targeted loci on consumer arrays and does not sequence entire genes or detect structural variants."
 };
+
+export const COVERAGE_STATES = {
+  SUPPORTED_AND_OBSERVED: "supported_and_observed",
+  SUPPORTED_NOT_OBSERVED: "supported_not_observed",
+  NOT_TESTED_BY_ARRAY: "not_tested_by_array",
+  OUTSIDE_COVERAGE: "outside_coverage",
+  INSUFFICIENT_EVIDENCE: "insufficient_evidence"
+};
+
+export const EVIDENCE_TIERS = {
+  TIER_A: "Tier A",
+  TIER_B: "Tier B",
+  TIER_C: "Tier C",
+  TIER_D: "Tier D"
+};
+
+export const ABSENCE_OF_FINDING_GUARDRAIL = (
+  "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. " +
+  "GenomePulse analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. " +
+  "It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, " +
+  "and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats."
+);
+
+export const INCOMPLETE_STAR_ALLELE_REFUSAL = (
+  "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out " +
+  "other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. " +
+  "A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing."
+);
+
 
 export const ACMG_SF_GENES = new Set([
   "ACTA2", "ACTC1", "APC", "APOB", "ATP7B", "BAG3", "BMPR1A", "BRCA1", "BRCA2", "BTD",

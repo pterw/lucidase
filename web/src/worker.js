@@ -8,6 +8,9 @@
 import { 
   CURATED_KB, 
   ACMG_SF_GENES, 
+  COVERAGE_STATES,
+  EVIDENCE_TIERS,
+  ABSENCE_OF_FINDING_GUARDRAIL,
   computeSegregationReport, 
   detectCompoundHeterozygosity, 
   computeIndependentAssortment 
@@ -111,6 +114,7 @@ function parseGenomicText(text, fileName = "") {
 
   const variants = {};
   const clinicalFindings = [];
+  const assayedCurated = new Map();
 
   const updateInterval = Math.max(10000, Math.floor(totalLines / 20));
 
@@ -222,45 +226,24 @@ function parseGenomicText(text, fileName = "") {
         yCalled++;
       }
 
-      // Check Clinical Knowledge Base
+      // Track all interrogated curated loci for 5-state coverage taxonomy evaluation
       if (CURATED_KB[rsid]) {
-        const entry = CURATED_KB[rsid];
-        // Sort alleles to match canonical format (e.g. AG vs GA)
-        const sortedGt = genotype.length === 2 ? genotype.split("").sort().join("") : genotype;
-        let match = entry.genotypes[genotype] || entry.genotypes[sortedGt];
-
-        if (!match) {
-          // Check inverted complement if strand flipped
-          const compMap = { "A": "T", "T": "A", "C": "G", "G": "C" };
-          const compGt = genotype.split("").map(b => compMap[b] || b).sort().join("");
-          match = entry.genotypes[compGt];
-        }
-
-        if (match) {
-          const isAcmg = ACMG_SF_GENES.has(entry.gene);
-          const segregation = computeSegregationReport(entry.gene, genotype, match.category, match.significance);
-          clinicalFindings.push({
-            rsid,
-            gene: entry.gene,
-            genotype,
-            chrom,
-            pos,
-            category: match.category,
-            significance: match.significance,
-            magnitude: match.magnitude,
-            repute: match.repute,
-            phenotype: match.phenotype,
-            drug_response: match.drug_response,
-            clinvar_stars: entry.clinvar_stars,
-            clinvar_id: entry.clinvar_id,
-            gnomad_af: entry.gnomad_af,
-            gnomad_pli: entry.gnomad_pli,
-            hpa_tissues: entry.hpa_tissues || {},
-            hpa_subcellular: entry.hpa_subcellular || [],
-            acmg_actionable: isAcmg,
-            segregation
-          });
-        }
+        assayedCurated.set(rsid, {
+          chrom,
+          pos,
+          genotype,
+          isNoCall: false
+        });
+      }
+    } else {
+      // If a curated locus had a no-call on the array, track it for gap reporting
+      if (CURATED_KB[rsid]) {
+        assayedCurated.set(rsid, {
+          chrom,
+          pos,
+          genotype: "--",
+          isNoCall: true
+        });
       }
     }
 
@@ -296,29 +279,163 @@ function parseGenomicText(text, fileName = "") {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // 5-STATE COVERAGE TAXONOMY EVALUATION
+  // -------------------------------------------------------------------------
+  const observedFindings = [];
+  const negativeChecks = [];
+  const arrayGaps = [];
+  const insufficientEvidence = [];
+
+  for (const [rsid, entry] of Object.entries(CURATED_KB)) {
+    const isAcmg = ACMG_SF_GENES.has(entry.gene);
+    const assayed = assayedCurated.get(rsid);
+
+    if (!assayed) {
+      // State 3: Not Tested By This Array (Omitted from chip)
+      arrayGaps.push({
+        rsid,
+        gene: entry.gene,
+        name: entry.name || rsid,
+        coverage_state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
+        reason: "Omitted from microarray chip manifest",
+        chrom: entry.chrom,
+        pos_grch37: entry.pos_grch37,
+        pos_grch38: entry.pos_grch38,
+        evidence_tier: entry.evidence_tier || "Tier A",
+        acmg_actionable: isAcmg
+      });
+      continue;
+    }
+
+    if (assayed.isNoCall) {
+      // State 3: Assayed on array but uncallable / no-call
+      arrayGaps.push({
+        rsid,
+        gene: entry.gene,
+        name: entry.name || rsid,
+        coverage_state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
+        reason: "No-call / uncallable on array (--)",
+        chrom: entry.chrom,
+        pos_grch37: entry.pos_grch37,
+        pos_grch38: entry.pos_grch38,
+        evidence_tier: entry.evidence_tier || "Tier A",
+        acmg_actionable: isAcmg
+      });
+      continue;
+    }
+
+    // Match genotype against curated assertions
+    const genotype = assayed.genotype;
+    const sortedGt = genotype.length === 2 ? genotype.split("").sort().join("") : genotype;
+    let match = entry.genotypes[genotype] || entry.genotypes[sortedGt];
+
+    if (!match && !entry.is_palindromic) {
+      // Check complement only if not palindromic
+      const compMap = { "A": "T", "T": "A", "C": "G", "G": "C" };
+      const compGt = genotype.split("").map(b => compMap[b] || b).sort().join("");
+      match = entry.genotypes[compGt];
+    }
+
+    const segregation = computeSegregationReport(entry.gene, genotype, match ? match.category : "Trait", match ? match.significance : "Baseline");
+
+    const record = {
+      rsid,
+      gene: entry.gene,
+      genotype,
+      chrom: assayed.chrom || entry.chrom,
+      pos: assayed.pos || entry.pos_grch37,
+      category: match ? match.category : "Trait",
+      significance: match ? match.significance : "Negative / Wild-Type",
+      magnitude: match ? match.magnitude : 1.0,
+      repute: match ? match.repute : "Good",
+      phenotype: match ? match.phenotype : "Normal / Baseline non-risk genotype confirmed.",
+      drug_response: match ? match.drug_response : null,
+      clinvar_stars: entry.clinvar_stars,
+      clinvar_id: entry.clinvar_id,
+      gnomad_af: entry.gnomad_af,
+      gnomad_pli: entry.gnomad_pli,
+      hpa_tissues: entry.hpa_tissues || {},
+      hpa_subcellular: entry.hpa_subcellular || [],
+      acmg_actionable: isAcmg,
+      evidence_tier: entry.evidence_tier || (entry.clinvar_stars >= 3 ? "Tier A" : (entry.clinvar_stars === 2 ? "Tier B" : "Tier C")),
+      tier_rationale: entry.tier_rationale || "",
+      caveats: entry.caveats || [],
+      refusal_notices: entry.refusal_notices || [],
+      segregation
+    };
+
+    // Determine Coverage State
+    const isRiskOrActionable = match && (
+      match.category === "Pathogenic" ||
+      match.category === "Carrier" ||
+      match.category === "Pharmacogenomics" ||
+      match.category === "Risk Factor" ||
+      match.magnitude >= 2.0 ||
+      match.isCarrier
+    );
+
+    const isConflictingOrWeak = record.evidence_tier === "Tier C" || record.evidence_tier === "Tier D" || (entry.clinvar_status && entry.clinvar_status.includes("conflicting"));
+
+    if (isConflictingOrWeak && isRiskOrActionable) {
+      // State 5: Insufficient / Conflicting Evidence (e.g. MTHFR C677T)
+      record.coverage_state = COVERAGE_STATES.INSUFFICIENT_EVIDENCE;
+      insufficientEvidence.push(record);
+      observedFindings.push(record); // Display in table with Tier C badge
+    } else if (isRiskOrActionable) {
+      // State 1: Supported and Observed
+      record.coverage_state = COVERAGE_STATES.SUPPORTED_AND_OBSERVED;
+      observedFindings.push(record);
+    } else {
+      // State 2: Supported but Not Observed (Negative check / Wild-Type)
+      record.coverage_state = COVERAGE_STATES.SUPPORTED_NOT_OBSERVED;
+      record.significance = "Negative / Wild-Type (Tested Normal)";
+      record.repute = "Good";
+      negativeChecks.push(record);
+    }
+  }
+
   // Synthesize compound APOE Diplotype (rs429358 + rs7412)
   const apoeFinding = resolveApoeDiplotype(gt429, gt741);
   if (apoeFinding) {
-    clinicalFindings.push(apoeFinding);
+    if (apoeFinding.apoeInfo.diplotype.includes("ε4") || apoeFinding.apoeInfo.diplotype.includes("ε2/ε2")) {
+      apoeFinding.coverage_state = COVERAGE_STATES.SUPPORTED_AND_OBSERVED;
+      apoeFinding.evidence_tier = EVIDENCE_TIERS.TIER_A;
+      observedFindings.push(apoeFinding);
+    } else {
+      apoeFinding.coverage_state = COVERAGE_STATES.SUPPORTED_NOT_OBSERVED;
+      apoeFinding.evidence_tier = EVIDENCE_TIERS.TIER_A;
+      negativeChecks.push(apoeFinding);
+    }
   }
 
-  // Sort clinical findings by clinical priority (Magnitude descending, then stars)
-  clinicalFindings.sort((a, b) => (b.magnitude - a.magnitude) || (b.clinvar_stars - a.clinvar_stars));
+  // Sort observed findings by clinical priority (Magnitude descending, then stars)
+  observedFindings.sort((a, b) => (b.magnitude - a.magnitude) || (b.clinvar_stars - a.clinvar_stars));
 
   // Detect Multi-Locus Segregation & Assortment
-  const compoundHeterozygotes = detectCompoundHeterozygosity(clinicalFindings);
-  const independentAssortment = computeIndependentAssortment(clinicalFindings);
+  const compoundHeterozygotes = detectCompoundHeterozygosity(observedFindings);
+  const independentAssortment = computeIndependentAssortment(observedFindings);
+
+  const outsideCoverageCount = Math.max(0, totalSnps - assayedCurated.size);
 
   // Summary counts
   const summary = {
-    total_annotated: clinicalFindings.length,
-    pathogenic_count: clinicalFindings.filter(f => f.category === "Pathogenic").length,
-    carrier_count: clinicalFindings.filter(f => f.category === "Carrier" || f.isCarrier).length,
-    pgx_count: clinicalFindings.filter(f => f.category === "Pharmacogenomics").length,
-    risk_factor_count: clinicalFindings.filter(f => f.category === "Risk Factor").length,
-    acmg_actionable_findings: clinicalFindings.filter(f => f.acmg_actionable).length,
+    total_annotated: observedFindings.length,
+    pathogenic_count: observedFindings.filter(f => f.category === "Pathogenic").length,
+    carrier_count: observedFindings.filter(f => f.category === "Carrier" || f.isCarrier).length,
+    pgx_count: observedFindings.filter(f => f.category === "Pharmacogenomics").length,
+    risk_factor_count: observedFindings.filter(f => f.category === "Risk Factor").length,
+    acmg_actionable_findings: observedFindings.filter(f => f.acmg_actionable).length,
     compound_heterozygotes_count: compoundHeterozygotes.length,
-    independent_assortment_count: independentAssortment.length
+    independent_assortment_count: independentAssortment.length,
+    coverage_taxonomy: {
+      cardinal_guardrail: ABSENCE_OF_FINDING_GUARDRAIL,
+      supported_and_observed_count: observedFindings.length,
+      supported_not_observed_count: negativeChecks.length,
+      not_tested_by_array_count: arrayGaps.length,
+      outside_coverage_count: outsideCoverageCount,
+      insufficient_evidence_count: insufficientEvidence.length
+    }
   };
 
   const qc = {
@@ -339,7 +456,18 @@ function parseGenomicText(text, fileName = "") {
   self.postMessage({
     type: "complete",
     qc,
-    records: clinicalFindings,
+    records: observedFindings,
+    negative_checks: negativeChecks,
+    array_gaps: arrayGaps,
+    insufficient_evidence: insufficientEvidence,
+    coverage_taxonomy: {
+      cardinal_guardrail: ABSENCE_OF_FINDING_GUARDRAIL,
+      supported_and_observed_count: observedFindings.length,
+      supported_not_observed_count: negativeChecks.length,
+      not_tested_by_array_count: arrayGaps.length,
+      outside_coverage_count: outsideCoverageCount,
+      insufficient_evidence_count: insufficientEvidence.length
+    },
     summary,
     apoe: apoeFinding ? apoeFinding.apoeInfo : null,
     compound_heterozygotes: compoundHeterozygotes,

@@ -1,6 +1,6 @@
 {
   "manifest": {
-    "schema_version": "2.0.0",
+    "schema_version": "3.0.0",
     "release_version": "2026.10.02",
     "release_date": "2026-10-02",
     "authoritative_sources": {
@@ -14,7 +14,31 @@
       "acmg_secondary_findings": "v3.2 (81 actionable genes)"
     },
     "variant_count": 14,
-    "sha256": "2bf6cffdbff070af2d7ec7d2fba714897ef48d9e52d5ee7f1e8cbbb6151ead9f",
+    "sha256": "ad3c3cb5e04df46ff89b18effb0f2d0647ef41eccaaebbd6a65a2cf040838edd",
+    "coverage_taxonomy": {
+      "states": [
+        "supported_and_observed",
+        "supported_not_observed",
+        "not_tested_by_array",
+        "outside_coverage",
+        "insufficient_evidence"
+      ],
+      "categories": [
+        "pathogenic_carrier",
+        "acmg_sf_locus",
+        "pharmacogenomics_cpic",
+        "medically_relevant_risk",
+        "scientifically_defensible_trait",
+        "compound_multilocus"
+      ],
+      "evidence_tiers": [
+        "Tier A",
+        "Tier B",
+        "Tier C",
+        "Tier D"
+      ],
+      "cardinal_guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. GenomePulse analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats."
+    },
     "privacy_guarantees": {
       "local_analysis": true,
       "genomic_uploads": false,
@@ -27,6 +51,105 @@
       "rsid": "rs429358",
       "gene": "APOE",
       "name": "APOE-\u03b54 determinant (c.388T>C, p.Cys130Arg)",
+      "identity": {
+        "rsid": "rs429358",
+        "aliases": [
+          "rs769449"
+        ],
+        "chrom": "19",
+        "pos_grch37": 45411941,
+        "pos_grch38": 44908684,
+        "ref": "T",
+        "alt": "C",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000019.10:g.44908684T>C",
+        "hgvs_coding": "NM_000041.4:c.388T>C",
+        "hgvs_protein": "NP_000032.1:p.Cys130Arg"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel (ClinGen).",
+        "clinvar_vcv": "VCV000017864.5",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Risk factor",
+        "clinvar_condition": "Late-onset Alzheimer disease",
+        "clinvar_medgen": "C0494463",
+        "gnomad_af": 0.145,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 1.12,
+        "mane_transcript": "ENST00000252486.9",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.78,
+        "uniprot_id": "P02649",
+        "alphafold_plddt": 75.5,
+        "hpa_tissues": {
+          "liver": "High",
+          "cerebral cortex": "Medium",
+          "plasma": "High"
+        },
+        "hpa_subcellular": [
+          "Secreted",
+          "Endoplasmic reticulum"
+        ],
+        "encode_ccre": "Candidate Enhancer (dELS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "25741868",
+          "31777002"
+        ]
+      },
+      "interpretation": {
+        "category": "medically_relevant_risk",
+        "phenotype_summary": "APOE-\u03b54 is the primary genetic susceptibility factor for late-onset Alzheimer's disease.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "CC": {
+            "category": "Risk Factor",
+            "significance": "High Risk Factor",
+            "magnitude": 5.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "APOE \u03b54/\u03b54 homozygote: ~12-15\u00d7 elevated lifetime risk of late-onset Alzheimer's disease.",
+            "user_guidance": "High lifetime risk factor; clinical risk is modified by cardiovascular health, aerobic activity, and sleep quality.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "CT": {
+            "category": "Carrier",
+            "significance": "Carrier / Risk Factor",
+            "magnitude": 3.5,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "APOE \u03b54 carrier (\u03b53/\u03b54 or \u03b52/\u03b54): ~3-4\u00d7 increased lifetime risk of late-onset Alzheimer's disease.",
+            "user_guidance": "Single \u03b54 copy conveys moderate lifetime risk elevation. Diplotype resolution with rs7412 required.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "TT": {
+            "category": "Trait",
+            "significance": "Common / Benign Baseline",
+            "magnitude": 1.0,
+            "repute": "Neutral",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Non-\u03b54 at rs429358 (\u03b53 or \u03b52 allele present). Baseline population risk.",
+            "user_guidance": "Baseline population risk for Alzheimer's disease at this locus.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "APOE-\u03b54 is a risk factor, neither necessary nor sufficient to cause Alzheimer's disease.",
+          "Clinical interpretation requires simultaneous evaluation of rs7412 to assign the \u03b52/\u03b53/\u03b54 diplotype."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": [
+          "rs429358",
+          "rs7412"
+        ]
+      },
       "chrom": "19",
       "pos_grch37": 45411941,
       "pos_grch38": 44908684,
@@ -40,6 +163,7 @@
       "clinvar_significance": "Risk factor",
       "clinvar_condition": "Late-onset Alzheimer disease",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.145,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 1.12,
@@ -66,7 +190,9 @@
           "significance": "High Risk Factor",
           "magnitude": 5.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "APOE \u03b54/\u03b54 homozygote: ~12-15\u00d7 elevated lifetime risk of late-onset Alzheimer's disease.",
+          "user_guidance": "High lifetime risk factor; clinical risk is modified by cardiovascular health, aerobic activity, and sleep quality.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -75,16 +201,20 @@
           "significance": "Carrier / Risk Factor",
           "magnitude": 3.5,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "APOE \u03b54 carrier (\u03b53/\u03b54 or \u03b52/\u03b54): ~3-4\u00d7 increased lifetime risk of late-onset Alzheimer's disease.",
+          "user_guidance": "Single \u03b54 copy conveys moderate lifetime risk elevation. Diplotype resolution with rs7412 required.",
           "drug_response": null,
           "is_carrier": true
         },
         "TT": {
           "category": "Trait",
-          "significance": "Common / Benign",
+          "significance": "Common / Benign Baseline",
           "magnitude": 1.0,
           "repute": "Neutral",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Non-\u03b54 at rs429358 (\u03b53 or \u03b52 allele present). Baseline population risk.",
+          "user_guidance": "Baseline population risk for Alzheimer's disease at this locus.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -100,7 +230,8 @@
             "GRCh38.p14": "chr19:44908684"
           },
           "alleles": "T>C",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -109,24 +240,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Risk factor",
-          "condition": "Late-onset Alzheimer disease"
+          "condition": "Late-onset Alzheimer disease",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000252486.9",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.78
+          "alphamissense_score": 0.78,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P02649",
-          "plddt": 75.5
+          "plddt": 75.5,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.145,
           "pli": 0.0,
-          "loeuf": 1.12
+          "loeuf": 1.12,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -138,16 +273,19 @@
           "subcellular": [
             "Secreted",
             "Endoplasmic reticulum"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -155,6 +293,99 @@
       "rsid": "rs7412",
       "gene": "APOE",
       "name": "APOE-\u03b52 determinant (c.526C>T, p.Arg176Cys)",
+      "identity": {
+        "rsid": "rs7412",
+        "aliases": [],
+        "chrom": "19",
+        "pos_grch37": 45412079,
+        "pos_grch38": 44908822,
+        "ref": "C",
+        "alt": "T",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000019.10:g.44908822C>T",
+        "hgvs_coding": "NM_000041.4:c.526C>T",
+        "hgvs_protein": "NP_000032.1:p.Arg176Cys"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel (ClinGen).",
+        "clinvar_vcv": "VCV000017865.5",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Protective / Risk factor",
+        "clinvar_condition": "Hyperlipoproteinemia, type III / Alzheimer disease risk reduction",
+        "clinvar_medgen": "C0020477",
+        "gnomad_af": 0.078,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 1.12,
+        "mane_transcript": "ENST00000252486.9",
+        "alphamissense_class": "ambiguous",
+        "alphamissense_score": 0.45,
+        "uniprot_id": "P02649",
+        "alphafold_plddt": 75.5,
+        "hpa_tissues": {
+          "liver": "High",
+          "cerebral cortex": "Medium"
+        },
+        "hpa_subcellular": [
+          "Secreted"
+        ],
+        "encode_ccre": "Candidate Enhancer (dELS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "25741868"
+        ]
+      },
+      "interpretation": {
+        "category": "medically_relevant_risk",
+        "phenotype_summary": "APOE-\u03b52 allele encodes Arg176Cys, associated with neuroprotection but risk of Type III Dysbetalipoproteinemia.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "TT": {
+            "category": "Trait",
+            "significance": "Protective / Benign",
+            "magnitude": 2.5,
+            "repute": "Good",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "APOE \u03b52/\u03b52 homozygote: Lower risk of Alzheimer's; potential susceptibility to Type III Hyperlipoproteinemia.",
+            "user_guidance": "Associated with relative neuroprotection; periodic lipid panel screening recommended.",
+            "drug_response": null,
+            "is_carrier": false
+          },
+          "CT": {
+            "category": "Trait",
+            "significance": "Protective / Benign",
+            "magnitude": 2.0,
+            "repute": "Good",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "APOE \u03b52 carrier: Moderate protective effect against late-onset Alzheimer's disease.",
+            "user_guidance": "Single \u03b52 allele confers modest protective reduction in Alzheimer's risk.",
+            "drug_response": null,
+            "is_carrier": false
+          },
+          "CC": {
+            "category": "Trait",
+            "significance": "Common / Benign Baseline",
+            "magnitude": 1.0,
+            "repute": "Neutral",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Common baseline allele at rs7412 (encodes Arg176).",
+            "user_guidance": "Standard baseline allele at this position.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "\u03b52/\u03b52 homozygotes require secondary environmental triggers for clinical dysbetalipoproteinemia expression."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": [
+          "rs429358",
+          "rs7412"
+        ]
+      },
       "chrom": "19",
       "pos_grch37": 45412079,
       "pos_grch38": 44908822,
@@ -168,6 +399,7 @@
       "clinvar_significance": "Protective / Risk factor",
       "clinvar_condition": "Hyperlipoproteinemia, type III / Alzheimer disease risk reduction",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.078,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 1.12,
@@ -192,7 +424,9 @@
           "significance": "Protective / Benign",
           "magnitude": 2.5,
           "repute": "Good",
-          "phenotype": "APOE \u03b52/\u03b52 homozygote: Lower risk of Alzheimer's; associated with Type III Hyperlipoproteinemia risk.",
+          "coverage_state": "supported_and_observed",
+          "phenotype": "APOE \u03b52/\u03b52 homozygote: Lower risk of Alzheimer's; potential susceptibility to Type III Hyperlipoproteinemia.",
+          "user_guidance": "Associated with relative neuroprotection; periodic lipid panel screening recommended.",
           "drug_response": null,
           "is_carrier": false
         },
@@ -201,16 +435,20 @@
           "significance": "Protective / Benign",
           "magnitude": 2.0,
           "repute": "Good",
+          "coverage_state": "supported_and_observed",
           "phenotype": "APOE \u03b52 carrier: Moderate protective effect against late-onset Alzheimer's disease.",
+          "user_guidance": "Single \u03b52 allele confers modest protective reduction in Alzheimer's risk.",
           "drug_response": null,
           "is_carrier": false
         },
         "CC": {
           "category": "Trait",
-          "significance": "Common / Benign",
+          "significance": "Common / Benign Baseline",
           "magnitude": 1.0,
           "repute": "Neutral",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Common baseline allele at rs7412 (encodes Arg176).",
+          "user_guidance": "Standard baseline allele at this position.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -226,7 +464,8 @@
             "GRCh38.p14": "chr19:44908822"
           },
           "alleles": "C>T",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -235,24 +474,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Protective / Risk factor",
-          "condition": "Hyperlipoproteinemia, type III / Alzheimer disease risk reduction"
+          "condition": "Hyperlipoproteinemia, type III / Alzheimer disease risk reduction",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000252486.9",
           "alphamissense_class": "ambiguous",
-          "alphamissense_score": 0.45
+          "alphamissense_score": 0.45,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P02649",
-          "plddt": 75.5
+          "plddt": 75.5,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.078,
           "pli": 0.0,
-          "loeuf": 1.12
+          "loeuf": 1.12,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -262,16 +505,19 @@
           },
           "subcellular": [
             "Secreted"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -279,6 +525,103 @@
       "rsid": "rs1800562",
       "gene": "HFE",
       "name": "HFE C282Y (c.845G>A, p.Cys282Tyr)",
+      "identity": {
+        "rsid": "rs1800562",
+        "aliases": [],
+        "chrom": "6",
+        "pos_grch37": 26093141,
+        "pos_grch38": 26092913,
+        "ref": "G",
+        "alt": "A",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000006.12:g.26092913G>A",
+        "hgvs_coding": "NM_000410.4:c.845G>A",
+        "hgvs_protein": "NP_000401.1:p.Cys282Tyr"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Practice guideline consensus (ClinVar 4 stars).",
+        "clinvar_vcv": "VCV000000009.12",
+        "clinvar_stars": 4,
+        "clinvar_status": "practice guideline",
+        "clinvar_significance": "Pathogenic",
+        "clinvar_condition": "Hemochromatosis type 1",
+        "clinvar_medgen": "C0392514",
+        "gnomad_af": 0.062,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.94,
+        "mane_transcript": "ENST00000357618.8",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.89,
+        "uniprot_id": "P55899",
+        "alphafold_plddt": 86.4,
+        "hpa_tissues": {
+          "liver": "High",
+          "duodenum": "High",
+          "spleen": "Medium"
+        },
+        "hpa_subcellular": [
+          "Plasma membrane",
+          "Endoplasmic reticulum"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "8696333",
+          "27535533"
+        ]
+      },
+      "interpretation": {
+        "category": "pathogenic_carrier",
+        "phenotype_summary": "HFE C282Y is the primary cause of hereditary hemochromatosis type 1 (iron overload).",
+        "acmg_sf_actionable": true,
+        "genotypes": {
+          "AA": {
+            "category": "Pathogenic",
+            "significance": "Pathogenic",
+            "magnitude": 4.5,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "HFE C282Y homozygote: Primary genetic cause of Type 1 Hereditary Hemochromatosis.",
+            "user_guidance": "Homozygous for the high-impact C282Y mutation. Serum ferritin and transferrin saturation monitoring recommended.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "AG": {
+            "category": "Carrier",
+            "significance": "Carrier / Pathogenic",
+            "magnitude": 2.5,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "HFE C282Y carrier: Transmits allele to 50% of offspring. Risk of compound hemochromatosis if paired with H63D.",
+            "user_guidance": "Carrier of C282Y. Unlikely to develop iron overload alone, but risk increases if paired in trans with H63D.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "GG": {
+            "category": "Trait",
+            "significance": "Normal Baseline",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal genotype at HFE C282Y.",
+            "user_guidance": "Negative for the C282Y pathogenic mutation.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "ACMG Secondary Findings locus caveat: This finding represents interrogation of a single specific nucleotide locus only. It does NOT represent comprehensive clinical sequencing of the gene. A negative result at this single position does not rule out other pathogenic variants across the remainder of the gene.",
+          "Penetrance of C282Y homozygosity is incomplete; non-genetic factors influence actual iron accumulation."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": [
+          "rs1800562",
+          "rs1799945"
+        ]
+      },
       "chrom": "6",
       "pos_grch37": 26093141,
       "pos_grch38": 26092913,
@@ -292,6 +635,7 @@
       "clinvar_significance": "Pathogenic",
       "clinvar_condition": "Hemochromatosis type 1",
       "acmg_sf_actionable": true,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.062,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.94,
@@ -318,7 +662,9 @@
           "significance": "Pathogenic",
           "magnitude": 4.5,
           "repute": "Bad",
-          "phenotype": "HFE C282Y homozygote: Primary genetic cause of Type 1 Hereditary Hemochromatosis (iron overload).",
+          "coverage_state": "supported_and_observed",
+          "phenotype": "HFE C282Y homozygote: Primary genetic cause of Type 1 Hereditary Hemochromatosis.",
+          "user_guidance": "Homozygous for the high-impact C282Y mutation. Serum ferritin and transferrin saturation monitoring recommended.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -327,16 +673,20 @@
           "significance": "Carrier / Pathogenic",
           "magnitude": 2.5,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "HFE C282Y carrier: Transmits allele to 50% of offspring. Risk of compound hemochromatosis if paired with H63D.",
+          "user_guidance": "Carrier of C282Y. Unlikely to develop iron overload alone, but risk increases if paired in trans with H63D.",
           "drug_response": null,
           "is_carrier": true
         },
         "GG": {
           "category": "Trait",
-          "significance": "Normal",
+          "significance": "Normal Baseline",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal genotype at HFE C282Y.",
+          "user_guidance": "Negative for the C282Y pathogenic mutation.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -352,7 +702,8 @@
             "GRCh38.p14": "chr6:26092913"
           },
           "alleles": "G>A",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -361,24 +712,28 @@
           "stars": 4,
           "status": "practice guideline",
           "significance": "Pathogenic",
-          "condition": "Hemochromatosis type 1"
+          "condition": "Hemochromatosis type 1",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000357618.8",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.89
+          "alphamissense_score": 0.89,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P55899",
-          "plddt": 86.4
+          "plddt": 86.4,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.062,
           "pli": 0.0,
-          "loeuf": 0.94
+          "loeuf": 0.94,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -390,16 +745,19 @@
           "subcellular": [
             "Plasma membrane",
             "Endoplasmic reticulum"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": true
+          "actionable": true,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -407,6 +765,101 @@
       "rsid": "rs1799945",
       "gene": "HFE",
       "name": "HFE H63D (c.187C>G, p.His63Asp)",
+      "identity": {
+        "rsid": "rs1799945",
+        "aliases": [],
+        "chrom": "6",
+        "pos_grch37": 26092913,
+        "pos_grch38": 26091179,
+        "ref": "C",
+        "alt": "G",
+        "is_palindromic": true,
+        "strand": "+",
+        "hgvs_genomic": "NC_000006.12:g.26091179C>G",
+        "hgvs_coding": "NM_000410.4:c.187C>G",
+        "hgvs_protein": "NP_000401.1:p.His63Asp"
+      },
+      "evidence": {
+        "tier": "Tier B",
+        "tier_rationale": "Multi-submitter consensus with criteria provided, no conflicts (ClinVar 2 stars).",
+        "clinvar_vcv": "VCV000000013.10",
+        "clinvar_stars": 2,
+        "clinvar_status": "criteria provided, multiple submitters, no conflicts",
+        "clinvar_significance": "Risk factor",
+        "clinvar_condition": "Hemochromatosis modifier",
+        "clinvar_medgen": "C0392514",
+        "gnomad_af": 0.141,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.94,
+        "mane_transcript": "ENST00000357618.8",
+        "alphamissense_class": "ambiguous",
+        "alphamissense_score": 0.42,
+        "uniprot_id": "P55899",
+        "alphafold_plddt": 86.4,
+        "hpa_tissues": {
+          "liver": "High",
+          "duodenum": "High"
+        },
+        "hpa_subcellular": [
+          "Plasma membrane"
+        ],
+        "encode_ccre": "Candidate Enhancer (dELS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "8696333",
+          "27535533"
+        ]
+      },
+      "interpretation": {
+        "category": "acmg_sf_locus",
+        "phenotype_summary": "HFE H63D is a mild, low-penetrance modifier allele of iron absorption.",
+        "acmg_sf_actionable": true,
+        "genotypes": {
+          "GG": {
+            "category": "Risk Factor",
+            "significance": "Risk Factor",
+            "magnitude": 2.5,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "HFE H63D homozygote: Low-penetrance modifier of iron absorption. Rarely causes clinical overload alone.",
+            "user_guidance": "Homozygous for the H63D modifier. Clinical iron overload is rare in the absence of C282Y.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "CG": {
+            "category": "Carrier",
+            "significance": "Carrier / Risk Factor",
+            "magnitude": 1.5,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "HFE H63D carrier: Mild modifier; clinical significance elevated primarily when in trans with C282Y.",
+            "user_guidance": "Heterozygous H63D carrier. Evaluated in combination with rs1800562 (C282Y).",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "CC": {
+            "category": "Trait",
+            "significance": "Normal Baseline",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal genotype at HFE H63D.",
+            "user_guidance": "Negative for the H63D modifier mutation.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "ACMG Secondary Findings locus caveat: This finding represents interrogation of a single specific nucleotide locus only. It does NOT represent comprehensive clinical sequencing of the gene. A negative result at this single position does not rule out other pathogenic variants across the remainder of the gene.",
+          "Palindromic C/G locus: validated against chromosomal coordinates to prevent strand-inversion artifacts."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": [
+          "rs1800562",
+          "rs1799945"
+        ]
+      },
       "chrom": "6",
       "pos_grch37": 26092913,
       "pos_grch38": 26091179,
@@ -420,6 +873,7 @@
       "clinvar_significance": "Risk factor",
       "clinvar_condition": "Hemochromatosis modifier",
       "acmg_sf_actionable": true,
+      "evidence_tier": "Tier B",
       "gnomad_af": 0.141,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.94,
@@ -444,7 +898,9 @@
           "significance": "Risk Factor",
           "magnitude": 2.5,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "HFE H63D homozygote: Low-penetrance modifier of iron absorption. Rarely causes clinical overload alone.",
+          "user_guidance": "Homozygous for the H63D modifier. Clinical iron overload is rare in the absence of C282Y.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -453,16 +909,20 @@
           "significance": "Carrier / Risk Factor",
           "magnitude": 1.5,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "HFE H63D carrier: Mild modifier; clinical significance elevated primarily when in trans with C282Y.",
+          "user_guidance": "Heterozygous H63D carrier. Evaluated in combination with rs1800562 (C282Y).",
           "drug_response": null,
           "is_carrier": true
         },
         "CC": {
           "category": "Trait",
-          "significance": "Normal",
+          "significance": "Normal Baseline",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal genotype at HFE H63D.",
+          "user_guidance": "Negative for the H63D modifier mutation.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -478,7 +938,8 @@
             "GRCh38.p14": "chr6:26091179"
           },
           "alleles": "C>G",
-          "is_palindromic": true
+          "is_palindromic": true,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -487,24 +948,28 @@
           "stars": 2,
           "status": "criteria provided, multiple submitters, no conflicts",
           "significance": "Risk factor",
-          "condition": "Hemochromatosis modifier"
+          "condition": "Hemochromatosis modifier",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000357618.8",
           "alphamissense_class": "ambiguous",
-          "alphamissense_score": 0.42
+          "alphamissense_score": 0.42,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P55899",
-          "plddt": 86.4
+          "plddt": 86.4,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.141,
           "pli": 0.0,
-          "loeuf": 0.94
+          "loeuf": 0.94,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -514,16 +979,19 @@
           },
           "subcellular": [
             "Plasma membrane"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": true
+          "actionable": true,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -531,6 +999,100 @@
       "rsid": "rs6025",
       "gene": "F5",
       "name": "Factor V Leiden (c.1601G>A, p.Arg534Gln)",
+      "identity": {
+        "rsid": "rs6025",
+        "aliases": [],
+        "chrom": "1",
+        "pos_grch37": 169519049,
+        "pos_grch38": 169549811,
+        "ref": "C",
+        "alt": "T",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000001.11:g.169549811C>T",
+        "hgvs_coding": "NM_000130.5:c.1601G>A",
+        "hgvs_protein": "NP_000121.2:p.Arg534Gln"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel.",
+        "clinvar_vcv": "VCV000003058.11",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Pathogenic",
+        "clinvar_condition": "Thrombophilia due to activated protein C resistance",
+        "clinvar_medgen": "C0398642",
+        "gnomad_af": 0.024,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.81,
+        "mane_transcript": "ENST00000367122.9",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.83,
+        "uniprot_id": "P12259",
+        "alphafold_plddt": 82.1,
+        "hpa_tissues": {
+          "liver": "High",
+          "plasma": "High"
+        },
+        "hpa_subcellular": [
+          "Secreted"
+        ],
+        "encode_ccre": "Candidate Enhancer (pELS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "8164741",
+          "27535533"
+        ]
+      },
+      "interpretation": {
+        "category": "pathogenic_carrier",
+        "phenotype_summary": "Factor V Leiden causes resistance to activated protein C, conferring venous thromboembolism risk.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "TT": {
+            "category": "Pathogenic",
+            "significance": "High Risk Pathogenic",
+            "magnitude": 5.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Factor V Leiden homozygote: ~50-80\u00d7 elevated lifetime risk of venous thromboembolism (VTE).",
+            "user_guidance": "Markedly increased thrombotic risk. Hematology consultation recommended; prophylactic anticoagulation during high-risk events.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "CT": {
+            "category": "Carrier",
+            "significance": "Pathogenic (Heterozygous)",
+            "magnitude": 3.5,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Factor V Leiden heterozygote: ~3-8\u00d7 elevated risk of deep vein thrombosis and pulmonary embolism.",
+            "user_guidance": "Heterozygous carrier. Avoid prolonged immobility and consider non-estrogen contraceptives.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "CC": {
+            "category": "Trait",
+            "significance": "Normal Baseline",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal genotype: Negative for Factor V Leiden.",
+            "user_guidance": "Negative for Factor V Leiden.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Most individuals with heterozygous Factor V Leiden do not develop thrombosis without additional triggers (surgery, estrogen, trauma)."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": [
+          "rs6025",
+          "rs1799963"
+        ]
+      },
       "chrom": "1",
       "pos_grch37": 169519049,
       "pos_grch38": 169549811,
@@ -544,6 +1106,7 @@
       "clinvar_significance": "Pathogenic",
       "clinvar_condition": "Thrombophilia due to activated protein C resistance",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.024,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.81,
@@ -568,7 +1131,9 @@
           "significance": "High Risk Pathogenic",
           "magnitude": 5.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Factor V Leiden homozygote: ~50-80\u00d7 elevated lifetime risk of venous thromboembolism (VTE).",
+          "user_guidance": "Markedly increased thrombotic risk. Hematology consultation recommended; prophylactic anticoagulation during high-risk events.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -577,16 +1142,20 @@
           "significance": "Pathogenic (Heterozygous)",
           "magnitude": 3.5,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Factor V Leiden heterozygote: ~3-8\u00d7 elevated risk of deep vein thrombosis and pulmonary embolism.",
+          "user_guidance": "Heterozygous carrier. Avoid prolonged immobility and consider non-estrogen contraceptives.",
           "drug_response": null,
           "is_carrier": true
         },
         "CC": {
           "category": "Trait",
-          "significance": "Normal",
+          "significance": "Normal Baseline",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal genotype: Negative for Factor V Leiden.",
+          "user_guidance": "Negative for Factor V Leiden.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -602,7 +1171,8 @@
             "GRCh38.p14": "chr1:169549811"
           },
           "alleles": "C>T",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -611,24 +1181,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Pathogenic",
-          "condition": "Thrombophilia due to activated protein C resistance"
+          "condition": "Thrombophilia due to activated protein C resistance",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000367122.9",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.83
+          "alphamissense_score": 0.83,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P12259",
-          "plddt": 82.1
+          "plddt": 82.1,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.024,
           "pli": 0.0,
-          "loeuf": 0.81
+          "loeuf": 0.81,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -638,16 +1212,19 @@
           },
           "subcellular": [
             "Secreted"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -655,6 +1232,99 @@
       "rsid": "rs1799963",
       "gene": "F2",
       "name": "Prothrombin G20210A (c.*97G>A)",
+      "identity": {
+        "rsid": "rs1799963",
+        "aliases": [],
+        "chrom": "11",
+        "pos_grch37": 46761055,
+        "pos_grch38": 46739905,
+        "ref": "G",
+        "alt": "A",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000011.10:g.46739905G>A",
+        "hgvs_coding": "NM_000506.5:c.*97G>A",
+        "hgvs_protein": ""
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel.",
+        "clinvar_vcv": "VCV000003059.9",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Pathogenic",
+        "clinvar_condition": "Thrombophilia due to elevated prothrombin levels",
+        "clinvar_medgen": "C0398643",
+        "gnomad_af": 0.011,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.72,
+        "mane_transcript": "ENST00000311910.8",
+        "alphamissense_class": "ambiguous",
+        "alphamissense_score": 0.35,
+        "uniprot_id": "P00734",
+        "alphafold_plddt": 89.2,
+        "hpa_tissues": {
+          "liver": "High",
+          "plasma": "High"
+        },
+        "hpa_subcellular": [
+          "Secreted"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "8988179"
+        ]
+      },
+      "interpretation": {
+        "category": "pathogenic_carrier",
+        "phenotype_summary": "Prothrombin G20210A increases 3' end processing efficiency, raising plasma prothrombin levels and thrombotic risk.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "AA": {
+            "category": "Pathogenic",
+            "significance": "High Risk Pathogenic",
+            "magnitude": 4.5,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Prothrombin G20210A homozygote: Markedly elevated prothrombin levels and substantial thrombotic risk.",
+            "user_guidance": "Homozygous for G20210A; significant elevation in venous thrombosis predisposition.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "AG": {
+            "category": "Carrier",
+            "significance": "Pathogenic (Heterozygous)",
+            "magnitude": 3.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Prothrombin G20210A carrier: ~2-3\u00d7 elevated risk of venous thromboembolism.",
+            "user_guidance": "Heterozygous carrier of G20210A. Co-occurrence with Factor V Leiden produces synergistic risk.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "GG": {
+            "category": "Trait",
+            "significance": "Normal Baseline",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal genotype: Negative for Prothrombin G20210A.",
+            "user_guidance": "Negative for Prothrombin G20210A.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Independent assortment on chromosome 11; multiplies thrombophilia risk synergistically if combined with Factor V Leiden (Chr 1)."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": [
+          "rs6025",
+          "rs1799963"
+        ]
+      },
       "chrom": "11",
       "pos_grch37": 46761055,
       "pos_grch38": 46739905,
@@ -666,8 +1336,9 @@
       "clinvar_stars": 3,
       "clinvar_status": "reviewed by expert panel",
       "clinvar_significance": "Pathogenic",
-      "clinvar_condition": "Thrombophilia due to prothrombin deficiency or elevated levels",
+      "clinvar_condition": "Thrombophilia due to elevated prothrombin levels",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.011,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.72,
@@ -692,7 +1363,9 @@
           "significance": "High Risk Pathogenic",
           "magnitude": 4.5,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Prothrombin G20210A homozygote: Markedly elevated prothrombin levels and substantial thrombotic risk.",
+          "user_guidance": "Homozygous for G20210A; significant elevation in venous thrombosis predisposition.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -701,16 +1374,20 @@
           "significance": "Pathogenic (Heterozygous)",
           "magnitude": 3.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Prothrombin G20210A carrier: ~2-3\u00d7 elevated risk of venous thromboembolism.",
+          "user_guidance": "Heterozygous carrier of G20210A. Co-occurrence with Factor V Leiden produces synergistic risk.",
           "drug_response": null,
           "is_carrier": true
         },
         "GG": {
           "category": "Trait",
-          "significance": "Normal",
+          "significance": "Normal Baseline",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal genotype: Negative for Prothrombin G20210A.",
+          "user_guidance": "Negative for Prothrombin G20210A.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -726,7 +1403,8 @@
             "GRCh38.p14": "chr11:46739905"
           },
           "alleles": "G>A",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -735,24 +1413,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Pathogenic",
-          "condition": "Thrombophilia due to prothrombin deficiency or elevated levels"
+          "condition": "Thrombophilia due to elevated prothrombin levels",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000311910.8",
           "alphamissense_class": "ambiguous",
-          "alphamissense_score": 0.35
+          "alphamissense_score": 0.35,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P00734",
-          "plddt": 89.2
+          "plddt": 89.2,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.011,
           "pli": 0.0,
-          "loeuf": 0.72
+          "loeuf": 0.72,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -762,16 +1444,19 @@
           },
           "subcellular": [
             "Secreted"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -779,6 +1464,101 @@
       "rsid": "rs113993960",
       "gene": "CFTR",
       "name": "CFTR deltaF508 (c.1521_1523delCTT, p.Phe508del)",
+      "identity": {
+        "rsid": "rs113993960",
+        "aliases": [
+          "rs121908769"
+        ],
+        "chrom": "7",
+        "pos_grch37": 117199644,
+        "pos_grch38": 117559590,
+        "ref": "CTT",
+        "alt": "C",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000007.14:g.117559590_117559592delCTT",
+        "hgvs_coding": "NM_000492.4:c.1521_1523delCTT",
+        "hgvs_protein": "NP_000483.3:p.Phe508del"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel (CFTR2).",
+        "clinvar_vcv": "VCV000007105.10",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Pathogenic",
+        "clinvar_condition": "Cystic fibrosis / Hereditary pancreatitis",
+        "clinvar_medgen": "C0010674",
+        "gnomad_af": 0.014,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.63,
+        "mane_transcript": "ENST00000003084.11",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.95,
+        "uniprot_id": "P13569",
+        "alphafold_plddt": 84.8,
+        "hpa_tissues": {
+          "pancreas": "High",
+          "lung": "Medium",
+          "gallbladder": "High"
+        },
+        "hpa_subcellular": [
+          "Plasma membrane",
+          "Apical membrane"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": "Level A",
+        "cpic_drug": "Ivacaftor / Elexacaftor",
+        "literature_pmids": [
+          "2573216",
+          "23891399"
+        ]
+      },
+      "interpretation": {
+        "category": "pathogenic_carrier",
+        "phenotype_summary": "CFTR deltaF508 is the most common severe cystic fibrosis-causing deletion in populations of European descent.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "DD": {
+            "category": "Pathogenic",
+            "significance": "Pathogenic",
+            "magnitude": 5.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "CFTR deltaF508 homozygote: Classic severe Cystic Fibrosis phenotype.",
+            "user_guidance": "Homozygous for the deltaF508 deletion. Clinical geneticist evaluation and CFTR modulator therapy evaluation indicated.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "DI": {
+            "category": "Carrier",
+            "significance": "Carrier / Pathogenic",
+            "magnitude": 3.0,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "CFTR deltaF508 carrier: 50% recurrence risk to transmit to offspring.",
+            "user_guidance": "Heterozygous carrier. Carrier reproductive screening recommended for partner.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "II": {
+            "category": "Trait",
+            "significance": "Normal Baseline",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal genotype: Negative for CFTR deltaF508.",
+            "user_guidance": "Negative for CFTR deltaF508. Note: Does not sequence the remaining ~2,000 CFTR variants.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Negative deltaF508 result does not rule out other CFTR mutations (residual carrier risk remains ~1 in 160)."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": []
+      },
       "chrom": "7",
       "pos_grch37": 117199644,
       "pos_grch38": 117559590,
@@ -792,6 +1572,7 @@
       "clinvar_significance": "Pathogenic",
       "clinvar_condition": "Cystic fibrosis / Hereditary pancreatitis",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.014,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.63,
@@ -818,7 +1599,9 @@
           "significance": "Pathogenic",
           "magnitude": 5.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "CFTR deltaF508 homozygote: Classic severe Cystic Fibrosis phenotype.",
+          "user_guidance": "Homozygous for the deltaF508 deletion. Clinical geneticist evaluation and CFTR modulator therapy evaluation indicated.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -827,16 +1610,20 @@
           "significance": "Carrier / Pathogenic",
           "magnitude": 3.0,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "CFTR deltaF508 carrier: 50% recurrence risk to transmit to offspring.",
+          "user_guidance": "Heterozygous carrier. Carrier reproductive screening recommended for partner.",
           "drug_response": null,
           "is_carrier": true
         },
         "II": {
           "category": "Trait",
-          "significance": "Normal",
+          "significance": "Normal Baseline",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal genotype: Negative for CFTR deltaF508.",
+          "user_guidance": "Negative for CFTR deltaF508. Note: Does not sequence the remaining ~2,000 CFTR variants.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -852,7 +1639,8 @@
             "GRCh38.p14": "chr7:117559590"
           },
           "alleles": "CTT>C",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -861,24 +1649,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Pathogenic",
-          "condition": "Cystic fibrosis / Hereditary pancreatitis"
+          "condition": "Cystic fibrosis / Hereditary pancreatitis",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000003084.11",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.95
+          "alphamissense_score": 0.95,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P13569",
-          "plddt": 84.8
+          "plddt": 84.8,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.014,
           "pli": 0.0,
-          "loeuf": 0.63
+          "loeuf": 0.63,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -890,16 +1682,19 @@
           "subcellular": [
             "Plasma membrane",
             "Apical membrane"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": "Level A",
-          "drug": "Ivacaftor / Elexacaftor"
+          "drug": "Ivacaftor / Elexacaftor",
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -907,6 +1702,99 @@
       "rsid": "rs4244285",
       "gene": "CYP2C19",
       "name": "CYP2C19*2 (c.681G>A, aberrant splice site)",
+      "identity": {
+        "rsid": "rs4244285",
+        "aliases": [],
+        "chrom": "10",
+        "pos_grch37": 96541604,
+        "pos_grch38": 94781859,
+        "ref": "G",
+        "alt": "A",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000010.11:g.94781859G>A",
+        "hgvs_coding": "NM_000769.4:c.681G>A",
+        "hgvs_protein": ""
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Practice guideline consensus (ClinVar 4 stars & CPIC Level A).",
+        "clinvar_vcv": "VCV000013589.6",
+        "clinvar_stars": 4,
+        "clinvar_status": "practice guideline",
+        "clinvar_significance": "Drug response",
+        "clinvar_condition": "Clopidogrel resistance / CYP2C19 poor metabolizer",
+        "clinvar_medgen": "C2749845",
+        "gnomad_af": 0.15,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 1.25,
+        "mane_transcript": "ENST00000371321.9",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.91,
+        "uniprot_id": "P33261",
+        "alphafold_plddt": 85.0,
+        "hpa_tissues": {
+          "liver": "High",
+          "small intestine": "Medium"
+        },
+        "hpa_subcellular": [
+          "Endoplasmic reticulum membrane"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": "Level A",
+        "cpic_drug": "Clopidogrel / Omeprazole / Escitalopram",
+        "literature_pmids": [
+          "22569435",
+          "35030251"
+        ]
+      },
+      "interpretation": {
+        "category": "pharmacogenomics_cpic",
+        "phenotype_summary": "CYP2C19*2 creates an aberrant splice site producing a non-functional enzyme; causes clopidogrel resistance.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "AA": {
+            "category": "Pharmacogenomics",
+            "significance": "Poor Metabolizer (*2/*2)",
+            "magnitude": 4.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "CYP2C19 Poor Metabolizer: Marked loss of clopidogrel bioactivation; consider alternative antiplatelet (prasugrel/ticagrelor).",
+            "user_guidance": "Poor metabolizer status severely reduces clopidogrel efficacy. CPIC recommends alternative antiplatelet therapy.",
+            "drug_response": "Clopidogrel resistance",
+            "is_carrier": true
+          },
+          "AG": {
+            "category": "Pharmacogenomics",
+            "significance": "Intermediate Metabolizer (*1/*2)",
+            "magnitude": 2.5,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "CYP2C19 Intermediate Metabolizer: Reduced enzymatic clearance; clopidogrel resistance risk.",
+            "user_guidance": "Intermediate metabolizer status: reduced bioactivation of clopidogrel.",
+            "drug_response": "Suboptimal clopidogrel activation",
+            "is_carrier": true
+          },
+          "GG": {
+            "category": "Trait",
+            "significance": "Provisional Normal Metabolizer",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Provisional Normal Metabolizer at rs4244285. Full phenotype requires testing *3 and *17.",
+            "user_guidance": "Negative for *2 loss-of-function allele.",
+            "drug_response": "Normal clopidogrel activation",
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Testing single SNP rs4244285 (*2) does not test *3 or *17 gain-of-function alleles."
+        ],
+        "refusal_notices": [
+          "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing."
+        ],
+        "multi_locus_dependencies": []
+      },
       "chrom": "10",
       "pos_grch37": 96541604,
       "pos_grch38": 94781859,
@@ -920,6 +1808,7 @@
       "clinvar_significance": "Drug response",
       "clinvar_condition": "Clopidogrel resistance / CYP2C19 poor metabolizer",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.15,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 1.25,
@@ -944,7 +1833,9 @@
           "significance": "Poor Metabolizer (*2/*2)",
           "magnitude": 4.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "CYP2C19 Poor Metabolizer: Marked loss of clopidogrel bioactivation; consider alternative antiplatelet (prasugrel/ticagrelor).",
+          "user_guidance": "Poor metabolizer status severely reduces clopidogrel efficacy. CPIC recommends alternative antiplatelet therapy.",
           "drug_response": "Clopidogrel resistance",
           "is_carrier": true
         },
@@ -953,7 +1844,9 @@
           "significance": "Intermediate Metabolizer (*1/*2)",
           "magnitude": 2.5,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "CYP2C19 Intermediate Metabolizer: Reduced enzymatic clearance; clopidogrel resistance risk.",
+          "user_guidance": "Intermediate metabolizer status: reduced bioactivation of clopidogrel.",
           "drug_response": "Suboptimal clopidogrel activation",
           "is_carrier": true
         },
@@ -962,7 +1855,9 @@
           "significance": "Provisional Normal Metabolizer",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Provisional Normal Metabolizer at rs4244285. Full phenotype requires testing *3 and *17.",
+          "user_guidance": "Negative for *2 loss-of-function allele.",
           "drug_response": "Normal clopidogrel activation",
           "is_carrier": false
         }
@@ -978,7 +1873,8 @@
             "GRCh38.p14": "chr10:94781859"
           },
           "alleles": "G>A",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -987,24 +1883,28 @@
           "stars": 4,
           "status": "practice guideline",
           "significance": "Drug response",
-          "condition": "Clopidogrel resistance / CYP2C19 poor metabolizer"
+          "condition": "Clopidogrel resistance / CYP2C19 poor metabolizer",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000371321.9",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.91
+          "alphamissense_score": 0.91,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P33261",
-          "plddt": 85.0
+          "plddt": 85.0,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.15,
           "pli": 0.0,
-          "loeuf": 1.25
+          "loeuf": 1.25,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1014,16 +1914,19 @@
           },
           "subcellular": [
             "Endoplasmic reticulum membrane"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": "Level A",
-          "drug": "Clopidogrel / Omeprazole / Escitalopram"
+          "drug": "Clopidogrel / Omeprazole / Escitalopram",
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -1031,6 +1934,98 @@
       "rsid": "rs9923231",
       "gene": "VKORC1",
       "name": "VKORC1 promoter -1639G>A (c.-1639G>A)",
+      "identity": {
+        "rsid": "rs9923231",
+        "aliases": [],
+        "chrom": "16",
+        "pos_grch37": 31107689,
+        "pos_grch38": 31103689,
+        "ref": "C",
+        "alt": "T",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000016.10:g.31103689C>T",
+        "hgvs_coding": "NM_024006.5:c.-1639G>A",
+        "hgvs_protein": ""
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel & CPIC Level A.",
+        "clinvar_vcv": "VCV000009624.7",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Drug response",
+        "clinvar_condition": "Warfarin sensitivity / dosage requirement",
+        "clinvar_medgen": "C1844234",
+        "gnomad_af": 0.39,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.88,
+        "mane_transcript": "ENST00000394985.8",
+        "alphamissense_class": "likely_benign",
+        "alphamissense_score": 0.18,
+        "uniprot_id": "Q9BQB6",
+        "alphafold_plddt": 79.2,
+        "hpa_tissues": {
+          "liver": "High",
+          "heart muscle": "Medium"
+        },
+        "hpa_subcellular": [
+          "Endoplasmic reticulum membrane"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": "Level A",
+        "cpic_drug": "Warfarin",
+        "literature_pmids": [
+          "28198080"
+        ]
+      },
+      "interpretation": {
+        "category": "pharmacogenomics_cpic",
+        "phenotype_summary": "VKORC1 -1639G>A promoter variant reduces VKORC1 mRNA expression, conferring high warfarin sensitivity.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "TT": {
+            "category": "Pharmacogenomics",
+            "significance": "High Warfarin Sensitivity (AA)",
+            "magnitude": 3.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "VKORC1 High Warfarin Sensitivity: Requires lower initial maintenance warfarin dosing to prevent bleeding.",
+            "user_guidance": "High warfarin sensitivity genotype: lower initial dose algorithms indicated per CPIC.",
+            "drug_response": "High Warfarin Sensitivity",
+            "is_carrier": true
+          },
+          "CT": {
+            "category": "Pharmacogenomics",
+            "significance": "Intermediate Warfarin Sensitivity (AG)",
+            "magnitude": 2.0,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "VKORC1 Intermediate Sensitivity: Moderate dose reduction indicated per CPIC algorithms.",
+            "user_guidance": "Moderate sensitivity to warfarin anticoagulant dosing.",
+            "drug_response": "Intermediate Warfarin Sensitivity",
+            "is_carrier": true
+          },
+          "CC": {
+            "category": "Trait",
+            "significance": "Normal Warfarin Sensitivity (GG)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal VKORC1 expression: Standard initial maintenance warfarin dosing indicated.",
+            "user_guidance": "Standard warfarin dosing sensitivity.",
+            "drug_response": "Standard Warfarin Dosing",
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Full warfarin dose prediction models require integrating CYP2C9 genotype, age, body weight, and concurrent medications."
+        ],
+        "refusal_notices": [
+          "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing."
+        ],
+        "multi_locus_dependencies": []
+      },
       "chrom": "16",
       "pos_grch37": 31107689,
       "pos_grch38": 31103689,
@@ -1044,6 +2039,7 @@
       "clinvar_significance": "Drug response",
       "clinvar_condition": "Warfarin sensitivity / dosage requirement",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.39,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.88,
@@ -1068,7 +2064,9 @@
           "significance": "High Warfarin Sensitivity (AA)",
           "magnitude": 3.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "VKORC1 High Warfarin Sensitivity: Requires lower initial maintenance warfarin dosing to prevent bleeding.",
+          "user_guidance": "High warfarin sensitivity genotype: lower initial dose algorithms indicated per CPIC.",
           "drug_response": "High Warfarin Sensitivity",
           "is_carrier": true
         },
@@ -1077,7 +2075,9 @@
           "significance": "Intermediate Warfarin Sensitivity (AG)",
           "magnitude": 2.0,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "VKORC1 Intermediate Sensitivity: Moderate dose reduction indicated per CPIC algorithms.",
+          "user_guidance": "Moderate sensitivity to warfarin anticoagulant dosing.",
           "drug_response": "Intermediate Warfarin Sensitivity",
           "is_carrier": true
         },
@@ -1086,7 +2086,9 @@
           "significance": "Normal Warfarin Sensitivity (GG)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal VKORC1 expression: Standard initial maintenance warfarin dosing indicated.",
+          "user_guidance": "Standard warfarin dosing sensitivity.",
           "drug_response": "Standard Warfarin Dosing",
           "is_carrier": false
         }
@@ -1102,7 +2104,8 @@
             "GRCh38.p14": "chr16:31103689"
           },
           "alleles": "C>T",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -1111,24 +2114,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Drug response",
-          "condition": "Warfarin sensitivity / dosage requirement"
+          "condition": "Warfarin sensitivity / dosage requirement",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000394985.8",
           "alphamissense_class": "likely_benign",
-          "alphamissense_score": 0.18
+          "alphamissense_score": 0.18,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "Q9BQB6",
-          "plddt": 79.2
+          "plddt": 79.2,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.39,
           "pli": 0.0,
-          "loeuf": 0.88
+          "loeuf": 0.88,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1138,16 +2145,19 @@
           },
           "subcellular": [
             "Endoplasmic reticulum membrane"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": "Level A",
-          "drug": "Warfarin"
+          "drug": "Warfarin",
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -1155,6 +2165,98 @@
       "rsid": "rs4149056",
       "gene": "SLCO1B1",
       "name": "SLCO1B1*5 (c.521T>C, p.Val174Ala)",
+      "identity": {
+        "rsid": "rs4149056",
+        "aliases": [],
+        "chrom": "12",
+        "pos_grch37": 21331549,
+        "pos_grch38": 21178615,
+        "ref": "T",
+        "alt": "C",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000012.12:g.21178615T>C",
+        "hgvs_coding": "NM_006446.5:c.521T>C",
+        "hgvs_protein": "NP_006437.3:p.Val174Ala"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel & CPIC Level A.",
+        "clinvar_vcv": "VCV000009623.6",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Drug response",
+        "clinvar_condition": "Simvastatin-induced myopathy / Statin-related muscle symptoms",
+        "clinvar_medgen": "C2749844",
+        "gnomad_af": 0.16,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 1.15,
+        "mane_transcript": "ENST00000499066.2",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.74,
+        "uniprot_id": "Q9Y6L6",
+        "alphafold_plddt": 83.4,
+        "hpa_tissues": {
+          "liver": "High"
+        },
+        "hpa_subcellular": [
+          "Basolateral plasma membrane"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": "Level A",
+        "cpic_drug": "Simvastatin / Atorvastatin / Rosuvastatin",
+        "literature_pmids": [
+          "22828609",
+          "35030251"
+        ]
+      },
+      "interpretation": {
+        "category": "pharmacogenomics_cpic",
+        "phenotype_summary": "SLCO1B1*5 impairs hepatic statin uptake, causing elevated systemic plasma statin concentrations and myopathy risk.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "CC": {
+            "category": "Pharmacogenomics",
+            "significance": "Poor Transporter Function (*5/*5)",
+            "magnitude": 4.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "SLCO1B1 Poor Function: High risk of statin-induced myopathy / rhabdomyolysis; avoid high-dose simvastatin.",
+            "user_guidance": "Significantly increased statin myopathy risk. CPIC recommends avoiding high-dose simvastatin or prescribing an alternative agent.",
+            "drug_response": "High Statin Myopathy Risk",
+            "is_carrier": true
+          },
+          "CT": {
+            "category": "Pharmacogenomics",
+            "significance": "Decreased Function (*1/*5)",
+            "magnitude": 2.5,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "SLCO1B1 Decreased Function: Moderate risk of statin myopathy; lower initial simvastatin dose recommended.",
+            "user_guidance": "Moderate risk elevation for statin muscle symptoms.",
+            "drug_response": "Moderate Statin Myopathy Risk",
+            "is_carrier": true
+          },
+          "TT": {
+            "category": "Trait",
+            "significance": "Normal Transporter Function (*1/*1)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal SLCO1B1 hepatic uptake: Standard statin dosing tolerated.",
+            "user_guidance": "Normal hepatic uptake baseline for statins.",
+            "drug_response": "Normal Statin Tolerance",
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Risk varies across statin molecules; pravastatin and rosuvastatin have lower SLCO1B1 dependence than simvastatin."
+        ],
+        "refusal_notices": [
+          "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing."
+        ],
+        "multi_locus_dependencies": []
+      },
       "chrom": "12",
       "pos_grch37": 21331549,
       "pos_grch38": 21178615,
@@ -1168,6 +2270,7 @@
       "clinvar_significance": "Drug response",
       "clinvar_condition": "Simvastatin-induced myopathy / Statin-related muscle symptoms",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.16,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 1.15,
@@ -1191,7 +2294,9 @@
           "significance": "Poor Transporter Function (*5/*5)",
           "magnitude": 4.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "SLCO1B1 Poor Function: High risk of statin-induced myopathy / rhabdomyolysis; avoid high-dose simvastatin.",
+          "user_guidance": "Significantly increased statin myopathy risk. CPIC recommends avoiding high-dose simvastatin or prescribing an alternative agent.",
           "drug_response": "High Statin Myopathy Risk",
           "is_carrier": true
         },
@@ -1200,7 +2305,9 @@
           "significance": "Decreased Function (*1/*5)",
           "magnitude": 2.5,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "SLCO1B1 Decreased Function: Moderate risk of statin myopathy; lower initial simvastatin dose recommended.",
+          "user_guidance": "Moderate risk elevation for statin muscle symptoms.",
           "drug_response": "Moderate Statin Myopathy Risk",
           "is_carrier": true
         },
@@ -1209,7 +2316,9 @@
           "significance": "Normal Transporter Function (*1/*1)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal SLCO1B1 hepatic uptake: Standard statin dosing tolerated.",
+          "user_guidance": "Normal hepatic uptake baseline for statins.",
           "drug_response": "Normal Statin Tolerance",
           "is_carrier": false
         }
@@ -1225,7 +2334,8 @@
             "GRCh38.p14": "chr12:21178615"
           },
           "alleles": "T>C",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -1234,24 +2344,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Drug response",
-          "condition": "Simvastatin-induced myopathy / Statin-related muscle symptoms"
+          "condition": "Simvastatin-induced myopathy / Statin-related muscle symptoms",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000499066.2",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.74
+          "alphamissense_score": 0.74,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "Q9Y6L6",
-          "plddt": 83.4
+          "plddt": 83.4,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.16,
           "pli": 0.0,
-          "loeuf": 1.15
+          "loeuf": 1.15,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1260,16 +2374,19 @@
           },
           "subcellular": [
             "Basolateral plasma membrane"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": "Level A",
-          "drug": "Simvastatin / Atorvastatin / Rosuvastatin"
+          "drug": "Simvastatin / Atorvastatin / Rosuvastatin",
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -1277,6 +2394,98 @@
       "rsid": "rs3918290",
       "gene": "DPYD",
       "name": "DPYD*2A (c.1905+1G>A, aberrant splice loss)",
+      "identity": {
+        "rsid": "rs3918290",
+        "aliases": [],
+        "chrom": "1",
+        "pos_grch37": 97915614,
+        "pos_grch38": 97450058,
+        "ref": "C",
+        "alt": "T",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000001.11:g.97450058C>T",
+        "hgvs_coding": "NM_000110.4:c.1905+1G>A",
+        "hgvs_protein": ""
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Practice guideline consensus (ClinVar 4 stars & CPIC Level A).",
+        "clinvar_vcv": "VCV000015383.6",
+        "clinvar_stars": 4,
+        "clinvar_status": "practice guideline",
+        "clinvar_significance": "Drug response",
+        "clinvar_condition": "Fluorouracil toxicity / DPD deficiency",
+        "clinvar_medgen": "C0268538",
+        "gnomad_af": 0.005,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.7,
+        "mane_transcript": "ENST00000370192.8",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.94,
+        "uniprot_id": "Q12882",
+        "alphafold_plddt": 88.5,
+        "hpa_tissues": {
+          "liver": "High",
+          "colon": "Medium"
+        },
+        "hpa_subcellular": [
+          "Cytoplasm"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": "Level A",
+        "cpic_drug": "5-Fluorouracil / Capecitabine",
+        "literature_pmids": [
+          "29152729"
+        ]
+      },
+      "interpretation": {
+        "category": "pharmacogenomics_cpic",
+        "phenotype_summary": "DPYD*2A abolishes dihydropyrimidine dehydrogenase splicing, leading to lethal 5-fluorouracil/capecitabine toxicity.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "TT": {
+            "category": "Pharmacogenomics",
+            "significance": "Complete DPD Deficiency (*2A/*2A)",
+            "magnitude": 5.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "DPYD Complete Deficiency: Lethal toxicity risk with 5-FU/capecitabine; fluoropyrimidines contraindicated.",
+            "user_guidance": "Complete DPD deficiency: standard fluoropyrimidines are strictly contraindicated per FDA and CPIC guidelines.",
+            "drug_response": "Lethal 5-FU Toxicity Risk",
+            "is_carrier": true
+          },
+          "CT": {
+            "category": "Pharmacogenomics",
+            "significance": "Intermediate DPD Deficiency (*1/*2A)",
+            "magnitude": 4.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "DPYD Intermediate Deficiency: ~50% dose reduction of 5-FU/capecitabine strongly indicated per CPIC.",
+            "user_guidance": "Intermediate DPD deficiency: significant 50% dose reduction required under oncologic supervision.",
+            "drug_response": "High 5-FU Toxicity Risk",
+            "is_carrier": true
+          },
+          "CC": {
+            "category": "Trait",
+            "significance": "Normal DPD Activity (*1/*1)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal DPYD genotype: Standard fluoropyrimidine dosing tolerated.",
+            "user_guidance": "Negative for DPYD*2A. Note: Other rare DPYD variants (e.g. *13, c.2846A>T) are not ruled out.",
+            "drug_response": "Standard 5-FU Tolerance",
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Testing single SNP rs3918290 (*2A) does not rule out other severe DPYD alleles (e.g. HapB3, *13, c.2846A>T)."
+        ],
+        "refusal_notices": [
+          "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing."
+        ],
+        "multi_locus_dependencies": []
+      },
       "chrom": "1",
       "pos_grch37": 97915614,
       "pos_grch38": 97450058,
@@ -1290,6 +2499,7 @@
       "clinvar_significance": "Drug response",
       "clinvar_condition": "Fluorouracil toxicity / DPD deficiency",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.005,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.7,
@@ -1314,7 +2524,9 @@
           "significance": "Complete DPD Deficiency (*2A/*2A)",
           "magnitude": 5.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "DPYD Complete Deficiency: Lethal toxicity risk with 5-FU/capecitabine; fluoropyrimidines contraindicated.",
+          "user_guidance": "Complete DPD deficiency: standard fluoropyrimidines are strictly contraindicated per FDA and CPIC guidelines.",
           "drug_response": "Lethal 5-FU Toxicity Risk",
           "is_carrier": true
         },
@@ -1323,7 +2535,9 @@
           "significance": "Intermediate DPD Deficiency (*1/*2A)",
           "magnitude": 4.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "DPYD Intermediate Deficiency: ~50% dose reduction of 5-FU/capecitabine strongly indicated per CPIC.",
+          "user_guidance": "Intermediate DPD deficiency: significant 50% dose reduction required under oncologic supervision.",
           "drug_response": "High 5-FU Toxicity Risk",
           "is_carrier": true
         },
@@ -1332,7 +2546,9 @@
           "significance": "Normal DPD Activity (*1/*1)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal DPYD genotype: Standard fluoropyrimidine dosing tolerated.",
+          "user_guidance": "Negative for DPYD*2A. Note: Other rare DPYD variants (e.g. *13, c.2846A>T) are not ruled out.",
           "drug_response": "Standard 5-FU Tolerance",
           "is_carrier": false
         }
@@ -1348,7 +2564,8 @@
             "GRCh38.p14": "chr1:97450058"
           },
           "alleles": "C>T",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -1357,24 +2574,28 @@
           "stars": 4,
           "status": "practice guideline",
           "significance": "Drug response",
-          "condition": "Fluorouracil toxicity / DPD deficiency"
+          "condition": "Fluorouracil toxicity / DPD deficiency",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000370192.8",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.94
+          "alphamissense_score": 0.94,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "Q12882",
-          "plddt": 88.5
+          "plddt": 88.5,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.005,
           "pli": 0.0,
-          "loeuf": 0.7
+          "loeuf": 0.7,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1384,16 +2605,19 @@
           },
           "subcellular": [
             "Cytoplasm"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": "Level A",
-          "drug": "5-Fluorouracil / Capecitabine"
+          "drug": "5-Fluorouracil / Capecitabine",
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -1401,6 +2625,98 @@
       "rsid": "rs1801133",
       "gene": "MTHFR",
       "name": "MTHFR C677T (c.665C>T, p.Ala222Val)",
+      "identity": {
+        "rsid": "rs1801133",
+        "aliases": [],
+        "chrom": "1",
+        "pos_grch37": 11856378,
+        "pos_grch38": 11796321,
+        "ref": "G",
+        "alt": "A",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000001.11:g.11796321G>A",
+        "hgvs_coding": "NM_005957.5:c.665C>T",
+        "hgvs_protein": "NP_005948.3:p.Ala222Val"
+      },
+      "evidence": {
+        "tier": "Tier C",
+        "tier_rationale": "Single submitter or conflicting clinical evaluations (ClinVar 1 star, conflicting classifications).",
+        "clinvar_vcv": "VCV000003520.14",
+        "clinvar_stars": 1,
+        "clinvar_status": "criteria provided, single submitter",
+        "clinvar_significance": "Conflicting classifications of pathogenicity",
+        "clinvar_condition": "Hyperhomocysteinemia biomarker / Folate metabolism modifier",
+        "clinvar_medgen": "C0598602",
+        "gnomad_af": 0.31,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 1.04,
+        "mane_transcript": "ENST00000376585.8",
+        "alphamissense_class": "ambiguous",
+        "alphamissense_score": 0.52,
+        "uniprot_id": "P42898",
+        "alphafold_plddt": 81.3,
+        "hpa_tissues": {
+          "kidney": "High",
+          "liver": "High",
+          "testis": "High"
+        },
+        "hpa_subcellular": [
+          "Cytoplasm",
+          "Nucleus"
+        ],
+        "encode_ccre": "Candidate Enhancer (dELS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "23288205"
+        ]
+      },
+      "interpretation": {
+        "category": "medically_relevant_risk",
+        "phenotype_summary": "MTHFR C677T confers reduced enzymatic thermolability and mild homocysteine elevation without established primary disease causality.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "AA": {
+            "category": "Risk Factor",
+            "significance": "Biomarker Modifier (Homocysteine)",
+            "magnitude": 2.5,
+            "repute": "Bad",
+            "coverage_state": "insufficient_evidence",
+            "phenotype": "MTHFR 677TT homozygote: Thermolabile enzyme with ~30% residual activity; mild elevation of homocysteine.",
+            "user_guidance": "Practice guidelines (ACMG/ACOG) do not recommend clinical intervention or routine screening for MTHFR C677T alone.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "AG": {
+            "category": "Trait",
+            "significance": "Mild Activity Reduction (Heterozygote)",
+            "magnitude": 1.5,
+            "repute": "Neutral",
+            "coverage_state": "insufficient_evidence",
+            "phenotype": "MTHFR 677CT carrier: Modest enzyme thermolability (~65% residual activity); clinically unremarkable.",
+            "user_guidance": "Heterozygous carrier; benign population variant with no established standalone pathology.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "GG": {
+            "category": "Trait",
+            "significance": "Normal Activity (677CC)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal MTHFR enzymatic activity baseline.",
+            "user_guidance": "Normal MTHFR baseline.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "Evidence Tier C: ACMG and ACOG practice guidelines advise AGAINST routine testing for MTHFR polymorphisms due to lack of clinical utility."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": []
+      },
       "chrom": "1",
       "pos_grch37": 11856378,
       "pos_grch38": 11796321,
@@ -1414,6 +2730,7 @@
       "clinvar_significance": "Conflicting classifications of pathogenicity",
       "clinvar_condition": "Hyperhomocysteinemia biomarker / Folate metabolism modifier",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier C",
       "gnomad_af": 0.31,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 1.04,
@@ -1440,7 +2757,9 @@
           "significance": "Biomarker Modifier (Homocysteine)",
           "magnitude": 2.5,
           "repute": "Bad",
+          "coverage_state": "insufficient_evidence",
           "phenotype": "MTHFR 677TT homozygote: Thermolabile enzyme with ~30% residual activity; mild elevation of homocysteine.",
+          "user_guidance": "Practice guidelines (ACMG/ACOG) do not recommend clinical intervention or routine screening for MTHFR C677T alone.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -1449,7 +2768,9 @@
           "significance": "Mild Activity Reduction (Heterozygote)",
           "magnitude": 1.5,
           "repute": "Neutral",
+          "coverage_state": "insufficient_evidence",
           "phenotype": "MTHFR 677CT carrier: Modest enzyme thermolability (~65% residual activity); clinically unremarkable.",
+          "user_guidance": "Heterozygous carrier; benign population variant with no established standalone pathology.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -1458,7 +2779,9 @@
           "significance": "Normal Activity (677CC)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal MTHFR enzymatic activity baseline.",
+          "user_guidance": "Normal MTHFR baseline.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -1474,7 +2797,8 @@
             "GRCh38.p14": "chr1:11796321"
           },
           "alleles": "G>A",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -1483,24 +2807,28 @@
           "stars": 1,
           "status": "criteria provided, single submitter",
           "significance": "Conflicting classifications of pathogenicity",
-          "condition": "Hyperhomocysteinemia biomarker / Folate metabolism modifier"
+          "condition": "Hyperhomocysteinemia biomarker / Folate metabolism modifier",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000376585.8",
           "alphamissense_class": "ambiguous",
-          "alphamissense_score": 0.52
+          "alphamissense_score": 0.52,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P42898",
-          "plddt": 81.3
+          "plddt": 81.3,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.31,
           "pli": 0.0,
-          "loeuf": 1.04
+          "loeuf": 1.04,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1512,16 +2840,19 @@
           "subcellular": [
             "Cytoplasm",
             "Nucleus"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -1529,6 +2860,96 @@
       "rsid": "rs4988235",
       "gene": "MCM6",
       "name": "MCM6/LCT lactase persistence regulatory (c.-13910C>T)",
+      "identity": {
+        "rsid": "rs4988235",
+        "aliases": [],
+        "chrom": "2",
+        "pos_grch37": 136608646,
+        "pos_grch38": 135851076,
+        "ref": "G",
+        "alt": "A",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000002.12:g.135851076G>A",
+        "hgvs_coding": "NM_005915.6:c.-13910C>T",
+        "hgvs_protein": ""
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel.",
+        "clinvar_vcv": "VCV000018177.5",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Association",
+        "clinvar_condition": "Lactase persistence / Adult hypolactasia",
+        "clinvar_medgen": "C0268155",
+        "gnomad_af": 0.48,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.95,
+        "mane_transcript": "ENST00000262160.9",
+        "alphamissense_class": "likely_benign",
+        "alphamissense_score": 0.12,
+        "uniprot_id": "P42392",
+        "alphafold_plddt": 86.0,
+        "hpa_tissues": {
+          "small intestine": "High",
+          "duodenum": "High"
+        },
+        "hpa_subcellular": [
+          "Nucleus"
+        ],
+        "encode_ccre": "Distal Enhancer (dELS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "11788828"
+        ]
+      },
+      "interpretation": {
+        "category": "scientifically_defensible_trait",
+        "phenotype_summary": "MCM6 enhancer SNP c.-13910C>T governs adult lactase persistence versus primary adult hypolactasia.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "GG": {
+            "category": "Trait",
+            "significance": "Adult Hypolactasia (CC)",
+            "magnitude": 2.0,
+            "repute": "Neutral",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Primary adult lactose intolerance (hypolactasia): Reduced small intestine lactase after childhood.",
+            "user_guidance": "Genotype predictive of adult lactase non-persistence (lactose intolerance).",
+            "drug_response": null,
+            "is_carrier": false
+          },
+          "AG": {
+            "category": "Trait",
+            "significance": "Lactase Persistent (CT)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Lactase persistent: Sustained lactose tolerance into adulthood.",
+            "user_guidance": "Heterozygous for lactase persistence allele; tolerant of dairy lactose.",
+            "drug_response": null,
+            "is_carrier": false
+          },
+          "AA": {
+            "category": "Trait",
+            "significance": "Lactase Persistent (TT)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "Lactase persistent: Sustained lactose tolerance into adulthood.",
+            "user_guidance": "Homozygous for lactase persistence allele; tolerant of dairy lactose.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "This regulatory SNP is the predominant European lactase persistence allele; alternative alleles (e.g. -13915T>G) drive persistence in other global populations."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": []
+      },
       "chrom": "2",
       "pos_grch37": 136608646,
       "pos_grch38": 135851076,
@@ -1542,6 +2963,7 @@
       "clinvar_significance": "Association",
       "clinvar_condition": "Lactase persistence / Adult hypolactasia",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.48,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.95,
@@ -1566,7 +2988,9 @@
           "significance": "Adult Hypolactasia (CC)",
           "magnitude": 2.0,
           "repute": "Neutral",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Primary adult lactose intolerance (hypolactasia): Reduced small intestine lactase after childhood.",
+          "user_guidance": "Genotype predictive of adult lactase non-persistence (lactose intolerance).",
           "drug_response": null,
           "is_carrier": false
         },
@@ -1575,7 +2999,9 @@
           "significance": "Lactase Persistent (CT)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Lactase persistent: Sustained lactose tolerance into adulthood.",
+          "user_guidance": "Heterozygous for lactase persistence allele; tolerant of dairy lactose.",
           "drug_response": null,
           "is_carrier": false
         },
@@ -1584,7 +3010,9 @@
           "significance": "Lactase Persistent (TT)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_and_observed",
           "phenotype": "Lactase persistent: Sustained lactose tolerance into adulthood.",
+          "user_guidance": "Homozygous for lactase persistence allele; tolerant of dairy lactose.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -1600,7 +3028,8 @@
             "GRCh38.p14": "chr2:135851076"
           },
           "alleles": "G>A",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -1609,24 +3038,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Association",
-          "condition": "Lactase persistence / Adult hypolactasia"
+          "condition": "Lactase persistence / Adult hypolactasia",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000262160.9",
           "alphamissense_class": "likely_benign",
-          "alphamissense_score": 0.12
+          "alphamissense_score": 0.12,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P42392",
-          "plddt": 86.0
+          "plddt": 86.0,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.48,
           "pli": 0.0,
-          "loeuf": 0.95
+          "loeuf": 0.95,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1636,16 +3069,19 @@
           },
           "subcellular": [
             "Nucleus"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     },
@@ -1653,6 +3089,96 @@
       "rsid": "rs671",
       "gene": "ALDH2",
       "name": "ALDH2*2 (c.1510G>A, p.Glu504Lys)",
+      "identity": {
+        "rsid": "rs671",
+        "aliases": [],
+        "chrom": "12",
+        "pos_grch37": 112241766,
+        "pos_grch38": 111803962,
+        "ref": "G",
+        "alt": "A",
+        "is_palindromic": false,
+        "strand": "+",
+        "hgvs_genomic": "NC_000012.12:g.111803962G>A",
+        "hgvs_coding": "NM_000690.4:c.1510G>A",
+        "hgvs_protein": "NP_000681.2:p.Glu504Lys"
+      },
+      "evidence": {
+        "tier": "Tier A",
+        "tier_rationale": "Reviewed by ClinVar Expert Panel.",
+        "clinvar_vcv": "VCV000018390.6",
+        "clinvar_stars": 3,
+        "clinvar_status": "reviewed by expert panel",
+        "clinvar_significance": "Risk factor",
+        "clinvar_condition": "Alcohol sensitivity / Esophageal cancer susceptibility",
+        "clinvar_medgen": "C0268537",
+        "gnomad_af": 0.045,
+        "gnomad_pli": 0.0,
+        "gnomad_loeuf": 0.82,
+        "mane_transcript": "ENST00000261700.8",
+        "alphamissense_class": "likely_pathogenic",
+        "alphamissense_score": 0.88,
+        "uniprot_id": "P05091",
+        "alphafold_plddt": 89.6,
+        "hpa_tissues": {
+          "liver": "High",
+          "kidney": "High"
+        },
+        "hpa_subcellular": [
+          "Mitochondrial matrix"
+        ],
+        "encode_ccre": "Promoter-like (PLS)",
+        "cpic_level": null,
+        "cpic_drug": null,
+        "literature_pmids": [
+          "19234110"
+        ]
+      },
+      "interpretation": {
+        "category": "medically_relevant_risk",
+        "phenotype_summary": "ALDH2*2 Glu504Lys acts as a dominant-negative mutant, severely inactivating mitochondrial acetaldehyde dehydrogenase.",
+        "acmg_sf_actionable": false,
+        "genotypes": {
+          "AA": {
+            "category": "Risk Factor",
+            "significance": "Severe ALDH2 Deficiency (*2/*2)",
+            "magnitude": 4.0,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "ALDH2*2 homozygote: Near-complete loss of acetaldehyde dehydrogenase activity; severe flushing and toxicity.",
+            "user_guidance": "Marked acetaldehyde toxicity upon alcohol ingestion. Strict avoidance of alcohol recommended to minimize esophageal cancer risk.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "AG": {
+            "category": "Risk Factor",
+            "significance": "Partial ALDH2 Deficiency (*1/*2)",
+            "magnitude": 2.5,
+            "repute": "Bad",
+            "coverage_state": "supported_and_observed",
+            "phenotype": "ALDH2*2 heterozygote: Facial flushing, nausea, and tachycardia with alcohol; elevated esophageal cancer risk if consuming alcohol.",
+            "user_guidance": "Substantial facial flushing and tachycardia on alcohol ingestion. Moderate-to-high esophageal cancer risk multiplier.",
+            "drug_response": null,
+            "is_carrier": true
+          },
+          "GG": {
+            "category": "Trait",
+            "significance": "Normal ALDH2 Activity (*1/*1)",
+            "magnitude": 1.0,
+            "repute": "Good",
+            "coverage_state": "supported_not_observed",
+            "phenotype": "Normal acetaldehyde dehydrogenase metabolism.",
+            "user_guidance": "Normal acetaldehyde metabolism baseline.",
+            "drug_response": null,
+            "is_carrier": false
+          }
+        },
+        "caveats": [
+          "ALDH2*2 interacts strongly with alcohol intake: cancer risk elevation is only manifested upon sustained alcohol exposure."
+        ],
+        "refusal_notices": [],
+        "multi_locus_dependencies": []
+      },
       "chrom": "12",
       "pos_grch37": 112241766,
       "pos_grch38": 111803962,
@@ -1666,6 +3192,7 @@
       "clinvar_significance": "Risk factor",
       "clinvar_condition": "Alcohol sensitivity / Esophageal cancer susceptibility",
       "acmg_sf_actionable": false,
+      "evidence_tier": "Tier A",
       "gnomad_af": 0.045,
       "gnomad_pli": 0.0,
       "gnomad_loeuf": 0.82,
@@ -1690,7 +3217,9 @@
           "significance": "Severe ALDH2 Deficiency (*2/*2)",
           "magnitude": 4.0,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "ALDH2*2 homozygote: Near-complete loss of acetaldehyde dehydrogenase activity; severe flushing and toxicity.",
+          "user_guidance": "Marked acetaldehyde toxicity upon alcohol ingestion. Strict avoidance of alcohol recommended to minimize esophageal cancer risk.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -1699,7 +3228,9 @@
           "significance": "Partial ALDH2 Deficiency (*1/*2)",
           "magnitude": 2.5,
           "repute": "Bad",
+          "coverage_state": "supported_and_observed",
           "phenotype": "ALDH2*2 heterozygote: Facial flushing, nausea, and tachycardia with alcohol; elevated esophageal cancer risk if consuming alcohol.",
+          "user_guidance": "Substantial facial flushing and tachycardia on alcohol ingestion. Moderate-to-high esophageal cancer risk multiplier.",
           "drug_response": null,
           "is_carrier": true
         },
@@ -1708,7 +3239,9 @@
           "significance": "Normal ALDH2 Activity (*1/*1)",
           "magnitude": 1.0,
           "repute": "Good",
+          "coverage_state": "supported_not_observed",
           "phenotype": "Normal acetaldehyde dehydrogenase metabolism.",
+          "user_guidance": "Normal acetaldehyde metabolism baseline.",
           "drug_response": null,
           "is_carrier": false
         }
@@ -1724,7 +3257,8 @@
             "GRCh38.p14": "chr12:111803962"
           },
           "alleles": "G>A",
-          "is_palindromic": false
+          "is_palindromic": false,
+          "license": "Public Domain (US Government / NLM)"
         },
         "clinvar": {
           "registry": "NCBI ClinVar",
@@ -1733,24 +3267,28 @@
           "stars": 3,
           "status": "reviewed by expert panel",
           "significance": "Risk factor",
-          "condition": "Alcohol sensitivity / Esophageal cancer susceptibility"
+          "condition": "Alcohol sensitivity / Esophageal cancer susceptibility",
+          "license": "Public Domain / Open Data (NCBI)"
         },
         "ensembl_mane": {
           "registry": "Ensembl Release 112 / MANE v1.3",
           "transcript": "ENST00000261700.8",
           "alphamissense_class": "likely_pathogenic",
-          "alphamissense_score": 0.88
+          "alphamissense_score": 0.88,
+          "license": "EMBL-EBI Open Terms of Use"
         },
         "alphafold": {
           "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
           "uniprot": "P05091",
-          "plddt": 89.6
+          "plddt": 89.6,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         },
         "gnomad": {
           "registry": "gnomAD v4.1.0",
           "exome_af": 0.045,
           "pli": 0.0,
-          "loeuf": 0.82
+          "loeuf": 0.82,
+          "license": "Open Access (Broad Institute, ODC-ODbL)"
         },
         "hpa": {
           "registry": "Human Protein Atlas v23.0",
@@ -1760,16 +3298,19 @@
           },
           "subcellular": [
             "Mitochondrial matrix"
-          ]
+          ],
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
         },
         "acmg_sf_v3_2": {
           "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-          "actionable": false
+          "actionable": false,
+          "license": "ACMG Educational & Clinical Practice Terms"
         },
         "cpic": {
           "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
           "level": null,
-          "drug": null
+          "drug": null,
+          "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
         }
       }
     }
@@ -1786,7 +3327,8 @@
           "GRCh38.p14": "chr19:44908684"
         },
         "alleles": "T>C",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -1795,24 +3337,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Risk factor",
-        "condition": "Late-onset Alzheimer disease"
+        "condition": "Late-onset Alzheimer disease",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000252486.9",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.78
+        "alphamissense_score": 0.78,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P02649",
-        "plddt": 75.5
+        "plddt": 75.5,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.145,
         "pli": 0.0,
-        "loeuf": 1.12
+        "loeuf": 1.12,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -1824,16 +3370,19 @@
         "subcellular": [
           "Secreted",
           "Endoplasmic reticulum"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -1847,7 +3396,8 @@
           "GRCh38.p14": "chr19:44908822"
         },
         "alleles": "C>T",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -1856,24 +3406,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Protective / Risk factor",
-        "condition": "Hyperlipoproteinemia, type III / Alzheimer disease risk reduction"
+        "condition": "Hyperlipoproteinemia, type III / Alzheimer disease risk reduction",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000252486.9",
         "alphamissense_class": "ambiguous",
-        "alphamissense_score": 0.45
+        "alphamissense_score": 0.45,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P02649",
-        "plddt": 75.5
+        "plddt": 75.5,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.078,
         "pli": 0.0,
-        "loeuf": 1.12
+        "loeuf": 1.12,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -1883,16 +3437,19 @@
         },
         "subcellular": [
           "Secreted"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -1906,7 +3463,8 @@
           "GRCh38.p14": "chr6:26092913"
         },
         "alleles": "G>A",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -1915,24 +3473,28 @@
         "stars": 4,
         "status": "practice guideline",
         "significance": "Pathogenic",
-        "condition": "Hemochromatosis type 1"
+        "condition": "Hemochromatosis type 1",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000357618.8",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.89
+        "alphamissense_score": 0.89,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P55899",
-        "plddt": 86.4
+        "plddt": 86.4,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.062,
         "pli": 0.0,
-        "loeuf": 0.94
+        "loeuf": 0.94,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -1944,16 +3506,19 @@
         "subcellular": [
           "Plasma membrane",
           "Endoplasmic reticulum"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": true
+        "actionable": true,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -1967,7 +3532,8 @@
           "GRCh38.p14": "chr6:26091179"
         },
         "alleles": "C>G",
-        "is_palindromic": true
+        "is_palindromic": true,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -1976,24 +3542,28 @@
         "stars": 2,
         "status": "criteria provided, multiple submitters, no conflicts",
         "significance": "Risk factor",
-        "condition": "Hemochromatosis modifier"
+        "condition": "Hemochromatosis modifier",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000357618.8",
         "alphamissense_class": "ambiguous",
-        "alphamissense_score": 0.42
+        "alphamissense_score": 0.42,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P55899",
-        "plddt": 86.4
+        "plddt": 86.4,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.141,
         "pli": 0.0,
-        "loeuf": 0.94
+        "loeuf": 0.94,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2003,16 +3573,19 @@
         },
         "subcellular": [
           "Plasma membrane"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": true
+        "actionable": true,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2026,7 +3599,8 @@
           "GRCh38.p14": "chr1:169549811"
         },
         "alleles": "C>T",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2035,24 +3609,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Pathogenic",
-        "condition": "Thrombophilia due to activated protein C resistance"
+        "condition": "Thrombophilia due to activated protein C resistance",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000367122.9",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.83
+        "alphamissense_score": 0.83,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P12259",
-        "plddt": 82.1
+        "plddt": 82.1,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.024,
         "pli": 0.0,
-        "loeuf": 0.81
+        "loeuf": 0.81,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2062,16 +3640,19 @@
         },
         "subcellular": [
           "Secreted"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2085,7 +3666,8 @@
           "GRCh38.p14": "chr11:46739905"
         },
         "alleles": "G>A",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2094,24 +3676,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Pathogenic",
-        "condition": "Thrombophilia due to prothrombin deficiency or elevated levels"
+        "condition": "Thrombophilia due to elevated prothrombin levels",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000311910.8",
         "alphamissense_class": "ambiguous",
-        "alphamissense_score": 0.35
+        "alphamissense_score": 0.35,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P00734",
-        "plddt": 89.2
+        "plddt": 89.2,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.011,
         "pli": 0.0,
-        "loeuf": 0.72
+        "loeuf": 0.72,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2121,16 +3707,19 @@
         },
         "subcellular": [
           "Secreted"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2144,7 +3733,8 @@
           "GRCh38.p14": "chr7:117559590"
         },
         "alleles": "CTT>C",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2153,24 +3743,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Pathogenic",
-        "condition": "Cystic fibrosis / Hereditary pancreatitis"
+        "condition": "Cystic fibrosis / Hereditary pancreatitis",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000003084.11",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.95
+        "alphamissense_score": 0.95,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P13569",
-        "plddt": 84.8
+        "plddt": 84.8,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.014,
         "pli": 0.0,
-        "loeuf": 0.63
+        "loeuf": 0.63,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2182,16 +3776,19 @@
         "subcellular": [
           "Plasma membrane",
           "Apical membrane"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": "Level A",
-        "drug": "Ivacaftor / Elexacaftor"
+        "drug": "Ivacaftor / Elexacaftor",
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2205,7 +3802,8 @@
           "GRCh38.p14": "chr10:94781859"
         },
         "alleles": "G>A",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2214,24 +3812,28 @@
         "stars": 4,
         "status": "practice guideline",
         "significance": "Drug response",
-        "condition": "Clopidogrel resistance / CYP2C19 poor metabolizer"
+        "condition": "Clopidogrel resistance / CYP2C19 poor metabolizer",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000371321.9",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.91
+        "alphamissense_score": 0.91,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P33261",
-        "plddt": 85.0
+        "plddt": 85.0,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.15,
         "pli": 0.0,
-        "loeuf": 1.25
+        "loeuf": 1.25,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2241,16 +3843,19 @@
         },
         "subcellular": [
           "Endoplasmic reticulum membrane"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": "Level A",
-        "drug": "Clopidogrel / Omeprazole / Escitalopram"
+        "drug": "Clopidogrel / Omeprazole / Escitalopram",
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2264,7 +3869,8 @@
           "GRCh38.p14": "chr16:31103689"
         },
         "alleles": "C>T",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2273,24 +3879,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Drug response",
-        "condition": "Warfarin sensitivity / dosage requirement"
+        "condition": "Warfarin sensitivity / dosage requirement",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000394985.8",
         "alphamissense_class": "likely_benign",
-        "alphamissense_score": 0.18
+        "alphamissense_score": 0.18,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "Q9BQB6",
-        "plddt": 79.2
+        "plddt": 79.2,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.39,
         "pli": 0.0,
-        "loeuf": 0.88
+        "loeuf": 0.88,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2300,16 +3910,19 @@
         },
         "subcellular": [
           "Endoplasmic reticulum membrane"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": "Level A",
-        "drug": "Warfarin"
+        "drug": "Warfarin",
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2323,7 +3936,8 @@
           "GRCh38.p14": "chr12:21178615"
         },
         "alleles": "T>C",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2332,24 +3946,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Drug response",
-        "condition": "Simvastatin-induced myopathy / Statin-related muscle symptoms"
+        "condition": "Simvastatin-induced myopathy / Statin-related muscle symptoms",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000499066.2",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.74
+        "alphamissense_score": 0.74,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "Q9Y6L6",
-        "plddt": 83.4
+        "plddt": 83.4,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.16,
         "pli": 0.0,
-        "loeuf": 1.15
+        "loeuf": 1.15,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2358,16 +3976,19 @@
         },
         "subcellular": [
           "Basolateral plasma membrane"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": "Level A",
-        "drug": "Simvastatin / Atorvastatin / Rosuvastatin"
+        "drug": "Simvastatin / Atorvastatin / Rosuvastatin",
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2381,7 +4002,8 @@
           "GRCh38.p14": "chr1:97450058"
         },
         "alleles": "C>T",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2390,24 +4012,28 @@
         "stars": 4,
         "status": "practice guideline",
         "significance": "Drug response",
-        "condition": "Fluorouracil toxicity / DPD deficiency"
+        "condition": "Fluorouracil toxicity / DPD deficiency",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000370192.8",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.94
+        "alphamissense_score": 0.94,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "Q12882",
-        "plddt": 88.5
+        "plddt": 88.5,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.005,
         "pli": 0.0,
-        "loeuf": 0.7
+        "loeuf": 0.7,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2417,16 +4043,19 @@
         },
         "subcellular": [
           "Cytoplasm"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": "Level A",
-        "drug": "5-Fluorouracil / Capecitabine"
+        "drug": "5-Fluorouracil / Capecitabine",
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2440,7 +4069,8 @@
           "GRCh38.p14": "chr1:11796321"
         },
         "alleles": "G>A",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2449,24 +4079,28 @@
         "stars": 1,
         "status": "criteria provided, single submitter",
         "significance": "Conflicting classifications of pathogenicity",
-        "condition": "Hyperhomocysteinemia biomarker / Folate metabolism modifier"
+        "condition": "Hyperhomocysteinemia biomarker / Folate metabolism modifier",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000376585.8",
         "alphamissense_class": "ambiguous",
-        "alphamissense_score": 0.52
+        "alphamissense_score": 0.52,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P42898",
-        "plddt": 81.3
+        "plddt": 81.3,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.31,
         "pli": 0.0,
-        "loeuf": 1.04
+        "loeuf": 1.04,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2478,16 +4112,19 @@
         "subcellular": [
           "Cytoplasm",
           "Nucleus"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2501,7 +4138,8 @@
           "GRCh38.p14": "chr2:135851076"
         },
         "alleles": "G>A",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2510,24 +4148,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Association",
-        "condition": "Lactase persistence / Adult hypolactasia"
+        "condition": "Lactase persistence / Adult hypolactasia",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000262160.9",
         "alphamissense_class": "likely_benign",
-        "alphamissense_score": 0.12
+        "alphamissense_score": 0.12,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P42392",
-        "plddt": 86.0
+        "plddt": 86.0,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.48,
         "pli": 0.0,
-        "loeuf": 0.95
+        "loeuf": 0.95,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2537,16 +4179,19 @@
         },
         "subcellular": [
           "Nucleus"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     },
     {
@@ -2560,7 +4205,8 @@
           "GRCh38.p14": "chr12:111803962"
         },
         "alleles": "G>A",
-        "is_palindromic": false
+        "is_palindromic": false,
+        "license": "Public Domain (US Government / NLM)"
       },
       "clinvar": {
         "registry": "NCBI ClinVar",
@@ -2569,24 +4215,28 @@
         "stars": 3,
         "status": "reviewed by expert panel",
         "significance": "Risk factor",
-        "condition": "Alcohol sensitivity / Esophageal cancer susceptibility"
+        "condition": "Alcohol sensitivity / Esophageal cancer susceptibility",
+        "license": "Public Domain / Open Data (NCBI)"
       },
       "ensembl_mane": {
         "registry": "Ensembl Release 112 / MANE v1.3",
         "transcript": "ENST00000261700.8",
         "alphamissense_class": "likely_pathogenic",
-        "alphamissense_score": 0.88
+        "alphamissense_score": 0.88,
+        "license": "EMBL-EBI Open Terms of Use"
       },
       "alphafold": {
         "registry": "AlphaFold Structure DB v4 (EBI/DeepMind)",
         "uniprot": "P05091",
-        "plddt": 89.6
+        "plddt": 89.6,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       },
       "gnomad": {
         "registry": "gnomAD v4.1.0",
         "exome_af": 0.045,
         "pli": 0.0,
-        "loeuf": 0.82
+        "loeuf": 0.82,
+        "license": "Open Access (Broad Institute, ODC-ODbL)"
       },
       "hpa": {
         "registry": "Human Protein Atlas v23.0",
@@ -2596,16 +4246,19 @@
         },
         "subcellular": [
           "Mitochondrial matrix"
-        ]
+        ],
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)"
       },
       "acmg_sf_v3_2": {
         "registry": "ACMG Secondary Findings v3.2 (81 genes)",
-        "actionable": false
+        "actionable": false,
+        "license": "ACMG Educational & Clinical Practice Terms"
       },
       "cpic": {
         "registry": "CPIC Clinical Pharmacogenetics Implementation Consortium",
         "level": null,
-        "drug": null
+        "drug": null,
+        "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)"
       }
     }
   ]

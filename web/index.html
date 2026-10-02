@@ -131,6 +131,17 @@
     <!-- Results Section (Populated dynamically) -->
     <section id="results-section" class="hidden space-y-6">
       
+      <!-- Cardinal Scientific Scope & Guardrail Banner -->
+      <div id="coverage-guardrail-banner" class="p-4 rounded-sm bg-amber-50/90 dark:bg-amber-950/40 border-l-4 border-amber-500 border border-amber-200 dark:border-amber-900/60 shadow-sm text-xs">
+        <div class="flex items-center space-x-2 font-bold font-mono uppercase tracking-wider text-[11px] text-amber-800 dark:text-amber-300">
+          <span>⚠️</span>
+          <span>Scientific Scope & Guardrail: Absence of a Finding ≠ Absence of Risk</span>
+        </div>
+        <p class="mt-1 leading-relaxed text-slate-800 dark:text-slate-200 font-serif">
+          GenomePulse tests only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs) or structural repeats. <strong>Absence of a finding must never imply absence of genetic risk.</strong>
+        </p>
+      </div>
+
       <!-- Sample QC Metrics Bar -->
       <div class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
@@ -194,6 +205,45 @@
             <div class="text-xs text-red-700 dark:text-red-300 font-semibold font-mono">Elevated Risk</div>
             <div id="count-risk" class="text-2xl font-black text-red-600 dark:text-red-400 mt-1 font-mono">0</div>
             <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Susceptibility loci</div>
+          </div>
+        </div>
+
+        <!-- 5-State Coverage Taxonomy Counters -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-800/80">
+          <div class="p-3 rounded-sm bg-sky-50/70 dark:bg-slate-900/40 border border-sky-200 dark:border-sky-500/20">
+            <div class="text-[11px] text-sky-700 dark:text-sky-300 font-mono font-semibold flex items-center justify-between">
+              <span>Observed Findings</span>
+              <span class="text-[9px] uppercase px-1 rounded bg-sky-200 dark:bg-sky-900/60 font-bold">State 1</span>
+            </div>
+            <div id="count-state-observed" class="text-xl font-bold text-sky-600 dark:text-sky-400 mt-1 font-mono">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Supported & observed</div>
+          </div>
+
+          <div class="p-3 rounded-sm bg-emerald-50/70 dark:bg-slate-900/40 border border-emerald-200 dark:border-emerald-500/20">
+            <div class="text-[11px] text-emerald-700 dark:text-emerald-300 font-mono font-semibold flex items-center justify-between">
+              <span>Tested Wild-Type</span>
+              <span class="text-[9px] uppercase px-1 rounded bg-emerald-200 dark:bg-emerald-900/60 font-bold">State 2</span>
+            </div>
+            <div id="count-state-negative" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Supported, not observed</div>
+          </div>
+
+          <div class="p-3 rounded-sm bg-amber-50/70 dark:bg-slate-900/40 border border-amber-200 dark:border-amber-500/20">
+            <div class="text-[11px] text-amber-700 dark:text-amber-300 font-mono font-semibold flex items-center justify-between">
+              <span>Microarray Gaps</span>
+              <span class="text-[9px] uppercase px-1 rounded bg-amber-200 dark:bg-amber-900/60 font-bold">State 3</span>
+            </div>
+            <div id="count-state-gaps" class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1 font-mono">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Not tested by this chip</div>
+          </div>
+
+          <div class="p-3 rounded-sm bg-slate-100/70 dark:bg-slate-900/40 border border-slate-300 dark:border-slate-700/50">
+            <div class="text-[11px] text-slate-600 dark:text-slate-400 font-mono font-semibold flex items-center justify-between">
+              <span>Outside Scope</span>
+              <span class="text-[9px] uppercase px-1 rounded bg-slate-200 dark:bg-slate-800 font-bold">State 4</span>
+            </div>
+            <div id="count-state-outside" class="text-xl font-bold text-slate-700 dark:text-slate-300 mt-1 font-mono">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Array markers uncurated</div>
           </div>
         </div>
       </div>
@@ -280,10 +330,19 @@
       <!-- Filter Tabs & Actions Bar -->
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         
-        <!-- Category Filters -->
+        <!-- Category & Coverage State Filters -->
         <div class="flex items-center space-x-1 overflow-x-auto p-1 bg-slate-100 dark:bg-slate-900/80 rounded-sm border border-slate-300 dark:border-slate-800 text-xs font-mono">
           <button data-filter="all" class="px-3 py-1.5 rounded-sm font-medium transition-colors tab-active bg-sky-600 text-white dark:bg-sky-500/20 dark:text-sky-300 border border-sky-600 dark:border-sky-400">
-            All Findings
+            Observed Findings
+          </button>
+          <button data-filter="negative" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+            Tested Wild-Type (State 2)
+          </button>
+          <button data-filter="gaps" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+            Array Gaps (State 3)
+          </button>
+          <button data-filter="insufficient" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+            Conflicting Evidence (State 5)
           </button>
           <button data-filter="carrier" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
             Carrier Status
@@ -309,7 +368,7 @@
             <span class="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
           </div>
 
-          <div id="kb-provenance-badge" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm text-[11px] font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700" title="Knowledge Base Pinned: ClinVar 2024-06 · dbSNP 156 · 60 Curated Loci">
+          <div id="kb-provenance-badge" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm text-[11px] font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700" title="Knowledge Base: ClinVar 2024-06 · dbSNP 156 · 3-Layer Provenance">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             <span>KB: ClinVar 2024-06 · Offline</span>
           </div>
@@ -330,7 +389,7 @@
       <div class="glass-panel overflow-hidden bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-sm">
         <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/40">
           <div id="showing-count" class="text-xs text-slate-600 dark:text-slate-400 font-mono">Showing 0 clinical variants</div>
-          <div class="text-[11px] text-slate-500">Click any row to inspect Proteomics & Clinical details</div>
+          <div class="text-[11px] text-slate-500">Click any row to inspect Proteomics, Evidence Tier & Provenance</div>
         </div>
 
         <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
@@ -340,10 +399,11 @@
                 <th class="py-3 px-4">rsID</th>
                 <th class="py-3 px-4">Gene</th>
                 <th class="py-3 px-4">Genotype</th>
-                <th class="py-3 px-4">Category</th>
+                <th class="py-3 px-4">Coverage State</th>
+                <th class="py-3 px-4">Tier / Category</th>
                 <th class="py-3 px-4">ClinVar</th>
                 <th class="py-3 px-4">Magnitude</th>
-                <th class="py-3 px-4">Condition / Phenotype</th>
+                <th class="py-3 px-4">Clinical Guidance & Phenotype</th>
               </tr>
             </thead>
             <tbody id="variants-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/50">
@@ -368,6 +428,10 @@
             <span id="drawer-gene" class="text-lg font-bold text-slate-900 dark:text-slate-200">Gene</span>
           </div>
           <p id="drawer-coord" class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">chr:pos</p>
+          <div class="flex items-center space-x-2 mt-2">
+            <span id="drawer-tier-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30">Tier A</span>
+            <span id="drawer-coverage-state-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700">Supported & Observed</span>
+          </div>
         </div>
         <button id="btn-close-drawer" type="button" class="btn btn-sm btn-circle btn-ghost text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
           ✕
@@ -391,6 +455,24 @@
           <p id="drawer-drug-text" class="text-xs text-purple-900 dark:text-purple-200 font-semibold mt-0.5">Drug Alert</p>
           <p class="text-[11px] text-purple-800 dark:text-purple-300/80 mt-1 italic">Interrogated single SNP only. Full CPIC metabolizer assignment requires multi-locus star allele diplotyping (*3, *17, etc.) not genotyped on this single-marker array.</p>
         </div>
+      </div>
+
+      <!-- Star-Allele Refusal & Incomplete Haplotype Notice Box -->
+      <div id="drawer-refusal-box" class="hidden p-3.5 rounded-sm bg-purple-50/80 dark:bg-purple-950/40 border-l-4 border-purple-600 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
+        <div class="font-bold text-purple-900 dark:text-purple-200 flex items-center space-x-1.5 font-mono uppercase tracking-wider text-[11px]">
+          <span>🚫</span>
+          <span>Incomplete Star-Allele Inference Refusal</span>
+        </div>
+        <p id="drawer-refusal-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-serif">
+          Incomplete star-allele coverage refusal: Interrogating an isolated SNP cannot rule out other active alleles. A full metabolizer phenotype cannot be inferred.
+        </p>
+      </div>
+
+      <!-- General Scientific Caveats Box -->
+      <div id="drawer-caveats-box" class="hidden p-3 rounded-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+        <div class="font-bold text-slate-800 dark:text-slate-200 uppercase font-mono text-[10px] tracking-wider">Scientific Caveats & Scope</div>
+        <ul id="drawer-caveats-list" class="list-disc list-inside space-y-0.5 text-slate-600 dark:text-slate-400">
+        </ul>
       </div>
 
       <!-- Variant Metrics Grid -->
