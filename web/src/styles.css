@@ -1,0 +1,242 @@
+/* GenomePulse - Modern Biotech Design System & Custom Tokens */
+/* Architecture: Sharp-Cornered Clinical Precision · Light Mode Foundation */
+
+:root {
+  /* Light Mode (Clinical Laboratory Baseline) */
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --border-subtle: #cbd5e1;
+  --border-strong: #94a3b8;
+  --header-bg: rgba(255, 255, 255, 0.98);
+  --header-border: #e2e8f0;
+  
+  /* Brand Clinical Accents */
+  --accent-cyan: #0284c7;
+  --accent-emerald: #059669;
+  --accent-purple: #7c3aed;
+  --accent-ruby: #e11d48;
+  --accent-amber: #d97706;
+
+  /* Badges - Light */
+  --badge-pathogenic-bg: #ffe4e6;
+  --badge-pathogenic-text: #9f1239;
+  --badge-pathogenic-border: #f43f5e;
+
+  --badge-carrier-bg: #fef3c7;
+  --badge-carrier-text: #92400e;
+  --badge-carrier-border: #f59e0b;
+
+  --badge-pgx-bg: #f3e8ff;
+  --badge-pgx-text: #6b21a8;
+  --badge-pgx-border: #a855f7;
+
+  --badge-risk-bg: #fee2e2;
+  --badge-risk-text: #991b1b;
+  --badge-risk-border: #ef4444;
+
+  --badge-benign-bg: #d1fae5;
+  --badge-benign-text: #065f46;
+  --badge-benign-border: #10b981;
+}
+
+[data-theme="dark"] {
+  /* Dark Mode (Biotech HUD) */
+  --bg-canvas: #070b14;
+  --bg-surface: rgba(15, 23, 42, 0.75);
+  --bg-surface-elevated: #0f172a;
+  --bg-surface-hover: rgba(30, 41, 59, 0.85);
+  --text-main: #f1f5f9;
+  --text-muted: #cbd5e1;
+  --text-subtle: #94a3b8;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.25);
+  --header-bg: rgba(7, 11, 20, 0.88);
+  --header-border: rgba(255, 255, 255, 0.1);
+
+  /* Brand Clinical Accents */
+  --accent-cyan: #38bdf8;
+  --accent-emerald: #10b981;
+  --accent-purple: #a855f7;
+  --accent-ruby: #f43f5e;
+  --accent-amber: #f59e0b;
+
+  /* Badges - Dark */
+  --badge-pathogenic-bg: rgba(244, 63, 94, 0.18);
+  --badge-pathogenic-text: #fda4af;
+  --badge-pathogenic-border: rgba(244, 63, 94, 0.4);
+
+  --badge-carrier-bg: rgba(245, 158, 11, 0.18);
+  --badge-carrier-text: #fcd34d;
+  --badge-carrier-border: rgba(245, 158, 11, 0.4);
+
+  --badge-pgx-bg: rgba(168, 85, 247, 0.18);
+  --badge-pgx-text: #d8b4fe;
+  --badge-pgx-border: rgba(168, 85, 247, 0.4);
+
+  --badge-risk-bg: rgba(239, 68, 68, 0.18);
+  --badge-risk-text: #fca5a5;
+  --badge-risk-border: rgba(239, 68, 68, 0.4);
+
+  --badge-benign-bg: rgba(16, 185, 129, 0.18);
+  --badge-benign-text: #6ee7b7;
+  --badge-benign-border: rgba(16, 185, 129, 0.4);
+  /* Impeccable Dynamic Typography Tokens */
+  --font-sans: 'gotham', 'nimbus-sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'attribute-mono', 'ballinger-mono', 'azo-mono', monospace;
+  --font-serif: 'orpheuspro', 'archer-pro', Georgia, serif;
+  --font-display: 'neuzeit-grotesk-condensed', 'gotham', sans-serif;
+  --editorial-size: 14.5px;
+  --mono-spacing: 0em;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+code, kbd, samp, pre, .font-mono {
+  font-family: var(--font-mono) !important;
+  letter-spacing: var(--mono-spacing);
+}
+
+.font-serif, .font-editorial {
+  font-family: var(--font-serif) !important;
+  font-size: var(--editorial-size);
+}
+
+.font-display {
+  font-family: var(--font-display) !important;
+}
+
+/* Sharp-Cornered Clinical Architecture */
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.glass-panel:hover {
+  border-color: var(--border-strong);
+}
+
+.glass-header {
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--header-border);
+}
+
+/* Strict Sharp Corners for Clinical Precision */
+.rounded-none,
+.rounded-sm,
+.btn,
+.input,
+.badge,
+.tab,
+table,
+th,
+td,
+.dropdown-content {
+  border-radius: 2px !important;
+}
+
+/* Crisp Category Badges */
+.badge-pathogenic {
+  background: var(--badge-pathogenic-bg);
+  color: var(--badge-pathogenic-text);
+  border: 1px solid var(--badge-pathogenic-border);
+}
+
+.badge-carrier {
+  background: var(--badge-carrier-bg);
+  color: var(--badge-carrier-text);
+  border: 1px solid var(--badge-carrier-border);
+}
+
+.badge-pgx {
+  background: var(--badge-pgx-bg);
+  color: var(--badge-pgx-text);
+  border: 1px solid var(--badge-pgx-border);
+}
+
+.badge-risk {
+  background: var(--badge-risk-bg);
+  color: var(--badge-risk-text);
+  border: 1px solid var(--badge-risk-border);
+}
+
+.badge-benign {
+  background: var(--badge-benign-bg);
+  color: var(--badge-benign-text);
+  border: 1px solid var(--badge-benign-border);
+}
+
+/* Custom Sharp Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+/* Subtle Clinical Grid */
+.dna-bg-grid {
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+[data-theme="dark"] .dna-bg-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Interactive Table Highlights */
+tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+tbody tr:hover {
+  background-color: var(--bg-surface-hover) !important;
+}
+
+/* Drawer in Light Mode */
+#variant-drawer {
+  background-color: var(--bg-surface-elevated);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}

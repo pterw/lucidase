@@ -1,0 +1,18 @@
+{
+  "assembly_name": "GRCh38",
+  "start": 44903787,
+  "description": "apolipoprotein E [Source:HGNC Symbol;Acc:HGNC:613]",
+  "db_type": "core",
+  "seq_region_name": "19",
+  "biotype": "protein_coding",
+  "version": 12,
+  "source": "ensembl_havana",
+  "species": "human",
+  "end": 44909396,
+  "canonical_transcript": "ENST00000252486.9",
+  "logic_name": "ensembl_havana_gene_homo_sapiens",
+  "strand": 1,
+  "object_type": "Gene",
+  "id": "ENSG00000130203",
+  "display_name": "APOE"
+}

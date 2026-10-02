@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "GenomePulse Font Studio & Typography Companion",
+  "version": "1.0.0",
+  "description": "Interactive Adobe Typekit typography switcher and design companion for GenomePulse and clinical web applications.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "GenomePulse Font Studio"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

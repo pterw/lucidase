@@ -1,0 +1,2 @@
+AlphaFold Database Terms: https://alphafold.ebi.ac.uk/
+Notified at: 2026-10-02T11:20:00.000000

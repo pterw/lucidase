@@ -1,0 +1,3060 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Font Kit Studio v0.1.1</title>
+
+<!--
+  TYPEKIT / ADOBE FONTS
+  ---------------------
+  Option A: paste your kit ID into the field at the top of the page.
+  Option B: replace YOUR_KIT_ID below and uncomment the line.
+
+  <link rel="stylesheet" href="https://use.typekit.net/YOUR_KIT_ID.css">
+-->
+
+<style>
+:root {
+  --bg: #f4f1e9;
+  --panel: #fffdf8;
+  --ink: #181714;
+  --muted: #6f6b63;
+  --line: #d8d1c4;
+  --accent: #5a3aa7;
+  --chip: #ece7dc;
+  --shadow: 0 8px 30px rgba(38, 30, 15, .07);
+  --sample-size: 42px;
+}
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.45;
+}
+body.dark {
+  --bg: #11110f;
+  --panel: #191917;
+  --ink: #f0ede5;
+  --muted: #a7a198;
+  --line: #34332e;
+  --accent: #b99cff;
+  --chip: #272622;
+  --shadow: none;
+  color-scheme: dark;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+
+.wrap {
+  width: min(1480px, calc(100% - 32px));
+  margin: 0 auto;
+}
+header {
+  padding: 36px 0 22px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+h1 {
+  margin: 0;
+  max-width: 900px;
+  font-size: clamp(34px, 5vw, 68px);
+  line-height: .98;
+  letter-spacing: -.045em;
+  font-weight: 680;
+}
+.deck {
+  max-width: 860px;
+  margin: 17px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 14px 0;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.controls-inner {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.25fr) minmax(180px, .8fr) auto auto;
+  gap: 10px;
+  align-items: end;
+}
+.field { min-width: 0; }
+.field label {
+  display: block;
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.input-row {
+  display: flex;
+  gap: 6px;
+}
+input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  outline: none;
+}
+input[type="text"]:focus { border-color: var(--accent); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.btn {
+  padding: 10px 12px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--accent); }
+.status {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.filters {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 18px 0 8px;
+}
+.filter {
+  padding: 7px 10px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+}
+.filter.active {
+  color: var(--panel);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+body.dark .filter.active { color: #111; background: #f1eee6; border-color: #f1eee6; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 12px 0 48px;
+}
+.card {
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 13px 14px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.family {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 760;
+  letter-spacing: -.01em;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+.tag, .style-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1;
+}
+.tag {
+  padding: 4px 6px;
+  color: var(--muted);
+  background: var(--chip);
+  border-color: transparent;
+}
+.styles {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  flex-wrap: wrap;
+  max-width: 260px;
+}
+.style-chip {
+  padding: 5px 7px;
+  color: var(--muted);
+  background: transparent;
+}
+.style-chip.active {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.sample-wrap { padding: 17px 15px 15px; }
+.big-sample {
+  margin: 0;
+  font-size: var(--sample-size);
+  line-height: 1.02;
+  letter-spacing: -.025em;
+  overflow-wrap: anywhere;
+}
+.body-sample {
+  max-width: 70ch;
+  margin: 17px 0 0;
+  font-size: 16px;
+  line-height: 1.48;
+}
+.glyphs {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.card-foot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 11px 14px 13px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 93%, var(--bg));
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+.note { max-width: 68ch; }
+.css {
+  max-width: 330px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-align: right;
+}
+.var-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.var-control label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font: 11px/1.2 system-ui, sans-serif;
+}
+.var-control input { margin-top: 6px; }
+.audit {
+  margin: 0 0 52px;
+  padding: 17px 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 13px;
+}
+.audit strong { color: var(--ink); }
+.audit code {
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+footer {
+  padding: 0 0 40px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.hidden { display: none !important; }
+
+@media (max-width: 900px) {
+  .controls-inner { grid-template-columns: 1fr 1fr; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .wrap { width: min(100% - 20px, 1480px); }
+  header { padding-top: 25px; }
+  .controls-inner { grid-template-columns: 1fr; }
+  .card-head { grid-template-columns: 1fr; }
+  .styles { justify-content: flex-start; max-width: none; }
+  .card-foot { grid-template-columns: 1fr; }
+  .css { max-width: 100%; text-align: left; }
+}
+
+
+/* ================================================================
+   Font Kit Studio v0.1.1 — Composer
+   ================================================================ */
+.mode-nav {
+  position: sticky;
+  top: 0;
+  z-index: 31;
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.mode-nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 50px;
+}
+.mode-tab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 15px 2px 13px;
+  margin-right: 18px;
+  color: var(--muted);
+  background: transparent;
+  font: 700 12px/1 system-ui, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.mode-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+.mode-view[hidden] { display: none !important; }
+#libraryView .controls { top: 50px; }
+
+.composer-view { padding: 18px 0 60px; }
+.composer-toolbar {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.c-field { min-width: 0; }
+.c-field.span-1 { grid-column: span 1; }
+.c-field.span-2 { grid-column: span 2; }
+.c-field.span-3 { grid-column: span 3; }
+.c-field.span-4 { grid-column: span 4; }
+.c-field.span-6 { grid-column: span 6; }
+.c-field label,
+.inspector-field > label,
+.inspector-label {
+  display: block;
+  margin: 0 0 5px;
+  color: var(--muted);
+  font: 750 10px/1.2 system-ui, sans-serif;
+  letter-spacing: .085em;
+  text-transform: uppercase;
+}
+.c-field input,
+.c-field select,
+.inspector input,
+.inspector select,
+.inspector textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  outline: none;
+}
+.c-field input:focus,
+.c-field select:focus,
+.inspector input:focus,
+.inspector select:focus,
+.inspector textarea:focus { border-color: var(--accent); }
+.composer-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: end; }
+.composer-actions .btn { flex: 1 0 auto; }
+.composer-status {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 11px;
+  min-height: 1.3em;
+}
+
+.composer-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 14px;
+  align-items: start;
+}
+.canvas-stage {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px;
+  overflow: auto;
+}
+.composer-canvas {
+  width: min(100%, 960px);
+  min-height: 620px;
+  margin: 0 auto;
+  padding: clamp(30px, 6vw, 72px);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.16);
+  transition: width .18s ease, background .18s ease;
+}
+.flow-slot {
+  position: relative;
+  width: 100%;
+  min-height: 26px;
+  padding: 9px 10px;
+  margin: 2px 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.flow-slot:hover { border-color: color-mix(in srgb, var(--accent) 38%, transparent); }
+.flow-slot.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 13%, transparent);
+}
+.slot-badge {
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  z-index: 2;
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font: 700 8px/1.3 system-ui, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.flow-slot:hover > .slot-badge,
+.flow-slot.selected > .slot-badge { opacity: 1; }
+.slot-movers {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  display: flex;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.flow-slot:hover > .slot-movers,
+.flow-slot.selected > .slot-movers { opacity: 1; }
+.slot-mini-btn {
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--panel);
+  font: 700 11px/1 system-ui, sans-serif;
+}
+.slot-mini-btn:disabled { opacity: .35; cursor: default; }
+.slot-text { display: block; width: 100%; margin: 0; overflow-wrap: anywhere; }
+.asset-wrap { display: flex; width: 100%; }
+.asset-wrap img { display: block; max-width: 100%; height: auto; }
+.asset-placeholder {
+  width: 100%;
+  padding: 28px;
+  border: 1px dashed currentColor;
+  border-radius: 7px;
+  opacity: .55;
+  text-align: center;
+  font: 600 12px/1.35 system-ui, sans-serif;
+}
+.rule-wrap { display: flex; width: 100%; }
+.rule-line { display: block; }
+.spacer-visual {
+  width: 100%;
+  border-block: 1px dashed color-mix(in srgb, currentColor 20%, transparent);
+  opacity: .3;
+}
+.row-layout {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+  transition: grid-template-columns .16s ease, gap .16s ease;
+}
+.row-layout.is-collapsed { grid-template-columns: 1fr !important; }
+.row-child {
+  min-width: 0;
+  margin: 0;
+}
+.row-child .slot-badge { left: 6px; }
+.row-child-list {
+  display: grid;
+  gap: 6px;
+}
+.row-child-jump {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--bg);
+  text-align: left;
+  cursor: pointer;
+}
+.row-child-jump:hover { border-color: var(--accent); }
+.row-child-jump small { color: var(--muted); }
+
+.inspector {
+  position: sticky;
+  top: 65px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.inspector-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  padding-bottom: 11px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.inspector h2 { margin: 0; font-size: 15px; }
+.inspector-index { color: var(--muted); font: 650 10px/1 system-ui, sans-serif; }
+.inspector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.inspector-field { min-width: 0; margin-bottom: 10px; }
+.inspector-field.full { grid-column: 1 / -1; }
+.inspector textarea { min-height: 88px; resize: vertical; }
+.inspector input[type="range"] { padding: 0; accent-color: var(--accent); }
+.value-line { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.value-line output { color: var(--muted); font: 600 10px/1 system-ui, sans-serif; }
+.segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
+.segmented button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--bg);
+  cursor: pointer;
+}
+.segmented button.active { color: var(--ink); border-color: var(--accent); }
+.color-grid { display: grid; grid-template-columns: 1fr .75fr; gap: 7px; }
+.swatch-row { display: grid; grid-template-columns: 32px 1fr; gap: 7px; align-items: center; }
+.swatch {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--swatch, transparent);
+}
+.inspector-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.empty-inspector { color: var(--muted); font-size: 13px; }
+
+.export-dialog {
+  width: min(720px, calc(100vw - 30px));
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.export-dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px); }
+.export-dialog textarea {
+  width: 100%; min-height: 360px; resize: vertical;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.dialog-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:10px; }
+.dialog-head h2 { margin: 0; font-size: 16px; }
+.dialog-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:10px; }
+
+@media (max-width: 1100px) {
+  .composer-shell { grid-template-columns: 1fr; }
+  .inspector { position: static; }
+  .composer-toolbar { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .c-field.span-1 { grid-column: span 1; }
+  .c-field.span-2 { grid-column: span 2; }
+  .c-field.span-3, .c-field.span-4, .c-field.span-6 { grid-column: span 3; }
+}
+@media (max-width: 680px) {
+  .composer-toolbar { grid-template-columns: 1fr 1fr; }
+  .c-field.span-1, .c-field.span-2, .c-field.span-3, .c-field.span-4, .c-field.span-6 { grid-column: span 1; }
+  .composer-status { grid-column: 1 / -1; }
+  .canvas-stage { padding: 8px; }
+  .composer-canvas { padding: 30px 20px; min-height: 520px; }
+  .inspector-grid { grid-template-columns: 1fr; }
+  .mode-nav-inner { overflow-x: auto; }
+}
+
+
+/* Theater Fullscreen & Viewport Styles */
+.composer-shell.is-theater-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+  background: var(--bg, #090a0f) !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: 1fr 340px !important;
+  gap: 12px !important;
+}
+.composer-shell.is-theater-fullscreen .canvas-stage {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+.composer-shell.is-theater-fullscreen #targetAppContainer {
+  height: 100% !important;
+  flex: 1 1 auto !important;
+  margin: 0 auto !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  transition: max-width 0.2s ease !important;
+}
+.composer-shell.is-theater-fullscreen .inspector {
+  max-height: calc(100vh - 20px) !important;
+  overflow-y: auto !important;
+}
+
+</style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Font Kit Studio · v0.1.1</p>
+    <h1>Inspect the faces. Then make them live together.</h1>
+    <p class="deck">
+      A local-first Adobe Fonts specimen library and flow-based brand typography composer.
+      Load a kit, audition the candidates, then assign real roles, colour, rhythm and assets
+      until the family stops looking like a font list and starts behaving like an identity.
+    </p>
+  </div>
+</header>
+<nav class="mode-nav" aria-label="Studio mode">
+  <div class="wrap mode-nav-inner">
+    <button id="modeLibrary" class="mode-tab active" type="button" aria-pressed="true">Library</button>
+    <button id="modeComposer" class="mode-tab" type="button" aria-pressed="false">Composer</button>
+  </div>
+</nav>
+
+<div id="libraryView" class="mode-view">
+<section class="controls">
+  <div class="wrap controls-inner">
+    <div class="field">
+      <label for="kitId">Adobe Fonts kit ID</label>
+      <div class="input-row">
+        <input id="kitId" type="text" placeholder="e.g. abc1def" autocomplete="off" spellcheck="false">
+        <button id="loadKit" class="btn" type="button">Load kit</button>
+      </div>
+      <div id="kitStatus" class="status">No external kit loaded yet.</div>
+    </div>
+
+    <div class="field">
+      <label for="sampleText">Large specimen text</label>
+      <input id="sampleText" type="text" value="The sky remembers what we forget.">
+    </div>
+
+    <div class="field">
+      <label for="sizeRange">Display size <span id="sizeValue">42px (2.625rem)</span></label>
+      <input id="sizeRange" type="range" min="8" max="86" value="42" step="1">
+    </div>
+
+    <button id="themeToggle" class="btn" type="button" aria-pressed="false">Dark mode</button>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="filters" id="filters"></div>
+  <section class="grid" id="grid" aria-live="polite"></section>
+
+  <aside class="audit">
+    <strong>Table handling:</strong>
+    the Xenara row has a spelling mismatch between the family name and copied CSS
+    (<code>Xenara</code> vs <code>xenera</code>), so this specimen tries both
+    <code>"xenara"</code> and <code>"xenera"</code> before falling back. The stray
+    <code>Ellfont-family</code> typo before Ella Roman is removed.
+    Otherwise the candidate family names, numeric weights and style combinations are
+    preserved. Generic fallbacks are chosen by visual class instead of blindly preserving
+    copied <code>sans-serif</code> fallbacks.
+  </aside>
+
+  <footer>
+    Research notes used for labeling: Adobe Fonts pages for Daith Variable, Ella, Xenara,
+    LTR NCND Variable, Ballinger Mono, Azo Mono, Anonymous, Orpheus, Vox Round and Mencken;
+    foundry / publisher references for Corporate A, Archer, Sentinel, Susan and FF Attribute Mono.
+    This file contains no font binaries.
+  </footer>
+</main>
+
+</div>
+
+<section id="composerView" class="mode-view composer-view" hidden>
+  <div class="wrap">
+    <section class="composer-toolbar" aria-label="Composer setup">
+      <!-- Target Application Connector (Design Bridge Protocol v1) -->
+      <div id="targetAppBridgeBar" class="c-field span-6" style="grid-column: 1 / -1; min-width: 0; max-width: 100%; box-sizing: border-box; padding: 8px 12px; background: color-mix(in srgb, var(--accent) 8%, var(--panel)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line)); border-radius: 8px; margin-bottom: 6px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+            <span style="font-weight: 750; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent);">Target Application Bridge</span>
+            <span id="bridgeStatusBadge" style="font-size: 10px; padding: 2px 7px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font-family: monospace;">Ready</span>
+          </div>
+          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; flex: 1 1 240px; min-width: 0; max-width: 100%;">
+            <input id="targetAppUrl" type="text" value="http://localhost:8000/" placeholder="Target URL e.g. http://localhost:8000/" style="padding: 6px 8px; font-size: 12px; font-family: monospace; min-width: 100px; flex: 1 1 100px; max-width: 100%; box-sizing: border-box;" />
+            <button id="btnConnectTarget" class="btn" type="button" style="padding: 6px 10px; font-size: 11px; font-weight: 600;">Connect Target</button>
+            <button id="btnRestoreOriginalText" class="btn" type="button" style="padding: 6px 8px; font-size: 11px;" title="Restore original text in live web app">↻ Restore Page Text</button>
+            <div class="segmented" style="display: inline-flex; flex-shrink: 0;">
+              <button id="viewSpecimenCanvas" class="active" type="button" style="padding: 6px 8px; font-size: 11px;">Specimen</button>
+              <button id="viewTargetApp" type="button" style="padding: 6px 8px; font-size: 11px;">Target App</button>
+            </div>
+            <div id="deviceViewportBar" style="display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
+              <button id="btnDeviceDesktop" class="btn" type="button" style="padding: 5px 8px; font-size: 10px;" title="Desktop (1440px)">🖥️ 1440</button>
+              <button id="btnDeviceLaptop" class="btn" type="button" style="padding: 5px 8px; font-size: 10px;" title="Laptop (1024px)">💻 1024</button>
+              <button id="btnDeviceMobile" class="btn" type="button" style="padding: 5px 8px; font-size: 10px;" title="Mobile (390px)">📱 390</button>
+              <button id="btnDeviceFluid" class="btn active" type="button" style="padding: 5px 8px; font-size: 10px;" title="Fluid (100%)">⛶ Fluid</button>
+              <button id="btnToggleFullscreen" class="btn primary" type="button" style="padding: 5px 9px; font-size: 11px; font-weight: 700;" title="Toggle Fullscreen Theater Mode">⛶ Fullscreen</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="c-field span-2">
+        <label for="kitPreset">Kit preset</label>
+        <select id="kitPreset">
+          <option value="typekit" selected>Adobe Typekit (cqu4tvx)</option>
+          <option value="custom">Custom / manual</option>
+          <option value="asteria">Asteria</option>
+        </select>
+      </div>
+      <div class="c-field span-4">
+        <label for="composerKitIds">Adobe kit ID(s)</label>
+        <div class="input-row">
+          <input id="composerKitIds" type="text" value="cqu4tvx" placeholder="abc123, def456" spellcheck="false">
+          <button id="loadComposerKits" class="btn" type="button">Load</button>
+        </div>
+      </div>
+      <div class="c-field span-3">
+        <label for="compositionPreset">Composition preset</label>
+        <select id="compositionPreset">
+          <option value="rowdemo" selected>Editorial — Image + Body Row</option>
+          <option value="blank">Blank — Editorial 5</option>
+          <option value="asteria">Asteria — Sculptural</option>
+        </select>
+      </div>
+      <div class="c-field span-1">
+        <label for="slotCount">Slots</label>
+        <input id="slotCount" type="number" min="1" max="8" value="5" inputmode="numeric">
+      </div>
+      <div class="c-field span-2">
+        <label for="canvasWidth">Canvas width</label>
+        <select id="canvasWidth">
+          <option value="720">720px</option>
+          <option value="960" selected>960px</option>
+          <option value="1200">1200px</option>
+          <option value="100%">Fluid</option>
+        </select>
+      </div>
+
+      <div class="c-field span-2">
+        <label for="canvasBgSource">Canvas colour source</label>
+        <select id="canvasBgSource">
+          <option value="custom">Custom hex</option>
+          <option value="tailwind">Tailwind</option>
+          <option value="saved">Saved palette</option>
+        </select>
+      </div>
+      <div class="c-field span-2">
+        <label for="canvasBgHex">Custom background</label>
+        <input id="canvasBgHex" type="text" value="#030409" spellcheck="false">
+      </div>
+      <div class="c-field span-2">
+        <label for="canvasBgFamily">Tailwind family</label>
+        <select id="canvasBgFamily"></select>
+      </div>
+      <div class="c-field span-1">
+        <label for="canvasBgShade">Shade</label>
+        <select id="canvasBgShade"></select>
+      </div>
+      <div class="c-field span-2">
+        <label for="canvasSavedColor">Saved colour</label>
+        <select id="canvasSavedColor"></select>
+      </div>
+      <div class="c-field span-3 composer-actions">
+        <button id="applyPreset" class="btn" type="button">Apply preset</button>
+        <button id="exportJson" class="btn" type="button">Export JSON</button>
+        <button id="importJson" class="btn" type="button">Import JSON</button>
+        <button id="exportCss" class="btn" type="button">Export CSS</button>
+        <button id="btnSyncToApp" class="btn primary" type="button" style="font-weight: 600;">⚡ Sync to Live App</button>
+        <input id="importJsonFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div id="composerStatus" class="composer-status">Editorial — Image + Body Row preset ready. Load the kit if the fonts are not already active.</div>
+    </section>
+
+    <div class="composer-shell">
+      <div class="canvas-stage">
+        <section id="composerCanvas" class="composer-canvas" aria-label="Brand composition preview"></section>
+        <section id="targetAppContainer" style="display: none; width: 100%; height: 720px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: #fff;">
+          <iframe id="targetAppFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+        </section>
+      </div>
+      <aside id="slotInspector" class="inspector" aria-label="Selected slot inspector"></aside>
+    </div>
+  </div>
+</section>
+
+<dialog id="exportDialog" class="export-dialog">
+  <div class="dialog-head">
+    <h2 id="exportDialogTitle">Export</h2>
+    <button id="closeExportDialog" class="btn" type="button">Close</button>
+  </div>
+  <textarea id="exportDialogText" spellcheck="false"></textarea>
+  <div class="dialog-actions">
+    <button id="copyExport" class="btn" type="button">Copy</button>
+    <button id="downloadExport" class="btn" type="button">Download</button>
+  </div>
+</dialog>
+
+<script>
+const BODY = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer vitae
+malesuada arcu. Curabitur pretium, sapien sed feugiat consequat, sem neque dictum
+nibh, vitae posuere nulla justo at erat.`;
+
+const GLYPHS = `ABCDEFGHIJKLMNOPQRSTUVWXYZ · abcdefghijklmnopqrstuvwxyz ·
+0123456789 · ÀÉÎÖÜ Ç Œ æ ß · & @ # % / ? ! — “ ” ‘ ’ ·
+Hamburgefontsiv · minimum · rhythm · fjord · WA To ry`;
+
+const fonts = [
+  {
+    name: "Daith Variable",
+    family: "daith-vf",
+    fallback: "serif",
+    tags: ["serif", "variable"],
+    note: "Darden Studio contemporary serif; variable weight plus optical-size axis.",
+    styles: [{label:"Variable", weight:400, style:"normal"}],
+    variable: { wght:[100,900,400], opsz:[6,144,72] }
+  },
+  {
+    name: "Anonymous Pro",
+    family: "anonymous-pro",
+    fallback: "monospace",
+    tags: ["mono"],
+    note: "Fixed-width family designed with coding in mind.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Nimbus Sans",
+    family: "nimbus-sans",
+    fallback: "sans-serif",
+    tags: ["sans"],
+    note: "Neutral grotesk workhorse.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Neuzeit Grotesk Condensed",
+    family: "neuzeit-grotesk-condensed",
+    fallback: "sans-serif",
+    tags: ["sans", "display"],
+    note: "Condensed grotesk candidate; this specimen uses the requested 900 / Black cut.",
+    styles: [{label:"Black", weight:900, style:"normal"}]
+  },
+  {
+    name: "Corporate A",
+    family: "corporate-a",
+    fallback: "serif",
+    tags: ["serif"],
+    note: "Corporate Antiqua: serif member of Kurt Weidemann’s Corporate ASE system.",
+    styles: [
+      {label:"Regular", weight:400, style:"normal"},
+      {label:"Regular Italic", weight:400, style:"italic"}
+    ]
+  },
+  {
+    name: "Xenara",
+    family: "xenara",
+    aliases: ["xenera"],
+    fallback: "sans-serif",
+    tags: ["sans", "technical"],
+    note: "Rounded technical face inspired by 1970s calculator keys and electric typewriters.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Mencken Std",
+    family: "mencken-std",
+    fallback: "serif",
+    tags: ["serif"],
+    note: "American Scotch-derived family; requested standard Roman and Italic.",
+    styles: [
+      {label:"Regular", weight:400, style:"normal"},
+      {label:"Italic", weight:400, style:"italic"}
+    ]
+  },
+  {
+    name: "Century Gothic",
+    family: "century-gothic",
+    fallback: "sans-serif",
+    tags: ["sans", "geometric"],
+    note: "Geometric sans candidate.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "FF Attribute Mono",
+    family: "attribute-mono",
+    fallback: "monospace",
+    tags: ["mono", "technical"],
+    note: "Industrial/minimal mono originally conceived for code-editor use.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Susan",
+    family: "susan",
+    fallback: "sans-serif",
+    tags: ["sans"],
+    note: "Open humanist-ish sans with soft forms and rounded, serif-like details.",
+    styles: [{label:"Book", weight:400, style:"normal"}]
+  },
+  {
+    name: "Orpheus Pro",
+    family: "orpheuspro",
+    fallback: "serif",
+    tags: ["serif", "display"],
+    note: "Classic Roman proportions filtered through late-1920s Art Deco sensibility.",
+    styles: [
+      {label:"Regular", weight:400, style:"normal"},
+      {label:"Italic", weight:400, style:"italic"},
+      {label:"Medium", weight:500, style:"normal"}
+    ]
+  },
+  {
+    name: "Vox Round",
+    family: "vox-round",
+    fallback: "sans-serif",
+    tags: ["sans", "rounded"],
+    note: "Rounded Canada Type family.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Prestige Elite Std",
+    family: "prestige-elite-std",
+    fallback: "monospace",
+    tags: ["mono", "typewriter"],
+    note: "Classic fixed-pitch typewriter voice.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Mencken Std Head",
+    family: "mencken-std-head",
+    fallback: "serif",
+    tags: ["serif", "display"],
+    note: "Mencken display optical cut: higher contrast and more Didot-like than the text side.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Azo Mono",
+    family: "azo-mono",
+    fallback: "monospace",
+    tags: ["mono", "technical"],
+    note: "Geometric/humanist mono built for data, code and deliberately machine-like settings.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Ella Roman",
+    family: "ella-roman",
+    fallback: "serif",
+    tags: ["serif", "display"],
+    note: "Calligraphic display family with triangular serifs; shares its lowercase with Ella’s sibling families.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Ella Brutalist",
+    family: "ella-brutalist",
+    fallback: "serif",
+    tags: ["serif", "display"],
+    note: "Ella sibling with Brutalist capital treatment and the same lowercase system as Roman.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  },
+  {
+    name: "Archer Pro",
+    family: "archer-pro",
+    fallback: "serif",
+    tags: ["serif", "slab"],
+    note: "Geometric slab serif with characteristic ball terminals; requested Medium mapped to 400.",
+    styles: [
+      {label:"Medium", weight:400, style:"normal"},
+      {label:"Medium Italic", weight:400, style:"italic"}
+    ]
+  },
+  {
+    name: "Gotham",
+    family: "gotham",
+    fallback: "sans-serif",
+    tags: ["sans", "geometric"],
+    note: "Geometric sans; requested Book and Book Italic at 400.",
+    styles: [
+      {label:"Book", weight:400, style:"normal"},
+      {label:"Book Italic", weight:400, style:"italic"}
+    ]
+  },
+  {
+    name: "Sentinel",
+    family: "sentinel",
+    fallback: "serif",
+    tags: ["serif", "slab"],
+    note: "Contemporary slab serif designed to work in both text and display settings.",
+    styles: [{label:"Book", weight:400, style:"normal"}]
+  },
+  {
+    name: "LTR NCND Variable",
+    family: "ltr-ncnd-variable",
+    fallback: "monospace",
+    tags: ["mono", "variable", "typewriter"],
+    note: "Variable monospaced digital typewriter face descended from the design associated with The X-Files.",
+    styles: [{label:"Variable", weight:400, style:"normal"}],
+    variable: { wght:[250,900,400] }
+  },
+  {
+    name: "Ballinger Mono",
+    family: "ballinger-mono",
+    fallback: "monospace",
+    tags: ["mono"],
+    note: "Sturdy fixed-width design with generous x-height, open apertures and large counters.",
+    styles: [{label:"Regular", weight:400, style:"normal"}]
+  }
+];
+
+const grid = document.getElementById("grid");
+const filters = document.getElementById("filters");
+const sampleInput = document.getElementById("sampleText");
+const sizeRange = document.getElementById("sizeRange");
+const sizeValue = document.getElementById("sizeValue");
+const themeToggle = document.getElementById("themeToggle");
+const kitId = document.getElementById("kitId");
+const loadKit = document.getElementById("loadKit");
+const kitStatus = document.getElementById("kitStatus");
+
+let activeFilter = "all";
+
+function cssStack(f) {
+  const names = [f.family, ...(f.aliases || [])].map(name => `"${name}"`);
+  return `${names.join(", ")}, ${f.fallback}`;
+}
+
+function renderCard(font, index) {
+  const card = document.createElement("article");
+  card.className = "card";
+  card.dataset.tags = font.tags.join(" ");
+
+  const styleButtons = font.styles.map((s, i) =>
+    `<button type="button" class="style-chip ${i === 0 ? "active" : ""}"
+      data-style-index="${i}">${s.label}</button>`
+  ).join("");
+
+  card.innerHTML = `
+    <div class="card-head">
+      <div>
+        <h2 class="family">${font.name}</h2>
+        <div class="meta">
+          ${font.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+          <span class="tag">${font.family}</span>
+        </div>
+      </div>
+      <div class="styles">${styleButtons}</div>
+    </div>
+
+    <div class="sample-wrap">
+      <p class="big-sample">${sampleInput.value}</p>
+      <p class="body-sample">${BODY}</p>
+      <p class="glyphs">${GLYPHS}</p>
+      ${font.variable ? `<div class="var-controls"></div>` : ""}
+    </div>
+
+    <div class="card-foot">
+      <div class="note">${font.note}</div>
+      <div class="css"></div>
+    </div>
+  `;
+
+  const sampleNodes = card.querySelectorAll(".big-sample, .body-sample, .glyphs");
+  const cssNode = card.querySelector(".css");
+  let activeStyle = font.styles[0];
+  let variableState = {};
+
+  function apply() {
+    sampleNodes.forEach(el => {
+      el.style.fontFamily = cssStack(font);
+      el.style.fontWeight = activeStyle.weight;
+      el.style.fontStyle = activeStyle.style;
+      if (font.variable) {
+        const settings = Object.entries(variableState)
+          .map(([axis, val]) => `"${axis}" ${val}`)
+          .join(", ");
+        el.style.fontVariationSettings = settings;
+      }
+    });
+
+    let extra = "";
+    if (font.variable) {
+      extra = `; font-variation-settings: ${Object.entries(variableState)
+        .map(([a,v]) => `'${a}' ${v}`).join(", ")}`;
+    }
+    cssNode.textContent =
+      `font-family: ${cssStack(font)}; font-weight: ${activeStyle.weight}; font-style: ${activeStyle.style}${extra};`;
+  }
+
+  card.querySelectorAll(".style-chip").forEach(btn => {
+    btn.addEventListener("click", () => {
+      card.querySelectorAll(".style-chip").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeStyle = font.styles[Number(btn.dataset.styleIndex)];
+      apply();
+    });
+  });
+
+  if (font.variable) {
+    const varWrap = card.querySelector(".var-controls");
+    for (const [axis, [min, max, def]] of Object.entries(font.variable)) {
+      variableState[axis] = def;
+      const control = document.createElement("div");
+      control.className = "var-control";
+      control.innerHTML = `
+        <label>
+          <span>${axis}</span>
+          <span class="axis-value">${def}</span>
+        </label>
+        <input type="range" min="${min}" max="${max}" value="${def}" step="1">
+      `;
+      const range = control.querySelector("input");
+      const value = control.querySelector(".axis-value");
+      range.addEventListener("input", () => {
+        variableState[axis] = Number(range.value);
+        value.textContent = range.value;
+        apply();
+      });
+      varWrap.appendChild(control);
+    }
+  }
+
+  card._updateText = text => {
+    card.querySelector(".big-sample").textContent = text;
+  };
+
+  apply();
+  return card;
+}
+
+fonts.forEach((font, index) => grid.appendChild(renderCard(font, index)));
+
+const tagSet = ["all", ...new Set(fonts.flatMap(f => f.tags))];
+tagSet.forEach(tag => {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = `filter ${tag === "all" ? "active" : ""}`;
+  btn.textContent = tag;
+  btn.addEventListener("click", () => {
+    activeFilter = tag;
+    filters.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    grid.querySelectorAll(".card").forEach(card => {
+      card.classList.toggle("hidden",
+        activeFilter !== "all" && !card.dataset.tags.split(" ").includes(activeFilter)
+      );
+    });
+  });
+  filters.appendChild(btn);
+});
+
+sampleInput.addEventListener("input", () => {
+  const text = sampleInput.value || " ";
+  grid.querySelectorAll(".card").forEach(card => card._updateText(text));
+});
+
+function formatSize(px) {
+  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const rem = px / rootPx;
+  const remText = rem.toFixed(3).replace(/\.0+$|(?<=\.[0-9]*?)0+$/g, "");
+  return `${px}px (${remText}rem)`;
+}
+
+sizeRange.addEventListener("input", () => {
+  const px = Number(sizeRange.value);
+  document.documentElement.style.setProperty("--sample-size", `${px}px`);
+  sizeValue.textContent = formatSize(px);
+});
+
+// Keep the initial readout accurate even if the browser's root font size is not 16px.
+sizeValue.textContent = formatSize(Number(sizeRange.value));
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const dark = document.body.classList.contains("dark");
+  themeToggle.textContent = dark ? "Light mode" : "Dark mode";
+  themeToggle.setAttribute("aria-pressed", String(dark));
+});
+
+function normalizeKitId(raw) {
+  return raw.trim()
+    .replace(/^https?:\/\/use\.typekit\.net\//i, "")
+    .replace(/\.css(?:\?.*)?$/i, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+function loadAdobeKit() {
+  const id = normalizeKitId(kitId.value);
+  if (!id) {
+    kitStatus.textContent = "Paste a kit ID first.";
+    return;
+  }
+
+  const old = document.getElementById("adobe-kit");
+  if (old) old.remove();
+
+  const link = document.createElement("link");
+  link.id = "adobe-kit";
+  link.rel = "stylesheet";
+  link.href = `https://use.typekit.net/${id}.css`;
+  link.onload = async () => {
+    kitStatus.textContent = `Loaded https://use.typekit.net/${id}.css`;
+    try { await document.fonts.ready; } catch (_) {}
+  };
+  link.onerror = () => {
+    kitStatus.textContent = `Could not load kit ${id}. Check the ID / web-project domain settings.`;
+  };
+  document.head.appendChild(link);
+  kitStatus.textContent = `Loading kit ${id}…`;
+  localStorage.setItem("typekit-specimen-kit", id);
+}
+
+loadKit.addEventListener("click", loadAdobeKit);
+kitId.addEventListener("keydown", e => {
+  if (e.key === "Enter") loadAdobeKit();
+});
+
+const remembered = localStorage.getItem("typekit-specimen-kit");
+if (remembered) kitId.value = remembered;
+
+/* ================================================================
+   Font Kit Studio v0.1.1 — Flow Composer
+   ================================================================ */
+(function initComposer() {
+  const TAILWIND_COLORS = {
+  "black": "#000",
+  "white": "#fff",
+  "slate": {
+    "50": "oklch(98.4% 0.003 247.858)",
+    "100": "oklch(96.8% 0.007 247.896)",
+    "200": "oklch(92.9% 0.013 255.508)",
+    "300": "oklch(86.9% 0.022 252.894)",
+    "400": "oklch(70.4% 0.04 256.788)",
+    "500": "oklch(55.4% 0.046 257.417)",
+    "600": "oklch(44.6% 0.043 257.281)",
+    "700": "oklch(37.2% 0.044 257.287)",
+    "800": "oklch(27.9% 0.041 260.031)",
+    "900": "oklch(20.8% 0.042 265.755)",
+    "950": "oklch(12.9% 0.042 264.695)"
+  },
+  "gray": {
+    "50": "oklch(98.5% 0.002 247.839)",
+    "100": "oklch(96.7% 0.003 264.542)",
+    "200": "oklch(92.8% 0.006 264.531)",
+    "300": "oklch(87.2% 0.01 258.338)",
+    "400": "oklch(70.7% 0.022 261.325)",
+    "500": "oklch(55.1% 0.027 264.364)",
+    "600": "oklch(44.6% 0.03 256.802)",
+    "700": "oklch(37.3% 0.034 259.733)",
+    "800": "oklch(27.8% 0.033 256.848)",
+    "900": "oklch(21% 0.034 264.665)",
+    "950": "oklch(13% 0.028 261.692)"
+  },
+  "zinc": {
+    "50": "oklch(98.5% 0 0)",
+    "100": "oklch(96.7% 0.001 286.375)",
+    "200": "oklch(92% 0.004 286.32)",
+    "300": "oklch(87.1% 0.006 286.286)",
+    "400": "oklch(70.5% 0.015 286.067)",
+    "500": "oklch(55.2% 0.016 285.938)",
+    "600": "oklch(44.2% 0.017 285.786)",
+    "700": "oklch(37% 0.013 285.805)",
+    "800": "oklch(27.4% 0.006 286.033)",
+    "900": "oklch(21% 0.006 285.885)",
+    "950": "oklch(14.1% 0.005 285.823)"
+  },
+  "neutral": {
+    "50": "oklch(98.5% 0 0)",
+    "100": "oklch(97% 0 0)",
+    "200": "oklch(92.2% 0 0)",
+    "300": "oklch(87% 0 0)",
+    "400": "oklch(70.8% 0 0)",
+    "500": "oklch(55.6% 0 0)",
+    "600": "oklch(43.9% 0 0)",
+    "700": "oklch(37.1% 0 0)",
+    "800": "oklch(26.9% 0 0)",
+    "900": "oklch(20.5% 0 0)",
+    "950": "oklch(14.5% 0 0)"
+  },
+  "stone": {
+    "50": "oklch(98.5% 0.001 106.423)",
+    "100": "oklch(97% 0.001 106.424)",
+    "200": "oklch(92.3% 0.003 48.717)",
+    "300": "oklch(86.9% 0.005 56.366)",
+    "400": "oklch(70.9% 0.01 56.259)",
+    "500": "oklch(55.3% 0.013 58.071)",
+    "600": "oklch(44.4% 0.011 73.639)",
+    "700": "oklch(37.4% 0.01 67.558)",
+    "800": "oklch(26.8% 0.007 34.298)",
+    "900": "oklch(21.6% 0.006 56.043)",
+    "950": "oklch(14.7% 0.004 49.25)"
+  },
+  "red": {
+    "50": "oklch(97.1% 0.013 17.38)",
+    "100": "oklch(93.6% 0.032 17.717)",
+    "200": "oklch(88.5% 0.062 18.334)",
+    "300": "oklch(80.8% 0.114 19.571)",
+    "400": "oklch(70.4% 0.191 22.216)",
+    "500": "oklch(63.7% 0.237 25.331)",
+    "600": "oklch(57.7% 0.245 27.325)",
+    "700": "oklch(50.5% 0.213 27.518)",
+    "800": "oklch(44.4% 0.177 26.899)",
+    "900": "oklch(39.6% 0.141 25.723)",
+    "950": "oklch(25.8% 0.092 26.042)"
+  },
+  "orange": {
+    "50": "oklch(98% 0.016 73.684)",
+    "100": "oklch(95.4% 0.038 75.164)",
+    "200": "oklch(90.1% 0.076 70.697)",
+    "300": "oklch(83.7% 0.128 66.29)",
+    "400": "oklch(75% 0.183 55.934)",
+    "500": "oklch(70.5% 0.213 47.604)",
+    "600": "oklch(64.6% 0.222 41.116)",
+    "700": "oklch(55.3% 0.195 38.402)",
+    "800": "oklch(47% 0.157 37.304)",
+    "900": "oklch(40.8% 0.123 38.172)",
+    "950": "oklch(26.6% 0.079 36.259)"
+  },
+  "amber": {
+    "50": "oklch(98.7% 0.022 95.277)",
+    "100": "oklch(96.2% 0.059 95.617)",
+    "200": "oklch(92.4% 0.12 95.746)",
+    "300": "oklch(87.9% 0.169 91.605)",
+    "400": "oklch(82.8% 0.189 84.429)",
+    "500": "oklch(76.9% 0.188 70.08)",
+    "600": "oklch(66.6% 0.179 58.318)",
+    "700": "oklch(55.5% 0.163 48.998)",
+    "800": "oklch(47.3% 0.137 46.201)",
+    "900": "oklch(41.4% 0.112 45.904)",
+    "950": "oklch(27.9% 0.077 45.635)"
+  },
+  "yellow": {
+    "50": "oklch(98.7% 0.026 102.212)",
+    "100": "oklch(97.3% 0.071 103.193)",
+    "200": "oklch(94.5% 0.129 101.54)",
+    "300": "oklch(90.5% 0.182 98.111)",
+    "400": "oklch(85.2% 0.199 91.936)",
+    "500": "oklch(79.5% 0.184 86.047)",
+    "600": "oklch(68.1% 0.162 75.834)",
+    "700": "oklch(55.4% 0.135 66.442)",
+    "800": "oklch(47.6% 0.114 61.907)",
+    "900": "oklch(42.1% 0.095 57.708)",
+    "950": "oklch(28.6% 0.066 53.813)"
+  },
+  "lime": {
+    "50": "oklch(98.6% 0.031 120.757)",
+    "100": "oklch(96.7% 0.067 122.328)",
+    "200": "oklch(93.8% 0.127 124.321)",
+    "300": "oklch(89.7% 0.196 126.665)",
+    "400": "oklch(84.1% 0.238 128.85)",
+    "500": "oklch(76.8% 0.233 130.85)",
+    "600": "oklch(64.8% 0.2 131.684)",
+    "700": "oklch(53.2% 0.157 131.589)",
+    "800": "oklch(45.3% 0.124 130.933)",
+    "900": "oklch(40.5% 0.101 131.063)",
+    "950": "oklch(27.4% 0.072 132.109)"
+  },
+  "green": {
+    "50": "oklch(98.2% 0.018 155.826)",
+    "100": "oklch(96.2% 0.044 156.743)",
+    "200": "oklch(92.5% 0.084 155.995)",
+    "300": "oklch(87.1% 0.15 154.449)",
+    "400": "oklch(79.2% 0.209 151.711)",
+    "500": "oklch(72.3% 0.219 149.579)",
+    "600": "oklch(62.7% 0.194 149.214)",
+    "700": "oklch(52.7% 0.154 150.069)",
+    "800": "oklch(44.8% 0.119 151.328)",
+    "900": "oklch(39.3% 0.095 152.535)",
+    "950": "oklch(26.6% 0.065 152.934)"
+  },
+  "emerald": {
+    "50": "oklch(97.9% 0.021 166.113)",
+    "100": "oklch(95% 0.052 163.051)",
+    "200": "oklch(90.5% 0.093 164.15)",
+    "300": "oklch(84.5% 0.143 164.978)",
+    "400": "oklch(76.5% 0.177 163.223)",
+    "500": "oklch(69.6% 0.17 162.48)",
+    "600": "oklch(59.6% 0.145 163.225)",
+    "700": "oklch(50.8% 0.118 165.612)",
+    "800": "oklch(43.2% 0.095 166.913)",
+    "900": "oklch(37.8% 0.077 168.94)",
+    "950": "oklch(26.2% 0.051 172.552)"
+  },
+  "teal": {
+    "50": "oklch(98.4% 0.014 180.72)",
+    "100": "oklch(95.3% 0.051 180.801)",
+    "200": "oklch(91% 0.096 180.426)",
+    "300": "oklch(85.5% 0.138 181.071)",
+    "400": "oklch(77.7% 0.152 181.912)",
+    "500": "oklch(70.4% 0.14 182.503)",
+    "600": "oklch(60% 0.118 184.704)",
+    "700": "oklch(51.1% 0.096 186.391)",
+    "800": "oklch(43.7% 0.078 188.216)",
+    "900": "oklch(38.6% 0.063 188.416)",
+    "950": "oklch(27.7% 0.046 192.524)"
+  },
+  "cyan": {
+    "50": "oklch(98.4% 0.019 200.873)",
+    "100": "oklch(95.6% 0.045 203.388)",
+    "200": "oklch(91.7% 0.08 205.041)",
+    "300": "oklch(86.5% 0.127 207.078)",
+    "400": "oklch(78.9% 0.154 211.53)",
+    "500": "oklch(71.5% 0.143 215.221)",
+    "600": "oklch(60.9% 0.126 221.723)",
+    "700": "oklch(52% 0.105 223.128)",
+    "800": "oklch(45% 0.085 224.283)",
+    "900": "oklch(39.8% 0.07 227.392)",
+    "950": "oklch(30.2% 0.056 229.695)"
+  },
+  "sky": {
+    "50": "oklch(97.7% 0.013 236.62)",
+    "100": "oklch(95.1% 0.026 236.824)",
+    "200": "oklch(90.1% 0.058 230.902)",
+    "300": "oklch(82.8% 0.111 230.318)",
+    "400": "oklch(74.6% 0.16 232.661)",
+    "500": "oklch(68.5% 0.169 237.323)",
+    "600": "oklch(58.8% 0.158 241.966)",
+    "700": "oklch(50% 0.134 242.749)",
+    "800": "oklch(44.3% 0.11 240.79)",
+    "900": "oklch(39.1% 0.09 240.876)",
+    "950": "oklch(29.3% 0.066 243.157)"
+  },
+  "blue": {
+    "50": "oklch(97% 0.014 254.604)",
+    "100": "oklch(93.2% 0.032 255.585)",
+    "200": "oklch(88.2% 0.059 254.128)",
+    "300": "oklch(80.9% 0.105 251.813)",
+    "400": "oklch(70.7% 0.165 254.624)",
+    "500": "oklch(62.3% 0.214 259.815)",
+    "600": "oklch(54.6% 0.245 262.881)",
+    "700": "oklch(48.8% 0.243 264.376)",
+    "800": "oklch(42.4% 0.199 265.638)",
+    "900": "oklch(37.9% 0.146 265.522)",
+    "950": "oklch(28.2% 0.091 267.935)"
+  },
+  "indigo": {
+    "50": "oklch(96.2% 0.018 272.314)",
+    "100": "oklch(93% 0.034 272.788)",
+    "200": "oklch(87% 0.065 274.039)",
+    "300": "oklch(78.5% 0.115 274.713)",
+    "400": "oklch(67.3% 0.182 276.935)",
+    "500": "oklch(58.5% 0.233 277.117)",
+    "600": "oklch(51.1% 0.262 276.966)",
+    "700": "oklch(45.7% 0.24 277.023)",
+    "800": "oklch(39.8% 0.195 277.366)",
+    "900": "oklch(35.9% 0.144 278.697)",
+    "950": "oklch(25.7% 0.09 281.288)"
+  },
+  "violet": {
+    "50": "oklch(96.9% 0.016 293.756)",
+    "100": "oklch(94.3% 0.029 294.588)",
+    "200": "oklch(89.4% 0.057 293.283)",
+    "300": "oklch(81.1% 0.111 293.571)",
+    "400": "oklch(70.2% 0.183 293.541)",
+    "500": "oklch(60.6% 0.25 292.717)",
+    "600": "oklch(54.1% 0.281 293.009)",
+    "700": "oklch(49.1% 0.27 292.581)",
+    "800": "oklch(43.2% 0.232 292.759)",
+    "900": "oklch(38% 0.189 293.745)",
+    "950": "oklch(28.3% 0.141 291.089)"
+  },
+  "purple": {
+    "50": "oklch(97.7% 0.014 308.299)",
+    "100": "oklch(94.6% 0.033 307.174)",
+    "200": "oklch(90.2% 0.063 306.703)",
+    "300": "oklch(82.7% 0.119 306.383)",
+    "400": "oklch(71.4% 0.203 305.504)",
+    "500": "oklch(62.7% 0.265 303.9)",
+    "600": "oklch(55.8% 0.288 302.321)",
+    "700": "oklch(49.6% 0.265 301.924)",
+    "800": "oklch(43.8% 0.218 303.724)",
+    "900": "oklch(38.1% 0.176 304.987)",
+    "950": "oklch(29.1% 0.149 302.717)"
+  },
+  "fuchsia": {
+    "50": "oklch(97.7% 0.017 320.058)",
+    "100": "oklch(95.2% 0.037 318.852)",
+    "200": "oklch(90.3% 0.076 319.62)",
+    "300": "oklch(83.3% 0.145 321.434)",
+    "400": "oklch(74% 0.238 322.16)",
+    "500": "oklch(66.7% 0.295 322.15)",
+    "600": "oklch(59.1% 0.293 322.896)",
+    "700": "oklch(51.8% 0.253 323.949)",
+    "800": "oklch(45.2% 0.211 324.591)",
+    "900": "oklch(40.1% 0.17 325.612)",
+    "950": "oklch(29.3% 0.136 325.661)"
+  },
+  "pink": {
+    "50": "oklch(97.1% 0.014 343.198)",
+    "100": "oklch(94.8% 0.028 342.258)",
+    "200": "oklch(89.9% 0.061 343.231)",
+    "300": "oklch(82.3% 0.12 346.018)",
+    "400": "oklch(71.8% 0.202 349.761)",
+    "500": "oklch(65.6% 0.241 354.308)",
+    "600": "oklch(59.2% 0.249 0.584)",
+    "700": "oklch(52.5% 0.223 3.958)",
+    "800": "oklch(45.9% 0.187 3.815)",
+    "900": "oklch(40.8% 0.153 2.432)",
+    "950": "oklch(28.4% 0.109 3.907)"
+  },
+  "rose": {
+    "50": "oklch(96.9% 0.015 12.422)",
+    "100": "oklch(94.1% 0.03 12.58)",
+    "200": "oklch(89.2% 0.058 10.001)",
+    "300": "oklch(81% 0.117 11.638)",
+    "400": "oklch(71.2% 0.194 13.428)",
+    "500": "oklch(64.5% 0.246 16.439)",
+    "600": "oklch(58.6% 0.253 17.585)",
+    "700": "oklch(51.4% 0.222 16.935)",
+    "800": "oklch(45.5% 0.188 13.697)",
+    "900": "oklch(41% 0.159 10.272)",
+    "950": "oklch(27.1% 0.105 12.094)"
+  }
+};
+
+  const CUSTOM_COLORS = {
+    "Asteria Void": "#030409",
+    "Asteria Abyss": "#060a17",
+    "Asteria Haze": "#0b1022",
+    "Asteria Starlight": "#eef2ff",
+    "Asteria Mist": "#98a3c5",
+    "Asteria Gold": "#e6c88d",
+    "Asteria Tender": "#dca8b7",
+    "Asteria Serene": "#9dbdd6",
+    "Asteria Electric": "#b8a2da",
+    "Asteria Verdant": "#a2c6ab",
+    "Asteria Vesper": "#909dd0"
+  };
+
+  const KIT_PRESETS = {
+    typekit: ["cqu4tvx"],
+    asteria: ["cqu4tvx"],
+    custom: []
+  };
+
+  const ROLE_DEFAULTS = {
+    Wordmark: { element:"div", text:"BRAND", size:24, lineHeight:1, tracking:.32, align:"center", transform:"uppercase" },
+    Display: { element:"div", text:"Every life is a night sky.", size:72, lineHeight:.95, tracking:-.03, align:"left", transform:"none" },
+    H1: { element:"h1", text:"Every life is a night sky.", size:64, lineHeight:.98, tracking:-.025, align:"left", transform:"none" },
+    H2: { element:"h2", text:"Things worth remembering", size:38, lineHeight:1.04, tracking:-.015, align:"left", transform:"none" },
+    H3: { element:"h3", text:"September observations", size:26, lineHeight:1.1, tracking:0, align:"left", transform:"none" },
+    Lead: { element:"p", text:"Some moments refuse to disappear quietly.", size:22, lineHeight:1.35, tracking:0, align:"left", transform:"none" },
+    Body: { element:"p", text:"Write down one small moment a night. The ordinary details gather weight in retrospect; a sentence becomes a marker, then a map.", size:16, lineHeight:1.55, tracking:0, align:"left", transform:"none" },
+    Accent: { element:"p", text:"only in retrospect.", size:30, lineHeight:1.15, tracking:0, align:"right", transform:"none" },
+    Caption: { element:"small", text:"Figure 01 — observation field", size:12, lineHeight:1.35, tracking:.02, align:"left", transform:"none" },
+    Metadata: { element:"small", text:"SEP 17 · 24 MOMENTS · OTTAWA", size:11, lineHeight:1.25, tracking:.08, align:"right", transform:"uppercase" },
+    Code: { element:"code", text:"font-family: var(--font-display);", size:13, lineHeight:1.45, tracking:0, align:"left", transform:"none" },
+    Custom: { element:"div", text:"Custom specimen text", size:24, lineHeight:1.2, tracking:0, align:"left", transform:"none" }
+  };
+
+  const ROLES = Object.keys(ROLE_DEFAULTS);
+  const ELEMENTS = ["div", "span", "h1", "h2", "h3", "p", "small", "code"];
+  const SLOT_TYPES = ["text", "image", "rule", "spacer", "row"];
+  const LEAF_SLOT_TYPES = ["text", "image", "rule", "spacer"];
+  const ROW_ALIGNMENTS = ["start", "center", "end", "stretch"];
+  const ALIGNMENTS = ["left", "center", "right", "justify"];
+  const TRANSFORMS = ["none", "uppercase", "lowercase", "capitalize"];
+
+  const byName = name => fonts.find(f => f.name === name) || fonts[0];
+  const byFamily = family => fonts.find(f => f.family === family) || fonts[0];
+
+  const makeTextSlot = (role="Body", family="gotham", overrides={}) => {
+    const def = Object.hasOwn(ROLE_DEFAULTS, role) ? ROLE_DEFAULTS[role] : ROLE_DEFAULTS.Custom;
+    const font = byFamily(family);
+    const first = font.styles[0];
+    const vars = {};
+    if (font.variable) {
+      Object.entries(font.variable).forEach(([axis, range]) => { vars[axis] = range[2]; });
+    }
+    return {
+      id: crypto.randomUUID ? crypto.randomUUID() : `slot-${Date.now()}-${Math.random()}`,
+      type: "text",
+      role,
+      element: def.element,
+      text: def.text,
+      family: font.family,
+      styleIndex: 0,
+      weight: first.weight,
+      fontStyle: first.style,
+      size: def.size,
+      lineHeight: def.lineHeight,
+      tracking: def.tracking,
+      align: def.align,
+      transform: def.transform,
+      colorSource: "custom",
+      colorHex: "#eef2ff",
+      colorFamily: "slate",
+      colorShade: "100",
+      savedColor: "Asteria Starlight",
+      variables: vars,
+      ...overrides
+    };
+  };
+
+  const makeGenericSlot = type => ({
+    id: crypto.randomUUID ? crypto.randomUUID() : `slot-${Date.now()}-${Math.random()}`,
+    type,
+    role: type === "image" ? "Image" : type === "rule" ? "Rule" : "Spacer",
+    align: "center",
+    colorSource: "custom",
+    colorHex: "#e6c88d",
+    colorFamily: "amber",
+    colorShade: "200",
+    savedColor: "Asteria Gold",
+    imageName: "",
+    assetDataUrl: "",
+    imageWidth: 180,
+    opacity: 1,
+    ruleWidth: 42,
+    ruleThickness: 1,
+    spacerHeight: 38
+  });
+
+  function rowNumber(value, fallback, min, max, integer=false) {
+    const number = value == null || value === "" ? fallback : Number(value);
+    const finite = Number.isFinite(number) ? number : fallback;
+    return Math.max(min, Math.min(max, integer ? Math.round(finite) : finite));
+  }
+
+  const makeRowSlot = (overrides={}) => {
+    const children = Array.isArray(overrides.children) ? overrides.children.slice(0, 4).map(child => {
+      if (!LEAF_SLOT_TYPES.includes(child?.type)) return hydrateSlot(child, 1);
+      const { children:discardedChildren, ...leaf } = child;
+      return leaf;
+    }) : [
+      makeGenericSlot("image"),
+      makeTextSlot("Body", "gotham")
+    ];
+    while (children.length < 2) children.push(makeTextSlot("Custom", "gotham"));
+    const count = rowNumber(overrides.childCount, children.length || 2, 2, 4, true);
+    while (children.length < count) children.push(makeTextSlot("Custom", "gotham"));
+    children.length = count;
+    const ratios = Array.isArray(overrides.ratios) ? overrides.ratios.slice(0, count) : [];
+    while (ratios.length < count) ratios.push(ratios.length === 1 ? 2 : 1);
+    return {
+      ...overrides,
+      id: crypto.randomUUID ? crypto.randomUUID() : `slot-${Date.now()}-${Math.random()}`,
+      type: "row",
+      role: "Row",
+      childCount: count,
+      gap: rowNumber(overrides.gap, 24, 0, 96),
+      alignItems: ROW_ALIGNMENTS.includes(overrides.alignItems) ? overrides.alignItems : "center",
+      collapseAt: rowNumber(overrides.collapseAt, 680, 240, 1600),
+      ratios: ratios.map(v => rowNumber(v, 1, .25, 12)),
+      children
+    };
+  };
+
+  const COMPOSITION_PRESETS = {
+    asteria: {
+      name: "Asteria — Sculptural",
+      background: { source:"custom", hex:"#030409", family:"slate", shade:"950", saved:"Asteria Void" },
+      width: "960",
+      slots: [
+        makeTextSlot("Wordmark", "daith-vf", { weight:500, variables:{wght:500, opsz:24}, colorHex:"#e6c88d" }),
+        makeTextSlot("H1", "ella-roman", { size:64, colorHex:"#eef2ff" }),
+        makeTextSlot("Accent", "orpheuspro", { styleIndex:1, weight:400, fontStyle:"italic", size:30, colorHex:"#b8a2da" }),
+        makeTextSlot("Body", "gotham", { size:16, colorHex:"#98a3c5" }),
+        makeTextSlot("Metadata", "ltr-ncnd-variable", { weight:700, variables:{wght:700}, size:11, colorHex:"#e6c88d" })
+      ]
+    },
+    blank: {
+      name: "Blank — Editorial 5",
+      background: { source:"custom", hex:"#f5f1e8", family:"stone", shade:"100", saved:"Asteria Starlight" },
+      width: "960",
+      slots: [
+        makeTextSlot("Wordmark", "gotham", { colorHex:"#181714" }),
+        makeTextSlot("H1", "ella-roman", { colorHex:"#181714" }),
+        makeTextSlot("H2", "sentinel", { colorHex:"#181714" }),
+        makeTextSlot("Body", "gotham", { colorHex:"#3f3b35" }),
+        makeTextSlot("Metadata", "azo-mono", { colorHex:"#6f6b63" })
+      ]
+    },
+    rowdemo: {
+      name: "Editorial — Image + Body Row",
+      background: { source:"custom", hex:"#f5f1e8", family:"stone", shade:"100", saved:"Asteria Starlight" },
+      width: "960",
+      slots: [
+        makeTextSlot("Wordmark", "daith-vf", { weight:500, variables:{wght:500, opsz:24}, colorHex:"#181714" }),
+        makeTextSlot("H1", "ella-roman", { text:"Image and prose, finally allowed to speak sideways.", size:58, colorHex:"#181714" }),
+        makeRowSlot({
+          gap:32, collapseAt:700, alignItems:"center", ratios:[1,2],
+          children:[
+            { ...makeGenericSlot("image"), imageWidth:220, colorHex:"#6f6b63" },
+            makeTextSlot("Body", "gotham", { size:17, colorHex:"#3f3b35", text:"Drop a PNG or SVG into the left child, then tune the ratio, gap and breakpoint on the row itself. The right child remains a normal typography slot with every existing control." })
+          ]
+        }),
+        makeTextSlot("Metadata", "azo-mono", { colorHex:"#6f6b63" })
+      ]
+    }
+  };
+
+  const state = {
+    selectedId: null,
+    canvasWidth: "960",
+    background: { source:"custom", hex:"#f5f1e8", family:"stone", shade:"100", saved:"Asteria Starlight" },
+    slots: []
+  };
+
+  const q = id => document.getElementById(id);
+  const modeLibrary = q("modeLibrary");
+  const modeComposer = q("modeComposer");
+  const libraryView = q("libraryView");
+  const composerView = q("composerView");
+  const kitPreset = q("kitPreset");
+  const composerKitIds = q("composerKitIds");
+  const loadComposerKits = q("loadComposerKits");
+  const composerStatus = q("composerStatus");
+  const compositionPreset = q("compositionPreset");
+  const applyPreset = q("applyPreset");
+  const slotCount = q("slotCount");
+  const canvasWidth = q("canvasWidth");
+  const canvasBgSource = q("canvasBgSource");
+  const canvasBgHex = q("canvasBgHex");
+  const canvasBgFamily = q("canvasBgFamily");
+  const canvasBgShade = q("canvasBgShade");
+  const canvasSavedColor = q("canvasSavedColor");
+  const composerCanvas = q("composerCanvas");
+  const slotInspector = q("slotInspector");
+  const exportDialog = q("exportDialog");
+  const exportDialogTitle = q("exportDialogTitle");
+  const exportDialogText = q("exportDialogText");
+  const closeExportDialog = q("closeExportDialog");
+  const copyExport = q("copyExport");
+  const downloadExport = q("downloadExport");
+  const importJsonFile = q("importJsonFile");
+
+  let exportFilename = "font-kit-studio-export.txt";
+  let exportMime = "text/plain";
+
+  function switchMode(mode) {
+    const composer = mode === "composer";
+    libraryView.hidden = composer;
+    composerView.hidden = !composer;
+    modeLibrary.classList.toggle("active", !composer);
+    modeComposer.classList.toggle("active", composer);
+    modeLibrary.setAttribute("aria-pressed", String(!composer));
+    modeComposer.setAttribute("aria-pressed", String(composer));
+  }
+  modeLibrary.addEventListener("click", () => switchMode("library"));
+  modeComposer.addEventListener("click", () => switchMode("composer"));
+
+  function normalizeKitIds(value) {
+    return value.split(",").map(normalizeKitId).filter(Boolean);
+  }
+
+  function loadComposerKitStyles() {
+    const ids = normalizeKitIds(composerKitIds.value);
+    document.querySelectorAll('link[data-composer-kit="true"]').forEach(el => el.remove());
+    if (!ids.length) {
+      composerStatus.textContent = "No kit IDs supplied.";
+      return;
+    }
+    let loaded = 0;
+    ids.forEach(id => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = `https://use.typekit.net/${id}.css`;
+      link.dataset.composerKit = "true";
+      link.onload = () => {
+        loaded += 1;
+        composerStatus.textContent = `Loaded ${loaded}/${ids.length} Adobe kit stylesheet${ids.length === 1 ? "" : "s"}.`;
+      };
+      link.onerror = () => { composerStatus.textContent = `Could not load kit ${id}. Check the ID / project settings.`; };
+      document.head.appendChild(link);
+    });
+    localStorage.setItem("font-kit-studio-kit-ids", ids.join(","));
+  }
+
+  kitPreset.addEventListener("change", () => {
+    const ids = KIT_PRESETS[kitPreset.value] || [];
+    if (ids.length) composerKitIds.value = ids.join(", ");
+  });
+  loadComposerKits.addEventListener("click", loadComposerKitStyles);
+  composerKitIds.addEventListener("keydown", e => { if (e.key === "Enter") loadComposerKitStyles(); });
+
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
+
+  function freshId() { return crypto.randomUUID ? crypto.randomUUID() : `slot-${Date.now()}-${Math.random()}`; }
+
+  function hydrateSlot(raw, depth=0) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+      throw new Error("Each slot must be an object; check composition.slots and row children.");
+    }
+    raw = stripSessionAssets(raw);
+    const requested = String(raw?.type || "text");
+    if (requested === "row" && depth === 0) {
+      if (raw.children !== undefined && !Array.isArray(raw.children)) {
+        throw new Error("Row slot children must be an array.");
+      }
+      const rawChildren = Array.isArray(raw.children) ? raw.children.slice(0, 4) : [];
+      const children = rawChildren.map(child => hydrateSlot(child, 1)).filter(child => child.type !== "row");
+      while (children.length < 2) children.push(makeTextSlot("Custom", "gotham"));
+      const count = rowNumber(raw.childCount, children.length, 2, 4, true);
+      while (children.length < count) children.push(makeTextSlot("Custom", "gotham"));
+      children.length = count;
+      const row = makeRowSlot({ ...raw, children, childCount:count });
+      row.id = freshId();
+      row.children = row.children.map(child => ({ ...child, id:freshId(), assetDataUrl:child.type === "image" ? "" : child.assetDataUrl }));
+      return row;
+    }
+    const type = LEAF_SLOT_TYPES.includes(requested) ? requested : "text";
+    const role = typeof raw.role === "string" && raw.role.trim() ? raw.role : "Custom";
+    const base = type === "text" ? makeTextSlot(role, typeof raw.family === "string" ? raw.family : "gotham") : makeGenericSlot(type);
+    const { children:discardedChildren, ...leaf } = raw || {};
+    const slot = { ...base, ...leaf, type, id:freshId(), assetDataUrl:"" };
+    // Imported known fields must keep the same scalar shapes as editable leaves.
+    Object.keys(base).forEach(key => {
+      if (typeof base[key] === "string" && typeof slot[key] !== "string") slot[key] = base[key];
+      if (typeof base[key] === "number") slot[key] = rowNumber(slot[key], base[key], -Number.MAX_VALUE, Number.MAX_VALUE);
+    });
+    if (type === "text") {
+      slot.role = role;
+      slot.family = byFamily(slot.family).family;
+      slot.element = ELEMENTS.includes(slot.element) ? slot.element : base.element;
+      slot.transform = TRANSFORMS.includes(slot.transform) ? slot.transform : base.transform;
+      slot.fontStyle = ["normal", "italic", "oblique"].includes(slot.fontStyle) ? slot.fontStyle : base.fontStyle;
+      slot.size = rowNumber(slot.size, base.size, 8, 86);
+      slot.lineHeight = rowNumber(slot.lineHeight, base.lineHeight, .7, 3);
+      slot.tracking = rowNumber(slot.tracking, base.tracking, -.2, 1);
+      slot.weight = rowNumber(slot.weight, base.weight, 1, 1000);
+      slot.styleIndex = rowNumber(slot.styleIndex, base.styleIndex, 0, byFamily(slot.family).styles.length - 1, true);
+      const variables = raw.variables && typeof raw.variables === "object" && !Array.isArray(raw.variables) ? raw.variables : base.variables;
+      slot.variables = Object.fromEntries(Object.entries(variables).filter(([axis, value]) =>
+        /^[a-zA-Z0-9]{4}$/.test(axis) && typeof value === "number" && Number.isFinite(value)));
+    }
+    slot.align = ALIGNMENTS.includes(slot.align) ? slot.align : base.align;
+    slot.colorSource = ["custom", "tailwind", "saved"].includes(slot.colorSource) ? slot.colorSource : base.colorSource;
+    slot.colorHex = CSS.supports("color", slot.colorHex) ? slot.colorHex : base.colorHex;
+    if (type !== "text") {
+      slot.imageWidth = rowNumber(slot.imageWidth, base.imageWidth, 16, 800);
+      slot.opacity = rowNumber(slot.opacity, base.opacity, .05, 1);
+      slot.ruleWidth = rowNumber(slot.ruleWidth, base.ruleWidth, 1, 100);
+      slot.ruleThickness = rowNumber(slot.ruleThickness, base.ruleThickness, 1, 20);
+      slot.spacerHeight = rowNumber(slot.spacerHeight, base.spacerHeight, 4, 240);
+    }
+    return slot;
+  }
+
+  function applyCompositionPreset(key) {
+    const preset = COMPOSITION_PRESETS[key] || COMPOSITION_PRESETS.rowdemo;
+    state.canvasWidth = preset.width;
+    state.background = clone(preset.background);
+    state.slots = preset.slots.map(slot => hydrateSlot(slot, 0));
+    state.selectedId = state.slots[0]?.id || null;
+    syncCompositionControls();
+    renderComposer();
+    composerStatus.textContent = `${preset.name} applied. Every slot is still editable.`;
+  }
+
+  function syncCompositionControls() {
+    slotCount.value = state.slots.length;
+    canvasWidth.value = state.canvasWidth;
+    canvasBgSource.value = state.background.source;
+    canvasBgHex.value = state.background.hex;
+    canvasBgFamily.value = state.background.family;
+    updateShadeOptions(canvasBgFamily, canvasBgShade, state.background.shade);
+    canvasSavedColor.value = state.background.saved;
+    updateCanvasBackground();
+  }
+
+  function familyOptions(select, selected) {
+    select.innerHTML = "";
+    Object.entries(TAILWIND_COLORS).forEach(([key, value]) => {
+      if (typeof value !== "object") return;
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = key;
+      option.selected = key === selected;
+      select.appendChild(option);
+    });
+  }
+
+  function updateShadeOptions(familySelect, shadeSelect, selected) {
+    const family = familySelect.value;
+    const values = TAILWIND_COLORS[family] || {};
+    shadeSelect.innerHTML = "";
+    Object.keys(values).forEach(shade => {
+      const option = document.createElement("option");
+      option.value = shade;
+      option.textContent = shade;
+      option.selected = String(shade) === String(selected);
+      shadeSelect.appendChild(option);
+    });
+    if (!shadeSelect.value && shadeSelect.options.length) shadeSelect.value = shadeSelect.options[Math.min(5, shadeSelect.options.length - 1)].value;
+  }
+
+  function populateSavedColors(select, selected) {
+    select.innerHTML = "";
+    Object.keys(CUSTOM_COLORS).forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      option.selected = name === selected;
+      select.appendChild(option);
+    });
+  }
+
+  function resolvedColor(spec) {
+    if (spec.colorSource === "tailwind" || spec.source === "tailwind") {
+      const family = spec.colorFamily || spec.family;
+      const shade = spec.colorShade || spec.shade;
+      return TAILWIND_COLORS[family]?.[shade] || "#000000";
+    }
+    if (spec.colorSource === "saved" || spec.source === "saved") {
+      return CUSTOM_COLORS[spec.savedColor || spec.saved] || "#000000";
+    }
+    return spec.colorHex || spec.hex || "#000000";
+  }
+
+  function updateCanvasBackground() {
+    composerCanvas.style.background = resolvedColor({
+      source: state.background.source,
+      hex: state.background.hex,
+      family: state.background.family,
+      shade: state.background.shade,
+      saved: state.background.saved
+    });
+    composerCanvas.style.width = state.canvasWidth === "100%" ? "100%" : `min(100%, ${state.canvasWidth}px)`;
+  }
+
+  function setSlotCount(nextCount) {
+    const n = Math.max(1, Math.min(8, Number(nextCount) || 1));
+    while (state.slots.length < n) state.slots.push(makeTextSlot("Custom", "gotham"));
+    if (state.slots.length > n) state.slots.length = n;
+    if (!state.slots.some(s => s.id === state.selectedId)) state.selectedId = state.slots[0]?.id || null;
+    slotCount.value = n;
+    renderComposer();
+  }
+
+  function styleForSlot(slot) {
+    const font = byFamily(slot.family);
+    const style = font.styles[slot.styleIndex] || font.styles[0];
+    return { font, style };
+  }
+
+  function applyTextSlotStyles(el, slot) {
+    const { font, style } = styleForSlot(slot);
+    el.style.fontFamily = cssStack(font);
+    el.style.fontWeight = String(slot.weight ?? style.weight);
+    el.style.fontStyle = slot.fontStyle || style.style;
+    el.style.fontSize = `${slot.size}px`;
+    el.style.lineHeight = String(slot.lineHeight);
+    el.style.letterSpacing = `${slot.tracking}em`;
+    el.style.textAlign = slot.align;
+    el.style.textTransform = slot.transform;
+    el.style.color = resolvedColor(slot);
+    el.style.fontSynthesis = "none";
+    if (slot.variables && Object.keys(slot.variables).length) {
+      el.style.fontVariationSettings = Object.entries(slot.variables).map(([axis, value]) => `"${axis}" ${value}`).join(", ");
+    }
+  }
+
+  function justifyFlex(align) {
+    if (align === "right") return "flex-end";
+    if (align === "center") return "center";
+    return "flex-start";
+  }
+
+  function appendLeafContent(wrapper, slot) {
+    if (slot.type === "text") {
+      const allowed = ELEMENTS.includes(slot.element) ? slot.element : "div";
+      const el = document.createElement(allowed);
+      el.className = "slot-text";
+      el.textContent = slot.text;
+      applyTextSlotStyles(el, slot);
+      wrapper.appendChild(el);
+    } else if (slot.type === "image") {
+      const box = document.createElement("div");
+      box.className = "asset-wrap";
+      box.style.justifyContent = justifyFlex(slot.align);
+      box.style.opacity = String(slot.opacity);
+      if (slot.assetDataUrl) {
+        const img = document.createElement("img");
+        img.src = slot.assetDataUrl;
+        img.alt = slot.imageName || "Uploaded brand asset";
+        img.style.width = `${slot.imageWidth}px`;
+        box.appendChild(img);
+      } else {
+        const ph = document.createElement("div");
+        ph.className = "asset-placeholder";
+        ph.style.color = resolvedColor(slot);
+        ph.textContent = slot.imageName ? `${slot.imageName} — reselect file to preview` : "PNG / SVG asset";
+        box.appendChild(ph);
+      }
+      wrapper.appendChild(box);
+    } else if (slot.type === "rule") {
+      const box = document.createElement("div");
+      box.className = "rule-wrap";
+      box.style.justifyContent = justifyFlex(slot.align);
+      const line = document.createElement("span");
+      line.className = "rule-line";
+      line.style.width = `${slot.ruleWidth}%`;
+      line.style.height = `${slot.ruleThickness}px`;
+      line.style.background = resolvedColor(slot);
+      box.appendChild(line);
+      wrapper.appendChild(box);
+    } else {
+      const spacer = document.createElement("div");
+      spacer.className = "spacer-visual";
+      spacer.style.height = `${slot.spacerHeight}px`;
+      wrapper.appendChild(spacer);
+    }
+  }
+
+  function slotBadgeText(slot) {
+    if (slot.type === "text") return slot.role;
+    if (slot.type === "row") return `Row · ${slot.children.length}`;
+    return slot.type;
+  }
+
+  function addSlotBadge(wrapper, slot) {
+    const badge = document.createElement("span");
+    badge.className = "slot-badge";
+    badge.textContent = slotBadgeText(slot);
+    wrapper.appendChild(badge);
+  }
+
+  function renderRowChild(row, child, childIndex) {
+    const wrapper = document.createElement("div");
+    wrapper.className = `row-child flow-slot${child.id === state.selectedId ? " selected" : ""}`;
+    wrapper.dataset.id = child.id;
+    wrapper.dataset.rowChild = String(childIndex);
+    wrapper.addEventListener("click", event => {
+      event.stopPropagation();
+      state.selectedId = child.id;
+      renderComposer();
+    });
+    addSlotBadge(wrapper, child);
+    appendLeafContent(wrapper, child);
+    return wrapper;
+  }
+
+  function renderSlot(slot, index) {
+    const wrapper = document.createElement("div");
+    wrapper.className = `flow-slot${slot.id === state.selectedId ? " selected" : ""}`;
+    wrapper.dataset.id = slot.id;
+    wrapper.addEventListener("click", e => {
+      if (e.target.closest("button")) return;
+      state.selectedId = slot.id;
+      renderComposer();
+    });
+
+    addSlotBadge(wrapper, slot);
+
+    const movers = document.createElement("div");
+    movers.className = "slot-movers";
+    const up = document.createElement("button");
+    up.type = "button"; up.className = "slot-mini-btn"; up.textContent = "↑"; up.title = "Move up"; up.disabled = index === 0;
+    up.addEventListener("click", () => moveSlot(index, -1));
+    const down = document.createElement("button");
+    down.type = "button"; down.className = "slot-mini-btn"; down.textContent = "↓"; down.title = "Move down"; down.disabled = index === state.slots.length - 1;
+    down.addEventListener("click", () => moveSlot(index, 1));
+    movers.append(up, down);
+    wrapper.appendChild(movers);
+
+    if (slot.type === "row") {
+      const layout = document.createElement("div");
+      layout.className = "row-layout";
+      layout.dataset.rowId = slot.id;
+      slot.children.forEach((child, childIndex) => layout.appendChild(renderRowChild(slot, child, childIndex)));
+      wrapper.appendChild(layout);
+    } else {
+      appendLeafContent(wrapper, slot);
+    }
+    return wrapper;
+  }
+
+  function syncRowLayouts() {
+    const canvasWidthPx = composerCanvas.getBoundingClientRect().width;
+    composerCanvas.querySelectorAll(".row-layout").forEach(layout => {
+      const row = state.slots.find(slot => slot.type === "row" && slot.id === layout.dataset.rowId);
+      if (!row) return;
+      const collapsed = canvasWidthPx <= Number(row.collapseAt || 680);
+      layout.classList.toggle("is-collapsed", collapsed);
+      const ratios = row.ratios.slice(0, row.children.length).map(value => `${Math.max(.25, Number(value) || 1)}fr`);
+      layout.style.gridTemplateColumns = collapsed ? "1fr" : ratios.join(" ");
+      layout.style.gap = `${Math.max(0, Number(row.gap) || 0)}px`;
+      layout.style.alignItems = ROW_ALIGNMENTS.includes(row.alignItems) ? row.alignItems : "center";
+    });
+  }
+
+  function moveSlot(index, delta) {
+    const target = index + delta;
+    if (target < 0 || target >= state.slots.length) return;
+    [state.slots[index], state.slots[target]] = [state.slots[target], state.slots[index]];
+    renderComposer();
+    if (typeof broadcastLiveState === "function") {
+      broadcastLiveState(true);
+      highlightSlotInTarget(state.slots[target].id, target, state.slots[target].role);
+    }
+  }
+
+  function renderCanvas() {
+    composerCanvas.replaceChildren();
+    state.slots.forEach((slot, index) => composerCanvas.appendChild(renderSlot(slot, index)));
+    updateCanvasBackground();
+    syncRowLayouts();
+  }
+
+  function renderComposer() {
+    renderCanvas();
+    renderInspector();
+  }
+
+  const canvasResizeObserver = typeof ResizeObserver === "function"
+    ? new ResizeObserver(() => syncRowLayouts())
+    : null;
+  canvasResizeObserver?.observe(composerCanvas);
+  window.addEventListener("resize", syncRowLayouts);
+
+  function findSlotById(id) {
+    for (let index = 0; index < state.slots.length; index += 1) {
+      const slot = state.slots[index];
+      if (slot.id === id) return { slot, index, parent:null, childIndex:-1 };
+      if (slot.type === "row") {
+        const childIndex = slot.children.findIndex(child => child.id === id);
+        if (childIndex >= 0) return { slot:slot.children[childIndex], index, parent:slot, childIndex };
+      }
+    }
+    return null;
+  }
+
+  function selectedLocation() {
+    return findSlotById(state.selectedId) || (state.slots[0] ? { slot:state.slots[0], index:0, parent:null, childIndex:-1 } : null);
+  }
+
+  function selectedSlot() { return selectedLocation()?.slot || null; }
+
+  function isRowChild(slotOrId) {
+    const id = typeof slotOrId === "string" ? slotOrId : slotOrId?.id;
+    return Boolean(id && findSlotById(id)?.parent);
+  }
+
+  function replaceSelectedSlot(replacement) {
+    const loc = selectedLocation();
+    if (!loc) return;
+    replacement.id = loc.slot.id;
+    if (loc.parent) loc.parent.children[loc.childIndex] = replacement;
+    else state.slots[loc.index] = replacement;
+    state.selectedId = replacement.id;
+  }
+
+  function escapeAttr(value) {
+    return String(value ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function optionsHtml(values, selected, labeler=v=>v) {
+    return values.map(v => `<option value="${escapeAttr(v)}"${String(v) === String(selected) ? " selected" : ""}>${escapeAttr(labeler(v))}</option>`).join("");
+  }
+
+  function colorInspectorHtml(slot) {
+    const source = slot.colorSource;
+    const familyNames = Object.keys(TAILWIND_COLORS).filter(k => typeof TAILWIND_COLORS[k] === "object");
+    const shades = Object.keys(TAILWIND_COLORS[slot.colorFamily] || {});
+    return `
+      <div class="inspector-field full">
+        <label>Text / mark colour</label>
+        <div class="swatch-row">
+          <span class="swatch" style="--swatch:${escapeAttr(resolvedColor(slot))}"></span>
+          <select data-bind="colorSource">${optionsHtml(["custom","tailwind","saved"], source, v => v === "custom" ? "Custom hex" : v === "tailwind" ? "Tailwind" : "Saved palette")}</select>
+        </div>
+      </div>
+      <div class="inspector-field"><label>Custom</label><input data-bind="colorHex" value="${escapeAttr(slot.colorHex)}" spellcheck="false"></div>
+      <div class="inspector-field"><label>Saved</label><select data-bind="savedColor">${optionsHtml(Object.keys(CUSTOM_COLORS), slot.savedColor)}</select></div>
+      <div class="inspector-field"><label>Tailwind family</label><select data-bind="colorFamily">${optionsHtml(familyNames, slot.colorFamily)}</select></div>
+      <div class="inspector-field"><label>Shade</label><select data-bind="colorShade">${optionsHtml(shades, slot.colorShade)}</select></div>`;
+  }
+
+  function updateInspectorOutput(el, key, value) {
+    const field = el.closest(".inspector-field");
+    const output = field?.querySelector("output");
+    if (!output) return;
+    if (key === "size") output.textContent = formatSize(Number(value));
+    else if (key === "imageWidth" || key === "spacerHeight") output.textContent = `${value}px`;
+    else if (key === "opacity") output.textContent = `${Math.round(Number(value) * 100)}%`;
+    else if (key === "rowGap" || key === "rowCollapseAt") output.textContent = `${value}px`;
+    else output.textContent = String(value);
+  }
+
+  function bindSimpleInput(selector, event="input", parser=v=>v) {
+    const el = slotInspector.querySelector(selector);
+    if (!el) return;
+    el.addEventListener(event, () => {
+      const slot = selectedSlot();
+      if (!slot) return;
+      const key = el.dataset.bind;
+      slot[key] = parser(el.value);
+      if (key === "colorFamily") {
+        const shades = Object.keys(TAILWIND_COLORS[slot.colorFamily] || {});
+        slot.colorShade = shades[5] || shades[0] || slot.colorShade;
+        const shadeSelect = slotInspector.querySelector('[data-bind="colorShade"]');
+        if (shadeSelect) shadeSelect.innerHTML = optionsHtml(shades, slot.colorShade);
+      }
+      updateInspectorOutput(el, key, slot[key]);
+      renderCanvas();
+    });
+  }
+
+  function renderInspector() {
+    const loc = selectedLocation();
+    const slot = loc?.slot;
+    if (!slot) {
+      slotInspector.innerHTML = '<p class="empty-inspector">No slot selected.</p>';
+      return;
+    }
+    const isChild = Boolean(loc.parent);
+    const typeChoices = isChild ? LEAF_SLOT_TYPES : SLOT_TYPES;
+    const indexLabel = isChild
+      ? `ROW ${loc.index + 1} · CHILD ${loc.childIndex + 1}/${loc.parent.children.length}`
+      : `SLOT ${loc.index + 1}/${state.slots.length}`;
+    let body = `
+      <div class="inspector-title-row"><h2>${escapeAttr(slot.type === "text" ? slot.role : slot.type[0].toUpperCase()+slot.type.slice(1))}</h2><span class="inspector-index">${indexLabel}</span></div>
+      <div class="inspector-grid">
+        <div class="inspector-field full"><label>Slot type</label><select data-bind="type">${optionsHtml(typeChoices, slot.type, v => v[0].toUpperCase()+v.slice(1))}</select></div>`;
+
+    if (slot.type === "row") {
+      body += `
+        <div class="inspector-field"><label for="rowChildCount">Children</label><input id="rowChildCount" data-bind="rowChildCount" type="number" min="2" max="4" step="1" value="${slot.children.length}"></div>
+        <div class="inspector-field"><div class="value-line"><label for="rowGap">Gap</label><output>${slot.gap}px</output></div><input id="rowGap" data-bind="rowGap" type="range" min="0" max="96" step="1" value="${slot.gap}"></div>
+        <div class="inspector-field"><label for="rowAlignItems">Align items</label><select id="rowAlignItems" data-bind="rowAlignItems">${optionsHtml(ROW_ALIGNMENTS, slot.alignItems)}</select></div>
+        <div class="inspector-field"><div class="value-line"><label for="rowCollapseAt">Collapse at</label><output>${slot.collapseAt}px</output></div><input id="rowCollapseAt" data-bind="rowCollapseAt" type="number" min="240" max="1600" step="10" value="${slot.collapseAt}"></div>
+        <div class="inspector-field full"><span class="inspector-label">Column weights</span><div class="inspector-grid">${slot.children.map((child, childIndex) => `<div class="inspector-field"><label for="rowRatio${childIndex}">Child ${childIndex + 1}</label><input id="rowRatio${childIndex}" data-row-ratio="${childIndex}" type="number" min="0.25" max="12" step="0.25" value="${slot.ratios[childIndex] ?? 1}"></div>`).join("")}</div></div>
+        <div class="inspector-field full"><span class="inspector-label">Children</span><div class="row-child-list">${slot.children.map((child, childIndex) => `<button type="button" class="row-child-jump" data-select-child="${escapeAttr(child.id)}"><span>${childIndex + 1}. ${escapeAttr(child.type === "text" ? child.role : child.type[0].toUpperCase()+child.type.slice(1))}</span><small>${escapeAttr(child.type)}</small></button>`).join("")}</div><p class="inspector-note">Children are ordinary leaf slots. Select one to edit it. Rows cannot contain rows in v0.1.1.</p></div>`;
+    } else if (slot.type === "text") {
+      const font = byFamily(slot.family);
+      const styleLabels = font.styles.map((s, i) => `${i}|${s.label}`);
+      body += `
+        <div class="inspector-field"><label>Role</label><select data-bind="role">${optionsHtml(ROLES, slot.role)}</select></div>
+        <div class="inspector-field"><label>Element</label><select data-bind="element">${optionsHtml(ELEMENTS, slot.element)}</select></div>
+        <div class="inspector-field full"><label>Family</label><select data-bind="family">${fonts.map(f => `<option value="${escapeAttr(f.family)}"${f.family === slot.family ? " selected" : ""}>${escapeAttr(f.name)}</option>`).join("")}</select></div>
+        <div class="inspector-field full"><label>Style / cut</label><select data-bind="styleIndex">${styleLabels.map(v => { const [i,label] = v.split("|"); return `<option value="${i}"${Number(i) === Number(slot.styleIndex) ? " selected" : ""}>${escapeAttr(label)}</option>`; }).join("")}</select></div>
+        <div class="inspector-field full"><div class="value-line"><label>Size</label><output>${formatSize(slot.size)}</output></div><input type="range" data-bind="size" min="8" max="86" step="1" value="${slot.size}"></div>
+        <div class="inspector-field"><label>Line height</label><input data-bind="lineHeight" type="number" min="0.7" max="3" step="0.05" value="${slot.lineHeight}"></div>
+        <div class="inspector-field"><label>Tracking (em)</label><input data-bind="tracking" type="number" min="-0.2" max="1" step="0.005" value="${slot.tracking}"></div>
+        <div class="inspector-field full"><label>Alignment</label><div class="segmented" data-align>${ALIGNMENTS.map(a => `<button type="button" data-value="${a}" class="${slot.align === a ? "active" : ""}">${a === "left" ? "L" : a === "center" ? "C" : a === "right" ? "R" : "J"}</button>`).join("")}</div></div>
+        <div class="inspector-field full"><label>Transform</label><select data-bind="transform">${optionsHtml(TRANSFORMS, slot.transform)}</select></div>
+        ${colorInspectorHtml(slot)}
+        <div class="inspector-field full"><label>Text</label><textarea data-bind="text">${escapeAttr(slot.text)}</textarea></div>`;
+
+      if (font.variable) {
+        body += `<div class="inspector-field full"><span class="inspector-label">Variable axes</span>`;
+        Object.entries(font.variable).forEach(([axis, [min,max,def]]) => {
+          const value = slot.variables?.[axis] ?? def;
+          body += `<div class="inspector-field"><div class="value-line"><label>${axis}</label><output>${value}</output></div><input type="range" data-axis="${axis}" min="${min}" max="${max}" step="1" value="${value}"></div>`;
+        });
+        body += `</div>`;
+      }
+    } else if (slot.type === "image") {
+      body += `
+        <div class="inspector-field full"><label>PNG / SVG file</label><input id="assetFile" type="file" accept="image/png,image/svg+xml"><p class="inspector-note">Session-local in v0.1.1. SVG is previewed as an image; it is not injected as editable markup.</p></div>
+        <div class="inspector-field full"><label>Alignment</label><div class="segmented" data-align>${["left","center","right"].map(a => `<button type="button" data-value="${a}" class="${slot.align === a ? "active" : ""}">${a[0].toUpperCase()}</button>`).join("")}</div></div>
+        <div class="inspector-field full"><div class="value-line"><label>Width</label><output>${slot.imageWidth}px</output></div><input type="range" data-bind="imageWidth" min="16" max="800" step="1" value="${slot.imageWidth}"></div>
+        <div class="inspector-field full"><div class="value-line"><label>Opacity</label><output>${Math.round(slot.opacity*100)}%</output></div><input type="range" data-bind="opacity" min="0.05" max="1" step="0.01" value="${slot.opacity}"></div>
+        ${colorInspectorHtml(slot)}`;
+    } else if (slot.type === "rule") {
+      body += `
+        <div class="inspector-field full"><label>Alignment</label><div class="segmented" data-align>${["left","center","right"].map(a => `<button type="button" data-value="${a}" class="${slot.align === a ? "active" : ""}">${a[0].toUpperCase()}</button>`).join("")}</div></div>
+        <div class="inspector-field"><label>Width %</label><input data-bind="ruleWidth" type="number" min="1" max="100" value="${slot.ruleWidth}"></div>
+        <div class="inspector-field"><label>Thickness px</label><input data-bind="ruleThickness" type="number" min="1" max="20" value="${slot.ruleThickness}"></div>
+        ${colorInspectorHtml(slot)}`;
+    } else {
+      body += `<div class="inspector-field full"><div class="value-line"><label>Spacer height</label><output>${slot.spacerHeight}px</output></div><input type="range" data-bind="spacerHeight" min="4" max="240" step="1" value="${slot.spacerHeight}"></div>`;
+    }
+    body += `</div>`;
+    slotInspector.innerHTML = body;
+
+    const typeSelect = slotInspector.querySelector('[data-bind="type"]');
+    typeSelect?.addEventListener("change", () => {
+      const current = selectedSlot();
+      if (!current) return;
+      let replacement;
+      if (typeSelect.value === "row" && !isRowChild(current)) {
+        const preserved = { ...clone(current), id:freshId() };
+        replacement = makeRowSlot({ children:[preserved, makeTextSlot("Body", "gotham")], ratios:[1,2] });
+      } else if (typeSelect.value === "text") {
+        replacement = makeTextSlot("Custom", "gotham");
+      } else {
+        replacement = makeGenericSlot(typeSelect.value);
+      }
+      replaceSelectedSlot(replacement);
+      renderComposer();
+    });
+
+    if (slot.type === "row") {
+      const childCount = slotInspector.querySelector('[data-bind="rowChildCount"]');
+      childCount?.addEventListener("change", () => {
+        const row = selectedSlot();
+        if (!row || row.type !== "row") return;
+        const next = rowNumber(childCount.value, 2, 2, 4, true);
+        while (row.children.length < next) row.children.push(makeTextSlot("Custom", "gotham"));
+        row.children.length = next;
+        while (row.ratios.length < next) row.ratios.push(1);
+        row.ratios.length = next;
+        row.childCount = next;
+        renderComposer();
+      });
+      const rowGap = slotInspector.querySelector('[data-bind="rowGap"]');
+      rowGap?.addEventListener("input", () => {
+        const row = selectedSlot();
+        row.gap = rowNumber(rowGap.value, 24, 0, 96);
+        rowGap.value = row.gap;
+        updateInspectorOutput(rowGap, "rowGap", row.gap);
+        syncRowLayouts();
+      });
+      const rowAlign = slotInspector.querySelector('[data-bind="rowAlignItems"]');
+      rowAlign?.addEventListener("change", () => {
+        const row = selectedSlot();
+        row.alignItems = ROW_ALIGNMENTS.includes(rowAlign.value) ? rowAlign.value : "center";
+        syncRowLayouts();
+      });
+      const collapse = slotInspector.querySelector('[data-bind="rowCollapseAt"]');
+      collapse?.addEventListener("input", () => {
+        const row = selectedSlot();
+        row.collapseAt = rowNumber(collapse.value, 680, 240, 1600);
+        updateInspectorOutput(collapse, "rowCollapseAt", row.collapseAt);
+        syncRowLayouts();
+      });
+      collapse?.addEventListener("change", () => {
+        collapse.value = selectedSlot().collapseAt;
+      });
+      slotInspector.querySelectorAll('[data-row-ratio]').forEach(input => {
+        input.addEventListener("input", () => {
+          const row = selectedSlot();
+          const ratioIndex = Number(input.dataset.rowRatio);
+          row.ratios[ratioIndex] = rowNumber(input.value, 1, .25, 12);
+          syncRowLayouts();
+        });
+        input.addEventListener("change", () => {
+          input.value = selectedSlot().ratios[Number(input.dataset.rowRatio)];
+        });
+      });
+      slotInspector.querySelectorAll('[data-select-child]').forEach(button => {
+        button.addEventListener("click", () => {
+          state.selectedId = button.dataset.selectChild;
+          renderComposer();
+        });
+      });
+      return;
+    }
+
+    if (slot.type === "text") {
+      const roleSelect = slotInspector.querySelector('[data-bind="role"]');
+      roleSelect?.addEventListener("change", () => {
+        const current = selectedSlot();
+        current.role = roleSelect.value;
+        const def = ROLE_DEFAULTS[current.role] || ROLE_DEFAULTS.Custom;
+        Object.assign(current, { element:def.element, text:def.text, size:def.size, lineHeight:def.lineHeight, tracking:def.tracking, align:def.align, transform:def.transform });
+        renderComposer();
+      });
+      bindSimpleInput('[data-bind="element"]', "change");
+      const familySelect = slotInspector.querySelector('[data-bind="family"]');
+      familySelect?.addEventListener("change", () => {
+        const current = selectedSlot();
+        const font = byFamily(familySelect.value);
+        current.family = font.family;
+        current.styleIndex = 0;
+        current.weight = font.styles[0].weight;
+        current.fontStyle = font.styles[0].style;
+        current.variables = {};
+        if (font.variable) Object.entries(font.variable).forEach(([axis, range]) => current.variables[axis] = range[2]);
+        renderComposer();
+      });
+      const styleSelect = slotInspector.querySelector('[data-bind="styleIndex"]');
+      styleSelect?.addEventListener("change", () => {
+        const current = selectedSlot();
+        const font = byFamily(current.family);
+        current.styleIndex = Number(styleSelect.value);
+        const cut = font.styles[current.styleIndex] || font.styles[0];
+        current.weight = cut.weight;
+        current.fontStyle = cut.style;
+        renderComposer();
+      });
+      bindSimpleInput('[data-bind="size"]', "input", Number);
+      bindSimpleInput('[data-bind="lineHeight"]', "input", Number);
+      bindSimpleInput('[data-bind="tracking"]', "input", Number);
+      bindSimpleInput('[data-bind="transform"]', "change");
+          const textInputEl = slotInspector.querySelector('[data-bind="text"]');
+    if (textInputEl) {
+      textInputEl.addEventListener("input", () => {
+        const slot = selectedSlot();
+        if (slot) {
+          slot.text = textInputEl.value;
+          slot.textTouched = true; // Mark as explicitly edited by user
+          renderCanvas();
+        }
+      });
+    }
+      slotInspector.querySelectorAll('[data-axis]').forEach(range => {
+        range.addEventListener("input", () => {
+          const current = selectedSlot();
+          current.variables ||= {};
+          current.variables[range.dataset.axis] = Number(range.value);
+          if (range.dataset.axis === "wght") current.weight = Number(range.value);
+          const output = range.closest(".inspector-field")?.querySelector("output");
+          if (output) output.textContent = range.value;
+          renderCanvas();
+        });
+      });
+    } else if (slot.type === "image") {
+      bindSimpleInput('[data-bind="imageWidth"]', "input", Number);
+      bindSimpleInput('[data-bind="opacity"]', "input", Number);
+      const assetFile = q("assetFile");
+      assetFile?.addEventListener("change", () => {
+        const file = assetFile.files?.[0];
+        if (!file) return;
+        const allowed = ["image/png", "image/svg+xml"];
+        const extOkay = /\.(png|svg)$/i.test(file.name);
+        if (!allowed.includes(file.type) || !extOkay) {
+          composerStatus.textContent = "Asset rejected: v0.1.1 accepts PNG and SVG only.";
+          assetFile.value = "";
+          return;
+        }
+        const target = selectedSlot();
+        const reader = new FileReader();
+        reader.onload = () => {
+          const current = findSlotById(target.id)?.slot;
+          if (current !== target || current.type !== "image") return;
+          current.imageName = file.name;
+          current.assetDataUrl = String(reader.result || "");
+          renderComposer();
+          composerStatus.textContent = `${file.name} loaded for this session.`;
+          if (typeof broadcastLiveState === "function") {
+            broadcastLiveState(true);
+            highlightSlotInTarget(current.id, 0, current.role || "Image");
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    } else if (slot.type === "rule") {
+      bindSimpleInput('[data-bind="ruleWidth"]', "input", Number);
+      bindSimpleInput('[data-bind="ruleThickness"]', "input", Number);
+    } else {
+      bindSimpleInput('[data-bind="spacerHeight"]', "input", Number);
+    }
+
+    if (slot.type !== "spacer") {
+      bindSimpleInput('[data-bind="colorSource"]', "change");
+      bindSimpleInput('[data-bind="colorHex"]', "input");
+      bindSimpleInput('[data-bind="savedColor"]', "change");
+      bindSimpleInput('[data-bind="colorFamily"]', "change");
+      bindSimpleInput('[data-bind="colorShade"]', "change");
+      slotInspector.querySelectorAll('[data-align] button').forEach(btn => {
+        btn.addEventListener("click", () => { const current = selectedSlot(); current.align = btn.dataset.value; renderComposer(); });
+      });
+    }
+  }
+
+  slotCount.addEventListener("change", () => setSlotCount(slotCount.value));
+  canvasWidth.addEventListener("change", () => { state.canvasWidth = canvasWidth.value; updateCanvasBackground(); });
+  compositionPreset.addEventListener("change", () => {});
+  applyPreset.addEventListener("click", () => applyCompositionPreset(compositionPreset.value));
+
+  familyOptions(canvasBgFamily, state.background.family);
+  updateShadeOptions(canvasBgFamily, canvasBgShade, state.background.shade);
+  populateSavedColors(canvasSavedColor, state.background.saved);
+
+  canvasBgSource.addEventListener("change", () => { state.background.source = canvasBgSource.value; updateCanvasBackground(); });
+  canvasBgHex.addEventListener("input", () => { state.background.hex = canvasBgHex.value; updateCanvasBackground(); });
+  canvasBgFamily.addEventListener("change", () => {
+    state.background.family = canvasBgFamily.value;
+    updateShadeOptions(canvasBgFamily, canvasBgShade, Object.keys(TAILWIND_COLORS[state.background.family] || {})[5]);
+    state.background.shade = canvasBgShade.value;
+    updateCanvasBackground();
+  });
+  canvasBgShade.addEventListener("change", () => { state.background.shade = canvasBgShade.value; updateCanvasBackground(); });
+  canvasSavedColor.addEventListener("change", () => { state.background.saved = canvasSavedColor.value; updateCanvasBackground(); });
+
+  function stripSessionAssets(slot) {
+    if (Array.isArray(slot)) return slot.map(stripSessionAssets);
+    if (!slot || typeof slot !== "object") return slot;
+    return Object.fromEntries(Object.entries(slot).map(([key, value]) =>
+      [key, key === "assetDataUrl" ? "" : stripSessionAssets(value)]));
+  }
+
+  function serializableState() {
+    const clean = stripSessionAssets(state);
+    return { version:"0.1.1", app:"Font Kit Studio", kitIds:normalizeKitIds(composerKitIds.value), composition:clean };
+  }
+
+  function showExport(title, text, filename, mime) {
+    exportDialogTitle.textContent = title;
+    exportDialogText.value = text;
+    exportFilename = filename;
+    exportMime = mime;
+    if (typeof exportDialog.showModal === "function") exportDialog.showModal();
+    else exportDialog.setAttribute("open", "");
+  }
+
+  function exportCompositionJson() {
+    showExport("Composition JSON", JSON.stringify(serializableState(), null, 2), "font-kit-studio-composition.json", "application/json");
+  }
+
+  function cssTokenName(slot, index) {
+    const base = typeof slot.role === "string" ? slot.role.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") : `slot-${index+1}`;
+    return base || `slot-${index+1}`;
+  }
+
+  function walkLeafSlots(slots) {
+    const leaves = [];
+    slots.forEach(slot => {
+      if (slot.type === "row") slot.children.forEach(child => leaves.push(child));
+      else leaves.push(slot);
+    });
+    return leaves;
+  }
+
+  function exportCompositionCss() {
+    const lines = [":root {"];
+    const usedNames = new Set();
+    walkLeafSlots(state.slots).forEach((slot, index) => {
+      if (slot.type !== "text") return;
+      const font = byFamily(slot.family);
+      const baseName = cssTokenName(slot, index);
+      const properties = name => ["", "-size", "-weight", "-style", "-tracking", "-line-height"]
+        .map(suffix => `--font-${name}${suffix}`).concat(`--color-${name}`);
+      let name = baseName;
+      let suffix = 2;
+      while (properties(name).some(property => usedNames.has(property))) name = `${baseName}-${suffix++}`;
+      properties(name).forEach(property => usedNames.add(property));
+      lines.push(`  --font-${name}: ${cssStack(font)};`);
+      lines.push(`  --font-${name}-size: ${slot.size}px; /* ${formatSize(slot.size).replace(/^.*\(/, "").replace(/\)$/, "")} */`);
+      lines.push(`  --font-${name}-weight: ${slot.weight};`);
+      lines.push(`  --font-${name}-style: ${slot.fontStyle};`);
+      lines.push(`  --font-${name}-tracking: ${slot.tracking}em;`);
+      lines.push(`  --font-${name}-line-height: ${slot.lineHeight};`);
+      lines.push(`  --color-${name}: ${resolvedColor(slot)};`);
+    });
+    state.slots.forEach((slot, index) => {
+      if (slot.type !== "row") return;
+      lines.push(`  --row-${index + 1}-gap: ${slot.gap}px;`);
+      lines.push(`  --row-${index + 1}-collapse: ${slot.collapseAt}px;`);
+      lines.push(`  --row-${index + 1}-columns: ${slot.ratios.slice(0, slot.children.length).map(value => `${value}fr`).join(" ")};`);
+    });
+    lines.push(`  --brand-canvas: ${resolvedColor({source:state.background.source,hex:state.background.hex,family:state.background.family,shade:state.background.shade,saved:state.background.saved})};`);
+    lines.push("}");
+    showExport("CSS tokens", lines.join("\n"), "font-kit-studio-tokens.css", "text/css");
+  }
+
+  function importCompositionJson(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result || "{}"));
+        if (!data || !data.composition || !Array.isArray(data.composition.slots)) throw new Error("Missing composition.slots array.");
+        const incoming = data.composition;
+        if (incoming.background !== undefined && (!incoming.background || typeof incoming.background !== "object" || Array.isArray(incoming.background))) {
+          throw new Error("Composition background must be an object.");
+        }
+        const background = { ...COMPOSITION_PRESETS.blank.background, ...stripSessionAssets(incoming.background || {}) };
+        const defaults = COMPOSITION_PRESETS.blank.background;
+        Object.keys(defaults).forEach(key => { if (typeof background[key] !== "string") background[key] = defaults[key]; });
+        if (!["custom", "tailwind", "saved"].includes(background.source)) background.source = defaults.source;
+        if (!CSS.supports("color", background.hex)) background.hex = defaults.hex;
+        const slots = incoming.slots.slice(0,8).map(raw => hydrateSlot(raw, 0));
+        if (!slots.length) slots.push(makeTextSlot("Custom", "gotham"));
+        const width = String(incoming.canvasWidth || "960");
+        const kitIds = Array.isArray(data.kitIds) ? normalizeKitIds(data.kitIds.filter(id => typeof id === "string").join(", ")) : [];
+        // Only publish a fully hydrated candidate; failed validation leaves live state intact.
+        Object.assign(state, { canvasWidth:width === "100%" ? width : String(rowNumber(width, 960, 240, 2400)),
+          background, slots, selectedId:slots[0].id });
+        // Legacy documents without kitIds retain the receiving selection; explicit IDs replace it, even when empty.
+        if (Object.hasOwn(data, "kitIds")) composerKitIds.value = kitIds.join(", ");
+        familyOptions(canvasBgFamily, state.background.family);
+        populateSavedColors(canvasSavedColor, state.background.saved);
+        syncCompositionControls();
+        renderComposer();
+        composerStatus.textContent = "Composition imported. Image assets must be reselected in v0.1.1.";
+      } catch (err) {
+        composerStatus.textContent = `Import failed: ${err.message}`;
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  q("exportJson").addEventListener("click", exportCompositionJson);
+  q("exportCss").addEventListener("click", exportCompositionCss);
+  q("importJson").addEventListener("click", () => importJsonFile.click());
+  importJsonFile.addEventListener("change", () => { const file = importJsonFile.files?.[0]; if (file) importCompositionJson(file); importJsonFile.value = ""; });
+  closeExportDialog.addEventListener("click", () => exportDialog.close());
+  copyExport.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(exportDialogText.value); copyExport.textContent = "Copied"; setTimeout(() => copyExport.textContent = "Copy", 900); }
+    catch { exportDialogText.select(); document.execCommand("copy"); }
+  });
+  downloadExport.addEventListener("click", () => {
+    const blob = new Blob([exportDialogText.value], { type:exportMime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = exportFilename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  });
+
+  
+  // ==========================================
+  // Design Bridge Protocol v1 Live Visual Editor Runtime
+  // ==========================================
+  const targetAppUrlInput = document.getElementById("targetAppUrl");
+  const btnConnectTarget = document.getElementById("btnConnectTarget");
+  const viewSpecimenBtn = document.getElementById("viewSpecimenCanvas");
+  const viewTargetBtn = document.getElementById("viewTargetApp");
+  const composerCanvasEl = document.getElementById("composerCanvas");
+  const targetAppContainerEl = document.getElementById("targetAppContainer");
+  const targetAppFrameEl = document.getElementById("targetAppFrame");
+  const bridgeStatusBadge = document.getElementById("bridgeStatusBadge");
+  const syncBtnEl = document.getElementById("btnSyncToApp");
+
+  let connectedTargetWindow = null;
+  let targetRevision = 1;
+  let liveSyncDebounceTimer = null;
+
+  function setBridgeStatus(text, isConnected = true) {
+    if (bridgeStatusBadge) {
+      bridgeStatusBadge.textContent = text;
+      bridgeStatusBadge.style.color = isConnected ? "var(--accent)" : "#ef4444";
+      bridgeStatusBadge.style.background = isConnected ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "rgba(239, 68, 68, 0.15)";
+    }
+  }
+
+  function sendDesignMessage(msg) {
+    if (connectedTargetWindow) {
+      try { connectedTargetWindow.postMessage(msg, "*"); } catch(e){}
+    }
+    
+  // Anti-recursion guard: If Studio itself is embedded inside an iframe (Modality B),
+  // hide the recursive Target Bridge connector bar and target iframe container.
+  if (window.self !== window.top) {
+    const bridgeBar = document.getElementById("targetAppBridgeBar");
+    if (bridgeBar) bridgeBar.style.display = "none";
+    if (targetAppContainerEl) targetAppContainerEl.style.display = "none";
+    if (viewTargetBtn) viewTargetBtn.style.display = "none";
+    if (viewSpecimenBtn) viewSpecimenBtn.style.display = "none";
+  }
+
+  if (window.parent && window.parent !== window) {
+      try { window.parent.postMessage(msg, "*"); } catch(e){}
+    }
+    if (window.opener) {
+      try { window.opener.postMessage(msg, "*"); } catch(e){}
+    }
+  }
+
+  function highlightSlotInTarget(slotId, slotIndex, role) {
+    sendDesignMessage({
+      type: "design:highlight",
+      targetId: slotId,
+      slotIndex: slotIndex ?? 0,
+      role: role || "Slot"
+    });
+  }
+
+  function broadcastLiveState(immediate = false) {
+    if (liveSyncDebounceTimer) {
+      clearTimeout(liveSyncDebounceTimer);
+      liveSyncDebounceTimer = null;
+    }
+
+    const runSync = () => {
+      // 1. Compute CSS font stacks
+      const tokens = {};
+      state.slots.forEach(slot => {
+        if (slot.type !== "text") return;
+        const font = byFamily(slot.family);
+        const stack = cssStack(font);
+        const r = (slot.role || "").toLowerCase();
+        if (r.includes("title") || r.includes("display") || r.includes("hero")) {
+          tokens["--font-display"] = stack;
+        } else if (r.includes("lead") || r.includes("body") || r.includes("deck")) {
+          tokens["--font-sans"] = stack;
+        } else if (r.includes("editorial") || r.includes("quote") || r.includes("narrative") || r.includes("serif")) {
+          tokens["--font-serif"] = stack;
+        } else if (r.includes("mono") || r.includes("data") || r.includes("caption") || r.includes("code")) {
+          tokens["--font-mono"] = stack;
+        }
+      });
+
+      if (!tokens["--font-display"] && state.slots[0]) tokens["--font-display"] = cssStack(byFamily(state.slots[0].family));
+      if (!tokens["--font-sans"] && state.slots[1]) tokens["--font-sans"] = cssStack(byFamily(state.slots[1].family));
+      if (!tokens["--font-serif"] && state.slots[2]) tokens["--font-serif"] = cssStack(byFamily(state.slots[2].family));
+      if (!tokens["--font-mono"] && state.slots[3]) tokens["--font-mono"] = cssStack(byFamily(state.slots[3].family));
+
+      // 2. Structured Slots Payload for live content, typography, and SVG/PNG assets
+      const slotPayloads = state.slots.map((slot, index) => {
+        const payload = {
+          id: slot.id,
+          targetId: slot.targetId,
+          index,
+          role: slot.role,
+          type: slot.type
+        };
+
+        if (slot.type === "text") {
+          const font = byFamily(slot.family);
+          payload.fontFamily = cssStack(font);
+          payload.familyRaw = slot.family;
+          payload.weight = slot.weight;
+          payload.size = slot.size;
+          payload.lineHeight = slot.lineHeight;
+          payload.tracking = slot.tracking;
+          payload.align = slot.align;
+          payload.colorHex = resolvedColor(slot);
+          payload.transform = slot.transform;
+          payload.text = slot.text;
+          payload.textTouched = Boolean(slot.textTouched);
+        } else if (slot.type === "image") {
+          payload.imageName = slot.imageName;
+          payload.assetDataUrl = slot.assetDataUrl;
+          payload.imageWidth = slot.imageWidth;
+          payload.opacity = slot.opacity;
+        } else if (slot.type === "rule") {
+          payload.ruleWidth = slot.ruleWidth;
+          payload.ruleThickness = slot.ruleThickness;
+          payload.colorHex = resolvedColor(slot);
+        } else if (slot.type === "spacer") {
+          payload.spacerHeight = slot.spacerHeight;
+        } else if (slot.type === "row") {
+          payload.children = (slot.children || []).map(child => ({
+            id: child.id,
+            role: child.role,
+            type: child.type,
+            fontFamily: child.family ? cssStack(byFamily(child.family)) : undefined,
+            text: child.text,
+            assetDataUrl: child.assetDataUrl,
+            imageWidth: child.imageWidth
+          }));
+        }
+
+        return payload;
+      });
+
+      // 3. Dispatch Live Design Update
+      sendDesignMessage({
+        type: "design:update",
+        requestId: `req-${Date.now()}`,
+        baseRevision: targetRevision,
+        patch: {
+          tokens,
+          slots: slotPayloads,
+          layout: {
+            order: slotPayloads.map(s => ({ id: s.id, role: s.role, index: s.index })),
+            canvasWidth: state.canvasWidth,
+            backgroundHex: state.background?.hex
+          }
+        }
+      });
+    };
+
+    if (immediate) {
+      runSync();
+    } else {
+      liveSyncDebounceTimer = setTimeout(runSync, 20);
+    }
+  }
+
+  function syncToLiveApp() {
+    broadcastLiveState(true);
+    const loc = selectedLocation();
+    if (loc && loc.slot) {
+      highlightSlotInTarget(loc.slot.id, loc.index, loc.slot.role);
+    }
+    if (syncBtnEl) {
+      syncBtnEl.textContent = "✓ Synced!";
+      setTimeout(() => { syncBtnEl.textContent = "⚡ Sync to Live App"; }, 1400);
+    }
+  }
+
+  if (syncBtnEl) syncBtnEl.addEventListener("click", syncToLiveApp);
+
+  function connectTargetApp(url) {
+    if (!targetAppFrameEl) return;
+    const targetUrl = url || targetAppUrlInput.value || "http://localhost:8000/";
+
+    // Anti-recursion guard: Never embed Font Kit Studio inside itself
+    if (/font_kit_studio|font-kit-studio/i.test(targetUrl) || targetUrl.replace(/\/$/, "") === window.location.href.replace(/\/$/, "")) {
+      setBridgeStatus("Recursion Blocked", false);
+      console.warn("[FontKitStudio] Blocked recursive self-embedding:", targetUrl);
+      if (targetAppUrlInput) targetAppUrlInput.value = "http://localhost:8000/";
+      return;
+    }
+
+    targetAppFrameEl.src = targetUrl;
+    setBridgeStatus("Connecting…", true);
+
+    targetAppFrameEl.onload = () => {
+      connectedTargetWindow = targetAppFrameEl.contentWindow;
+      setTimeout(() => {
+        sendDesignMessage({
+          type: "design:hello",
+          protocolVersion: 1,
+          sessionId: "fks-" + Date.now()
+        });
+      }, 250);
+    };
+  }
+
+  
+  const btnRestoreOriginalText = document.getElementById("btnRestoreOriginalText");
+  if (btnRestoreOriginalText) {
+    btnRestoreOriginalText.addEventListener("click", () => {
+      state.slots.forEach(slot => { slot.textTouched = false; });
+      sendDesignMessage({ type: "design:restore-text" });
+      setBridgeStatus("Original Text Restored", true);
+      btnRestoreOriginalText.textContent = "✓ Restored!";
+      setTimeout(() => { btnRestoreOriginalText.textContent = "↻ Restore Page Text"; }, 1500);
+    });
+  }
+
+  
+  // Device Viewport & Theater Fullscreen Controller
+  const composerShellEl = document.querySelector(".composer-shell");
+  const btnToggleFullscreen = document.getElementById("btnToggleFullscreen");
+  const btnDeviceDesktop = document.getElementById("btnDeviceDesktop");
+  const btnDeviceLaptop = document.getElementById("btnDeviceLaptop");
+  const btnDeviceMobile = document.getElementById("btnDeviceMobile");
+  const btnDeviceFluid = document.getElementById("btnDeviceFluid");
+  const allDeviceBtns = [btnDeviceDesktop, btnDeviceLaptop, btnDeviceMobile, btnDeviceFluid].filter(Boolean);
+
+  function setDeviceWidth(width, activeBtn) {
+    allDeviceBtns.forEach(btn => btn.classList.remove("active"));
+    if (activeBtn) activeBtn.classList.add("active");
+    if (targetAppContainerEl) {
+      if (width === "100%") {
+        targetAppContainerEl.style.maxWidth = "100%";
+        targetAppContainerEl.style.width = "100%";
+      } else {
+        targetAppContainerEl.style.maxWidth = width;
+        targetAppContainerEl.style.width = width;
+      }
+    }
+  }
+
+  if (btnDeviceDesktop) btnDeviceDesktop.addEventListener("click", () => setDeviceWidth("1440px", btnDeviceDesktop));
+  if (btnDeviceLaptop) btnDeviceLaptop.addEventListener("click", () => setDeviceWidth("1024px", btnDeviceLaptop));
+  if (btnDeviceMobile) btnDeviceMobile.addEventListener("click", () => setDeviceWidth("390px", btnDeviceMobile));
+  if (btnDeviceFluid) btnDeviceFluid.addEventListener("click", () => setDeviceWidth("100%", btnDeviceFluid));
+
+  function toggleFullscreenTheater() {
+    if (!composerShellEl) return;
+    const isFull = composerShellEl.classList.toggle("is-theater-fullscreen");
+    if (btnToggleFullscreen) {
+      btnToggleFullscreen.textContent = isFull ? "✕ Exit (Esc)" : "⛶ Fullscreen";
+    }
+    if (isFull) {
+      switchToTargetView();
+      if (targetAppContainerEl) targetAppContainerEl.style.height = "100%";
+    } else {
+      if (targetAppContainerEl) targetAppContainerEl.style.height = "720px";
+    }
+  }
+
+  if (btnToggleFullscreen) {
+    btnToggleFullscreen.addEventListener("click", toggleFullscreenTheater);
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && composerShellEl?.classList.contains("is-theater-fullscreen")) {
+      toggleFullscreenTheater();
+    }
+  });
+
+  if (btnConnectTarget) {
+    btnConnectTarget.addEventListener("click", () => {
+      connectTargetApp(targetAppUrlInput.value);
+      switchToTargetView();
+    });
+  }
+
+  function switchToSpecimenView() {
+    if (viewSpecimenBtn) viewSpecimenBtn.classList.add("active");
+    if (viewTargetBtn) viewTargetBtn.classList.remove("active");
+    if (composerCanvasEl) composerCanvasEl.style.display = "";
+    if (targetAppContainerEl) targetAppContainerEl.style.display = "none";
+  }
+
+  function switchToTargetView() {
+    if (viewTargetBtn) viewTargetBtn.classList.add("active");
+    if (viewSpecimenBtn) viewSpecimenBtn.classList.remove("active");
+    if (composerCanvasEl) composerCanvasEl.style.display = "none";
+    if (targetAppContainerEl) targetAppContainerEl.style.display = "block";
+    if (!targetAppFrameEl.src || targetAppFrameEl.src === "about:blank") {
+      connectTargetApp(targetAppUrlInput.value);
+    } else {
+      broadcastLiveState(true);
+    }
+  }
+
+  if (viewSpecimenBtn) viewSpecimenBtn.addEventListener("click", switchToSpecimenView);
+  if (viewTargetBtn) viewTargetBtn.addEventListener("click", switchToTargetView);
+
+  window.addEventListener("message", (event) => {
+    const data = event.data;
+    if (!data || typeof data !== "object") return;
+
+    if (data.type === "design:bridge-ready") {
+      setBridgeStatus("Target Bridge Detected");
+      sendDesignMessage({
+        type: "design:hello",
+        protocolVersion: 1,
+        sessionId: "fks-" + Date.now()
+      });
+    } else if (data.type === "design:ready") {
+      const targetCount = data.targets ? data.targets.length : 0;
+      setBridgeStatus(`Connected (${targetCount} targets)`, true);
+      broadcastLiveState(true);
+    } else if (data.type === "design:applied") {
+      targetRevision = data.revision;
+      setBridgeStatus(`Live Synced (rev ${targetRevision})`, true);
+    } else if (data.type === "design:select-slot") {
+      // Target webapp clicked an element -> select corresponding slot in composer
+      const targetId = data.targetId;
+      const roleLower = (data.role || "").toLowerCase();
+      const idLower = (data.targetId || "").toLowerCase();
+
+      let matched = state.slots.find(s => s.targetId === targetId || s.id === targetId);
+      if (!matched) {
+        // Map by semantic role
+        matched = state.slots.find(s => {
+          const sr = (s.role || "").toLowerCase();
+          if (idLower.includes("title") || roleLower.includes("display")) return sr === "h1" || sr === "title" || sr === "hero";
+          if (idLower.includes("tagline") || roleLower.includes("editorial")) return sr === "accent" || sr === "editorial" || sr === "tagline";
+          if (idLower.includes("wordmark") || roleLower.includes("brand")) return sr === "wordmark";
+          if (idLower.includes("deck") || roleLower.includes("body")) return sr === "body";
+          if (idLower.includes("mark") || idLower.includes("graphic") || roleLower.includes("image")) return sr === "image";
+          if (idLower.includes("stat") || idLower.includes("badge") || roleLower.includes("metric")) return sr === "metadata";
+          return false;
+        });
+      }
+
+      if (!matched && state.slots.length > 0) {
+        matched = state.slots[0];
+      }
+
+      if (matched) {
+        matched.targetId = targetId;
+        state.selectedId = matched.id;
+        if (!matched.textTouched && data.currentText) {
+          matched.text = data.currentText;
+        }
+        if (data.name) {
+          matched.role = data.name;
+        }
+        if (data.computed && data.computed.fontSize) {
+          const parsed = Math.round(parseFloat(data.computed.fontSize));
+          if (parsed > 8 && parsed < 200) {
+            matched.size = parsed;
+          }
+        }
+        renderComposer();
+        setBridgeStatus(`Selected: ${data.name || data.role} (${matched.size}px)`, true);
+      }
+    }
+  });
+
+  // Streaming live hook into renderCanvas for real-time live typing and slider adjustments
+  const originalRenderCanvas = renderCanvas;
+  renderCanvas = function() {
+    originalRenderCanvas();
+    if (typeof broadcastLiveState === "function") {
+      broadcastLiveState(false);
+    }
+  };
+
+  // Streaming live hook into applyCompositionPreset
+  const originalApplyCompositionPreset = applyCompositionPreset;
+  applyCompositionPreset = function(name) {
+    originalApplyCompositionPreset(name);
+    if (typeof broadcastLiveState === "function") {
+      broadcastLiveState(true);
+    }
+  };
+
+  
+  // Anti-recursion guard: If Studio itself is embedded inside an iframe (Modality B),
+  // hide the recursive Target Bridge connector bar and target iframe container.
+  if (window.self !== window.top) {
+    const bridgeBar = document.getElementById("targetAppBridgeBar");
+    if (bridgeBar) bridgeBar.style.display = "none";
+    if (targetAppContainerEl) targetAppContainerEl.style.display = "none";
+    if (viewTargetBtn) viewTargetBtn.style.display = "none";
+    if (viewSpecimenBtn) viewSpecimenBtn.style.display = "none";
+  }
+
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: "design:hello", protocolVersion: 1, sessionId: "fks-" + Date.now() }, "*");
+  }
+
+  const rememberedComposerKits = localStorage.getItem("font-kit-studio-kit-ids");
+  if (rememberedComposerKits) {
+    composerKitIds.value = rememberedComposerKits;
+    kitPreset.value = "custom";
+  } else {
+    composerKitIds.value = "cqu4tvx";
+    kitPreset.value = "typekit";
+  }
+
+  applyCompositionPreset("rowdemo");
+  if (compositionPreset) compositionPreset.value = "rowdemo";
+})();
+
+</script>
+</body>
+</html>

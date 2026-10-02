@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Node / JS
+node_modules/
+.npm/
+
+# Caches & scratch directories
+.biotools_cache/
+.matplotlib_cache/
+.uv_cache/
+scratch/
+*.tmp
+*.log
+
+# Large transient raw query dumps & zip archives
+test_vep.json
+test_encode_expr.json
+*.zip
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
