@@ -35,7 +35,7 @@
   - *Rationale*: High-density statistical callouts (e.g. `12–15×`, `99.8%`, `ACMG SF v3.2`).
 
 ### Interactive Font Studio & Extension Companion
-- **Live In-App Font Studio**: Floating typography engine (`web/src/font-studio.js`) exposing all 27 foundry fonts from Typekit kit `cqu4tvx`.
+- **Font Kit Studio (`tools/font-kit-studio/`)**: Standalone designer tooling and laboratory suite exposing all 27 foundry fonts from Typekit kit `cqu4tvx` (extracted out of the production clinical application).
   - Dynamically binds to `--font-sans`, `--font-serif`, `--font-mono`, `--font-display`, `--editorial-size`, `--mono-spacing`.
   - 4 1-click curated presets: *🧬 Impeccable Clinical*, *📰 Editorial Heavyweight*, *🔬 Swiss Bio Precision*, *⚡ Biotech Cyber HUD*.
   - Live fine-tuning sliders for narrative text size (12px–20px) and monospace letter spacing (-0.05em to +0.1em).
