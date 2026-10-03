@@ -1,0 +1,8 @@
+#AncestryDNA raw data download
+#Genome Reference Build: GRCh37.1
+rsid	chromosome	position	allele1	allele2
+rs429358	19	45411941	T	C
+rs7412	19	45412079	C	C
+rs1800562	6	26093141	A	G
+rs4244285	10	96541604	G	A
+rs671	12	112241766	0	0

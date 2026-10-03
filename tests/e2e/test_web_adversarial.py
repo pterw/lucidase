@@ -127,8 +127,11 @@ def test_corrupt_binary_garbage_is_survived(loaded_page):
         files=[{"name": "corrupt.bin", "mimeType": "text/plain", "buffer": garbage.encode("utf-8")}],
     )
     _wait_outcome(loaded_page)
-    expect(loaded_page.locator("#results-section")).to_be_visible()
-    assert int(loaded_page.locator("#qc-total-snps").text_content().replace(",", "")) >= 1
+    # Contracts C1: unrecognised content is rejected, never guessed at.
+    alert = loaded_page.locator("#analysis-error")
+    expect(alert).to_be_visible()
+    assert "unsupported" in alert.inner_text().lower()
+    expect(loaded_page.locator("#results-section")).to_be_hidden()
 
 
 def test_export_handlers_run(loaded_page):

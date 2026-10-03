@@ -21,267 +21,82 @@ import {
   computeIndependentAssortment 
 } from "./knowledge-base.js";
 
+import { parseGenotypeFile } from "./core/parse.js";
+import { computeQc } from "./core/qc.js";
+
 self.onmessage = function (e) {
   try {
     const { action, text, fileName } = e.data;
     if (action === "parse") {
-      parseGenomicText(text, fileName);
+      analyzeGenotypeFile(text, fileName);
     }
   } catch (err) {
     self.postMessage({ type: "error", message: String((err && err.message) || err) });
   }
 };
 
-function parseGenomicText(text, fileName = "") {
+/** Curated loci by "chrom:pos" for one assembly, used to place calls that carry no rsID. */
+function buildPositionIndex(build) {
+  const field = build === "GRCh38" ? "pos_grch38" : build === "GRCh37" ? "pos_grch37" : null;
+  const index = new Map();
+  if (!field) return index;
+  for (const [rsid, entry] of Object.entries(CURATED_KB)) {
+    if (entry[field]) index.set(`${entry.chrom}:${entry[field]}`, rsid);
+  }
+  return index;
+}
+
+function analyzeGenotypeFile(text, fileName = "") {
   self.postMessage({ type: "progress", percent: 5, status: "Detecting format and header..." });
 
-  const lines = text.split(/\r?\n/);
-  const totalLines = lines.length;
+  // Throws UnsupportedFormatError for unrecognised content; the catch above reports it.
+  const parsed = parseGenotypeFile(text, fileName);
+  const format = parsed.format;
+  const build = parsed.build;
 
-  let format = "unknown";
-  let build = "GRCh37";
-  let dataStartIndex = 0;
-  let isAncestry = false;
-  let isMyHeritage = false;
-  let isVcf = false;
-  let is23andMe = false;
+  self.postMessage({ type: "progress", percent: 15, status: `Parsed ${format.toUpperCase()} (${build})...` });
 
-  // Header inspect
-  for (let i = 0; i < Math.min(200, totalLines); i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-
-    const lower = line.toLowerCase();
-    if (lower.includes("23andme")) is23andMe = true;
-    if (lower.includes("ancestrydna")) isAncestry = true;
-    if (lower.includes("myheritage")) isMyHeritage = true;
-    if (line.startsWith("##fileformat=vcf")) isVcf = true;
-
-    if (lower.includes("build 38") || lower.includes("grch38") || lower.includes("hg38")) {
-      build = "GRCh38";
-    } else if (lower.includes("build 37") || lower.includes("grch37") || lower.includes("hg19")) {
-      build = "GRCh37";
-    } else if (lower.includes("ncbi36") || lower.includes("hg18")) {
-      build = "NCBI36";
-    }
-
-    if (line.startsWith("#") || line.startsWith("##")) {
-      dataStartIndex = i + 1;
-      continue;
-    }
-
-    // CSV header for MyHeritage
-    if (line.includes('"RSID"') || line.includes("RSID,CHROMOSOME")) {
-      isMyHeritage = true;
-      dataStartIndex = i + 1;
-      break;
-    }
-
-    // If we reach a non-comment line
-    if (!line.startsWith("#")) {
-      dataStartIndex = i;
-      break;
-    }
-  }
-
-  // Fallback format heuristics
-  if (isVcf) {
-    format = "vcf";
-  } else if (isAncestry) {
-    format = "ancestry";
-  } else if (isMyHeritage) {
-    format = "myheritage";
-  } else if (is23andMe) {
-    format = "23andme";
-  } else {
-    // Check first data line
-    const firstData = lines[dataStartIndex] || "";
-    if (firstData.includes(",")) format = "myheritage";
-    else if (firstData.split(/\t/).length >= 5) format = "ancestry";
-    else format = "23andme";
-  }
-
-  self.postMessage({ type: "progress", percent: 15, status: `Parsing ${format.toUpperCase()} (${build})...` });
-
-  let totalSnps = 0;
-  let calledSnps = 0;
-  let nocallSnps = 0;
-  let homCount = 0;
-  let hetCount = 0;
-
-  let xCalled = 0;
-  let xHet = 0;
-  let yCalled = 0;
+  const totalSnps = parsed.calls.length;
+  const calledSnps = parsed.stats.called;
+  const nocallSnps = parsed.stats.no_calls;
   const chromDist = {};
 
   let gt429 = null;
   let gt741 = null;
 
-  const variants = {};
-  const clinicalFindings = [];
   const assayedCurated = new Map();
+  const positionIndex = buildPositionIndex(build);
 
-  const updateInterval = Math.max(10000, Math.floor(totalLines / 20));
+  for (const call of parsed.calls) {
+    chromDist[call.chrom] = (chromDist[call.chrom] || 0) + 1;
 
-  for (let i = dataStartIndex; i < totalLines; i++) {
-    const rawLine = lines[i];
-    if (!rawLine || rawLine.startsWith("#")) continue;
-
-    let rsid = "";
-    let chrom = "";
-    let pos = 0;
-    let genotype = "";
-
-    if (format === "myheritage" || rawLine.includes(",")) {
-      const parts = rawLine.split(",").map(p => p.replace(/"/g, "").trim());
-      if (parts.length < 4 || parts[0].toUpperCase() === "RSID") continue;
-      rsid = parts[0];
-      chrom = parts[1];
-      pos = parseInt(parts[2], 10) || 0;
-      genotype = parts[3];
-    } else if (format === "vcf") {
-      const cols = rawLine.split(/\t/);
-      if (cols.length < 10) continue;
-      chrom = cols[0].replace(/^chr/i, "");
-      pos = parseInt(cols[1], 10) || 0;
-      rsid = cols[2];
-      const ref = cols[3];
-      const alt = cols[4];
-      const formatStr = cols[8];
-      const sampleStr = cols[9];
-
-      const gtIdx = formatStr.split(":").indexOf("GT");
-      if (gtIdx >= 0) {
-        const gt = sampleStr.split(":")[gtIdx];
-        const altAlleles = alt.split(",");
-        const alleleTable = [ref, ...altAlleles];
-        const tokens = gt.split(/[/|]/);
-        if (tokens.length === 1 && tokens[0] !== "." && tokens[0] !== "") {
-          const idx = parseInt(tokens[0], 10);
-          const a = alleleTable[idx] || "";
-          genotype = a ? a + a : "--";
-        } else if (tokens.length >= 2) {
-          if (tokens[0] === "." || tokens[1] === ".") {
-            genotype = "--";
-          } else {
-            const i0 = parseInt(tokens[0], 10);
-            const i1 = parseInt(tokens[1], 10);
-            const a0 = alleleTable[i0] || "";
-            const a1 = alleleTable[i1] || "";
-            genotype = (a0 && a1) ? [a0, a1].sort().join("") : "--";
-          }
-        } else {
-          genotype = "--";
-        }
-      }
-    } else {
-      // 23andMe or Ancestry tab-delimited
-      const cols = rawLine.split(/\t/);
-      if (cols.length < 4) continue;
-      rsid = cols[0].trim();
-      chrom = cols[1].trim();
-      pos = parseInt(cols[2], 10) || 0;
-
-      if (cols.length >= 5) {
-        // Ancestry format: allele1, allele2
-        const a1 = cols[3].trim().toUpperCase();
-        const a2 = cols[4].trim().toUpperCase();
-        if (a1 === "0" || a2 === "0" || a1 === "-" || a2 === "-") {
-          genotype = "--";
-        } else {
-          genotype = [a1, a2].sort().join("");
-        }
-      } else {
-        genotype = cols[3].trim().toUpperCase();
-      }
-    }
-
+    // Minimal adaptation until the classification is rewritten (T6): the old genotype
+    // string, and curated lookup by chrom:pos for calls that have no rsID.
+    const rsid = call.rsid || positionIndex.get(`${call.chrom}:${call.pos}`);
     if (!rsid) continue;
-    totalSnps++;
-    chromDist[chrom] = (chromDist[chrom] || 0) + 1;
+    const genotype = call.alleles === null ? "--" : call.alleles.join("");
 
-    // Check no-call
-    const isNoCall = (
-      genotype === "--" || genotype === "00" || genotype === "??" ||
-      genotype === "NN" || genotype === "." || genotype === "" ||
-      genotype.includes("-") || genotype.includes("0")
-    );
-
-    if (isNoCall) {
-      nocallSnps++;
+    if (call.alleles === null) {
       // If a curated locus had a no-call on the array, track it for gap reporting
       if (CURATED_KB[rsid]) {
-        assayedCurated.set(rsid, {
-          chrom,
-          pos,
-          genotype: "--",
-          isNoCall: true
-        });
+        assayedCurated.set(rsid, { chrom: call.chrom, pos: call.pos, genotype, isNoCall: true });
       }
-    } else {
-      calledSnps++;
-      const isHet = (genotype.length === 2 && genotype[0] !== genotype[1]);
-      if (isHet) {
-        hetCount++;
-      } else {
-        homCount++;
-      }
-
-      // Track APOE key SNPs
-      if (rsid === "rs429358") gt429 = genotype;
-      if (rsid === "rs7412") gt741 = genotype;
-
-      // Sex chromosome metrics
-      const cUpper = chrom.toUpperCase();
-      if (cUpper === "X" || cUpper === "23") {
-        xCalled++;
-        if (isHet) xHet++;
-      } else if (cUpper === "Y" || cUpper === "24") {
-        yCalled++;
-      }
-
-      // Track all interrogated curated loci for 5-state coverage taxonomy evaluation
-      if (CURATED_KB[rsid]) {
-        assayedCurated.set(rsid, {
-          chrom,
-          pos,
-          genotype,
-          isNoCall: false
-        });
-      }
+      continue;
     }
 
-    if (i % updateInterval === 0) {
-      const p = Math.round(15 + (i / totalLines) * 75);
-      self.postMessage({
-        type: "progress",
-        percent: p,
-        status: `Parsed ${totalSnps.toLocaleString()} SNPs (${clinicalFindings.length} clinical findings)...`
-      });
+    // Track APOE key SNPs
+    if (rsid === "rs429358") gt429 = genotype;
+    if (rsid === "rs7412") gt741 = genotype;
+
+    // Track all interrogated curated loci for 5-state coverage taxonomy evaluation
+    if (CURATED_KB[rsid]) {
+      assayedCurated.set(rsid, { chrom: call.chrom, pos: call.pos, genotype, isNoCall: false });
     }
   }
 
-  // Compute QC metrics
-  const callRate = totalSnps > 0 ? (calledSnps / totalSnps) : 0;
-  const hetRate = calledSnps > 0 ? (hetCount / calledSnps) : 0;
+  self.postMessage({ type: "progress", percent: 90, status: `Parsed ${totalSnps.toLocaleString()} SNPs...` });
 
-  // Infer biological sex-chromosome karyotype signal
-  let inferredSex = "Unknown (Insufficient X markers)";
-  let xHetRate = 0;
-  if (xCalled >= 10) {
-    xHetRate = xHet / xCalled;
-    if (xHetRate > 0.08 && yCalled >= 5) {
-      inferredSex = "Atypical (High X Heterozygosity with Y Markers - e.g. 47,XXY or Mosaicism)";
-    } else if (xHetRate > 0.08) {
-      inferredSex = "Compatible with XX Karyotype (Heterozygous X)";
-    } else if (xHetRate < 0.03 && yCalled >= 5) {
-      inferredSex = "Compatible with XY Karyotype (Hemizygous X & Y Present)";
-    } else if (xHetRate < 0.03 && yCalled === 0) {
-      inferredSex = "Hemizygous X with No Y Markers Observed (Consistent with 45,X Turner or Sparse Y Coverage)";
-    } else {
-      inferredSex = "Indeterminate Sex-Chromosome Signal";
-    }
-  }
+  const qcMetrics = computeQc(parsed);
 
   // -------------------------------------------------------------------------
   // 5-STATE COVERAGE TAXONOMY EVALUATION
@@ -504,12 +319,7 @@ function parseGenomicText(text, fileName = "") {
     total_snps: totalSnps,
     called_snps: calledSnps,
     nocall_snps: nocallSnps,
-    call_rate: callRate,
-    heterozygosity_rate: hetRate,
-    inferred_sex: inferredSex,
-    x_markers_called: xCalled,
-    x_het_rate: xHetRate,
-    y_markers_called: yCalled,
+    ...qcMetrics,
     chrom_distribution: chromDist
   };
 

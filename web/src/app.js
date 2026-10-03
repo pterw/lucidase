@@ -323,15 +323,11 @@ function renderQC() {
   document.getElementById("qc-call-rate").textContent = `${(qc.call_rate * 100).toFixed(2)}%`;
   document.getElementById("qc-het-rate").textContent = `${(qc.heterozygosity_rate * 100).toFixed(2)}%`;
 
+  // The badge shows the QC signal verbatim; it makes no sex or karyotype claim.
   const sexBadge = document.getElementById("qc-inferred-sex");
-  sexBadge.textContent = qc.inferred_sex;
-  if (qc.inferred_sex.includes("Female")) {
-    sexBadge.className = "inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-pink-100 dark:bg-pink-500/20 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30";
-  } else if (qc.inferred_sex.includes("Male")) {
-    sexBadge.className = "inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30";
-  } else {
-    sexBadge.className = "inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
-  }
+  sexBadge.textContent = qc.sex_signal;
+  sexBadge.title = `X markers: ${qc.x_markers.toLocaleString()} | X heterozygosity: ${(qc.x_het_rate * 100).toFixed(1)}% | Y calls: ${qc.y_calls.toLocaleString()}`;
+  sexBadge.className = "inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
 }
 
 function renderSummaryCards() {
@@ -1034,7 +1030,7 @@ function exportMarkdownReport() {
 
   let md = `# GenomePulse Variome Clinical Report\n\n`;
   md += `> **CARDINAL SCOPE GUARDRAIL**: ${ABSENCE_OF_FINDING_GUARDRAIL}\n\n`;
-  md += `**Sample**: ${state.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Inferred Sex**: ${qc.inferred_sex}\n`;
+  md += `**Sample**: ${state.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
   md += `**Markers**: ${qc.total_snps.toLocaleString()} | **Call Rate**: ${(qc.call_rate * 100).toFixed(2)}% | **Heterozygosity**: ${(qc.heterozygosity_rate * 100).toFixed(2)}%\n\n`;
 
   md += `## Coverage Taxonomy (5-State Summary)\n\n`;
