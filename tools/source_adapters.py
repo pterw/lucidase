@@ -6,9 +6,10 @@ The only module that names a field of an upstream payload. It reads the pinned c
 returns our models from `tools/variome_models.py`. Downstream code never sees a raw dict.
 
 Rules every adapter follows:
-- Fail closed. A value the payload lacks is `None` and the model's `reasons` names why. Nothing is
-  synthesised: no default accession, no fallback transcript, no 0.0 placeholder.
-- Fail fast on a vocabulary it does not know (an unknown ClinVar review status raises).
+- Fail closed. A value the model allows to be absent is `None` and the model's `reasons` names why. Nothing
+  is synthesised: no default accession, no fallback transcript, no 0.0 placeholder.
+- Fail fast on a vocabulary it does not know (an unknown ClinVar review status raises) and on a field the
+  code relies on that is missing or mistyped: `_require` raises `AdapterError` naming the path.
 - Provenance (`retrieved_at`, `url`, `sha256`) comes from the capture's `.meta.json`, `release`
   from the payload or the request recorded in the meta, never from a constant.
 
@@ -51,6 +52,8 @@ REVIEW_STATUS_STARS = {
 }
 STAR_ALLELE_TITLE = re.compile(r"[A-Za-z0-9]+\*\d+[A-Za-z]?")
 BUILDS = ("GRCh37", "GRCh38")
+# The AlphaMissense class vocabulary of the pinned VEP payloads.
+ALPHAMISSENSE_CLASSES = frozenset({"likely_benign", "ambiguous", "likely_pathogenic"})
 
 
 class AdapterError(ValueError):
@@ -59,6 +62,23 @@ class AdapterError(ValueError):
 
 class PayloadIntegrityError(AdapterError):
     """A pinned payload does not match its meta."""
+
+
+def _require(obj: Any, key: str, kind: type | tuple[type, ...], where: str) -> Any:
+    """`obj[key]`, which must exist and be a `kind` (a bool is never an int or a float), else `AdapterError`.
+
+    `where` names the object read, so the message gives the path of the field that broke.
+    """
+    if not isinstance(obj, dict):
+        raise AdapterError(f"{where}: expected an object holding {key!r}, got {type(obj).__name__}")
+    if key not in obj:
+        raise AdapterError(f"{where}.{key} is missing")
+    value = obj[key]
+    kinds = kind if isinstance(kind, tuple) else (kind,)
+    if not isinstance(value, kinds) or (isinstance(value, bool) and bool not in kinds):
+        names = " or ".join(k.__name__ for k in kinds)
+        raise AdapterError(f"{where}.{key} must be {names}, got {type(value).__name__}")
+    return value
 
 
 # =============================================================================
@@ -75,9 +95,9 @@ class PinnedPayload:
             source=source,
             release=release,
             accession=accession,
-            url=self.meta["url"],
-            retrieved_at=self.meta["retrieved_at"],
-            sha256=self.meta["sha256_of_body"],
+            url=_require(self.meta, "url", str, f"{self.path} meta"),
+            retrieved_at=_require(self.meta, "retrieved_at", str, f"{self.path} meta"),
+            sha256=_require(self.meta, "sha256_of_body", str, f"{self.path} meta"),
         )
 
 
@@ -94,11 +114,19 @@ def load_pinned(body_path: Path | str) -> PinnedPayload:
         body = body_path.read_bytes()
     except OSError as exc:
         raise PayloadIntegrityError(f"{body_path}: cannot read capture or meta ({exc})") from exc
+    except ValueError as exc:  # JSONDecodeError and UnicodeDecodeError
+        raise PayloadIntegrityError(f"{meta_path}: the meta is not readable JSON ({exc})") from exc
+    if not isinstance(meta, dict):
+        raise PayloadIntegrityError(f"{meta_path}: the meta is not a JSON object")
     if meta.get("http_status") != 200 or not meta.get("sha256_of_body"):
         raise PayloadIntegrityError(f"{body_path}: capture was not a successful response")
     if hashlib.sha256(body).hexdigest() != meta["sha256_of_body"]:
         raise PayloadIntegrityError(f"{body_path}: sha256 does not match {meta_path.name}")
-    return PinnedPayload(body_path, json.loads(body.decode("utf-8")), meta)
+    try:
+        data = json.loads(body.decode("utf-8"))
+    except ValueError as exc:  # JSONDecodeError and UnicodeDecodeError
+        raise PayloadIntegrityError(f"{body_path}: the capture is not readable JSON ({exc})") from exc
+    return PinnedPayload(body_path, data, meta)
 
 
 def verify_pinned_payloads(root: Path | str) -> list[str]:
@@ -115,8 +143,12 @@ def verify_pinned_payloads(root: Path | str) -> list[str]:
         rel = body_path.relative_to(root).as_posix()
         try:
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            if not isinstance(meta, dict):
+                raise ValueError("the meta is not a JSON object")
             if meta.get("http_status") != 200:
-                continue  # a recorded failure has no body to check
+                if body_path.exists():  # a recorded failure has no body: a leftover is a stale capture
+                    errors.append(f"pinned payload {rel}: a body sits next to a failure meta (status {meta.get('http_status')})")
+                continue
             body = body_path.read_bytes()
         except (OSError, ValueError) as exc:
             errors.append(f"pinned payload {rel}: unreadable ({exc})")
@@ -131,18 +163,22 @@ def verify_pinned_payloads(root: Path | str) -> list[str]:
 # =============================================================================
 # ClinVar (esummary)
 # =============================================================================
-def _spdi_edit(spdi: Any) -> Optional[tuple[int, str, str]]:
-    """Parse `NC_000007.14:117559590:TCTT:T` (0-based) into a normalised 1-based edit, or None."""
+def _spdi_edit(spdi: Any, where: str) -> tuple[str, tuple[int, str, str]]:
+    """Parse `NC_000007.14:117559590:TCTT:T` (0-based) into (sequence id, normalised 1-based edit).
+
+    A value that is not a four-part SPDI with a numeric position raises `AdapterError` naming `where`.
+    """
     if not isinstance(spdi, str) or spdi.count(":") != 3:
-        return None
-    _, pos, deleted, inserted = spdi.split(":")
-    if not pos.isdigit():
-        return None
-    return normalize_edit(int(pos) + 1, deleted, inserted)
+        raise AdapterError(f"{where}.canonical_spdi is not a four-part SPDI string: {spdi!r}")
+    seq_id, pos, deleted, inserted = spdi.split(":")
+    if not seq_id or not pos.isdigit():
+        raise AdapterError(f"{where}.canonical_spdi has no sequence id or a non-numeric position: {spdi!r}")
+    return seq_id, normalize_edit(int(pos) + 1, deleted, inserted)
 
 
-def _dbsnp_numbers(variation: dict[str, Any]) -> set[str]:
-    return {x.get("db_id") for x in variation.get("variation_xrefs", []) if x.get("db_source") == "dbSNP"}
+def _dbsnp_numbers(variation: dict[str, Any], where: str) -> set[str]:
+    xrefs = _require(variation, "variation_xrefs", list, where)
+    return {x.get("db_id") for x in xrefs if isinstance(x, dict) and x.get("db_source") == "dbSNP"}
 
 
 class TruncatedSearch(AdapterError):
@@ -170,7 +206,8 @@ def esearch_uids(esearch: bytes | dict[str, Any]) -> list[str]:
 def check_clinvar_search_complete(esearch: dict[str, Any], esummary: dict[str, Any]) -> None:
     """Raise unless the esearch was complete (count == len(idlist)) and esummary covers exactly its ids (L2)."""
     ids = esearch_uids(esearch)
-    if set(ids) != set(esummary.get("result", {}).get("uids", [])):
+    result = _require(esummary, "result", dict, "ClinVar esummary")
+    if set(ids) != set(_require(result, "uids", list, "ClinVar esummary.result")):
         raise AdapterError("ClinVar esummary does not cover exactly the esearch ids")
 
 
@@ -191,8 +228,8 @@ def _clinvar_record(raw: dict[str, Any], selected_by: str, provenance: Optional[
     return ClinVarRecord(
         accession=accession,
         accession_version=raw.get("accession_version") or None,
-        title=raw.get("title", ""),
-        obj_type=raw.get("obj_type", ""),
+        title=_require(raw, "title", str, f"ClinVar record {raw.get('uid')!r}"),
+        obj_type=_require(raw, "obj_type", str, f"ClinVar record {raw.get('uid')!r}"),
         review_status=status,
         stars=REVIEW_STATUS_STARS[status],
         conflicting=status == CLINVAR_CONFLICTING,
@@ -210,6 +247,7 @@ def select_clinvar_record(
     ref: str,
     alt: str,
     provenance: Optional[ImportProvenance] = None,
+    seq_id: Optional[str] = None,
 ) -> Optional[ClinVarRecord]:
     """Pick the ClinVar record that describes this locus allele, or None when none does.
 
@@ -221,23 +259,35 @@ def select_clinvar_record(
     2. if a star-allele haplotype record (`GENE*N`) remains, take it: it is the allele-defining record
        (the single-variant record for CYP2C19 c.681G>A reads "Likely benign" for a loss-of-function allele);
     3. otherwise take the one remaining single-variant record. More than one raises, none gives None.
+
+    A record whose dbSNP xref is `rsid` must carry a readable `canonical_spdi`, on the sequence `seq_id` (the
+    locus's GRCh38 chromosome accession) when it is given: an unreadable or foreign one raises instead of being
+    dropped, so "no record matches" never hides a schema change. Records for other variants are not inspected.
     """
     number = rsid[2:]
     want = normalize_edit(pos, ref, alt)
-    records = esummary.get("result", {})
+    records = _require(esummary, "result", dict, "ClinVar esummary")
     matches = []
-    for uid in records.get("uids", []):
-        raw = records[uid]
-        for variation in raw.get("variation_set", []):
-            if number in _dbsnp_numbers(variation) and _spdi_edit(variation.get("canonical_spdi")) == want:
+    for uid in _require(records, "uids", list, "ClinVar esummary.result"):
+        raw = _require(records, uid, dict, "ClinVar esummary.result")
+        where = f"ClinVar record {uid!r}"
+        for variation in _require(raw, "variation_set", list, where):
+            if number not in _dbsnp_numbers(variation, f"{where}.variation_set[]"):
+                continue
+            spdi = _require(variation, "canonical_spdi", str, f"{where}.variation_set[]")
+            spdi_seq, edit = _spdi_edit(spdi, f"{where}.variation_set[]")
+            if seq_id is not None and spdi_seq != seq_id:
+                raise AdapterError(f"{rsid}: {where} SPDI is on {spdi_seq}, not the GRCh38 chromosome {seq_id}")
+            if edit == want:
                 matches.append(raw)
                 break
-    stars = [r for r in matches if r.get("obj_type") == "Haplotype" and STAR_ALLELE_TITLE.fullmatch(r.get("title", ""))]
+    stars = [r for r in matches if _require(r, "obj_type", str, "ClinVar record") == "Haplotype"
+             and STAR_ALLELE_TITLE.fullmatch(_require(r, "title", str, "ClinVar record"))]
     if stars:
         if len(stars) > 1:
             raise AdapterError(f"{rsid}: several star-allele haplotype records match: {[r['accession'] for r in stars]}")
         return _clinvar_record(stars[0], "star-allele haplotype record containing the locus variant", provenance)
-    singles = [r for r in matches if len(r.get("variation_set", [])) == 1]
+    singles = [r for r in matches if len(r["variation_set"]) == 1]
     if len(singles) > 1:
         raise AdapterError(f"{rsid}: several single-variant ClinVar records match: {[r.get('accession') for r in singles]}")
     if not singles:
@@ -250,28 +300,40 @@ def select_clinvar_record(
 # =============================================================================
 def parse_dbsnp(raw: dict[str, Any], provenance: Optional[ImportProvenance] = None) -> DbsnpRecord:
     """Read the GRCh37 and GRCh38 chromosome placements and their SPDI alleles (0-based) from a refsnp."""
+    refsnp = _require(raw, "refsnp_id", str, "dbSNP payload")
+    where = f"dbSNP rs{refsnp}"
+    snapshot = _require(raw, "primary_snapshot_data", dict, where)
     placements: dict[str, DbsnpPlacement] = {}
-    for placement in raw.get("primary_snapshot_data", {}).get("placements_with_allele", []):
-        annot = placement.get("placement_annot", {})
-        if annot.get("seq_type") != "refseq_chromosome":
+    for placement in _require(snapshot, "placements_with_allele", list, f"{where}.primary_snapshot_data"):
+        place = f"{where}.placements_with_allele[]"
+        annot = _require(placement, "placement_annot", dict, place)
+        if _require(annot, "seq_type", str, f"{place}.placement_annot") != "refseq_chromosome":
             continue
-        for trait in annot.get("seq_id_traits_by_assembly", []):
-            name = trait.get("assembly_name", "")
+        for trait in _require(annot, "seq_id_traits_by_assembly", list, f"{place}.placement_annot"):
+            name = _require(trait, "assembly_name", str, f"{place}.placement_annot.seq_id_traits_by_assembly[]")
             build = next((b for b in BUILDS if name.startswith(b)), None)
             if build is None or not trait.get("is_chromosome") or trait.get("is_alt") or trait.get("is_patch"):
                 continue
             if build in placements:
-                raise AdapterError(f"rs{raw.get('refsnp_id')}: several {build} chromosome placements")
-            spdis = [a["allele"]["spdi"] for a in placement.get("alleles", [])]
+                raise AdapterError(f"rs{refsnp}: several {build} chromosome placements")
+            alleles = []
+            for allele in _require(placement, "alleles", list, place):
+                spdi = _require(_require(allele, "allele", dict, f"{place}.alleles[]"), "spdi", dict, f"{place}.alleles[].allele")
+                spdi_where = f"{place}.alleles[].allele.spdi"
+                alleles.append((
+                    _require(spdi, "position", int, spdi_where),
+                    _require(spdi, "deleted_sequence", str, spdi_where),
+                    _require(spdi, "inserted_sequence", str, spdi_where),
+                ))
             placements[build] = DbsnpPlacement(
-                seq_id=placement["seq_id"],
+                seq_id=_require(placement, "seq_id", str, place),
                 build=build,
-                alleles=tuple((s["position"], s["deleted_sequence"], s["inserted_sequence"]) for s in spdis),
+                alleles=tuple(alleles),
             )
     reasons = {f"placement_{b}": "the payload has no chromosome placement for this build" for b in BUILDS if b not in placements}
     build_id = raw.get("last_update_build_id")
     return DbsnpRecord(
-        rsid=f"rs{raw.get('refsnp_id')}",
+        rsid=f"rs{refsnp}",
         release=f"dbSNP build {build_id}" if build_id else None,
         placements=placements,
         reasons=reasons,
@@ -290,7 +352,7 @@ def gnomad_variant_ids_from_dbsnp(raw: dict[str, Any]) -> list[str]:
     """
     placement = parse_dbsnp(raw).placements.get("GRCh38")
     if placement is None:
-        raise AdapterError(f"rs{raw.get('refsnp_id')}: the dbSNP payload has no GRCh38 chromosome placement")
+        raise AdapterError(f"rs{_require(raw, 'refsnp_id', str, 'dbSNP payload')}: the dbSNP payload has no GRCh38 chromosome placement")
     found = _CHROMOSOME_ACCESSION.fullmatch(placement.seq_id)
     if found is None:
         raise AdapterError(f"unexpected GRCh38 sequence accession {placement.seq_id!r}")
@@ -340,9 +402,14 @@ def parse_vep(
     am = row.get("alphamissense")
     am_class: Optional[str] = None
     am_score: Optional[float] = None
-    if isinstance(am, dict):
+    if am is not None and not isinstance(am, dict):
+        raise AdapterError(f"{rsid}: VEP alphamissense must be an object, got {type(am).__name__}")
+    if am is not None:
         am_class = am.get("am_class")
-        am_score = float(am["am_pathogenicity"]) if am.get("am_pathogenicity") is not None else None
+        if am_class is not None and am_class not in ALPHAMISSENSE_CLASSES:
+            raise AdapterError(f"{rsid}: unknown alphamissense am_class {am_class!r}; known: {sorted(ALPHAMISSENSE_CLASSES)}")
+        if am.get("am_pathogenicity") is not None:
+            am_score = float(_require(am, "am_pathogenicity", (int, float), f"{rsid} alphamissense"))
     if am_class is None:
         reasons["alphamissense_class"] = "the payload row has no alphamissense am_class"
     if am_score is None:
@@ -368,6 +435,9 @@ _GNOMAD_MULTIPLE_VARIANTS_MESSAGE = "Multiple variants found"
 def parse_gnomad_variant(raw: dict[str, Any], provenance: Optional[ImportProvenance] = None) -> GnomadVariant:
     """Allele frequency as ac/an pooled over the exome and genome records that have an > 0, else None."""
     variant = (raw.get("data") or {}).get("variant")
+    if isinstance(variant, dict) and raw.get("errors"):
+        messages = [str(e.get("message")) if isinstance(e, dict) else str(e) for e in raw["errors"]]
+        raise AdapterError(f"gnomAD returned a variant together with errors (a partial response): {'; '.join(messages)}")
     if not isinstance(variant, dict):
         errors = "; ".join(str(e.get("message")) for e in raw.get("errors", []) if isinstance(e, dict))
         refusal = GNOMAD_REFUSAL_MULTIPLE_VARIANTS if _GNOMAD_MULTIPLE_VARIANTS_MESSAGE in errors else None
@@ -376,9 +446,19 @@ def parse_gnomad_variant(raw: dict[str, Any], provenance: Optional[ImportProvena
     ac_total = an_total = 0
     for key in ("exome", "genome"):
         record = variant.get(key)
-        if isinstance(record, dict) and record.get("ac") is not None and (record.get("an") or 0) > 0:
-            ac_total += record["ac"]
-            an_total += record["an"]
+        if record is None:
+            continue  # this dataset has no record of the variant
+        where = f"gnomAD variant {variant.get('variant_id')!r} {key}"
+        an = record.get("an") if isinstance(record, dict) else None
+        if not isinstance(record, dict) or (an is not None and (not isinstance(an, int) or isinstance(an, bool) or an < 0)):
+            raise AdapterError(f"{where}: expected an object with an integer an >= 0, got {record!r}")
+        if not an:
+            continue  # an of 0 or null: no called alleles, so no frequency from this record
+        ac = _require(record, "ac", int, where)
+        if not 0 <= ac <= an:
+            raise AdapterError(f"{where}.ac {ac} is outside 0..an ({an})")
+        ac_total += ac
+        an_total += an
     reasons = {}
     af = None
     if an_total > 0:
@@ -449,7 +529,11 @@ class UpstreamSnapshot:
         if search is None:
             raise AdapterError(f"{rsid}: ClinVar esummary has no esearch capture to prove it is complete")
         check_clinvar_search_complete(search.data, summary.data)
-        record = select_clinvar_record(summary.data, rsid, pos_grch38, ref, alt)
+        dbsnp = self.dbsnp(rsid)
+        placement = None if dbsnp is None else dbsnp.placements.get("GRCh38")
+        if placement is None:
+            raise AdapterError(f"{rsid}: no dbSNP GRCh38 chromosome placement to compare the ClinVar SPDI sequence with")
+        record = select_clinvar_record(summary.data, rsid, pos_grch38, ref, alt, seq_id=placement.seq_id)
         if record is None:
             return None
         provenance = summary.provenance("NCBI ClinVar", None, record.accession_version)
@@ -487,9 +571,11 @@ class UpstreamSnapshot:
                 expected = f"gnomad/{rsid}.{variant_id}.json"
                 reason = f"gnomAD refused the rsid query (multiple variants) and the per-variant capture {expected} is missing"
                 return GnomadVariant(None, None, {"af": reason}, None, GNOMAD_REFUSAL_MULTIPLE_VARIANTS)
-        meta_query = (payload.meta.get("request_body") or "")
-        dataset = re.search(r"dataset:\s*(\w+)", meta_query)
-        provenance = payload.provenance("gnomAD", dataset.group(1) if dataset else None, variant_id)
+        meta_query = payload.meta.get("request_body")
+        dataset = re.search(r"dataset:\s*(\w+)", meta_query) if isinstance(meta_query, str) else None
+        if dataset is None:
+            raise AdapterError(f"{payload.path}: the capture meta does not record the gnomAD dataset (request_body)")
+        provenance = payload.provenance("gnomAD", dataset.group(1), variant_id)
         return parse_gnomad_variant(payload.data, provenance)
 
     def constraint(self, gene: str) -> Optional[GnomadConstraint]:

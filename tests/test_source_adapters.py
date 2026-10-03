@@ -295,7 +295,7 @@ def test_dbsnp_rejects_wrong_position_and_alleles(snapshot):
     record = snapshot.dbsnp("rs671")
     assert "position" in record.check_locus("GRCh38", 111803963, "G", "A")
     assert "allele" in record.check_locus("GRCh38", 111803962, "G", "C")
-    assert "placement" in parse_dbsnp({"refsnp_id": "1", "primary_snapshot_data": {}}).check_locus("GRCh38", 1, "A", "G")
+    assert "placement" in parse_dbsnp({"refsnp_id": "1", "primary_snapshot_data": {"placements_with_allele": []}}).check_locus("GRCh38", 1, "A", "G")
 
 
 def test_dbsnp_release_comes_from_the_payload(snapshot):
@@ -502,7 +502,7 @@ _NOT_UPSTREAM_FIELDS = frozenset({
 
 
 def _string_keys_read_by(path):
-    """Every string constant used as a subscript or as the first argument of `.get(...)` in a module."""
+    """Every string constant used as a subscript, as the first argument of `.get(...)` or as the key of `_require(...)`."""
     tree = ast.parse(path.read_text(encoding="utf-8"))
     keys = set()
     for node in ast.walk(tree):
@@ -517,6 +517,15 @@ def _string_keys_read_by(path):
             and isinstance(node.args[0].value, str)
         ):
             keys.add(node.args[0].value)
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "_require"
+            and len(node.args) > 1
+            and isinstance(node.args[1], ast.Constant)
+            and isinstance(node.args[1].value, str)
+        ):
+            keys.add(node.args[1].value)  # _require(obj, "key", kind, where) reads "key"
     return keys
 
 
@@ -647,3 +656,399 @@ def test_gnomad_multiple_variants_refusal_is_recognised_through_the_parser():
     assert is_multiple_variants_refusal({"errors": [{"message": "Multiple variants found, x"}]}) is True
     with pytest.raises(AdapterError):
         is_multiple_variants_refusal(b"<html>502</html>")
+
+
+# ---------------------------------------------------------------------------
+# S3-F2b: the adapters refuse what they cannot read (S3a-C-4, C-5, C-7, C-13, C-15)
+# Every test below is synthetic (hand-built bytes) and names the branch it guards.
+# ---------------------------------------------------------------------------
+def _repin(root, source, key, data):
+    """Replace a capture body and re-pin it (meta sha and size agree), so only the adapter can object."""
+    body = root / source / f"{key}.json"
+    meta = root / source / f"{key}.meta.json"
+    body.write_bytes(data)
+    info = json.loads(meta.read_text(encoding="utf-8"))
+    info["sha256_of_body"], info["bytes"] = hashlib.sha256(data).hexdigest(), len(data)
+    meta.write_text(json.dumps(info), encoding="utf-8")
+
+
+def _edit_meta(root, source, key, **change):
+    meta = root / source / f"{key}.meta.json"
+    info = json.loads(meta.read_text(encoding="utf-8"))
+    info.update(change)
+    meta.write_text(json.dumps(info), encoding="utf-8")
+    return info
+
+
+@pytest.fixture
+def pinned_copy(tmp_path):
+    root = tmp_path / "real"
+    shutil.copytree(REAL, root)
+    return root
+
+
+# --- C-4: ClinVar -----------------------------------------------------------
+@pytest.mark.parametrize("field", ["title", "obj_type"])
+def test_synthetic_clinvar_matching_record_without_title_or_obj_type_raises(field):
+    """C-4: a matching record that loses title or obj_type is refused, not read as title ''."""
+    summary = _synthetic_summary()
+    del summary["result"]["1"][field]
+    with pytest.raises(AdapterError, match=field):
+        select_clinvar_record(summary, "rs123", 100, "A", "G")
+
+
+def test_synthetic_clinvar_mistyped_title_raises():
+    with pytest.raises(AdapterError, match="title"):
+        select_clinvar_record(_synthetic_summary(title=5), "rs123", 100, "A", "G")
+
+
+def test_synthetic_clinvar_uid_listed_without_an_entry_raises_adapter_error():
+    """C-4: `records[uid]` must not escape as a KeyError (the build's handler catches AdapterError)."""
+    summary = _synthetic_summary()
+    summary["result"]["uids"].append("2")
+    with pytest.raises(AdapterError, match="result.2 is missing"):
+        select_clinvar_record(summary, "rs123", 100, "A", "G")
+
+
+def test_synthetic_clinvar_summary_without_result_raises():
+    with pytest.raises(AdapterError, match="result"):
+        select_clinvar_record({}, "rs123", 100, "A", "G")
+
+
+@pytest.mark.parametrize("spdi", [None, 5, "NC_000001.11:99:A", "NC_000001.11:x:A:G"])
+def test_synthetic_clinvar_unreadable_spdi_on_an_xref_match_raises(spdi):
+    """C-4: an xref-matching record whose canonical_spdi is absent or malformed is refused, not dropped."""
+    summary = _synthetic_summary()
+    variation = summary["result"]["1"]["variation_set"][0]
+    if spdi is None:
+        del variation["canonical_spdi"]
+    else:
+        variation["canonical_spdi"] = spdi
+    with pytest.raises(AdapterError, match="canonical_spdi"):
+        select_clinvar_record(summary, "rs123", 100, "A", "G")
+
+
+def test_synthetic_clinvar_record_for_another_rsid_with_no_spdi_is_still_skipped():
+    """C-4 scope: only an xref-matching record must carry a readable SPDI."""
+    summary = _synthetic_summary()
+    del summary["result"]["1"]["variation_set"][0]["canonical_spdi"]
+    assert select_clinvar_record(summary, "rs999", 100, "A", "G") is None
+
+
+def test_synthetic_clinvar_spdi_on_another_sequence_raises():
+    """C-4: the SPDI sequence id is compared with the GRCh38 chromosome of the locus, not dropped."""
+    summary = _synthetic_summary()
+    with pytest.raises(AdapterError, match="NC_000002.12"):
+        select_clinvar_record(summary, "rs123", 100, "A", "G", seq_id="NC_000002.12")
+    assert select_clinvar_record(summary, "rs123", 100, "A", "G", seq_id="NC_000001.11") is not None
+
+
+def test_clinvar_snapshot_compares_the_spdi_sequence_with_the_dbsnp_grch38_chromosome(pinned_copy):
+    """C-4 end to end: the dbSNP capture names the GRCh38 chromosome; a ClinVar SPDI elsewhere is refused."""
+    raw = (pinned_copy / "clinvar" / "rs671.json").read_bytes()
+    assert b"NC_000012.12:" in raw
+    _repin(pinned_copy, "clinvar", "rs671", raw.replace(b"NC_000012.12:", b"NC_000012.11:"))
+    with pytest.raises(AdapterError, match="NC_000012.11"):
+        UpstreamSnapshot(pinned_copy).clinvar("rs671", *locus_args("rs671"))
+
+
+def test_synthetic_clinvar_search_check_needs_the_esummary_uids():
+    with pytest.raises(AdapterError, match="uids"):
+        check_clinvar_search_complete({"esearchresult": {"count": "0", "idlist": []}}, {"result": {}})
+
+
+# --- C-4: dbSNP -------------------------------------------------------------
+def _synthetic_dbsnp():
+    return copy.deepcopy(read("dbsnp", "rs671"))
+
+
+def _grch38_placement(raw):
+    return next(p for p in raw["primary_snapshot_data"]["placements_with_allele"] if p["seq_id"] == "NC_000012.12")
+
+
+@pytest.mark.parametrize("path", ["primary_snapshot_data", "refsnp_id"])
+def test_synthetic_dbsnp_missing_top_level_field_raises(path):
+    raw = _synthetic_dbsnp()
+    del raw[path]
+    with pytest.raises(AdapterError, match=path):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_without_placements_raises_not_an_empty_record():
+    raw = _synthetic_dbsnp()
+    del raw["primary_snapshot_data"]["placements_with_allele"]
+    with pytest.raises(AdapterError, match="placements_with_allele"):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_refsnp_id_is_never_rendered_as_rsnone():
+    raw = _synthetic_dbsnp()
+    raw["refsnp_id"] = None
+    with pytest.raises(AdapterError, match="refsnp_id"):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_placement_without_seq_id_raises():
+    raw = _synthetic_dbsnp()
+    del _grch38_placement(raw)["seq_id"]
+    with pytest.raises(AdapterError, match="seq_id"):
+        parse_dbsnp(raw)
+
+
+@pytest.mark.parametrize("field", ["position", "deleted_sequence", "inserted_sequence"])
+def test_synthetic_dbsnp_allele_without_position_or_sequence_raises(field):
+    raw = _synthetic_dbsnp()
+    del _grch38_placement(raw)["alleles"][0]["allele"]["spdi"][field]
+    with pytest.raises(AdapterError, match=field):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_string_position_raises():
+    raw = _synthetic_dbsnp()
+    _grch38_placement(raw)["alleles"][0]["allele"]["spdi"]["position"] = "111803961"
+    with pytest.raises(AdapterError, match="position"):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_allele_without_spdi_raises():
+    raw = _synthetic_dbsnp()
+    del _grch38_placement(raw)["alleles"][0]["allele"]["spdi"]
+    with pytest.raises(AdapterError, match="spdi"):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_two_grch38_chromosome_placements_raise():
+    """C-13: the 'several chromosome placements' guard."""
+    raw = _synthetic_dbsnp()
+    raw["primary_snapshot_data"]["placements_with_allele"].append(copy.deepcopy(_grch38_placement(raw)))
+    with pytest.raises(AdapterError, match="several GRCh38 chromosome placements"):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_payload_for_another_rsid_raises(pinned_copy):
+    """C-13: the 'dbSNP payload is for' guard."""
+    _repin(pinned_copy, "dbsnp", "rs671", (REAL / "dbsnp" / "rs7412.json").read_bytes())
+    with pytest.raises(AdapterError, match="dbSNP payload is for rs7412"):
+        UpstreamSnapshot(pinned_copy).dbsnp("rs671")
+
+
+# --- C-4: VEP ---------------------------------------------------------------
+def _vep_row(**alphamissense):
+    row = {"transcript_id": "ENST00000000001", "gene_symbol": "GENE", "mane": ["MANE_Select"],
+           "mane_select": "NM_000001.1", "variant_allele": "G"}
+    if alphamissense:
+        row["alphamissense"] = alphamissense
+    return row
+
+
+@pytest.mark.parametrize("score", ["0.5", True, [0.5]])
+def test_synthetic_vep_mistyped_alphamissense_score_raises_adapter_error(score):
+    """C-4: float('x') would raise a bare ValueError; a string score is a schema change, not a number."""
+    with pytest.raises(AdapterError, match="am_pathogenicity"):
+        parse_vep(_synthetic_vep([_vep_row(am_class="ambiguous", am_pathogenicity=score)]), "rs1", "GENE", "A", "G")
+
+
+@pytest.mark.parametrize("am_class", ["benign", "", 3, "Ambiguous"])
+def test_synthetic_vep_unknown_alphamissense_class_raises(am_class):
+    """C-4: the class vocabulary is closed (likely_benign, ambiguous, likely_pathogenic)."""
+    with pytest.raises(AdapterError, match="am_class"):
+        parse_vep(_synthetic_vep([_vep_row(am_class=am_class, am_pathogenicity=0.5)]), "rs1", "GENE", "A", "G")
+
+
+def test_synthetic_vep_alphamissense_vocabulary_is_accepted():
+    for am_class in ("likely_benign", "ambiguous", "likely_pathogenic"):
+        record = parse_vep(_synthetic_vep([_vep_row(am_class=am_class, am_pathogenicity=1)]), "rs1", "GENE", "A", "G")
+        assert record.alphamissense_class == am_class and record.alphamissense_score == 1.0
+
+
+def test_synthetic_vep_alphamissense_that_is_not_an_object_raises():
+    row = _vep_row()
+    row["alphamissense"] = "likely_benign"
+    with pytest.raises(AdapterError, match="alphamissense"):
+        parse_vep(_synthetic_vep([row]), "rs1", "GENE", "A", "G")
+
+
+def test_synthetic_vep_two_mane_select_transcripts_raise():
+    """C-13: the 'several MANE Select transcripts' guard."""
+    second = _vep_row()
+    second["transcript_id"], second["mane_select"] = "ENST00000000002", "NM_000002.1"
+    with pytest.raises(AdapterError, match="several MANE Select transcripts"):
+        parse_vep(_synthetic_vep([_vep_row(), second]), "rs1", "GENE", "A", "G")
+
+
+# --- C-4: the meta and load_pinned -------------------------------------------
+def test_synthetic_meta_without_url_raises_adapter_error_naming_the_field(pinned_copy):
+    meta = pinned_copy / "clinvar" / "rs671.meta.json"
+    info = json.loads(meta.read_text(encoding="utf-8"))
+    del info["url"]
+    meta.write_text(json.dumps(info), encoding="utf-8")
+    with pytest.raises(AdapterError, match="url"):
+        UpstreamSnapshot(pinned_copy).clinvar("rs671", *locus_args("rs671"))
+
+
+def test_synthetic_meta_with_a_mistyped_url_raises(pinned_copy):
+    _edit_meta(pinned_copy, "dbsnp", "rs671", url=None)
+    with pytest.raises(AdapterError, match="url"):
+        UpstreamSnapshot(pinned_copy).dbsnp("rs671")
+
+
+@pytest.mark.parametrize("which,data", [
+    ("meta", b"{not json"), ("meta", b"\xff\xfe"), ("meta", b"[]"),
+    ("body", b"{not json"), ("body", b"\xff\xfe"),
+])
+def test_load_pinned_wraps_json_and_decode_errors_in_payload_integrity_error(pinned_copy, which, data):
+    """C-4: a corrupt meta or body is a PayloadIntegrityError, never a bare JSONDecodeError/UnicodeDecodeError."""
+    if which == "meta":
+        (pinned_copy / "dbsnp" / "rs671.meta.json").write_bytes(data)
+    else:
+        _repin(pinned_copy, "dbsnp", "rs671", data)
+    with pytest.raises(PayloadIntegrityError):
+        load_pinned(pinned_copy / "dbsnp" / "rs671.json")
+
+
+def test_load_pinned_refuses_a_missing_body_or_meta(pinned_copy):
+    """C-13: the OSError branch."""
+    (pinned_copy / "dbsnp" / "rs671.json").unlink()
+    with pytest.raises(PayloadIntegrityError, match="cannot read"):
+        load_pinned(pinned_copy / "dbsnp" / "rs671.json")
+    (pinned_copy / "dbsnp" / "rs7412.meta.json").unlink()
+    with pytest.raises(PayloadIntegrityError, match="cannot read"):
+        load_pinned(pinned_copy / "dbsnp" / "rs7412.json")
+
+
+@pytest.mark.parametrize("change", [{"http_status": 500}, {"http_status": 204}, {"sha256_of_body": None}])
+def test_load_pinned_refuses_a_capture_that_was_not_a_successful_response(pinned_copy, change):
+    """C-13: the 'capture was not a successful response' guard (only a 200 with a sha is a capture)."""
+    _edit_meta(pinned_copy, "dbsnp", "rs671", **change)
+    with pytest.raises(PayloadIntegrityError, match="not a successful response"):
+        load_pinned(pinned_copy / "dbsnp" / "rs671.json")
+
+
+# --- C-7 / C-13: verify_pinned_payloads ---------------------------------------
+def test_verify_reports_a_directory_with_no_pinned_payloads(tmp_path):
+    """C-13: the 'no pinned payloads' guard."""
+    (tmp_path / "empty").mkdir()
+    errors = verify_pinned_payloads(tmp_path / "empty")
+    assert len(errors) == 1 and "no pinned payloads" in errors[0]
+
+
+def test_verify_reports_an_unreadable_meta_or_missing_body(pinned_copy):
+    """C-13: the 'unreadable' guard, for a missing body and for a meta that is not JSON."""
+    (pinned_copy / "dbsnp" / "rs671.json").unlink()
+    (pinned_copy / "dbsnp" / "rs7412.meta.json").write_text("{nope", encoding="utf-8")
+    errors = verify_pinned_payloads(pinned_copy)
+    assert len(errors) == 2 and all("unreadable" in e for e in errors)
+
+
+def test_verify_reports_a_size_that_differs_from_the_meta(pinned_copy):
+    """C-13: the size-mismatch branch (sha agrees, bytes does not)."""
+    info = json.loads((pinned_copy / "dbsnp" / "rs671.meta.json").read_text(encoding="utf-8"))
+    _edit_meta(pinned_copy, "dbsnp", "rs671", bytes=info["bytes"] + 1)
+    errors = verify_pinned_payloads(pinned_copy)
+    assert len(errors) == 1 and "dbsnp/rs671.json" in errors[0] and "size" in errors[0]
+
+
+def test_verify_reports_a_body_that_sits_next_to_a_failure_meta(pinned_copy):
+    """C-7: a failed re-capture that left the old body behind is an error, not a silent skip."""
+    _edit_meta(pinned_copy, "dbsnp", "rs671", http_status=500, sha256_of_body=None)
+    errors = verify_pinned_payloads(pinned_copy)
+    assert len(errors) == 1 and "dbsnp/rs671.json" in errors[0] and "failure" in errors[0]
+
+
+def test_verify_accepts_a_failure_meta_with_no_body(pinned_copy):
+    """C-7: a recorded failure with no body is the honest state."""
+    _edit_meta(pinned_copy, "dbsnp", "rs671", http_status=500, sha256_of_body=None)
+    (pinned_copy / "dbsnp" / "rs671.json").unlink()
+    assert verify_pinned_payloads(pinned_copy) == []
+
+
+# --- C-13: ClinVar selection and completeness guards --------------------------
+def test_synthetic_clinvar_two_star_allele_haplotype_records_raise():
+    """C-13: the 'several star-allele haplotype records' guard."""
+    summary = _synthetic_summary(obj_type="Haplotype", title="GENE*2")
+    second = copy.deepcopy(summary["result"]["1"])
+    second["uid"], second["accession"] = "2", "VCV000000002"
+    summary["result"]["uids"].append("2")
+    summary["result"]["2"] = second
+    with pytest.raises(AdapterError, match="several star-allele"):
+        select_clinvar_record(summary, "rs123", 100, "A", "G")
+
+
+def test_clinvar_snapshot_without_an_esearch_capture_raises(pinned_copy):
+    """C-13 / L2: an esummary with no esearch capture cannot prove it is complete."""
+    (pinned_copy / "clinvar" / "rs671.esearch.json").unlink()
+    (pinned_copy / "clinvar" / "rs671.esearch.meta.json").unlink()
+    with pytest.raises(AdapterError, match="no esearch capture"):
+        UpstreamSnapshot(pinned_copy).clinvar("rs671", *locus_args("rs671"))
+
+
+def test_clinvar_esummary_covering_other_ids_than_the_esearch_raises():
+    """C-13 / L2: the set(ids) != set(uids) branch of check_clinvar_search_complete."""
+    search = read("clinvar", "rs429358.esearch")
+    summary = copy.deepcopy(read("clinvar", "rs429358"))
+    summary["result"]["uids"] = summary["result"]["uids"][:-1]
+    with pytest.raises(AdapterError, match="does not cover exactly"):
+        check_clinvar_search_complete(search, summary)
+
+
+# --- C-5: gnomAD --------------------------------------------------------------
+def _gnomad(exome=None, genome=None, **extra):
+    return {"data": {"variant": {"variant_id": "1-1-A-G", "exome": exome, "genome": genome}}, **extra}
+
+
+@pytest.mark.parametrize("ac", [None, "5", 5.0, True, -1, 11])
+def test_synthetic_gnomad_ac_outside_zero_to_an_raises(ac):
+    """C-5: an > 0 with ac null, mistyped, negative or above an is refused, never skipped or pooled."""
+    with pytest.raises(AdapterError, match="ac"):
+        parse_gnomad_variant(_gnomad(exome={"ac": ac, "an": 10}, genome={"ac": 1, "an": 10}))
+
+
+@pytest.mark.parametrize("an", ["10", 1.5, True, -3])
+def test_synthetic_gnomad_mistyped_an_raises(an):
+    with pytest.raises(AdapterError, match="an"):
+        parse_gnomad_variant(_gnomad(exome={"ac": 1, "an": an}))
+
+
+def test_synthetic_gnomad_ac_equal_to_an_and_zero_are_valid():
+    assert parse_gnomad_variant(_gnomad(exome={"ac": 10, "an": 10}, genome={"ac": 0, "an": 10})).af == pytest.approx(0.5)
+
+
+def test_synthetic_gnomad_record_that_is_not_an_object_raises():
+    with pytest.raises(AdapterError, match="exome"):
+        parse_gnomad_variant(_gnomad(exome=[1, 2]))
+
+
+def test_synthetic_gnomad_errors_beside_a_variant_raise():
+    """C-5: a partial GraphQL response (variant plus errors) is not accepted."""
+    raw = _gnomad(exome={"ac": 1, "an": 10}, errors=[{"message": "timeout in genome"}])
+    with pytest.raises(AdapterError, match="timeout in genome"):
+        parse_gnomad_variant(raw)
+
+
+def test_synthetic_gnomad_empty_errors_list_beside_a_variant_is_accepted():
+    assert parse_gnomad_variant(_gnomad(exome={"ac": 1, "an": 10}, errors=[])).af == pytest.approx(0.1)
+
+
+def test_synthetic_gnomad_meta_without_the_dataset_raises(pinned_copy):
+    """C-5: provenance must record the dataset; a meta whose request lacks it is refused, not given release None."""
+    info = json.loads((pinned_copy / "gnomad" / "rs429358.meta.json").read_text(encoding="utf-8"))
+    _edit_meta(pinned_copy, "gnomad", "rs429358", request_body=info["request_body"].replace("dataset: gnomad_r4", ""))
+    with pytest.raises(AdapterError, match="dataset"):
+        UpstreamSnapshot(pinned_copy).gnomad_variant("rs429358", "19-44908684-T-C")
+
+
+def test_synthetic_gnomad_meta_without_a_request_body_raises(pinned_copy):
+    _edit_meta(pinned_copy, "gnomad", "rs429358", request_body=None)
+    with pytest.raises(AdapterError, match="dataset"):
+        UpstreamSnapshot(pinned_copy).gnomad_variant("rs429358", "19-44908684-T-C")
+
+
+# --- C-15 (test half): a curated locus with a missing capture is visible ----------
+@pytest.mark.parametrize("rsid", ALL_RSIDS)
+def test_every_curated_locus_has_all_its_pinned_captures(rsid):
+    """C-15: 'never captured' and 'deleted' must not look alike; the committed tree holds every capture."""
+    captures = (("clinvar", rsid), ("clinvar", f"{rsid}.esearch"), ("dbsnp", rsid), ("ensembl", rsid), ("gnomad", rsid),
+                ("gnomad", f"constraint_{LOCI[rsid]['gene']}"))
+    for source, key in captures:
+        assert (REAL / source / f"{key}.json").is_file(), f"{source}/{key}.json"
+        assert (REAL / source / f"{key}.meta.json").is_file(), f"{source}/{key}.meta.json"
