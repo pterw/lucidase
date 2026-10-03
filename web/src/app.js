@@ -691,7 +691,16 @@ function renderVariantsTable() {
   filtered.forEach(r => {
     const tr = document.createElement("tr");
     tr.className = "cursor-pointer border-b border-slate-200 dark:border-slate-800/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40";
-    tr.onclick = () => openDrawer(r);
+    tr.tabIndex = 0;
+    tr.setAttribute("aria-label", `${r.gene} ${r.id}`);
+    tr.onclick = () => openDrawer(r, tr);
+    tr.onkeydown = (event) => {
+      if (event.target !== tr) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); // Space must open the drawer, not scroll the page
+        openDrawer(r, tr);
+      }
+    };
 
     const categoryClass = categoryBadgeClass(r);
 
@@ -751,8 +760,12 @@ const COVERAGE_DRAWER_CLASS = {
   insufficient_evidence: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/30"
 };
 
-function openDrawer(record) {
+// The element that opened the drawer; closeDrawer returns focus to it.
+let drawerOpener = null;
+
+function openDrawer(record, opener = document.activeElement) {
   state.selectedVariant = record;
+  drawerOpener = opener instanceof HTMLElement && opener !== document.body ? opener : null;
   const drawer = document.getElementById("variant-drawer");
   if (!drawer) return;
 
@@ -1140,6 +1153,9 @@ function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
   if (drawer) drawer.classList.add("translate-x-full");
   state.selectedVariant = null;
+  // Return focus to whatever opened the drawer (a table row, or a button), if it is still on the page.
+  if (drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
+  drawerOpener = null;
 }
 
 /** Every row the file produced, once each: observed findings first, then wild-type, gaps and insufficient evidence. */
