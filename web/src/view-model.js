@@ -59,26 +59,57 @@ export function fmtPct(fraction) {
   return `${Math.round(fraction * 1000) / 10}%`;
 }
 
-/** Counts the variants the knowledge base tests per gene, from the distinct rsids in the listed records. */
+/**
+ * Counts the variants tested per gene for this file: the distinct KB rsids among the listed records, leaving out
+ * array gaps (a locus the array did not assay was not tested).
+ */
 export function testedVariantCounts(records) {
   const rsidsByGene = new Map();
   for (const r of records) {
-    if (r.role === "apoe_component" || r.components) continue;
+    if (r.role === "apoe_component" || r.components || r.coverage_state === "not_tested_by_array") continue;
     if (!rsidsByGene.has(r.gene)) rsidsByGene.set(r.gene, new Set());
     rsidsByGene.get(r.gene).add(r.rsid);
   }
   return Object.fromEntries([...rsidsByGene].map(([gene, set]) => [gene, set.size]));
 }
 
-/** "<allele> not detected (1 of N known variants in <gene> tested)". Only for a wild-type genotype. */
+/** "<allele> not detected (N variant(s) tested in <gene>)" (AGENTS.md 4.1). Only for a wild-type genotype. */
 function notDetectedStatement(record, testedCounts) {
   if (record.sample_observation !== "wild_type") return null;
-  const parts = record.components ?? [record];
   const label = record.components ? `${record.gene} ε2 and ε4 alleles` : `${record.rsid} variant`;
-  const total = record.components ? parts.length : testedCounts[record.gene];
+  const total = record.components ? record.components.length : testedCounts[record.gene];
   if (total === undefined) return `${label} not detected`;
-  return `${label} not detected (${parts.length} of ${total} known variants in ${record.gene} tested)`;
+  return `${label} not detected (${total} ${total === 1 ? "variant" : "variants"} tested in ${record.gene})`;
 }
+
+/** One locus's own evidence figures. A composite row carries one of these per component, never one as its own. */
+function locusEvidence(rec) {
+  const evidence = rec.evidence ?? {};
+  const clinvar = evidence.clinvar ?? {};
+  const stars = numberOrNull(clinvar.stars);
+  const digits = nonEmptyString(clinvar.accession) ? clinvar.accession.replace(/\D/g, "") : "";
+  const imported = clinvar.provenance && clinvar.provenance.curation_mode === "machine_imported";
+  const af = numberOrNull(evidence.gnomad && evidence.gnomad.af);
+  return {
+    rsid: rec.rsid,
+    stars,
+    starsText: stars === null ? NO_CLINVAR_STATUS : stars > 0 ? "★".repeat(stars) : "0 stars",
+    starsDetail: stars === null ? NO_CLINVAR_STATUS : stars > 0 ? `${"★".repeat(stars)} (${stars} / 4 stars)` : "0 / 4 stars",
+    clinvarUrl: imported && digits ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${Number(digits)}` : null,
+    af,
+    afText: af === null ? null : `${(af * 100).toFixed(2)}%`,
+    afExport: af === null ? null : Math.round(af * 1e6) / 1e6,
+    tier: nonEmptyString(rec.evidence_tier),
+  };
+}
+
+const joinLabelled = (parts, pick, naText = NOT_AVAILABLE) =>
+  parts.map((p) => `${p.rsid}: ${pick(p) ?? naText}`).join(" · ");
+/** Component values joined by ";" in component order (an absent one is an empty slot); null when none is present. */
+const joinExport = (parts, pick) => {
+  const values = parts.map(pick);
+  return values.every((v) => v === null) ? null : values.map((v) => v ?? "").join(";");
+};
 
 function loeufText(value) {
   if (value === null) return null;
@@ -103,7 +134,6 @@ export function toViewModel(record, genes, testedCounts = {}) {
   const gene = genes[record.gene];
   const interp = record.interpretation ?? null;
   const evidence = record.evidence ?? {};
-  const clinvar = evidence.clinvar ?? {};
   const gnomad = evidence.gnomad ?? {};
   const hpa = evidence.hpa ?? {};
   const vep = evidence.vep ?? {};
@@ -113,10 +143,13 @@ export function toViewModel(record, genes, testedCounts = {}) {
   const allPositions = positions.every((p) => p.pos !== null);
   const isComposite = Boolean(record.components);
 
-  const stars = numberOrNull(clinvar.stars);
-  const clinvarDigits = nonEmptyString(clinvar.accession) ? clinvar.accession.replace(/\D/g, "") : "";
-  const importedClinvar = clinvar.provenance && clinvar.provenance.curation_mode === "machine_imported";
-  const af = numberOrNull(gnomad.af);
+  // One evidence entry per locus. A composite (APOE) row carries both components' evidence, each labelled with its
+  // rsid, and none of it is presented as the row's own (AGENTS.md 4.5, contracts C4).
+  const evidenceParts = parts.map(locusEvidence);
+  const single = isComposite ? null : evidenceParts[0];
+  const stars = single && single.stars;
+  const af = single && single.af;
+  const tierParts = evidenceParts.map((p) => p.tier);
   const magnitude = numberOrNull(interp && interp.magnitude);
   const repute = nonEmptyString(interp && interp.repute);
   const limitation = nonEmptyString(record.limitation);
@@ -128,7 +161,13 @@ export function toViewModel(record, genes, testedCounts = {}) {
   const phenotype = interp ? nonEmptyString(interp.phenotype) : nonEmptyString(record.reason);
   const category = nonEmptyString(interp && interp.category);
   const genotype = nonEmptyString(record.genotype_display);
-  const tier = nonEmptyString(record.evidence_tier);
+  const tier = isComposite
+    ? tierParts.every((t) => t === null)
+      ? null
+      : tierParts.every((t) => t === tierParts[0])
+        ? tierParts[0]
+        : joinLabelled(evidenceParts, (p) => p.tier)
+    : single.tier;
 
   const amScore = numberOrNull(ensembl.alphamissense_pathogenicity ?? vep.alphamissense_score);
   const amClass = nonEmptyString(ensembl.alphamissense_class ?? vep.alphamissense_class);
@@ -160,17 +199,27 @@ export function toViewModel(record, genes, testedCounts = {}) {
     magnitudeShort: magnitude === null ? null : magnitude.toFixed(1),
     diplotypeDisplay: record.diplotype && record.diplotype !== "atypical" ? displayDiplotype(record.diplotype) : null,
     magnitudeText: magnitude === null ? null : `${magnitude.toFixed(1)} / 10.0${repute ? ` (${repute})` : ""}`,
+    componentEvidence: isComposite ? evidenceParts : null,
     stars,
     clinvar_stars: stars,
-    starsMuted: stars === null,
-    starsText: stars === null ? NO_CLINVAR_STATUS : stars > 0 ? "★".repeat(stars) : "0 stars",
-    starsDetail: stars === null ? NO_CLINVAR_STATUS : stars > 0 ? `${"★".repeat(stars)} (${stars} / 4 stars)` : "0 / 4 stars",
-    clinvarUrl:
-      importedClinvar && clinvarDigits
-        ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${Number(clinvarDigits)}`
-        : null,
+    starsMuted: isComposite ? evidenceParts.every((p) => p.stars === null) : stars === null,
+    starsText: isComposite ? joinLabelled(evidenceParts, (p) => p.starsText) : single.starsText,
+    starsDetail: isComposite ? joinLabelled(evidenceParts, (p) => p.starsDetail) : single.starsDetail,
+    clinvarUrl: isComposite ? null : single.clinvarUrl,
+    clinvarLinks: evidenceParts.filter((p) => p.clinvarUrl !== null).map((p) => ({ rsid: p.rsid, url: p.clinvarUrl })),
     gnomad_af: af,
-    afText: af === null ? null : `${(af * 100).toFixed(2)}%`,
+    afText: isComposite
+      ? evidenceParts.every((p) => p.af === null)
+        ? null
+        : joinLabelled(evidenceParts, (p) => p.afText)
+      : single.afText,
+    // Export columns: the single locus's value, or the component values joined by ";" in component order.
+    starsExport: isComposite ? joinExport(evidenceParts, (p) => p.stars) : stars,
+    starsExportText: isComposite
+      ? evidenceParts.map((p) => p.starsText).join(";")
+      : single.starsText,
+    afExport: isComposite ? joinExport(evidenceParts, (p) => p.afExport) : single.afExport,
+    tierExport: isComposite ? joinExport(evidenceParts, (p) => p.tier) : tier,
     limitation,
     caveats,
     limitationTooltip: [limitation, ...caveats].filter(Boolean).join(" ") || null,
@@ -204,13 +253,13 @@ export function toViewModel(record, genes, testedCounts = {}) {
   vm.missing_fields = [
     ["genotype", genotype],
     ["position", vm.positionExport],
-    ["evidence_tier", tier],
+    ["evidence_tier", tierParts.some((t) => t === null) && isComposite ? null : tier],
     ["category", category],
     ["significance", significanceValue],
     ["magnitude", magnitude],
     ["repute", repute],
-    ["clinvar_stars", stars],
-    ["gnomad_af", af],
+    ["clinvar_stars", evidenceParts.some((p) => p.stars === null) ? null : true],
+    ["gnomad_af", evidenceParts.some((p) => p.af === null) ? null : true],
     ["phenotype", phenotype],
   ]
     .filter(([, value]) => value === null)
@@ -314,24 +363,35 @@ const CSV_HEADERS = [
   "Condition_Phenotype", "Result_Statement", "Limitation", "Caveats", "Missing_Fields",
 ];
 
-/** Gnomad_AF, wild-type-partner transmission, unscreened-partner transmission, unscreened-partner affected. */
+const INHERITANCE_FIELDS = [
+  "child_inherits_allele_wildtype_partner",
+  "child_inherits_allele_unscreened_partner",
+  "child_affected_unscreened_partner",
+];
+
+/**
+ * Wild-type-partner transmission, unscreened-partner transmission, unscreened-partner affected, as CSV values.
+ * "N/A" means "not applicable" and is written only for the affected cell of a non-Mendelian gene (contracts C5).
+ * Every other unavailable value is null (an empty cell) and its field name is in `missing`.
+ */
 function inheritanceCells(vm, genes) {
   const seg = vm.segregation;
-  const NOT_APPLICABLE = "N/A";
-  if (!seg) return [NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE];
+  if (!seg) return { values: [null, null, null], missing: [...INHERITANCE_FIELDS] };
   const num = (v) => Math.round(v * 1e6) / 1e6;
   const gene = genes[seg.gene];
   const wildtypePartner = geneOutcome(gene, offspringDistribution(seg.altCount, "wildtype", seg.af), seg.allele);
   const unscreened = geneOutcome(gene, offspringDistribution(seg.altCount, "unscreened", seg.af), seg.allele);
-  const transmits = (out) => (out.available ? num(out.p1 + out.p2) : NOT_APPLICABLE);
-  const affected = unscreened.available && seg.mendelian_disease ? num(unscreened.affected) : NOT_APPLICABLE;
-  return [transmits(wildtypePartner), transmits(unscreened), affected];
+  const transmits = (out) => (out.available ? num(out.p1 + out.p2) : null);
+  const affected = !seg.mendelian_disease ? "N/A" : unscreened.available ? num(unscreened.affected) : null;
+  const values = [transmits(wildtypePartner), transmits(unscreened), affected];
+  return { values, missing: INHERITANCE_FIELDS.filter((_, i) => values[i] === null) };
 }
 
 /** CSV text for the given view models. Missing values are empty cells and are named in Missing_Fields. */
 export function csvReport(viewModels, genes) {
   const rows = [CSV_HEADERS.join(",")];
   for (const vm of viewModels) {
+    const inheritance = inheritanceCells(vm, genes);
     const cells = [
       csvCell(vm.exportId),
       csvCell(vm.gene),
@@ -339,20 +399,20 @@ export function csvReport(viewModels, genes) {
       csvCell(vm.chromosomes),
       vm.positions.length === 1 && vm.positionExport !== null ? vm.positions[0].pos : csvCell(vm.positionExport),
       csvCell(vm.coverage_state),
-      csvCell(vm.tier),
+      csvCell(vm.tierExport),
       csvCell(vm.category),
       csvCell(vm.significanceValue),
       csvCell(vm.magnitude),
       csvCell(vm.repute),
-      csvCell(vm.stars),
+      csvCell(vm.starsExport),
       csvCell(vm.modelLabel),
-      csvCell(vm.gnomad_af === null ? null : Math.round(vm.gnomad_af * 1e6) / 1e6),
-      ...inheritanceCells(vm, genes).map(csvCell),
+      csvCell(vm.afExport),
+      ...inheritance.values.map(csvCell),
       csvCell(vm.phenotype),
       csvCell(vm.statement),
       csvCell(vm.limitation),
       csvCell(vm.caveats.join("; ")),
-      csvCell(vm.missing_fields.join(";")),
+      csvCell([...vm.missing_fields, ...inheritance.missing].join(";")),
     ];
     rows.push(cells.join(","));
   }
@@ -431,8 +491,8 @@ export function markdownReport(data) {
   md += mdTable(
     ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Category", "ClinVar", "Magnitude", "Limitation", "Phenotype / Guidance", "Missing fields"],
     unseen(data.records).map((r) => [
-      r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tier, r.category,
-      r.stars === null ? NO_CLINVAR_STATUS : r.starsText, r.magnitude === null ? null : r.magnitude.toFixed(1),
+      r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tierExport, r.category,
+      r.starsExportText, r.magnitude === null ? null : r.magnitude.toFixed(1),
       r.limitationTooltip, r.phenotype, r.missing_fields.join("; "),
     ])
   );
@@ -443,7 +503,7 @@ export function markdownReport(data) {
     md += mdTable(
       ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Result", "Limitation", "Missing fields"],
       negatives.map((r) => [
-        r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tier,
+        r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tierExport,
         r.statement ?? r.phenotype, r.limitationTooltip, r.missing_fields.join("; "),
       ])
     );
@@ -464,7 +524,7 @@ export function markdownReport(data) {
     md += mdTable(
       ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Reason", "Limitation", "Missing fields"],
       insufficient.map((r) => [
-        r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tier, r.phenotype, r.limitationTooltip,
+        r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tierExport, r.phenotype, r.limitationTooltip,
         r.missing_fields.join("; "),
       ])
     );

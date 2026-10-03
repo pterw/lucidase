@@ -75,7 +75,15 @@ def test_apoe_numbers_come_from_the_knowledge_base(loaded_page):
     )
     assert apoe["magnitude"] == kb_interp["magnitude"]
     assert apoe["phenotype"] == kb_interp["phenotype"]
-    assert apoe["clinvar_stars"] == apoe["evidence"]["clinvar"]["stars"]
+    # The composite row carries each component's own evidence, never one component's as its own.
+    assert apoe["clinvar_stars"] is None
+    kb_loci = loaded_page.evaluate(
+        "async () => (await (await fetch('./src/knowledge-base.json')).json()).loci"
+    )
+    assert [c["rsid"] for c in apoe["componentEvidence"]] == ["rs429358", "rs7412"]
+    assert [c["stars"] for c in apoe["componentEvidence"]] == [
+        kb_loci[r]["evidence"]["clinvar"]["stars"] for r in ("rs429358", "rs7412")
+    ]
 
 
 def test_coverage_cards_count_apoe_once(loaded_page):

@@ -11,6 +11,7 @@
  */
 
 import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
+import { loadKnowledgeBase } from "./kb-loader.js";
 import {
   NOT_AVAILABLE,
   acmgVersionLabel,
@@ -136,13 +137,14 @@ function renderKbClaims(manifest) {
   });
 }
 
-/** Reads the manifest from the same KB JSON the worker validates, so the page claims match the analysis. */
+/** Reads the manifest from the KB the worker loads and validates (kb-loader.js), so the page claims match the analysis. */
 async function loadManifest() {
   try {
-    const mod = await import("./knowledge-base.json", { with: { type: "json" } });
-    renderKbClaims(mod.default.manifest);
-  } catch {
-    // The page claims then read "Not available". The analysis itself reports the KB failure when a file is run.
+    const kb = await loadKnowledgeBase();
+    renderKbClaims(kb.manifest);
+  } catch (err) {
+    // A KB that cannot be loaded or fails validation makes no claims: the page reads "Not available".
+    console.error(err && err.message ? err.message : err);
     renderKbClaims(null);
   }
 }
@@ -792,11 +794,25 @@ function openDrawer(record) {
     drugBox.classList.add("hidden");
   }
 
-  // ClinVar external link: only for an accession that was machine-imported.
+  // ClinVar external links: one per locus whose accession was machine-imported. A composite row (APOE) gets one
+  // link per component, labelled with its rsid.
   const clinvarLink = document.getElementById("drawer-clinvar-link");
-  if (record.clinvarUrl !== null) {
-    clinvarLink.href = record.clinvarUrl;
+  clinvarLink.parentElement.querySelectorAll("[data-extra-clinvar-link]").forEach((el) => el.remove());
+  if (record.clinvarLinks.length > 0) {
+    const labelled = Boolean(record.componentEvidence);
     clinvarLink.classList.remove("hidden");
+    let anchor = clinvarLink;
+    record.clinvarLinks.forEach((link, i) => {
+      if (i > 0) {
+        const extra = clinvarLink.cloneNode(false);
+        extra.removeAttribute("id");
+        extra.setAttribute("data-extra-clinvar-link", "");
+        anchor.after(extra);
+        anchor = extra;
+      }
+      anchor.href = link.url;
+      anchor.textContent = `Open ClinVar Record${labelled ? ` (${link.rsid})` : ""} ↗`;
+    });
   } else {
     clinvarLink.classList.add("hidden");
   }

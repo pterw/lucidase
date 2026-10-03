@@ -5,12 +5,12 @@
  * (23andMe, AncestryDNA, MyHeritage, VCF) without freezing the browser.
  *
  * The knowledge base is the pipeline's JSON (web/src/knowledge-base.json), validated once
- * per worker and cached. Classification is by alt-allele count (core/classify.js).
+ * per worker and cached by kb-loader.js. Classification is by alt-allele count (core/classify.js).
  */
 
 import { parseGenotypeFile } from "./core/parse.js";
 import { computeQc } from "./core/qc.js";
-import { validateKb } from "./core/kb.js";
+import { loadKnowledgeBase } from "./kb-loader.js";
 import { classify } from "./core/classify.js";
 import { assembleFindings } from "./core/apoe.js";
 import { COVERAGE_STATES, SAMPLE_OBSERVATION } from "./core/coverage.js";
@@ -26,26 +26,6 @@ self.onmessage = async function (e) {
     self.postMessage({ type: "error", message: String((err && err.message) || err) });
   }
 };
-
-let kbPromise = null;
-
-/**
- * Loads and validates the knowledge base once. It is imported as a JSON module rather than
- * fetched: tests/test_zero_knowledge_privacy.py requires that worker.js contains no fetch
- * call at all, and a JSON import is the same same-origin static load. A failed load is not
- * cached, so a retry can succeed.
- */
-function loadKnowledgeBase() {
-  if (!kbPromise) {
-    kbPromise = import("./knowledge-base.json", { with: { type: "json" } })
-      .then((mod) => validateKb(mod.default))
-      .catch((err) => {
-        kbPromise = null;
-        throw new Error(`The knowledge base could not be loaded: ${(err && err.message) || err}`);
-      });
-  }
-  return kbPromise;
-}
 
 /**
  * Inheritance inputs for one locus, from its alt-allele count and the KB (gene inheritance model,

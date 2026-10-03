@@ -6,6 +6,7 @@ import { validateKb } from "../src/core/kb.js";
 import { parseGenotypeFile } from "../src/core/parse.js";
 import { classify } from "../src/core/classify.js";
 import { assembleFindings } from "../src/core/apoe.js";
+import { describeSegregation } from "../src/core/inheritance.js";
 import {
   NOT_AVAILABLE,
   NO_CLINVAR_STATUS,
@@ -116,7 +117,7 @@ test("a record with null evidence fields shows Not available, never a fallback v
 });
 
 test("a not-tested record has no undefined, null or NaN in any field, and shows its state label and reason", () => {
-  const { vms, kb } = analyse(DEMO.replace(/^rs6025.*\n/m, ""));
+  const { vms, kb } = analyse(DEMO.replace(/^rs6025[^\n]*\r?\n/m, ""));
   const gap = vms.find((v) => v.id === "rs6025");
   assert.equal(gap.coverage_state, "not_tested_by_array");
   assert.equal(gap.significance, "Array Gap (State 3)");
@@ -130,8 +131,96 @@ test("a not-tested record has no undefined, null or NaN in any field, and shows 
   assert.equal(csv.Repute, "", "no 'Neutral' placeholder for a locus with no interpretation");
   assert.equal(csv.Category, "");
   assert.equal(csv.Position, "169519049");
-  assert.deepEqual(csv.Missing_Fields.split(";"), gap.missing_fields);
+  // A row with no segregation input also names its three empty inheritance cells.
+  assert.deepEqual(csv.Missing_Fields.split(";"), [
+    ...gap.missing_fields,
+    "child_inherits_allele_wildtype_partner",
+    "child_inherits_allele_unscreened_partner",
+    "child_affected_unscreened_partner",
+  ]);
   for (const name of ["genotype", "category", "magnitude", "repute"]) assert.ok(gap.missing_fields.includes(name), name);
+});
+
+/** The worker's segregation input for a view model (altCount and the KB's gnomAD af), so CSV inheritance cells can be built. */
+function withSegregation(vm, kb, afOverride) {
+  const e4 = vm.rsid === "APOE-STATUS";
+  const locus = kb.loci[e4 ? "rs429358" : vm.rsid];
+  const af = afOverride === undefined ? locus.evidence.gnomad.af : afOverride;
+  const altCount = e4 ? vm.components[0].altCount : vm.altCount;
+  return { ...vm, segregation: altCount === null ? null : describeSegregation(vm.gene, kb.genes[vm.gene], altCount, af, locus.alt) };
+}
+
+test("the demo file with CRLF line endings still drops the rs6025 row", () => {
+  const a = analyse(DEMO.replace(/\r?\n/g, "\r\n").replace(/^rs6025[^\n]*\r?\n/m, ""));
+  assert.equal(a.byRsid.rs6025.coverage_state, "not_tested_by_array");
+});
+
+test("inheritance cells: only the non-Mendelian affected cell is N/A, every other unavailable cell is empty and named in Missing_Fields", () => {
+  const a = analyse(DEMO.replace(/^rs6025[^\n]*\r?\n/m, ""));
+  const cells = ["Child_Inherits_Allele_Wildtype_Partner", "Child_Inherits_Allele_Unscreened_Partner", "Child_Affected_Unscreened_Partner"];
+  const csvOf = (vm) => parseCsv(csvReport([vm], a.kb.genes))[0];
+  const gap = csvOf(withSegregation(a.byRsid.rs6025, a.kb));
+  for (const c of cells) assert.equal(gap[c], "", `${c} must be empty for a not-tested row`);
+  for (const name of cells.map((c) => c.toLowerCase())) assert.ok(gap.Missing_Fields.split(";").includes(name), name);
+  // A tested non-Mendelian row: transmission numbers, and "N/A" (not applicable) for the affected cell.
+  const risk = csvOf(withSegregation(a.byRsid.rs1799963, a.kb));
+  assert.match(risk.Child_Inherits_Allele_Wildtype_Partner, /^\d/);
+  assert.equal(risk.Child_Affected_Unscreened_Partner, "N/A");
+  assert.ok(!risk.Missing_Fields.includes("child_"));
+  // No gnomAD af: the unscreened transmission cell is missing data, not "N/A".
+  const noAf = csvOf(withSegregation(a.byRsid.rs1799963, a.kb, null));
+  assert.equal(noAf.Child_Inherits_Allele_Unscreened_Partner, "");
+  assert.ok(noAf.Missing_Fields.split(";").includes("child_inherits_allele_unscreened_partner"));
+  assert.equal(noAf.Child_Affected_Unscreened_Partner, "N/A");
+  // A Mendelian gene with no unscreened outcome has an empty affected cell, named as missing.
+  const hfe = csvOf(withSegregation(a.byRsid.rs1800562, a.kb, null));
+  assert.equal(hfe.Child_Affected_Unscreened_Partner, "");
+  assert.ok(hfe.Missing_Fields.split(";").includes("child_affected_unscreened_partner"));
+  // Over the whole demo, no cell holds "N/A" except the non-Mendelian affected cell.
+  for (const vm of a.vms) {
+    const row = csvOf(withSegregation(vm, a.kb));
+    for (const c of cells.slice(0, 2)) assert.notEqual(row[c], "N/A", `${vm.id} ${c}`);
+  }
+});
+
+test("the APOE row never presents one component's evidence as its own", () => {
+  const a = analyse(DEMO);
+  const apoe = a.apoe;
+  const e4 = a.kb.loci.rs429358.evidence;
+  const e2 = a.kb.loci.rs7412.evidence;
+  assert.notEqual(e4.clinvar.stars, e2.clinvar.stars, "the two components have different review stars");
+  assert.equal(apoe.stars, null);
+  assert.equal(apoe.gnomad_af, null);
+  assert.equal(apoe.clinvarUrl, null);
+  assert.deepEqual(apoe.componentEvidence.map((c) => c.rsid), ["rs429358", "rs7412"]);
+  assert.deepEqual(apoe.componentEvidence.map((c) => c.stars), [e4.clinvar.stars, e2.clinvar.stars]);
+  assert.deepEqual(apoe.componentEvidence.map((c) => c.af), [e4.gnomad.af, e2.gnomad.af]);
+  const url = (e) => `https://www.ncbi.nlm.nih.gov/clinvar/variation/${Number(e.clinvar.accession.replace(/\D/g, ""))}`;
+  assert.deepEqual(apoe.clinvarLinks, [{ rsid: "rs429358", url: url(e4) }, { rsid: "rs7412", url: url(e2) }]);
+  assert.equal(apoe.starsText, "rs429358: ★ · rs7412: ★★★");
+  assert.match(apoe.afText, /^rs429358: \d+\.\d\d% · rs7412: \d+\.\d\d%$/);
+  const round = (x) => Math.round(x * 1e6) / 1e6;
+  const csv = parseCsv(csvReport([apoe], a.kb.genes))[0];
+  assert.equal(csv.ClinVar_Stars, "1;3");
+  assert.equal(csv.Gnomad_AF, `${round(e4.gnomad.af)};${round(e2.gnomad.af)}`);
+  assert.equal(csv.Evidence_Tier, "Tier A;Tier A");
+  const md = markdownReport(reportData(a));
+  assert.ok(md.includes("★;★★★"), "Markdown ClinVar column joins the component values");
+  // The tier is shown once when both components agree, and per component otherwise.
+  assert.equal(apoe.tier, "Tier A");
+  const split = structuredClone(apoe);
+  split.components[1].evidence_tier = "Tier B";
+  assert.equal(toViewModel(split, a.kb.genes).tier, "rs429358: Tier A · rs7412: Tier B");
+  // A component whose accession is not machine imported has no link.
+  const curated = structuredClone(apoe);
+  curated.components[0].evidence.clinvar.provenance.curation_mode = "manually_curated";
+  assert.deepEqual(toViewModel(curated, a.kb.genes).clinvarLinks.map((l) => l.rsid), ["rs7412"]);
+  // A missing component figure is named in Missing_Fields.
+  const noStars = structuredClone(apoe);
+  noStars.components[1].evidence.clinvar.stars = null;
+  const noStarsVm = toViewModel(noStars, a.kb.genes);
+  assert.ok(noStarsVm.missing_fields.includes("clinvar_stars"));
+  assert.equal(parseCsv(csvReport([noStarsVm], a.kb.genes))[0].ClinVar_Stars, "1;");
 });
 
 test("tier, stars and limitation are the same in the table model, drawer text, CSV and Markdown", () => {
@@ -173,9 +262,16 @@ test("not detected wording states the count, never 'Normal'", () => {
   const a = analyse(DEMO.replace(/^rs6025\t1\t169519049\tAG/m, "rs6025\t1\t169519049\tGG"));
   const f5 = a.byRsid.rs6025;
   assert.equal(f5.sample_observation, "wild_type");
-  assert.equal(f5.statement, "rs6025 variant not detected (1 of 1 known variants in F5 tested)");
+  assert.equal(f5.statement, "rs6025 variant not detected (1 variant tested in F5)");
   const hfe = analyse(DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG")).byRsid.rs1800562;
-  assert.equal(hfe.statement, "rs1800562 variant not detected (1 of 2 known variants in HFE tested)");
+  assert.equal(hfe.statement, "rs1800562 variant not detected (2 variants tested in HFE)");
+  // An array gap is not counted: with the other HFE locus not on the array, one variant was tested.
+  const gapped = analyse(
+    DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG").replace(/^rs1799945[^\n]*\r?\n/m, "")
+  );
+  assert.equal(gapped.byRsid.rs1799945.coverage_state, "not_tested_by_array");
+  assert.equal(gapped.byRsid.rs1800562.statement, "rs1800562 variant not detected (1 variant tested in HFE)");
+  assert.ok(!/known/i.test(gapped.byRsid.rs1800562.statement));
   assert.ok(!/normal/i.test(f5.statement));
   const dpyd = analyse(DEMO.replace(/^rs3918290\t1\t97915614\tCT/m, "rs3918290\t1\t97915614\tCC")).byRsid.rs3918290;
   assert.match(dpyd.limitationTooltip, /Single-variant test/);

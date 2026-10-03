@@ -55,6 +55,7 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
             WEB_DIR / "index.html",
             WEB_DIR / "src" / "app.js",
             WEB_DIR / "src" / "worker.js",
+            WEB_DIR / "src" / "kb-loader.js",
             *sorted((WEB_DIR / "src" / "core").glob("*.js")),
         ]
 

@@ -33,6 +33,7 @@ PLACEHOLDERS = [
     "Tested Normal",
     "Normal Baseline",
     "APOE-STATUS",
+    "known variants",
 ]
 STATIC_CLAIMS = ["Redis", "ClinVar 2026.1", "ClinVar 2024-06", "dbSNP 156", "Evidence Tier 1", "81 Genes"]
 BAD_WORDS = re.compile(r"\b(undefined|null|nan)\b", re.IGNORECASE)
@@ -123,6 +124,88 @@ def test_sparse_file_renders_honestly_everywhere(loaded_page, tmp_path):
     assert "rs429358;rs7412" in markdown
 
 
+def test_apoe_drawer_labels_each_component_evidence_by_rsid(loaded_page):
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    kb = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["loci"]
+    page.locator("#btn-inspect-apoe").click()
+    wait_drawer_open(page)
+    stars = page.locator("#drawer-stars").inner_text()
+    assert "rs429358:" in stars and "rs7412:" in stars, stars
+    af = page.locator("#drawer-af").inner_text()
+    assert "rs429358:" in af and "rs7412:" in af, af
+    links = page.locator("#drawer-clinvar-link, [data-extra-clinvar-link]")
+    assert links.count() == 2
+    hrefs = [links.nth(i).get_attribute("href") for i in range(2)]
+    expected = [
+        f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{int(kb[r]['evidence']['clinvar']['accession'][3:])}"
+        for r in ("rs429358", "rs7412")
+    ]
+    assert hrefs == expected
+    assert "(rs429358)" in links.nth(0).inner_text() and "(rs7412)" in links.nth(1).inner_text()
+    # Opening a single-locus record afterwards leaves exactly one unlabelled link.
+    page.locator("#btn-close-drawer").click()
+    page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')")).click()
+    wait_drawer_open(page)
+    assert page.locator("#drawer-clinvar-link, [data-extra-clinvar-link]").count() == 1
+    assert "(rs" not in page.locator("#drawer-clinvar-link").inner_text()
+
+
+def test_index_html_carries_no_static_clinical_defaults():
+    html = (WEB_DIR / "index.html").read_text(encoding="utf-8")
+    for text in (
+        "ENST00000252486",
+        "likely_benign",
+        "1.26 (Tolerant)",
+        "Population Baseline",
+        "Incomplete star-allele coverage refusal",
+    ):
+        assert text not in html, f"index.html still carries the static default {text!r}"
+
+
+@pytest.mark.allow_console_errors
+def test_a_kb_that_fails_validation_makes_no_page_claims(page):
+    kb = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))
+    kb["schema_version"] = 1
+    page.route(
+        "**/knowledge-base.json",
+        lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(kb)),
+    )
+    errors: list[str] = []
+    page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+    page.goto(page.base_url, wait_until="networkidle")
+    page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
+    badge = page.locator("#kb-provenance-badge")
+    assert MANIFEST["release"] not in badge.inner_text()
+    assert MANIFEST["sha256"][:12] not in badge.get_attribute("title")
+    assert "Not available" in page.locator("#hero-scope").inner_text()
+    assert any("schema_version" in e for e in errors), errors
+
+
+@pytest.mark.allow_console_errors
+def test_kb_text_is_escaped_where_it_reaches_innerhtml(page):
+    payload = "<img src=x onerror=window.__xss=1>"
+    kb = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))
+    interp = kb["loci"]["rs6025"]["interpretations"]["1"]
+    interp["caveats"] = [payload]
+    interp["phenotype"] = payload
+    page.route(
+        "**/knowledge-base.json",
+        lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(kb)),
+    )
+    page.goto(page.base_url, wait_until="networkidle")
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')"))
+    assert payload in row.inner_text(), "the phenotype shows literally in the table row"
+    row.click()
+    wait_drawer_open(page)
+    assert payload in page.locator("#drawer-caveats-list").inner_text()
+    assert page.locator("#variants-tbody img, #drawer-caveats-list img").count() == 0
+    assert page.evaluate("() => window.__xss") is None
+
+
 def test_cyp2c19_row_carries_the_star_allele_limitation(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
@@ -146,7 +229,7 @@ def test_tested_wildtype_rows_state_the_count_and_the_limitation(loaded_page):
     page.locator("[data-filter='negative']").click()
     dpyd = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs3918290')"))
     text = dpyd.inner_text()
-    assert "rs3918290 variant not detected (1 of 1 known variants in DPYD tested)" in text
+    assert "rs3918290 variant not detected (1 variant tested in DPYD)" in text
     assert "normal" not in text.lower()
     assert "Single-variant test" in dpyd.locator("[data-role='limitation']").get_attribute("title")
     dpyd.click()
