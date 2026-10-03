@@ -104,6 +104,7 @@ function startWorker() {
     clearWatchdog();
     const data = e.data;
     if (data.type === "progress") {
+      armWatchdog(fail);
       updateProgress(data.percent, data.status);
     } else if (data.type === "complete") {
       stopWorker();
@@ -112,11 +113,18 @@ function startWorker() {
       fail(data.message);
     }
   };
+  armWatchdog(fail);
+  return worker;
+}
+
+// Inactivity watchdog: re-armed on start and on every progress message, so a worker
+// that stalls or dies silently at any point fails visibly. Complete/error/stop clear it.
+function armWatchdog(fail) {
+  clearWatchdog();
   state.watchdog = setTimeout(
-    () => fail("The analysis worker did not respond."),
+    () => fail("The analysis worker stopped responding."),
     state.workerTimeoutMs
   );
-  return worker;
 }
 
 function clearWatchdog() {

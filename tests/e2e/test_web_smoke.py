@@ -82,3 +82,42 @@ def test_silent_worker_times_out_visibly(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
     expect(page.locator("#progress-section")).to_be_hidden()
+
+
+STALLING_WORKER = (
+    "self.onmessage = () => "
+    "self.postMessage({type: 'progress', percent: 5, status: 'x'});"
+)
+# Posts progress every 150 ms for ~1.2 s (longer than the 500 ms timeout), then completes.
+SLOW_HEALTHY_WORKER = """
+self.onmessage = () => {
+  let n = 0;
+  const t = setInterval(() => {
+    self.postMessage({type: 'progress', percent: 10 + n, status: 'working'});
+    if (++n >= 8) {
+      clearInterval(t);
+      self.postMessage({type: 'error', message: 'finished healthy run'});
+    }
+  }, 150);
+};
+"""
+
+
+def test_worker_stall_after_progress_times_out_visibly(page):
+    _serve_worker(page, STALLING_WORKER)
+    page.goto(page.base_url, wait_until="networkidle")
+    page.evaluate("window.__genomePulse.state.workerTimeoutMs = 500")
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#progress-section")).to_be_hidden()
+
+
+@pytest.mark.allow_console_errors
+def test_watchdog_does_not_fire_during_healthy_progress(page):
+    _serve_worker(page, SLOW_HEALTHY_WORKER)
+    page.goto(page.base_url, wait_until="networkidle")
+    page.evaluate("window.__genomePulse.state.workerTimeoutMs = 500")
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    # The alert must be the worker's own message, not the watchdog's.
+    assert "finished healthy run" in page.locator("#analysis-error-detail").inner_text()
