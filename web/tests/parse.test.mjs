@@ -1,12 +1,37 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { parseGenotypeFile, UnsupportedFormatError } from "../src/core/parse.js";
 
 const TAB = "\t";
 
-test("parser is pure: it imports without any worker or DOM global", () => {
-  assert.equal(typeof globalThis.self, "undefined");
-  assert.equal(typeof globalThis.document, "undefined");
+test("every core module is pure: no worker/DOM/network tokens, only relative imports", () => {
+  const dir = fileURLToPath(new URL("../src/core/", import.meta.url));
+  const files = readdirSync(dir).filter((f) => f.endsWith(".js"));
+  assert.ok(files.length >= 2);
+  for (const f of files) {
+    // Strip comments so documentation may mention the forbidden names.
+    const src = readFileSync(join(dir, f), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/(^|[^:])\/\/.*$/gm, "$1");
+    for (const tok of ["self", "window", "document", "fetch", "importScripts", "XMLHttpRequest"]) {
+      assert.doesNotMatch(src, new RegExp(`\\b${tok}\\b`), `${f} uses ${tok}`);
+    }
+    for (const m of src.matchAll(/\bimport\s*(?:[^'"]*?from\s*)?["']([^"']+)["']/g)) {
+      assert.match(m[1], /^\.\//, `${f} imports non-relative module ${m[1]}`);
+    }
+    assert.doesNotMatch(src, /\bimport\s*\(/, `${f} uses dynamic import`);
+  }
+});
+
+test("a sites-only VCF is rejected with a clear message", () => {
+  const vcf = `##fileformat=VCFv4.2\n#CHROM${TAB}POS${TAB}ID${TAB}REF${TAB}ALT${TAB}Q${TAB}F${TAB}I\n1${TAB}5${TAB}rs9${TAB}A${TAB}G${TAB}.${TAB}.${TAB}.\n`;
+  assert.throws(
+    () => parseGenotypeFile(vcf, "a.vcf"),
+    (e) => e instanceof UnsupportedFormatError && /VCF contains no sample genotypes/.test(e.message)
+  );
 });
 
 test("non-string input throws TypeError, not a format guess", () => {

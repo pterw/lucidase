@@ -16,6 +16,8 @@ export const MIN_X_MARKERS = 10;
  */
 export const X_HET_CUTOFF = 0.05;
 
+export const VCF_RATE_NOTE = "not meaningful for variants-only VCF";
+
 export const SEX_SIGNAL = Object.freeze({
   TWO_X: "X heterozygosity consistent with two X chromosomes",
   ONE_X: "X heterozygosity consistent with one X chromosome",
@@ -26,7 +28,7 @@ function isHet(alleles) {
   return alleles.length === 2 && alleles[0] !== alleles[1];
 }
 
-/** Returns { call_rate, heterozygosity_rate, x_markers, x_het_rate, y_calls, sex_signal }. */
+/** Returns { call_rate, heterozygosity_rate (both null for a VCF, with qc_note), x_markers, x_het_rate, y_calls, sex_signal }. */
 export function computeQc(parseResult) {
   let called = 0;
   let noCalls = 0;
@@ -55,6 +57,8 @@ export function computeQc(parseResult) {
   }
 
   const total = called + noCalls;
+  // A VCF lists variant sites, so rates over it are ~100% called / mostly het by construction.
+  const variantsOnly = parseResult.assay === "vcf";
   const xHetRate = xMarkers > 0 ? xHet / xMarkers : 0;
   let sexSignal = SEX_SIGNAL.INDETERMINATE;
   if (xMarkers >= MIN_X_MARKERS) {
@@ -62,8 +66,9 @@ export function computeQc(parseResult) {
   }
 
   return {
-    call_rate: total > 0 ? called / total : 0,
-    heterozygosity_rate: diploid > 0 ? het / diploid : 0,
+    call_rate: variantsOnly ? null : total > 0 ? called / total : 0,
+    heterozygosity_rate: variantsOnly ? null : diploid > 0 ? het / diploid : 0,
+    qc_note: variantsOnly ? VCF_RATE_NOTE : null,
     x_markers: xMarkers,
     x_het_rate: xHetRate,
     y_calls: yCalls,

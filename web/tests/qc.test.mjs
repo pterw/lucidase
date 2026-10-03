@@ -59,3 +59,21 @@ test("X no-calls and the PAR (XY) are not X markers", () => {
   const r = qc([call("X", null), call("XY", ["A", "G"])]);
   assert.equal(r.x_markers, 0);
 });
+
+test("variants-only VCF: call rate and het rate are null with an explanatory note", () => {
+  const r = computeQc({ assay: "vcf", calls: [call("1", ["A", "G"]), call("1", ["A", "A"]), call("1", null)] });
+  assert.equal(r.call_rate, null);
+  assert.equal(r.heterozygosity_rate, null);
+  assert.equal(r.qc_note, "not meaningful for variants-only VCF");
+});
+
+test("array QC keeps numeric rates and has no note", () => {
+  const r = computeQc({ assay: "array", calls: [call("1", ["A", "G"]), call("1", null)] });
+  assert.equal(r.call_rate, 0.5);
+  assert.equal(r.qc_note, null);
+});
+
+test("VCF still reports the X signal fields", () => {
+  const r = computeQc({ assay: "vcf", calls: xCalls(100, 25) });
+  assert.equal(r.sex_signal, SEX_SIGNAL.TWO_X);
+});

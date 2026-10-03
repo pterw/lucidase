@@ -62,6 +62,7 @@ function detectFormat(lines, fileName) {
     const tabs = firstData.split("\t");
     const commas = firstData.split(",");
     if (isColumnHeader(tabs[0]) && tabs.length >= 5) candidates.push("ancestry");
+    else if (isExact23andMeHeader(tabs)) candidates.push("23andme");
     else if (isColumnHeader(commas[0]) && commas.length >= 4 && !firstData.includes("\t")) candidates.push("myheritage");
     else if (candidates.length === 0) {
       // No header signal at all: accept only a well-formed first data row.
@@ -81,9 +82,19 @@ function detectFormat(lines, fileName) {
   return byExt || candidates[0];
 }
 
+/** The exact column header `rsid chromosome position genotype` (tab-separated). */
+function isExact23andMeHeader(cols) {
+  return (
+    cols.length === 4 &&
+    cols.map((c) => c.trim().toLowerCase()).join("\t") === "rsid\tchromosome\tposition\tgenotype"
+  );
+}
+
 const BUILD_PATTERNS = [
-  ["GRCh38", /(?:^|[^a-z0-9])(?:grch38|hg38|build 38)(?:[^a-z0-9]|$)/],
-  ["GRCh37", /(?:^|[^a-z0-9])(?:grch37|hg19|b37|build 37)(?:[^a-z0-9]|$)|g1k_v37/],
+  // GRCh38: GRCh38[.pN], hg38, hs38[DH], GATK "assembly38", accession GCA_000001405.15.
+  ["GRCh38", /(?:^|[^a-z0-9])(?:grch38|hg38|hs38(?:dh)?|assembly38|build 38|gca_000001405\.15)(?:[^a-z0-9]|$)/],
+  // GRCh37: GRCh37[.pN], hg19, b37, hs37d5, human_g1k_v37.
+  ["GRCh37", /(?:^|[^a-z0-9])(?:grch37|hg19|b37|hs37d5|build 37)(?:[^a-z0-9]|$)|g1k_v37/],
 ];
 
 function matchBuild(lowerLine) {
@@ -141,7 +152,7 @@ function parse23andMeLine(line) {
 }
 
 function parseAncestryLine(line) {
-  const cols = line.split("	");
+  const cols = line.split("\t");
   if (cols.length < 5) return null;
   const a = arrayAlleles(cols[3]);
   const b = arrayAlleles(cols[4]);
@@ -185,6 +196,11 @@ function vcfAlleles(gt, table) {
     if (!/^\d+$/.test(t)) return undefined;
     const idx = Number(t);
     if (idx >= table.length) return undefined;
+    // "*" is a spanning deletion, not a base: the position has no usable call.
+    if (table[idx] === "*") {
+      missing = true;
+      continue;
+    }
     out.push(table[idx].toUpperCase());
   }
   return missing ? null : out;
@@ -221,6 +237,15 @@ const LINE_PARSERS = {
   myheritage: parseMyHeritageLine,
 };
 
+/** True when the #CHROM line (or, lacking one, the first data row) has a sample column after FORMAT. */
+function hasSampleColumn(lines) {
+  for (const line of lines) {
+    if (line.startsWith("#CHROM") || line.startsWith("#chrom")) return line.split("\t").length >= 10;
+    if (!line.startsWith("#") && line.trim()) return line.split("\t").length >= 10;
+  }
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 
 /**
@@ -241,6 +266,9 @@ export function parseGenotypeFile(text, fileName = "") {
 
   const assay = format === "vcf" ? "vcf" : "array";
   const build = format === "vcf" ? detectVcfBuild(lines) : detectArrayBuild(lines);
+  if (format === "vcf" && !hasSampleColumn(lines)) {
+    throw new UnsupportedFormatError("Unsupported file: VCF contains no sample genotypes (no FORMAT or sample column).");
+  }
   const calls = [];
   const stats = { total_lines: lines.length, data_rows: 0, called: 0, no_calls: 0, skipped_malformed: 0 };
 

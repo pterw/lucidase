@@ -313,6 +313,11 @@ function handleParseComplete(data) {
   renderVariantsTable();
 }
 
+/** A null rate (variants-only VCF) is shown as "Not available", with the QC note as a tooltip. */
+function formatRate(rate) {
+  return rate === null ? "Not available" : `${(rate * 100).toFixed(2)}%`;
+}
+
 function renderQC() {
   const qc = state.qc;
   if (!qc) return;
@@ -320,8 +325,9 @@ function renderQC() {
   document.getElementById("qc-filename").textContent = state.fileName;
   document.getElementById("qc-format").textContent = `${qc.format_name.toUpperCase()} (${qc.build})`;
   document.getElementById("qc-total-snps").textContent = qc.total_snps.toLocaleString();
-  document.getElementById("qc-call-rate").textContent = `${(qc.call_rate * 100).toFixed(2)}%`;
-  document.getElementById("qc-het-rate").textContent = `${(qc.heterozygosity_rate * 100).toFixed(2)}%`;
+  document.getElementById("qc-call-rate").textContent = formatRate(qc.call_rate);
+  document.getElementById("qc-het-rate").textContent = formatRate(qc.heterozygosity_rate);
+  for (const id of ["qc-call-rate", "qc-het-rate"]) document.getElementById(id).title = qc.qc_note || "";
 
   // The badge shows the QC signal verbatim; it makes no sex or karyotype claim.
   const sexBadge = document.getElementById("qc-inferred-sex");
@@ -1031,7 +1037,7 @@ function exportMarkdownReport() {
   let md = `# GenomePulse Variome Clinical Report\n\n`;
   md += `> **CARDINAL SCOPE GUARDRAIL**: ${ABSENCE_OF_FINDING_GUARDRAIL}\n\n`;
   md += `**Sample**: ${state.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
-  md += `**Markers**: ${qc.total_snps.toLocaleString()} | **Call Rate**: ${(qc.call_rate * 100).toFixed(2)}% | **Heterozygosity**: ${(qc.heterozygosity_rate * 100).toFixed(2)}%\n\n`;
+  md += `**Markers**: ${qc.total_snps.toLocaleString()} | **Call Rate**: ${formatRate(qc.call_rate)} | **Heterozygosity**: ${formatRate(qc.heterozygosity_rate)}\n\n`;
 
   md += `## Coverage Taxonomy (5-State Summary)\n\n`;
   md += `- **Supported & Observed (State 1)**: ${cov.supported_and_observed_count ?? state.records.length} findings\n`;
