@@ -1,696 +1,509 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lucidase | Zero-Knowledge Clinical & Proteomic DNA Explorer</title>
-  
-  <!-- Adobe Typekit kit gfe3vcu (Akzidenz-Grotesk Next Pro, Orpheus Pro, Input Mono, Swiss 721 BT Condensed) -->
+  <title>Lucidase</title>
+  <!-- Theme before first paint: the stored override, else the device setting (see src/theme.js) -->
+  <script src="src/theme-boot.js"></script>
+  <link rel="icon" type="image/svg+xml" href="src/brand/favicon-light.svg" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/svg+xml" href="src/brand/favicon-dark.svg" media="(prefers-color-scheme: dark)">
+
+  <!-- Adobe Fonts kit gfe3vcu (Orpheus Pro, Akzidenz-Grotesk Next Pro and Condensed, Input Mono and Input Mono Narrow) -->
   <link rel="stylesheet" href="https://use.typekit.net/gfe3vcu.css" id="typekit-stylesheet">
-  
+
   <!-- daisyUI (vendored, see src/vendor/README.md), then app styles, then Tailwind utilities -->
   <link rel="stylesheet" href="src/vendor/daisyui-4.12.10.min.css">
-
-  <!-- Custom Design System Styles -->
+  <!-- Lucidase design system tokens and components -->
   <link rel="stylesheet" href="src/styles.css">
-  <!-- Utilities must come LAST: the Tailwind Play CDN appended its sheet after styles.css -->
+  <!-- Utilities must come LAST (see src/vendor/README.md) -->
   <link rel="stylesheet" href="src/vendor/tailwind.css">
 </head>
-<body class="dna-bg-grid min-h-screen text-slate-900 dark:text-slate-100 flex flex-col justify-between">
+<body class="min-h-screen flex flex-col">
 
-  <!-- Top Navigation Header -->
-  <header class="glass-header sticky top-0 z-40 px-6 py-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-sm bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-xl shadow-md text-white overflow-hidden transition-all duration-300" data-design-id="brand.mark" data-design-role="image" data-design-name="Brand Mark (PNG/SVG)">
-        🧬
-      </div>
-      <div>
-        <div class="flex items-center space-x-2">
-          <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono" data-design-id="brand.wordmark" data-design-role="display">
-            Lucidase
-          </h1>
-          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-sm bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
-            Clinical Variome
-          </span>
-        </div>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 font-serif italic tracking-wide" data-design-id="brand.tagline" data-design-role="editorial">Zero-Knowledge Clinical & Proteomic DNA Analysis</p>
-      </div>
-    </div>
+  <a class="lds-skip" href="#main-content-flow">Skip to content</a>
 
-    <!-- Theme Switcher & Privacy Badge -->
-    <div class="flex items-center space-x-2">
-      <a id="link-karyogram" href="karyogram.html" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 rounded-sm text-xs px-2.5 py-1">
-        Karyogram
-      </a>
-      <button id="btn-theme-toggle" type="button" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 rounded-sm text-xs px-2.5 py-1">
-        <span id="theme-toggle-icon">🌙</span> <span id="theme-toggle-text" class="hidden sm:inline">Dark HUD</span>
-      </button>
-
-      <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-300 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Local-First (Client-Side Only)</span>
-      </div>
+  <header class="lds-header">
+    <div class="lds-wrap lds-header-inner">
+      <a href="index.html" class="lds-brand" data-design-id="brand.wordmark">Lucidase</a>
+      <nav class="lds-nav" aria-label="Main">
+        <a href="index.html" class="lds-navlink" aria-current="page">Analysis</a>
+        <a id="link-karyogram" href="karyogram.html" class="lds-navlink">Karyogram</a>
+      </nav>
+      <div class="lds-header-spacer"></div>
+      <span class="lds-localnote">Read in this browser</span>
     </div>
   </header>
 
-  <!-- Main Content Container with Live Wireframe Order Support -->
-  <main id="main-content-flow" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col gap-6" data-design-order-container="true">
-    
-    <!-- Hero & File Dropzone Section -->
-    <section id="section-hero" class="mb-2 transition-all duration-300" data-design-id="landing.hero" data-design-role="hero" data-design-name="Hero Section">
-      <div id="dropzone" class="glass-panel p-8 sm:p-12 text-center border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all duration-200 relative group cursor-pointer bg-white dark:bg-slate-900/40">
-        <input type="file" id="file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
-        
-        <div class="relative z-10 max-w-xl mx-auto space-y-4">
-          <div class="w-14 h-14 mx-auto rounded-sm bg-sky-50 dark:bg-sky-500/10 border border-sky-300 dark:border-sky-500/30 flex items-center justify-center text-3xl group-hover:scale-105 transition-transform duration-200 text-sky-600 dark:text-sky-400 overflow-hidden" data-design-id="landing.hero.graphic" data-design-role="image" data-design-name="Hero Graphic (PNG/SVG)">
-            📂
+  <main id="main-content-flow" class="lds-wrap flex-1 flex flex-col gap-16 pt-10 pb-16" tabindex="-1">
+
+    <!-- Start: the lockup, what Lucidase does and does not do, and the drop field -->
+    <section id="section-hero" class="flex flex-wrap items-start gap-12">
+      <div class="flex flex-col gap-5 min-w-0" style="flex: 1 1 420px; max-width: 560px">
+        <div class="lds-masthead">
+          <div class="lds-masthead-art">
+            <img class="lds-wm-light" src="src/brand/lucidase-lockup-light.svg" alt="Lucidase" width="640" height="200">
+            <img class="lds-wm-dark" src="src/brand/lucidase-lockup-dark.svg" alt="Lucidase" width="640" height="200">
           </div>
-          <div>
-            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100" data-design-id="landing.hero.title" data-design-role="display" data-design-name="Hero Title">
-              Load DNA Raw Genotyping File
-            </h2>
-            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1" data-design-id="landing.hero.deck" data-design-role="body" data-design-name="Hero Description">
-              Engineered for <span class="text-sky-600 dark:text-sky-400 font-semibold">23andMe</span>, <span class="text-sky-600 dark:text-sky-400 font-semibold">AncestryDNA</span>, <span class="text-sky-600 dark:text-sky-400 font-semibold">MyHeritage</span>, and <span class="text-sky-600 dark:text-sky-400 font-semibold">VCF 4.2</span>
-            </p>
+          <div class="lds-masthead-wordmark">
+            <img class="lds-wm-light" src="src/brand/lucidase-wordmark-light.svg" alt="Lucidase" width="603" height="167">
+            <img class="lds-wm-dark" src="src/brand/lucidase-wordmark-dark.svg" alt="Lucidase" width="603" height="167">
           </div>
-          <div class="flex items-center justify-center space-x-4 pt-2">
-            <button type="button" id="btn-browse-files" class="btn btn-sm btn-primary bg-sky-600 hover:bg-sky-700 border-none text-white shadow-sm rounded-sm">
-              Browse Local Files…
+          <h1 class="lds-display">Read your raw DNA file, on your own device</h1>
+        </div>
+        <p class="lds-lede">Lucidase checks a short list of well-studied places in your file and explains each result in plain words, including what it could not test.</p>
+        <p id="hero-scope" class="lds-meta lds-data">Not available</p>
+
+        <div id="dropzone" class="lds-dropzone">
+          <input type="file" id="file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
+          <p class="lds-dropzone-title"><span class="lds-icon lds-icon-22 lds-i-file-up" aria-hidden="true"></span>Drop your raw DNA file here</p>
+          <p class="lds-dropzone-desc">Works with files from 23andMe, AncestryDNA and MyHeritage, and VCF files. Your file is read on this device and never uploaded.</p>
+          <div class="lds-dropzone-actions">
+            <button type="button" id="btn-browse-files" class="lds-btn lds-btn-primary">
+              <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
             </button>
-            <span class="text-xs text-slate-400 font-mono">or</span>
-            <button type="button" id="btn-load-demo" class="btn btn-sm btn-outline border-slate-400 dark:border-slate-700 hover:border-sky-500 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-300 rounded-sm">
-              ⚡ Load 23andMe Demo Sample
-            </button>
+            <button type="button" id="btn-load-demo" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
           </div>
-          <div class="flex items-center justify-center space-x-6 text-[11px] text-slate-500 dark:text-slate-400 pt-2 font-mono">
-            <span id="hero-scope">🧬 ACMG SF</span>
-            <span>·</span>
-            <span>🔬 Human Protein Atlas</span>
-            <span>·</span>
-            <span>💊 CPIC Pharmacogenomics</span>
-          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-7 pt-2 min-w-0" style="flex: 1 1 320px">
+        <div>
+          <h2 class="lds-h3 mb-2.5">What you get</h2>
+          <ul class="lds-list">
+            <li>A result for each place Lucidase checks, with what that result can't tell you</li>
+            <li>A map of where those genes sit on your chromosomes, on the Karyogram page</li>
+            <li>A copy you can save as a report (.md) or a table (.csv)</li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="lds-h3 mb-2.5">What it can't do</h2>
+          <ul class="lds-list text-ink-muted">
+            <li>It is not a medical test or medical advice</li>
+            <li>It does not read whole genes, so a missing variant does not rule out risk</li>
+            <li>Markers outside its checks are counted, not explained</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- Progress Indicator (Hidden until parsing begins) -->
-    <section id="progress-section" class="hidden mb-8">
-      <div class="glass-panel p-6 space-y-3 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700">
-        <div class="flex justify-between items-center text-sm">
-          <span id="parse-progress-msg" class="text-slate-800 dark:text-slate-200 font-medium flex items-center font-mono">
-            <span class="loading loading-spinner loading-xs mr-2 text-sky-600 dark:text-sky-400"></span>
-            Streaming & Parsing Genotyping Lines...
-          </span>
-          <span id="parse-progress-pct" class="font-mono text-sky-600 dark:text-sky-400 font-bold">0%</span>
+    <!-- Progress (hidden until a file is read) -->
+    <section id="progress-section" class="hidden" style="max-width: 560px">
+      <div class="lds-progress">
+        <div class="lds-progress-head">
+          <span id="parse-progress-msg" aria-live="polite">Reading your file</span>
+          <span id="parse-progress-pct" class="lds-progress-value">0%</span>
         </div>
-        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-none h-2 overflow-hidden border border-slate-300 dark:border-slate-700">
-          <div id="parse-progress-bar" class="bg-gradient-to-r from-sky-500 to-indigo-600 h-2 rounded-none transition-all duration-150" style="width: 0%"></div>
+        <div class="lds-progress-track" role="presentation">
+          <div id="parse-progress-bar" class="lds-progress-bar"></div>
         </div>
       </div>
     </section>
 
     <!-- Analysis failure (hidden until the worker fails) -->
-    <section id="analysis-error" role="alert" class="hidden mb-8 p-4 rounded-sm bg-red-50/90 dark:bg-red-950/40 border-l-4 border-red-500 border border-red-200 dark:border-red-900/60 shadow-sm text-xs">
-      <p class="font-bold text-red-800 dark:text-red-300">The analysis could not be completed. Nothing was uploaded, and no results are shown. Please try again, or try a different file.</p>
-      <p class="mt-1 font-mono text-red-700 dark:text-red-400">Technical detail: <span id="analysis-error-detail"></span></p>
+    <section id="analysis-error" role="alert" class="hidden lds-alert lds-alert-danger">
+      <span class="lds-icon lds-icon-18 lds-i-circle-alert" aria-hidden="true"></span>
+      <div class="lds-alert-body">
+        <p class="lds-alert-title">The analysis could not be completed.</p>
+        <p class="lds-alert-text">Nothing was uploaded, and no results are shown. Try again, or try a different file.</p>
+        <p class="lds-alert-detail">Technical detail: <span id="analysis-error-detail"></span></p>
+      </div>
     </section>
 
-    <!-- Results Section (Populated dynamically) -->
-    <section id="results-section" class="hidden space-y-6">
-      
-      <!-- Cardinal Scientific Scope & Guardrail Banner -->
-      <div id="coverage-guardrail-banner" class="p-4 rounded-sm bg-amber-50/90 dark:bg-amber-950/40 border-l-4 border-amber-500 border border-amber-200 dark:border-amber-900/60 shadow-sm text-xs">
-        <div class="flex items-center space-x-2 font-bold font-mono uppercase tracking-wider text-[11px] text-amber-800 dark:text-amber-300">
-          <span>⚠️</span>
-          <span>Scientific Scope & Guardrail: Absence of a Finding ≠ Absence of Risk</span>
+    <!-- Results (populated after the analysis) -->
+    <section id="results-section" class="hidden flex flex-col gap-16" aria-labelledby="results-h">
+      <div class="flex flex-col gap-6">
+        <h2 id="results-h" class="lds-display">Your results</h2>
+
+        <!-- Scope notice: travels with every result -->
+        <div id="coverage-guardrail-banner" class="lds-alert lds-alert-notice" role="note">
+          <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
+          <div class="lds-alert-body">
+            <p class="lds-alert-title">Absence of a finding is not absence of risk.</p>
+            <p class="lds-alert-text">Lucidase checks only the single positions your DNA chip read. It does not read whole genes or the regions the chip does not probe, and it cannot see larger changes such as missing or repeated stretches of DNA.</p>
+          </div>
         </div>
-        <p class="mt-1 leading-relaxed text-slate-800 dark:text-slate-200 font-serif">
-          Lucidase tests only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs) or structural repeats. <strong>Absence of a finding must never imply absence of genetic risk.</strong>
-        </p>
       </div>
 
-      <!-- Sample QC Metrics Bar -->
-      <div class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <!-- Your file (sample QC) -->
+      <section class="lds-section" aria-labelledby="qc-h">
+        <div class="lds-section-head">
+          <h2 id="qc-h" class="lds-section-title">Your file</h2>
+          <p class="lds-section-aside">Read in this browser. Nothing was uploaded.</p>
+        </div>
+        <div class="lds-section-body">
+          <dl class="lds-datalist">
+            <div><dt>File</dt><dd id="qc-filename">sample.txt</dd></div>
+            <div><dt>Format</dt><dd id="qc-format">Not available</dd></div>
+            <div><dt>Markers</dt><dd id="qc-total-snps">Not available</dd></div>
+            <div><dt>Call rate</dt><dd id="qc-call-rate">Not available</dd></div>
+            <div><dt>Heterozygosity</dt><dd id="qc-het-rate">Not available</dd></div>
+            <div><dt>Sex-chromosome check</dt><dd><span id="qc-inferred-sex" class="lds-tag lds-tag-neutral">Not available</span></dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- Summary: one result per check, then the categories of what was found -->
+      <section class="lds-section" aria-labelledby="summary-h">
+        <div class="lds-section-head">
+          <h2 id="summary-h" class="lds-section-title">Summary</h2>
+          <p class="lds-section-aside">Each check Lucidase runs has one result. Each result has its own mark, so it reads without colour.</p>
+        </div>
+        <div class="lds-section-body flex flex-col gap-8">
           <div>
-            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold font-mono">Active Sample Profile</div>
-            <h3 id="qc-filename" class="text-lg font-bold text-slate-900 dark:text-slate-100 font-mono">sample.txt</h3>
+            <h3 class="lds-h3 mb-2">Results of the checks</h3>
+            <div class="lds-counts">
+              <div class="lds-count">
+                <span class="lds-count-label"><span class="lds-mark lds-mark-supported_and_observed" aria-hidden="true"></span>Observed</span>
+                <span id="count-state-observed" class="lds-count-value">0</span>
+                <span class="lds-count-help">Variant seen in your file</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label"><span class="lds-mark lds-mark-supported_not_observed" aria-hidden="true"></span>Not detected</span>
+                <span id="count-state-negative" class="lds-count-value">0</span>
+                <span class="lds-count-help">Among the variants tested</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label"><span class="lds-mark lds-mark-not_tested_by_array" aria-hidden="true"></span>Not on the chip</span>
+                <span id="count-state-gaps" class="lds-count-value">0</span>
+                <span class="lds-count-help">Your chip did not read it</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label"><span class="lds-mark lds-mark-outside_coverage" aria-hidden="true"></span>Outside the checks</span>
+                <span id="count-state-outside" class="lds-count-value">0</span>
+                <span class="lds-count-help">Markers counted, not interpreted</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label"><span class="lds-mark lds-mark-insufficient_evidence" aria-hidden="true"></span>Conflicting</span>
+                <span id="count-state-insufficient" class="lds-count-value">0</span>
+                <span class="lds-count-help">Disputed or insufficient evidence</span>
+              </div>
+            </div>
           </div>
+          <div>
+            <h3 class="lds-h3 mb-2">What was found, by category</h3>
+            <div class="lds-counts">
+              <div class="lds-count">
+                <span class="lds-count-label">Pathogenic</span>
+                <span id="count-pathogenic" class="lds-count-value">0</span>
+                <span class="lds-count-help">Classed pathogenic in ClinVar</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label" data-acmg-version>ACMG SF</span>
+                <span id="count-acmg" class="lds-count-value">0</span>
+                <span class="lds-count-help">Actionable genes with a finding</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label">Pharmacogenomics</span>
+                <span id="count-pgx" class="lds-count-value">0</span>
+                <span class="lds-count-help">Drug-response findings (CPIC)</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label">Carrier status</span>
+                <span id="count-carrier" class="lds-count-value">0</span>
+                <span class="lds-count-help">Recessive and APOE alleles</span>
+              </div>
+              <div class="lds-count">
+                <span class="lds-count-label">Risk factors</span>
+                <span id="count-risk" class="lds-count-value">0</span>
+                <span class="lds-count-help">Susceptibility findings</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- APOE: two markers read together -->
+      <section id="apoe-status-card" class="hidden lds-section" aria-labelledby="apoe-h">
+        <div class="lds-section-head">
+          <h2 id="apoe-h" class="lds-section-title">APOE</h2>
+          <p class="lds-section-aside">Two markers, rs429358 and rs7412, read together as one result.</p>
+        </div>
+        <div class="lds-section-body flex flex-col gap-4">
           <div class="flex flex-wrap items-center gap-3">
-            <div class="px-3 py-1.5 rounded-sm bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-xs">
-              <span class="text-slate-500 dark:text-slate-400">Format:</span>
-              <span id="qc-format" class="font-bold text-slate-800 dark:text-slate-200 ml-1 font-mono">—</span>
-            </div>
-            <div class="px-3 py-1.5 rounded-sm bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-xs">
-              <span class="text-slate-500 dark:text-slate-400">Markers:</span>
-              <span id="qc-total-snps" class="font-bold text-slate-800 dark:text-slate-200 ml-1 font-mono">—</span>
-            </div>
-            <div class="px-3 py-1.5 rounded-sm bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-xs">
-              <span class="text-slate-500 dark:text-slate-400">Call Rate:</span>
-              <span id="qc-call-rate" class="font-bold text-emerald-600 dark:text-emerald-400 ml-1 font-mono">—</span>
-            </div>
-            <div class="px-3 py-1.5 rounded-sm bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-xs">
-              <span class="text-slate-500 dark:text-slate-400">Heterozygosity:</span>
-              <span id="qc-het-rate" class="font-bold text-slate-800 dark:text-slate-200 ml-1 font-mono">—</span>
-            </div>
-            <div class="flex items-center space-x-1.5">
-              <span class="text-xs text-slate-500 dark:text-slate-400">Sex-chromosome QC:</span>
-              <span id="qc-inferred-sex" class="inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-                —
-              </span>
-            </div>
+            <h3 id="apoe-diplotype-title" class="font-serif text-30 text-ink" style="letter-spacing: var(--tracking-heading)">APOE</h3>
+            <span id="apoe-carrier-pill" class="lds-tag lds-tag-neutral"></span>
+            <span id="apoe-risk-ratio" class="lds-tag lds-tag-neutral"></span>
+          </div>
+          <p id="apoe-phenotype-desc" class="lds-prose"></p>
+          <dl class="lds-datalist">
+            <div><dt>Underlying genotypes</dt><dd id="apoe-raw-loci"></dd></div>
+            <div><dt>Estimated lifetime risk</dt><dd id="apoe-lifetime-stat"></dd></div>
+            <div><dt>Protein abundance (Human Protein Atlas)</dt><dd id="apoe-hpa-desc" class="font-sans font-normal"></dd></div>
+          </dl>
+          <div>
+            <button id="btn-inspect-apoe" type="button" class="lds-btn lds-btn-secondary lds-btn-sm">See the details</button>
           </div>
         </div>
+      </section>
 
-        <!-- Summary KPI Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 pt-6">
-          <div class="p-4 rounded-sm bg-rose-50 dark:bg-slate-900/60 border border-rose-300 dark:border-rose-500/30">
-            <div class="text-xs text-rose-700 dark:text-rose-300 font-semibold font-mono">Pathogenic</div>
-            <div id="count-pathogenic" class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1 font-mono">0</div>
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">High clinical priority</div>
-          </div>
-
-          <div class="p-4 rounded-sm bg-sky-50 dark:bg-slate-900/60 border border-sky-300 dark:border-sky-500/30">
-            <div class="text-xs text-sky-700 dark:text-sky-300 font-semibold font-mono" data-acmg-version>ACMG SF</div>
-            <div id="count-acmg" class="text-2xl font-black text-sky-600 dark:text-sky-400 mt-1 font-mono">0</div>
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Actionable genes</div>
-          </div>
-
-          <div class="p-4 rounded-sm bg-purple-50 dark:bg-slate-900/60 border border-purple-300 dark:border-purple-500/30">
-            <div class="text-xs text-purple-700 dark:text-purple-300 font-semibold font-mono">Pharmacogenomics</div>
-            <div id="count-pgx" class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1 font-mono">0</div>
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">CPIC drug metabolism</div>
-          </div>
-
-          <div class="p-4 rounded-sm bg-amber-50 dark:bg-slate-900/60 border border-amber-300 dark:border-amber-500/30">
-            <div class="text-xs text-amber-700 dark:text-amber-300 font-semibold font-mono">Carrier Status</div>
-            <div id="count-carrier" class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 font-mono">0</div>
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Recessive & APOE alleles</div>
-          </div>
-
-          <div class="p-4 rounded-sm bg-red-50 dark:bg-slate-900/60 border border-red-300 dark:border-red-500/30">
-            <div class="text-xs text-red-700 dark:text-red-300 font-semibold font-mono">Elevated Risk</div>
-            <div id="count-risk" class="text-2xl font-black text-red-600 dark:text-red-400 mt-1 font-mono">0</div>
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Susceptibility loci</div>
-          </div>
+      <!-- Findings across more than one locus -->
+      <section id="assortment-section" class="hidden lds-section" aria-labelledby="assortment-h">
+        <div class="lds-section-head">
+          <h2 id="assortment-h" class="lds-section-title">Across genes</h2>
+          <p class="lds-section-aside">Two variants in one gene, and variants on different chromosomes that a child could inherit together.</p>
+          <span id="assortment-findings-count-badge" class="lds-meta">2 multi-locus findings</span>
         </div>
+        <div id="assortment-cards-container" class="lds-section-body flex flex-col"></div>
+      </section>
 
-        <!-- 5-State Coverage Taxonomy Counters -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-800/80">
-          <div class="p-3 rounded-sm bg-sky-50/70 dark:bg-slate-900/40 border border-sky-200 dark:border-sky-500/20">
-            <div class="text-[11px] text-sky-700 dark:text-sky-300 font-mono font-semibold flex items-center justify-between">
-              <span>Observed</span>
-              <span class="text-[9px] uppercase px-1 rounded bg-sky-200 dark:bg-sky-900/60 font-bold">State 1</span>
-            </div>
-            <div id="count-state-observed" class="text-xl font-bold text-sky-600 dark:text-sky-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Supported & observed</div>
-          </div>
-
-          <div class="p-3 rounded-sm bg-emerald-50/70 dark:bg-slate-900/40 border border-emerald-200 dark:border-emerald-500/20">
-            <div class="text-[11px] text-emerald-700 dark:text-emerald-300 font-mono font-semibold flex items-center justify-between">
-              <span>Tested WT</span>
-              <span class="text-[9px] uppercase px-1 rounded bg-emerald-200 dark:bg-emerald-900/60 font-bold">State 2</span>
-            </div>
-            <div id="count-state-negative" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Supported, not detected</div>
-          </div>
-
-          <div class="p-3 rounded-sm bg-amber-50/70 dark:bg-slate-900/40 border border-amber-200 dark:border-amber-500/20">
-            <div class="text-[11px] text-amber-700 dark:text-amber-300 font-mono font-semibold flex items-center justify-between">
-              <span>Array Gaps</span>
-              <span class="text-[9px] uppercase px-1 rounded bg-amber-200 dark:bg-amber-900/60 font-bold">State 3</span>
-            </div>
-            <div id="count-state-gaps" class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Omitted from chip</div>
-          </div>
-
-          <div class="p-3 rounded-sm bg-slate-100/70 dark:bg-slate-900/40 border border-slate-300 dark:border-slate-700/50">
-            <div class="text-[11px] text-slate-600 dark:text-slate-400 font-mono font-semibold flex items-center justify-between">
-              <span>Outside Scope</span>
-              <span class="text-[9px] uppercase px-1 rounded bg-slate-200 dark:bg-slate-800 font-bold">State 4</span>
-            </div>
-            <div id="count-state-outside" class="text-xl font-bold text-slate-700 dark:text-slate-300 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Markers uncurated</div>
-          </div>
-
-          <div class="p-3 rounded-sm bg-rose-50/70 dark:bg-slate-900/40 border border-rose-200 dark:border-rose-500/20">
-            <div class="text-[11px] text-rose-700 dark:text-rose-300 font-mono font-semibold flex items-center justify-between">
-              <span>Conflicting</span>
-              <span class="text-[9px] uppercase px-1 rounded bg-rose-200 dark:bg-rose-900/60 font-bold">State 5</span>
-            </div>
-            <div id="count-state-insufficient" class="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Disputed / insufficient</div>
-          </div>
+      <!-- All results: filters, search, save, table -->
+      <section class="lds-section" aria-labelledby="table-h">
+        <div class="lds-section-head">
+          <h2 id="table-h" class="lds-section-title">All results</h2>
+          <p class="lds-section-aside">Select a row to see its details, its limits and where the data comes from.</p>
         </div>
-      </div>
+        <div class="lds-section-body flex flex-col gap-4">
+          <div class="lds-tabs" role="group" aria-label="Show">
+            <button type="button" data-filter="all" class="lds-tab tab-active">Observed findings</button>
+            <button type="button" data-filter="negative" class="lds-tab">Not detected</button>
+            <button type="button" data-filter="gaps" class="lds-tab">Not on the chip</button>
+            <button type="button" data-filter="insufficient" class="lds-tab">Conflicting evidence</button>
+            <button type="button" data-filter="carrier" class="lds-tab">Carrier status</button>
+            <button type="button" data-filter="pathogenic" class="lds-tab">Pathogenic</button>
+            <button type="button" data-filter="acmg" data-acmg-version class="lds-tab">ACMG SF</button>
+            <button type="button" data-filter="pgx" class="lds-tab">Pharmacogenomics</button>
+            <button type="button" data-filter="risk" class="lds-tab">Risk factors</button>
+          </div>
 
-      <!-- Dedicated Compound APOE Diplotype & Neurological / Lipid Profile Card -->
-      <div id="apoe-status-card" class="hidden glass-panel p-6 border-l-4 transition-all duration-200 bg-white dark:bg-slate-900/60 border-slate-300 dark:border-slate-700">
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-          <div class="space-y-1">
-            <div class="flex items-center space-x-2">
-              <span class="text-xs uppercase font-bold tracking-wider text-sky-600 dark:text-sky-400 font-mono">Compound Haplotype Synthesis</span>
-              <span id="apoe-carrier-pill" class="px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border">Carrier Status</span>
-            </div>
-            <div class="flex items-center space-x-3">
-              <h3 id="apoe-diplotype-title" class="text-2xl font-black tracking-tight font-mono text-slate-900 dark:text-slate-100" data-design-id="apoe.hero.title" data-design-role="display">
-                APOE ε3/ε4 Carrier
-              </h3>
-              <span id="apoe-risk-ratio" class="px-2.5 py-1 text-xs font-bold rounded-sm font-mono border" data-design-id="apoe.hero.badge" data-design-role="metric">
-                3–4× Elevated Lifetime Risk
-              </span>
-            </div>
-            <p id="apoe-phenotype-desc" class="text-sm text-slate-700 dark:text-slate-300 max-w-3xl leading-relaxed font-serif" data-design-id="apoe.hero.narrative" data-design-role="editorial">
-              APOE diplotype synthesized from rs429358 and rs7412.
-            </p>
-          </div>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div class="px-3 py-2 bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 rounded-sm text-xs font-mono">
-              <div class="text-[10px] uppercase text-slate-500 font-semibold">Underlying Genotypes</div>
-              <div id="apoe-raw-loci" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">rs429358: CT · rs7412: CC</div>
-            </div>
-            <button id="btn-inspect-apoe" type="button" class="btn btn-sm btn-outline border-sky-500 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 text-xs rounded-sm">
-              🔬 Inspect Clinical Proteomics
-            </button>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 text-xs">
-          <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-sm">
-            <span class="text-[10px] uppercase text-slate-500 font-bold block">Estimated Lifetime Risk</span>
-            <span id="apoe-lifetime-stat" class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5 block" data-design-id="apoe.lifetime.stat" data-design-role="stat" data-design-name="APOE Lifetime Stat"></span>
-          </div>
-          <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-sm">
-            <span class="text-[10px] uppercase text-slate-500 font-bold block">HPA Proteomic Abundance</span>
-            <span id="apoe-hpa-desc" class="text-xs text-slate-700 dark:text-slate-300 mt-0.5 block" data-design-id="apoe.proteomic.desc" data-design-role="body" data-design-name="Proteomic Abundance"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Multi-Locus Independent Assortment & Compound Heterozygote Section -->
-      <div id="assortment-section" class="hidden space-y-4">
-        <div class="glass-panel p-6 bg-white dark:bg-slate-900/60 border-l-4 border-indigo-500 rounded-sm">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-2">
-            <div class="flex items-center space-x-3">
-              <div class="w-9 h-9 rounded-sm bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-300 dark:border-indigo-500/30 flex items-center justify-center text-lg text-indigo-600 dark:text-indigo-400">
-                🧬
-              </div>
-              <div>
-                <div class="flex items-center space-x-2">
-                  <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 font-mono">
-                    Mendelian Independent Segregation & Multi-Locus Assortment
-                  </h3>
-                  <span id="assortment-findings-count-badge" class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded-sm bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/30">
-                    2 Multi-Locus Findings
-                  </span>
-                </div>
-                <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-0.5">
-                  Multi-locus epistatic interactions across unlinked chromosomes (Mendel's Second Law) and compound heterozygous phasing
-                </p>
-              </div>
-            </div>
-            <div class="text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-sm border border-slate-200 dark:border-slate-700">
-              Joint Segregation Probability Analysis
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="lds-field flex-1" style="min-width: 220px; max-width: 360px">
+              <span class="lds-icon lds-icon-14 lds-i-search" aria-hidden="true"></span>
+              <span class="sr-only">Search</span>
+              <input type="text" id="search-input" placeholder="Find a marker, gene or drug" class="lds-input" autocomplete="off">
+            </label>
+            <div class="flex-1"></div>
+            <span id="kb-provenance-badge" class="lds-localnote lds-data"><span id="kb-provenance-text">KB · Offline</span></span>
+            <div class="dropdown dropdown-end">
+              <button type="button" class="lds-btn lds-btn-secondary lds-btn-sm">
+                <span class="lds-icon lds-icon-14 lds-i-download" aria-hidden="true"></span>Save a copy<span class="lds-icon lds-icon-14 lds-i-chevron-down" aria-hidden="true"></span>
+              </button>
+              <ul tabindex="0" class="dropdown-content z-30 lds-menu">
+                <li><button type="button" id="btn-export-md" class="lds-menu-item"><span class="lds-icon lds-icon-14 lds-i-file-text" aria-hidden="true"></span>Report<span class="lds-menu-hint">.md</span></button></li>
+                <li><button type="button" id="btn-export-csv" class="lds-menu-item"><span class="lds-icon lds-icon-14 lds-i-table" aria-hidden="true"></span>Table<span class="lds-menu-hint">.csv</span></button></li>
+              </ul>
             </div>
           </div>
-          <div id="assortment-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-            <!-- Dynamically populated cards for Compound Heterozygotes and Independent Assortment -->
+
+          <div class="overflow-x-auto max-h-[600px] overflow-y-auto border-t border-line">
+            <table class="lds-table">
+              <thead>
+                <tr>
+                  <th scope="col">Marker</th>
+                  <th scope="col">Gene</th>
+                  <th scope="col">Genotype</th>
+                  <th scope="col">Result</th>
+                  <th scope="col">Evidence and category</th>
+                  <th scope="col">ClinVar review</th>
+                  <th scope="col">Magnitude</th>
+                  <th scope="col">What it means</th>
+                </tr>
+              </thead>
+              <tbody id="variants-tbody"></tbody>
+            </table>
           </div>
+          <p id="showing-count" class="lds-meta">Showing 0 findings</p>
         </div>
-      </div>
-
-
-      <!-- Filter Tabs & Actions Bar -->
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        
-        <!-- Category & Coverage State Filters -->
-        <div class="flex items-center space-x-1 overflow-x-auto p-1 bg-slate-100 dark:bg-slate-900/80 rounded-sm border border-slate-300 dark:border-slate-800 text-xs font-mono">
-          <button data-filter="all" class="px-3 py-1.5 rounded-sm font-medium transition-colors tab-active bg-sky-600 text-white dark:bg-sky-500/20 dark:text-sky-300 border border-sky-600 dark:border-sky-400">
-            Observed Findings
-          </button>
-          <button data-filter="negative" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Tested Wild-Type (State 2)
-          </button>
-          <button data-filter="gaps" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Array Gaps (State 3)
-          </button>
-          <button data-filter="insufficient" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Conflicting Evidence (State 5)
-          </button>
-          <button data-filter="carrier" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Carrier Status
-          </button>
-          <button data-filter="pathogenic" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Pathogenic
-          </button>
-          <button data-filter="acmg" data-acmg-version class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            ACMG SF
-          </button>
-          <button data-filter="pgx" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Pharmacogenomics
-          </button>
-          <button data-filter="risk" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            Risk Factors
-          </button>
-        </div>
-
-        <!-- Search & Export Actions -->
-        <div class="flex items-center space-x-3">
-          <div class="relative flex-1 sm:w-64">
-            <input type="text" id="search-input" placeholder="Search rsID, gene, drug…" class="input input-sm w-full bg-white dark:bg-slate-900/90 border-slate-300 dark:border-slate-700/80 focus:border-sky-500 text-xs pl-8 text-slate-900 dark:text-slate-200 rounded-sm">
-            <span class="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
-          </div>
-
-          <div id="kb-provenance-badge" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm text-[11px] font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span id="kb-provenance-text">KB · Offline</span>
-          </div>
-
-          <div class="dropdown dropdown-end">
-            <button type="button" class="btn btn-sm btn-primary bg-sky-600 hover:bg-sky-700 border-none text-white text-xs rounded-sm">
-              Export ▾
-            </button>
-            <ul tabindex="0" class="dropdown-content z-30 menu p-2 shadow-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-sm w-48 text-xs mt-1">
-              <li><button type="button" id="btn-export-md" class="hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200">📄 Markdown Report</button></li>
-              <li><button type="button" id="btn-export-csv" class="hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200">📊 CSV Dataset</button></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Variants Table Card -->
-      <div class="glass-panel overflow-hidden bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-sm">
-        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/40">
-          <div id="showing-count" class="text-xs text-slate-600 dark:text-slate-400 font-mono">Showing 0 clinical variants</div>
-          <div class="text-[11px] text-slate-500">Click any row to inspect Proteomics, Evidence Tier & Provenance</div>
-        </div>
-
-        <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900/95 backdrop-blur border-b border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider font-semibold font-mono text-[11px]">
-              <tr>
-                <th class="py-3 px-4">rsID</th>
-                <th class="py-3 px-4">Gene</th>
-                <th class="py-3 px-4">Genotype</th>
-                <th class="py-3 px-4">Coverage State</th>
-                <th class="py-3 px-4">Tier / Category</th>
-                <th class="py-3 px-4">ClinVar</th>
-                <th class="py-3 px-4">Magnitude</th>
-                <th class="py-3 px-4">Clinical Guidance & Phenotype</th>
-              </tr>
-            </thead>
-            <tbody id="variants-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/50">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </section>
     </section>
 
   </main>
 
-  <!-- Slide-out Variant Inspection Drawer -->
-  <aside id="variant-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[540px] bg-white dark:bg-slate-950 border-l border-slate-300 dark:border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto flex flex-col justify-between">
-    <div class="p-6 space-y-6">
-      
-      <!-- Drawer Header -->
-      <div class="flex items-start justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <div class="flex items-center space-x-2">
-            <h3 id="drawer-rsid" class="text-2xl font-black text-sky-600 dark:text-sky-400 font-mono">rsID</h3>
-            <span id="drawer-gene" class="text-lg font-bold text-slate-900 dark:text-slate-200">Gene</span>
-          </div>
-          <p id="drawer-coord" class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">chr:pos</p>
-          <div class="flex items-center space-x-2 mt-2">
-            <span id="drawer-tier-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700"></span>
-            <span id="drawer-coverage-state-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700">Supported & Observed</span>
+  <!-- Result details (slides in over the page) -->
+  <aside id="variant-drawer" aria-label="Result details" class="lds-inspector fixed inset-y-0 right-0 z-50 w-full sm:w-inspector translate-x-full overflow-y-auto flex flex-col justify-between">
+    <div>
+      <div class="lds-inspector-head">
+        <div class="flex flex-col gap-1.5 min-w-0">
+          <h2 id="drawer-rsid" class="lds-inspector-title">rsID</h2>
+          <p class="lds-inspector-sub"><span id="drawer-gene">Gene</span> · <span id="drawer-coord">Not available</span></p>
+          <div class="flex flex-wrap items-center gap-2 mt-1">
+            <span id="drawer-coverage-state-badge" class="lds-tag lds-tag-neutral"></span>
+            <span id="drawer-tier-badge" class="lds-tag lds-tag-neutral"></span>
           </div>
         </div>
-        <button id="btn-close-drawer" type="button" class="btn btn-sm btn-circle btn-ghost text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
-          ✕
+        <button id="btn-close-drawer" type="button" class="lds-iconbtn" aria-label="Close details">
+          <span class="lds-icon lds-i-x" aria-hidden="true"></span>
         </button>
       </div>
 
-      <!-- ACMG Alert Box -->
-      <div id="drawer-acmg-box" class="hidden p-3.5 rounded-sm bg-sky-50 dark:bg-sky-500/10 border border-sky-300 dark:border-sky-500/30 flex items-start space-x-3">
-        <span class="text-sky-600 dark:text-sky-400 text-lg">🛡️</span>
-        <div>
-          <div class="text-xs font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider font-mono"><span data-acmg-version>ACMG SF</span> Gene</div>
-          <p class="text-xs text-slate-700 dark:text-slate-300 mt-0.5">Designated actionable locus under <span data-acmg-version>ACMG SF</span> screening guidelines. Note: Clinical assertions reflect curated ClinVar submissions; Lucidase does not independently evaluate ACMG/AMP 2015 variant classification criteria.</p>
-        </div>
-      </div>
+      <div class="lds-inspector-body">
+        <div class="flex flex-col gap-3 pt-4">
+          <!-- What this test can't tell you (a single-variant test, the star-allele refusal) -->
+          <div id="drawer-refusal-box" class="hidden lds-alert lds-alert-notice">
+            <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
+            <div class="lds-alert-body">
+              <p class="lds-alert-title">What this test can't tell you</p>
+              <p id="drawer-refusal-text" class="lds-alert-text"></p>
+            </div>
+          </div>
 
-      <!-- CPIC Drug Alert Box -->
-      <div id="drawer-drug-box" class="hidden p-3.5 rounded-sm bg-purple-50 dark:bg-purple-500/10 border border-purple-300 dark:border-purple-500/30 flex items-start space-x-3">
-        <span class="text-purple-600 dark:text-purple-400 text-lg">💊</span>
-        <div>
-          <div class="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider font-mono">CPIC Pharmacogenomics Guideline</div>
-          <p id="drawer-drug-text" class="text-xs text-purple-900 dark:text-purple-200 font-semibold mt-0.5">Drug Alert</p>
-        </div>
-      </div>
+          <div id="drawer-acmg-box" class="hidden lds-alert lds-alert-info">
+            <span class="lds-icon lds-icon-18 lds-i-info" aria-hidden="true"></span>
+            <div class="lds-alert-body">
+              <p class="lds-alert-title"><span data-acmg-version>ACMG SF</span> gene</p>
+              <p class="lds-alert-text">This gene is on the <span data-acmg-version>ACMG SF</span> list of genes where a finding can lead to medical action. The result shown reflects curated ClinVar submissions; Lucidase does not apply the ACMG/AMP 2015 variant classification criteria itself.</p>
+            </div>
+          </div>
 
-      <!-- Star-Allele Refusal & Incomplete Haplotype Notice Box -->
-      <div id="drawer-refusal-box" class="hidden p-3.5 rounded-sm bg-purple-50/80 dark:bg-purple-950/40 border-l-4 border-purple-600 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
-        <div class="font-bold text-purple-900 dark:text-purple-200 flex items-center space-x-1.5 font-mono uppercase tracking-wider text-[11px]">
-          <span>🚫</span>
-          <span>Limitation of this Test</span>
+          <div id="drawer-drug-box" class="hidden lds-alert lds-alert-pgx">
+            <span class="lds-icon lds-icon-18 lds-i-info" aria-hidden="true"></span>
+            <div class="lds-alert-body">
+              <p class="lds-alert-title">Drug response (CPIC guideline)</p>
+              <p id="drawer-drug-text" class="lds-alert-text"></p>
+            </div>
+          </div>
         </div>
-        <p id="drawer-refusal-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-serif"></p>
-      </div>
 
-      <!-- General Scientific Caveats Box -->
-      <div id="drawer-caveats-box" class="hidden p-3 rounded-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
-        <div class="font-bold text-slate-800 dark:text-slate-200 uppercase font-mono text-[10px] tracking-wider">Scientific Caveats & Scope</div>
-        <ul id="drawer-caveats-list" class="list-disc list-inside space-y-0.5 text-slate-600 dark:text-slate-400">
-        </ul>
-      </div>
+        <section class="lds-isec">
+          <h3 class="lds-isec-title">What it means</h3>
+          <p id="drawer-significance" class="font-sans font-bold text-15 text-ink mb-1.5">Not available</p>
+          <p id="drawer-phenotype" class="lds-prose">Not available</p>
+        </section>
 
-      <!-- Variant Metrics Grid -->
-      <div class="grid grid-cols-2 gap-3 text-xs font-mono">
-        <div class="p-3 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
-          <div class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold">Genotype</div>
-          <div id="drawer-genotype" class="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">—</div>
-        </div>
-        <div class="p-3 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
-          <div class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold">ClinVar Stars</div>
-          <div id="drawer-stars" class="text-amber-500 dark:text-amber-400 font-bold mt-0.5">—</div>
-        </div>
-        <div class="p-3 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
-          <div class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold">Magnitude / Repute</div>
-          <div id="drawer-magnitude" class="text-slate-900 dark:text-slate-100 font-bold mt-0.5">—</div>
-        </div>
-        <div class="p-3 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
-          <div class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold">gnomAD Allele Freq</div>
-          <div id="drawer-af" class="text-slate-900 dark:text-slate-100 font-bold mt-0.5">—</div>
-        </div>
-      </div>
+        <section class="lds-isec">
+          <dl class="lds-datalist">
+            <div><dt>Genotype</dt><dd id="drawer-genotype">Not available</dd></div>
+            <div><dt>ClinVar review stars</dt><dd id="drawer-stars">Not available</dd></div>
+            <div><dt>Magnitude</dt><dd id="drawer-magnitude">Not available</dd></div>
+            <div><dt>gnomAD allele frequency</dt><dd id="drawer-af">Not available</dd></div>
+          </dl>
+        </section>
 
-      <!-- Clinical Phenotype -->
-      <div class="space-y-1.5">
-        <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Clinical Significance & Phenotype</div>
-        <div id="drawer-significance" class="text-sm font-semibold text-rose-600 dark:text-rose-300">Significance</div>
-        <p id="drawer-phenotype" class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-sm border border-slate-200 dark:border-slate-800 font-serif" data-design-id="drawer.phenotype" data-design-role="editorial">
-          Phenotype details…
-        </p>
-      </div>
+        <section id="drawer-caveats-box" class="hidden lds-isec">
+          <h3 class="lds-isec-title">Caveats and scope</h3>
+          <ul id="drawer-caveats-list" class="lds-list text-ink-muted"></ul>
+        </section>
 
-      <!-- Independent Segregation & Carrier Transmission Section -->
-      <div id="drawer-segregation-container" class="p-4 rounded-sm bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-3">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-          <div class="flex items-center space-x-2">
-            <span class="text-base">⚖️</span>
+        <!-- Inheritance: recurrence for Mendelian genes, allele transmission otherwise -->
+        <section id="drawer-segregation-container" class="lds-isec flex flex-col gap-4">
+          <div class="lds-isec-head">
             <div>
-              <span class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider font-mono">Independent Segregation & Recurrence</span>
-              <p class="text-[10px] text-slate-500 dark:text-slate-400 font-serif">Mendelian inheritance model & recurrence risk calculation</p>
+              <h3 class="lds-isec-title mb-1" data-role="seg-title">Inheritance and recurrence</h3>
+              <p class="lds-meta">Mendelian inheritance model and recurrence calculation</p>
+            </div>
+            <span id="drawer-seg-mode-badge" class="lds-tag lds-tag-neutral">Not available</span>
+          </div>
+
+          <dl class="lds-datalist">
+            <div><dt>Carrier frequency (2pq)</dt><dd id="drawer-seg-carrier-prior">Not available</dd></div>
+            <div><dt>Penetrance</dt><dd id="drawer-seg-penetrance">Not available</dd></div>
+            <div><dt>Risk with an unscreened partner</dt><dd id="drawer-seg-risk-unscreened">Not available</dd></div>
+            <div><dt>Risk with a carrier partner</dt><dd id="drawer-seg-risk-carrier">Not available</dd></div>
+          </dl>
+
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <span class="lds-h3">Offspring simulator</span>
+              <span class="lds-meta">Partner's genotype</span>
+            </div>
+            <div id="drawer-partner-buttons" class="lds-segmented" role="group" aria-label="Partner's genotype">
+              <button type="button" data-partner="unscreened" class="partner-sim-btn lds-segment" aria-pressed="true">Unscreened</button>
+              <button type="button" data-partner="carrier" class="partner-sim-btn lds-segment" aria-pressed="false">Carrier</button>
+              <button type="button" data-partner="affected" class="partner-sim-btn lds-segment" aria-pressed="false">Affected</button>
+              <button type="button" data-partner="wildtype" class="partner-sim-btn lds-segment" aria-pressed="false">Wild-type</button>
+            </div>
+            <p id="drawer-partner-model-note" class="lds-meta"></p>
+
+            <div class="flex flex-col gap-3">
+              <div class="lds-prob">
+                <div class="lds-prob-head"><span>Affected probability</span><span id="sim-p-affected">Not available</span></div>
+                <div class="lds-prob-track"><div id="sim-bar-affected" class="lds-prob-bar" style="width: 0%"></div></div>
+              </div>
+              <div class="lds-prob">
+                <div class="lds-prob-head"><span>Carrier probability</span><span id="sim-p-carrier">Not available</span></div>
+                <div class="lds-prob-track"><div id="sim-bar-carrier" class="lds-prob-bar" style="width: 0%"></div></div>
+              </div>
+              <div class="lds-prob">
+                <div class="lds-prob-head"><span>Wild-type (non-carrier)</span><span id="sim-p-wildtype">Not available</span></div>
+                <div class="lds-prob-track"><div id="sim-bar-wildtype" class="lds-prob-bar" style="width: 0%"></div></div>
+              </div>
+              <div class="lds-prob-head pt-2 border-t border-line">
+                <span>Effective penetrance, adjusted</span><span id="sim-effective-risk">Not available</span>
+              </div>
             </div>
           </div>
-          <span id="drawer-seg-mode-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-sky-50 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-500/30 font-mono">
-            Autosomal Recessive
-          </span>
-        </div>
+        </section>
 
-        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-          <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
-            <div class="text-[10px] uppercase text-slate-400">Carrier Prior (2pq)</div>
-            <div id="drawer-seg-carrier-prior" class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">1 in 50 (2.0%)</div>
-          </div>
-          <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
-            <div class="text-[10px] uppercase text-slate-400">Penetrance</div>
-            <div id="drawer-seg-penetrance" class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">100%</div>
-          </div>
-          <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
-            <div class="text-[10px] uppercase text-slate-400">Risk vs Unscreened Partner</div>
-            <div id="drawer-seg-risk-unscreened" class="text-xs font-bold text-amber-600 dark:text-amber-400 mt-0.5">0.5% (1 in 200)</div>
-          </div>
-          <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
-            <div class="text-[10px] uppercase text-slate-400">Risk vs Carrier Partner</div>
-            <div id="drawer-seg-risk-carrier" class="text-xs font-bold text-rose-600 dark:text-rose-400 mt-0.5">25.0% (1 in 4)</div>
-          </div>
-        </div>
-
-        <!-- Interactive Offspring Risk Simulator -->
-        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-800 dark:text-slate-200 font-mono">Offspring Risk Simulator:</span>
-            <span class="text-[10px] text-slate-500 font-mono">Select Partner Status</span>
-          </div>
-          <div class="grid grid-cols-4 gap-1.5 text-[11px] font-mono" id="drawer-partner-buttons">
-            <button type="button" data-partner="unscreened" class="partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-sky-600 text-white border border-sky-600 shadow-sm transition-all">Unscreened</button>
-            <button type="button" data-partner="carrier" class="partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all">Carrier</button>
-            <button type="button" data-partner="affected" class="partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all">Affected</button>
-            <button type="button" data-partner="wildtype" class="partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all">Wild-Type</button>
-          </div>
-          <p id="drawer-partner-model-note" class="text-[10px] text-slate-500 dark:text-slate-400 font-serif"></p>
-
-          <!-- Offspring Probability Breakdown -->
-          <div class="space-y-2 pt-1 text-xs font-mono bg-white dark:bg-slate-950 p-3 rounded-sm border border-slate-200 dark:border-slate-800">
+        <!-- Gene and protein context: AlphaFold DB, Ensembl VEP, ENCODE -->
+        <section id="drawer-biotools-container" class="lds-isec flex flex-col gap-5">
+          <div class="lds-isec-head">
             <div>
-              <div class="flex justify-between items-center text-[11px] mb-1">
-                <span class="text-rose-600 dark:text-rose-400 font-bold">Affected Probability:</span>
-                <span id="sim-p-affected" class="font-bold text-rose-600 dark:text-rose-400">0.5%</span>
-              </div>
-              <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-none overflow-hidden">
-                <div id="sim-bar-affected" class="bg-rose-500 h-1.5 transition-all duration-300" style="width: 0.5%"></div>
-              </div>
+              <h3 class="lds-isec-title mb-1">Gene and protein context</h3>
+              <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
             </div>
+            <span id="drawer-biotool-gene-badge" class="lds-tag lds-tag-neutral lds-data">Gene</span>
+          </div>
 
+          <div id="biotool-alphafold-card" class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="flex flex-wrap items-center gap-2">
+                <span class="lds-h3">AlphaFold DB structure</span>
+                <span id="drawer-af-uniprot" class="lds-meta lds-data">Not available</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="lds-meta">pLDDT</span>
+                <span id="drawer-af-plddt" class="lds-tag lds-tag-neutral lds-data">Not available</span>
+              </span>
+            </div>
+            <p id="drawer-af-status" class="lds-prose">Not available</p>
             <div>
-              <div class="flex justify-between items-center text-[11px] mb-1">
-                <span class="text-amber-600 dark:text-amber-400 font-bold">Carrier Probability:</span>
-                <span id="sim-p-carrier" class="font-bold text-amber-600 dark:text-amber-400">50.0%</span>
-              </div>
-              <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-none overflow-hidden">
-                <div id="sim-bar-carrier" class="bg-amber-500 h-1.5 transition-all duration-300" style="width: 50%"></div>
-              </div>
+              <p class="lds-meta mb-1">Folded domains</p>
+              <div id="drawer-af-domains" class="flex flex-col gap-1 lds-data text-13"></div>
             </div>
-
-            <div>
-              <div class="flex justify-between items-center text-[11px] mb-1">
-                <span class="text-emerald-600 dark:text-emerald-400 font-bold">Wild-Type / Non-Carrier:</span>
-                <span id="sim-p-wildtype" class="font-bold text-emerald-600 dark:text-emerald-400">49.5%</span>
-              </div>
-              <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-none overflow-hidden">
-                <div id="sim-bar-wildtype" class="bg-emerald-500 h-1.5 transition-all duration-300" style="width: 49.5%"></div>
-              </div>
-            </div>
-
-            <div class="pt-1.5 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-[11px]">
-              <span class="text-slate-500">Effective Penetrance Adjusted:</span>
-              <span id="sim-effective-risk" class="font-bold text-slate-800 dark:text-slate-200">0.5%</span>
-            </div>
+            <p id="drawer-af-joints" class="lds-meta">Not available</p>
           </div>
-        </div>
+
+          <div id="biotool-ensembl-card" class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="lds-h3">Ensembl VEP and constraint</span>
+              <span id="drawer-ens-transcript" class="lds-meta lds-data">Not available</span>
+            </div>
+            <dl class="lds-datalist">
+              <div><dt>AlphaMissense class</dt><dd id="drawer-ens-alphamissense">Not available</dd></div>
+              <div><dt>LOEUF constraint</dt><dd id="drawer-ens-loeuf">Not available</dd></div>
+            </dl>
+          </div>
+
+          <div id="biotool-encode-card" class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="lds-h3">ENCODE RNA-seq expression</span>
+              <span class="lds-meta">Type A biosamples, TPM</span>
+            </div>
+            <div id="drawer-encode-tissues" class="flex flex-col gap-2"></div>
+          </div>
+        </section>
+
+        <section class="lds-isec">
+          <div class="lds-isec-head">
+            <h3 class="lds-isec-title">Human Protein Atlas expression</h3>
+            <span class="lds-meta">Normal tissue IHC</span>
+          </div>
+          <div id="drawer-hpa-tissues" class="flex flex-col"></div>
+        </section>
+
+        <section class="lds-isec">
+          <h3 class="lds-isec-title">Where the protein sits in the cell</h3>
+          <div id="drawer-hpa-subcell" class="flex flex-wrap gap-1.5"></div>
+        </section>
       </div>
-
-      <!-- Deep Biotools Multi-Source Insights Panel -->
-      <div id="drawer-biotools-container" class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="text-base">🔬</span>
-            <div>
-              <span class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider font-mono">Biotools Multi-Source Insights</span>
-              <p class="text-[10px] text-slate-500 dark:text-slate-400 font-serif">AlphaFold DB · Ensembl VEP · ENCODE cCREs</p>
-            </div>
-          </div>
-          <span id="drawer-biotool-gene-badge" class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-            APOE
-          </span>
-        </div>
-
-        <div class="space-y-3">
-          <!-- AlphaFold DB 3D Conformation Card -->
-          <div id="biotool-alphafold-card" class="p-3.5 rounded-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <span class="font-bold text-sky-600 dark:text-sky-400 font-mono">AlphaFold DB 3D</span>
-                <span id="drawer-af-uniprot" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">UniProt P02649</span>
-              </div>
-              <div class="flex items-center space-x-1.5">
-                <span class="text-[10px] text-slate-400">pLDDT:</span>
-                <span id="drawer-af-plddt" class="font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">75.5</span>
-              </div>
-            </div>
-            <div id="drawer-af-status" class="text-xs text-slate-700 dark:text-slate-300 font-serif">
-              Structured Core with Flexible Termini
-            </div>
-            <div class="space-y-1">
-              <span class="text-[10px] uppercase font-bold text-slate-400 font-mono">Rigid Structural Domains:</span>
-              <div id="drawer-af-domains" class="space-y-1 font-mono text-[11px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 p-2.5 rounded-sm border border-slate-200 dark:border-slate-800">
-                <!-- Populated dynamically -->
-              </div>
-            </div>
-            <div id="drawer-af-joints" class="text-[10px] text-slate-500 italic bg-slate-100 dark:bg-slate-950/60 p-2 rounded-sm border border-slate-200 dark:border-slate-800/80">
-              <!-- Flexible linkers -->
-            </div>
-          </div>
-
-          <!-- Ensembl VEP & Constraint Card -->
-          <div id="biotool-ensembl-card" class="p-3.5 rounded-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">Ensembl VEP & Constraint</span>
-              <span id="drawer-ens-transcript" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono"></span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
-              <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
-                <span class="text-[9px] uppercase text-slate-400 block">AlphaMissense Class</span>
-                <span id="drawer-ens-alphamissense" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block"></span>
-              </div>
-              <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
-                <span class="text-[9px] uppercase text-slate-400 block">LOEUF Constraint</span>
-                <span id="drawer-ens-loeuf" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ENCODE cCREs RNA-seq Expression Card -->
-          <div id="biotool-encode-card" class="p-3.5 rounded-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">ENCODE cCREs & RNA-seq Expression</span>
-              <span class="text-[10px] text-slate-400 font-mono">Type A Biosamples (TPM)</span>
-            </div>
-            <div id="drawer-encode-tissues" class="space-y-1.5 font-mono text-[11px]">
-              <!-- Populated dynamically -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Human Protein Atlas Section -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Human Protein Atlas (HPA) Expression</div>
-          <span class="text-[10px] text-slate-400 font-mono">Normal Tissue IHC</span>
-        </div>
-        <div id="drawer-hpa-tissues" class="space-y-1.5">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-
-      <!-- Subcellular Localization -->
-      <div class="space-y-2">
-        <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Subcellular Localization</div>
-        <div id="drawer-hpa-subcell" class="flex flex-wrap gap-1.5">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-
     </div>
 
-    <!-- Drawer Footer Actions -->
-    <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between">
-      <a id="drawer-clinvar-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 hover:border-sky-500 text-sky-600 dark:text-sky-400 text-xs rounded-sm">
-        Open ClinVar Record ↗
-      </a>
-      <span id="drawer-footer-tier" class="text-[11px] text-slate-500 font-mono">Evidence tier</span>
+    <div class="lds-inspector-foot">
+      <div class="flex flex-wrap gap-2">
+        <a id="drawer-clinvar-link" href="#" target="_blank" rel="noopener noreferrer" class="lds-btn lds-btn-secondary lds-btn-sm lds-extlink">Open the ClinVar record</a>
+      </div>
+      <span id="drawer-footer-tier" class="lds-meta lds-data">Not available</span>
     </div>
   </aside>
 
-  <!-- Footer -->
-  <footer class="glass-header px-6 py-4 mt-12 text-center text-xs text-slate-500 font-mono border-t border-slate-200 dark:border-slate-800">
-    <div class="flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto gap-2">
-      <div>Lucidase · Zero-Knowledge Variome Analysis</div>
-      <div class="flex items-center space-x-4">
-        <span>Zero-Knowledge / Client-Side Only</span>
-      </div>
+  <footer class="lds-footer mt-auto">
+    <div class="lds-wrap lds-footer-inner">
+      <span>Lucidase · not a diagnostic test, not medical advice</span>
+      <span class="lds-footer-grow">Your file is read in this browser and never uploaded.</span>
+      <span class="lds-theme">
+        <button id="btn-theme-toggle" type="button" class="lds-textlink"><span id="theme-toggle-icon" class="lds-icon lds-icon-14 lds-i-moon" aria-hidden="true"></span><span id="theme-toggle-text">Dark theme</span></button>
+        <button id="btn-theme-system" type="button" class="lds-textlink hidden">Use device setting</button>
+      </span>
     </div>
   </footer>
 

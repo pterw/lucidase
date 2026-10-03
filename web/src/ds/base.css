@@ -1,0 +1,14 @@
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+body{margin:0;font-size:15px;background:var(--bg-canvas);color:var(--text-body);font-family:var(--font-ui);font-size:var(--type-body-size);line-height:var(--leading-ui);letter-spacing:var(--tracking-ui);transition:background-color var(--dur-base) ease,color var(--dur-base) ease}
+a{color:var(--text-link);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--accent-hover)}
+code,kbd,samp,pre{font-family:var(--font-mono);letter-spacing:var(--tracking-mono)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-contrast: more){:root{--line:var(--line-strong);--ink-muted:var(--ink)}}
+::selection{background:var(--accent-wash);color:var(--ink)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg-canvas)}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.lds-dotfield{/* figures/drop field only */background-image:var(--pattern-dotfield);background-size:var(--pattern-dotfield-size)}
+.lds-na{color:var(--text-subtle);font-style:italic}
+.lds-term{text-decoration:underline dotted;text-decoration-color:var(--ink-subtle);text-underline-offset:3px;cursor:help}
+.lds-wm-dark{display:none!important}[data-theme="dark"] .lds-wm-dark{display:block!important}[data-theme="dark"] .lds-wm-light{display:none!important}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .lds-wm-dark{display:block!important}:root:not([data-theme="light"]) .lds-wm-light{display:none!important}}

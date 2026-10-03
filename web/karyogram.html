@@ -1,152 +1,147 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lucidase | Karyogram</title>
+  <title>Karyogram · Lucidase</title>
+  <!-- Theme before first paint: the stored override, else the device setting (see src/theme.js) -->
+  <script src="src/theme-boot.js"></script>
+  <link rel="icon" type="image/svg+xml" href="src/brand/favicon-light.svg" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/svg+xml" href="src/brand/favicon-dark.svg" media="(prefers-color-scheme: dark)">
 
-  <!-- Adobe Typekit kit gfe3vcu (Akzidenz-Grotesk Next Pro, Orpheus Pro, Input Mono, Swiss 721 BT Condensed) -->
+  <!-- Adobe Fonts kit gfe3vcu (Orpheus Pro, Akzidenz-Grotesk Next Pro and Condensed, Input Mono and Input Mono Narrow) -->
   <link rel="stylesheet" href="https://use.typekit.net/gfe3vcu.css" id="typekit-stylesheet">
 
   <!-- daisyUI (vendored, see src/vendor/README.md), then app styles, then Tailwind utilities -->
   <link rel="stylesheet" href="src/vendor/daisyui-4.12.10.min.css">
-
-  <!-- Custom Design System Styles -->
+  <!-- Lucidase design system tokens and components -->
   <link rel="stylesheet" href="src/styles.css">
   <!-- Utilities must come LAST (see src/vendor/README.md) -->
   <link rel="stylesheet" href="src/vendor/tailwind.css">
 </head>
-<body class="dna-bg-grid min-h-screen text-slate-900 dark:text-slate-100 flex flex-col justify-between">
+<body class="min-h-screen flex flex-col">
 
-  <!-- Top Navigation Header -->
-  <header class="glass-header sticky top-0 z-40 px-6 py-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-sm bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-xl shadow-md text-white overflow-hidden transition-all duration-300">
-        🧬
-      </div>
-      <div>
-        <div class="flex items-center space-x-2">
-          <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono">
-            Lucidase
-          </h1>
-          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-sm bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
-            Karyogram
-          </span>
-        </div>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 font-serif italic tracking-wide">See where the markers in your DNA file sit on your chromosomes</p>
-      </div>
-    </div>
+  <a class="lds-skip" href="#karyogram-main">Skip to content</a>
 
-    <!-- Navigation, Theme Switcher & Privacy Badge -->
-    <div class="flex items-center space-x-2">
-      <a id="link-analysis" href="index.html" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 rounded-sm text-xs px-2.5 py-1">
-        Analysis
-      </a>
-      <button id="btn-theme-toggle" type="button" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 rounded-sm text-xs px-2.5 py-1">
-        <span id="theme-toggle-icon">🌙</span> <span id="theme-toggle-text" class="hidden sm:inline">Dark HUD</span>
-      </button>
-
-      <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-300 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Local-First (Client-Side Only)</span>
-      </div>
+  <header class="lds-header">
+    <div class="lds-wrap lds-header-inner">
+      <a href="index.html" class="lds-brand">Lucidase</a>
+      <nav class="lds-nav" aria-label="Main">
+        <a id="link-analysis" href="index.html" class="lds-navlink">Analysis</a>
+        <a href="karyogram.html" class="lds-navlink" aria-current="page">Karyogram</a>
+      </nav>
+      <div class="lds-header-spacer"></div>
+      <span class="lds-localnote">Read in this browser</span>
     </div>
   </header>
 
   <!-- states: reference-only, loading, result, error (density unavailable is a notice inside result) -->
-  <main id="karyogram-main" data-karyogram-state="reference-only" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col gap-6">
+  <main id="karyogram-main" data-karyogram-state="reference-only" class="lds-wrap flex-1 flex flex-col gap-12 pt-10 pb-16" tabindex="-1">
 
-    <section class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-4">
-      <p class="text-sm text-slate-700 dark:text-slate-300 font-serif">
+    <section class="flex flex-col gap-5" style="max-width: 720px">
+      <h1 class="lds-display">Where the markers in your file sit</h1>
+      <p class="lds-lede">
         Each dot stands for a stretch of chromosome about 4 million DNA letters long. The more markers from your file
         fall in that stretch, the bigger the dot. Coloured rings mark the genes this report checks, with your result
         for each. Your file is read in this browser and never leaves it.
       </p>
       <div class="flex flex-wrap items-center gap-3">
-        <input type="file" id="karyogram-file-input" class="file-input file-input-sm file-input-bordered rounded-sm text-xs" accept=".txt,.csv,.vcf,.tsv,.gz">
-        <span class="text-xs text-slate-400 font-mono">or</span>
-        <button type="button" id="btn-load-karyogram-sample" class="btn btn-sm btn-outline border-slate-400 dark:border-slate-700 hover:border-sky-500 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-300 rounded-sm">
-          Try a made-up example file
-        </button>
+        <label for="karyogram-file-input" class="sr-only">Choose your DNA file</label>
+        <input type="file" id="karyogram-file-input" class="file-input file-input-bordered file-input-sm" accept=".txt,.csv,.vcf,.tsv,.gz">
+        <span class="lds-meta">or</span>
+        <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary lds-btn-sm">Try a made-up example file</button>
       </div>
     </section>
 
     <!-- Progress (hidden until a file is read) -->
-    <section id="karyogram-progress" class="hidden">
-      <div class="glass-panel p-6 space-y-3 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700">
-        <div class="flex justify-between items-center text-sm">
-          <span id="karyogram-progress-msg" class="text-slate-800 dark:text-slate-200 font-medium flex items-center font-mono">
-            <span class="loading loading-spinner loading-xs mr-2 text-sky-600 dark:text-sky-400"></span>
-            Reading the file...
-          </span>
-          <span id="karyogram-progress-pct" class="font-mono text-sky-600 dark:text-sky-400 font-bold">0%</span>
+    <section id="karyogram-progress" class="hidden" style="max-width: 560px">
+      <div class="lds-progress">
+        <div class="lds-progress-head">
+          <span id="karyogram-progress-msg" aria-live="polite">Reading the file</span>
+          <span id="karyogram-progress-pct" class="lds-progress-value">0%</span>
         </div>
-        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-none h-2 overflow-hidden border border-slate-300 dark:border-slate-700">
-          <div id="karyogram-progress-bar" class="bg-gradient-to-r from-sky-500 to-indigo-600 h-2 rounded-none transition-all duration-150" style="width: 0%"></div>
+        <div class="lds-progress-track" role="presentation">
+          <div id="karyogram-progress-bar" class="lds-progress-bar"></div>
         </div>
       </div>
     </section>
 
     <!-- Failure (hidden until something fails) -->
-    <section id="karyogram-error" role="alert" class="hidden p-4 rounded-sm bg-red-50/90 dark:bg-red-950/40 border-l-4 border-red-500 border border-red-200 dark:border-red-900/60 shadow-sm text-xs">
-      <p class="font-bold text-red-800 dark:text-red-300">The karyogram could not be drawn from this file. Nothing was uploaded, and no results are shown. Please try again, or try a different file.</p>
-      <p class="mt-1 font-mono text-red-700 dark:text-red-400">Technical detail: <span id="karyogram-error-detail"></span></p>
+    <section id="karyogram-error" role="alert" class="hidden lds-alert lds-alert-danger">
+      <span class="lds-icon lds-icon-18 lds-i-circle-alert" aria-hidden="true"></span>
+      <div class="lds-alert-body">
+        <p class="lds-alert-title">The karyogram could not be drawn from this file.</p>
+        <p class="lds-alert-text">Nothing was uploaded, and no results are shown. Try again, or try a different file.</p>
+        <p class="lds-alert-detail">Technical detail: <span id="karyogram-error-detail"></span></p>
+      </div>
     </section>
 
-    <section class="glass-panel p-4 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700">
+    <!-- The figure: the dot field belongs here, inside the figure, never as page texture -->
+    <section class="border-t border-line pt-7">
       <div id="karyogram-figure" class="overflow-x-auto"></div>
     </section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <section class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-3">
-        <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Key: the genes this report checks, by your result</h2>
-        <ul id="karyogram-legend" class="space-y-1.5 text-xs font-mono"></ul>
-      </section>
+    <section class="lds-section" aria-labelledby="key-h">
+      <div class="lds-section-head">
+        <h2 id="key-h" class="lds-section-title">Key</h2>
+        <p class="lds-section-aside">The genes this report checks, by your result. Each result has its own mark, so it reads without colour.</p>
+      </div>
+      <div class="lds-section-body flex flex-wrap gap-10">
+        <ul id="karyogram-legend" class="flex-1 text-14" style="min-width: 260px; max-width: 420px"></ul>
 
-      <section id="karyogram-totals" class="hidden glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-3">
-        <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Markers in your file</h2>
-        <dl class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs font-mono">
-          <dt class="text-slate-500 dark:text-slate-400">Lines read from your file</dt><dd data-total="rows" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Placed on a chromosome</dt><dd data-total="placed" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Mitochondrial DNA (not drawn)</dt><dd data-total="mt" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">On other DNA sequences (not drawn)</dt><dd data-total="unplaced" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Past the end of a chromosome (not drawn)</dt><dd data-total="outOfBounds" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Not placed (genome version unknown)</dt><dd data-total="notPlacedBuildUnknown" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Markers drawn on the map</dt><dd data-total="density" class="font-bold text-right"></dd>
-        </dl>
-        <p id="karyogram-density-notice" class="hidden p-3 rounded-sm bg-amber-50/90 dark:bg-amber-950/40 border-l-4 border-amber-500 border border-amber-200 dark:border-amber-900/60 text-xs text-slate-800 dark:text-slate-200">
-          Your file doesn't say which genome version it uses, so its markers can't be placed on the chromosomes. The
-          genes this report checks still show your results.
-        </p>
-      </section>
-    </div>
+        <div id="karyogram-totals" class="hidden flex-1 flex flex-col gap-3" style="min-width: 260px">
+          <h3 class="lds-h3">Markers in your file</h3>
+          <dl class="grid grid-cols-[1fr_auto] gap-x-6 text-14">
+            <dt class="py-1.5 border-b border-line text-ink-muted">Lines read from your file</dt><dd data-total="rows" class="py-1.5 border-b border-line lds-data font-bold text-right"></dd>
+            <dt class="py-1.5 border-b border-line text-ink-muted">Placed on a chromosome</dt><dd data-total="placed" class="py-1.5 border-b border-line lds-data font-bold text-right"></dd>
+            <dt class="py-1.5 border-b border-line text-ink-muted">Mitochondrial DNA (not drawn)</dt><dd data-total="mt" class="py-1.5 border-b border-line lds-data font-bold text-right"></dd>
+            <dt class="py-1.5 border-b border-line text-ink-muted">On other DNA sequences (not drawn)</dt><dd data-total="unplaced" class="py-1.5 border-b border-line lds-data font-bold text-right"></dd>
+            <dt class="py-1.5 border-b border-line text-ink-muted">Past the end of a chromosome (not drawn)</dt><dd data-total="outOfBounds" class="py-1.5 border-b border-line lds-data font-bold text-right"></dd>
+            <dt class="py-1.5 border-b border-line text-ink-muted">Not placed (genome version unknown)</dt><dd data-total="notPlacedBuildUnknown" class="py-1.5 border-b border-line lds-data font-bold text-right"></dd>
+            <dt class="py-1.5 text-ink-muted">Markers drawn on the map</dt><dd data-total="density" class="py-1.5 lds-data font-bold text-right"></dd>
+          </dl>
+          <div id="karyogram-density-notice" class="hidden lds-alert lds-alert-notice" role="note">
+            <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
+            <p class="lds-alert-text">
+              Your file doesn't say which genome version it uses, so its markers can't be placed on the chromosomes. The
+              genes this report checks still show your results.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <section class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-3">
-      <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Genes this report checks</h2>
-      <div class="overflow-x-auto">
-        <table class="table table-sm w-full text-xs">
+    <section class="lds-section" aria-labelledby="loci-h">
+      <div class="lds-section-head">
+        <h2 id="loci-h" class="lds-section-title">Genes this report checks</h2>
+        <p class="lds-section-aside">Where each one sits, and your result for it.</p>
+      </div>
+      <div class="lds-section-body overflow-x-auto">
+        <table class="lds-table">
           <thead>
-            <tr class="text-slate-500 dark:text-slate-400 font-mono">
-              <th class="text-left">Gene</th>
-              <th class="text-left">rsID</th>
-              <th class="text-left">Position</th>
-              <th class="text-left">Result</th>
+            <tr>
+              <th scope="col">Gene</th>
+              <th scope="col">Marker</th>
+              <th scope="col">Position</th>
+              <th scope="col">Result</th>
             </tr>
           </thead>
-          <tbody id="karyogram-loci-body" class="font-mono"></tbody>
+          <tbody id="karyogram-loci-body"></tbody>
         </table>
       </div>
     </section>
 
-    <p id="karyogram-provenance" class="text-[11px] text-slate-500 dark:text-slate-400 font-mono"></p>
+    <p id="karyogram-provenance" class="lds-meta lds-data"></p>
   </main>
 
-  <footer class="glass-header px-6 py-4 mt-12 text-center text-xs text-slate-500 font-mono border-t border-slate-200 dark:border-slate-800">
-    <div class="flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto gap-2">
-      <div>Lucidase · Zero-Knowledge Variome Analysis</div>
-      <div class="flex items-center space-x-4">
-        <span>Zero-Knowledge / Client-Side Only</span>
-      </div>
+  <footer class="lds-footer mt-auto">
+    <div class="lds-wrap lds-footer-inner">
+      <span>Lucidase · not a diagnostic test, not medical advice</span>
+      <span class="lds-footer-grow">Your file is read in this browser and never uploaded.</span>
+      <span class="lds-theme">
+        <button id="btn-theme-toggle" type="button" class="lds-textlink"><span id="theme-toggle-icon" class="lds-icon lds-icon-14 lds-i-moon" aria-hidden="true"></span><span id="theme-toggle-text">Dark theme</span></button>
+        <button id="btn-theme-system" type="button" class="lds-textlink hidden">Use device setting</button>
+      </span>
     </div>
   </footer>
 

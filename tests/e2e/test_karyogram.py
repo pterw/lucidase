@@ -386,3 +386,28 @@ def test_a_silent_worker_trips_the_watchdog(page):
     page.clock.run_for(31000)
     _assert_failed_and_inputs_free(page)
     expect(page.locator("#karyogram-error-detail")).to_contain_text("stopped responding")
+
+
+# The computed shape of one mark: everything that distinguishes the marks except colour.
+MARK_SHAPES = """(selector) => {
+  const out = {};
+  for (const el of document.querySelectorAll(selector)) {
+    const s = getComputedStyle(el);
+    const state = [...el.classList, ...el.parentElement.classList].find((c) => c.startsWith('kary-state-'));
+    const hollow = el.tagName === 'circle' ? s.fill !== s.stroke : s.backgroundColor === 'rgba(0, 0, 0, 0)';
+    out[state] = [hollow, s.clipPath, s.strokeDasharray, s.backgroundImage, s.borderTopStyle].join('|');
+  }
+  return out;
+}"""
+
+
+def test_each_result_on_the_map_has_its_own_mark_not_only_a_colour(page):
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    swatches = page.evaluate(MARK_SHAPES, "#karyogram-legend .kary-swatch")
+    swatches.pop("kary-state-reference")  # shown only before a file is loaded, never beside the results
+    assert len(set(swatches.values())) == len(swatches), swatches
+    cores = page.evaluate(MARK_SHAPES, "#karyogram-figure .kary-locus .kary-core")
+    assert "kary-state-insufficient_evidence" in cores, cores  # the sample has an unclear result to check
+    assert len(set(cores.values())) == len(cores), cores

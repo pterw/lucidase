@@ -2,6 +2,9 @@
 
 ## Design Context
 
+> **Superseded (owner ruling, 2026-10-03):** the Lucidase design system now owns the look and the font mapping; see
+> `web/src/ds/README.md` and `AGENTS.md`. The note below is kept for history.
+>
 > **Provisional (owner ruling, 2026-10-02).** Visual design and brand identity have not been established, and the
 > design system that will own them has not been authored yet. The Brand Personality, Aesthetic Direction,
 > Typography Specification and Design Principles sections below describe the current look and are provisional, not

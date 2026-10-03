@@ -21,23 +21,26 @@ Two untracked items at the repo root belong to the owner, and both are excluded 
   from `tools/curation/kb_curation.json` plus the pinned real payloads in `tools/fixtures/upstream/real/`.
   Never hand-edit it, and never commit `canonical_variome.db`.
 - The desktop Python stack is kept, and stays in parity with the web app through `tests/vectors/*.json`.
-- Visual design and identity are NOT established. Make no design decisions (colours, fonts, themes, components).
-  Reproduce the current look exactly. Styling lives in `web/tailwind.config.js`,
-  `web/src/tailwind.input.css` (the `@tailwind` directives), `web/src/styles.css` (theme variables, badge classes,
-  glass panels, typography overrides) and the vendored daisyUI. A design system will be authored later and will own
-  all of them.
-- Owner rulings 10, 11, 13 and 15 make exceptions to that:
-  - the product is named **Lucidase** (ruling 11), and the UI shows the name text only;
+- Visual design and identity are owned by the **Lucidase design system** (owner ruling, 2026-10-03), authored by
+  the owner in Claude Design. It supersedes the provisional look and ruling 15's font mapping. Follow it; do not
+  invent colours, fonts, spacing or components outside it, and ask the owner when it does not cover a case.
+  - Tokens are vendored unchanged in `web/src/ds/` (see its README); `web/src/styles.css` imports them and holds the
+    daisyUI theme bridge and the design system's components as `lds-*` classes; `web/src/ds/lucidase.preset.cjs` is
+    the Tailwind preset. Brand SVGs are in `web/src/brand/`, the vendored Lucide icons in `web/src/icons/`.
+  - Fonts: the owner's Adobe Fonts kit `gfe3vcu`: serif `orpheuspro` (headings, prose), sans
+    `akzidenz-grotesk-next-pro` (UI), condensed `akzidenz-grotesk-next-conden` (column heads, counts; Swiss 721 BT
+    Condensed only as a fallback), mono `input-mono` and `input-mono-narrow` (rsIDs, genotypes, dense tables).
+  - Copy: sentence case, no eyebrows above headings, no emoji, "Not available" for missing values, and the absence
+    wording rules in `AGENTS.md`. The theme follows the device; the override is a footer link.
+- Owner rulings 10, 11 and 13 still hold:
+  - the product is named **Lucidase** (ruling 11);
   - the README opens with the controller-designed banner (a light/dark SVG in `docs/assets/`) and screenshots.
     Regenerate the screenshots with `python tools/capture_readme_screenshot.py`;
-  - PR #2 adds a karyogram page built from existing classes and theme variables (ruling 13);
-  - fonts (ruling 15): the owner's Adobe Fonts kit `gfe3vcu`, mapped as:
-    - sans `akzidenz-grotesk-next-pro`;
-    - serif `orpheuspro`;
-    - mono `input-mono`;
-    - display `swiss-721-bt-condensed`.
-
-  Nothing else changes the look until the owner's design system.
+  - the karyogram page (ruling 13).
+- The design system lands in two steps. PR 1 (this reskin) applies it on the existing DOM, flow and view-model
+  wording. PR 2 brings its structure: the grouped report (Pharmacology, Health risk factors, Carrier status, Traits),
+  the plain result words (Found, Not found, Not on your chip, Unclear, Not checked) in the view model and exports,
+  the docked Inspector and the three-step StepNav.
 - Product goal: "a real useful tool that does not charge for analyzing uploaded docs". Docs and UI describe only
   shipped behaviour, and the README stays faithful.
 - Network access is allowed only when the owner approves it for a specific task. Tests are always offline.

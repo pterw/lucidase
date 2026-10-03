@@ -41,7 +41,8 @@ function setInputsDisabled(disabled) {
 }
 
 function updateProgress(percent, message) {
-  $("karyogram-progress-bar").style.width = `${percent}%`;
+  // The bar grows by transform only (the design system's motion rule).
+  $("karyogram-progress-bar").style.transform = `scaleX(${Math.min(100, Math.max(0, percent)) / 100})`;
   $("karyogram-progress-pct").textContent = `${percent}%`;
   $("karyogram-progress-msg").textContent = message;
 }
@@ -65,10 +66,10 @@ function renderLegend(layout) {
   for (const l of layout.reference.loci) counts[stateOf(layout, l.rsid)] += 1;
   $("karyogram-legend").innerHTML = LEGEND_ORDER.map(
     (s) =>
-      `<li class="flex items-center gap-2" data-legend-state="${escapeHtml(s)}">` +
+      `<li class="flex items-center gap-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
       `<span class="kary-swatch kary-state-${escapeHtml(s)}" aria-hidden="true"></span>` +
       `<span class="flex-1">${escapeHtml(labels[s])}</span>` +
-      `<span class="font-bold" data-legend-count="${escapeHtml(s)}">${counts[s]}</span></li>`,
+      `<span class="lds-data font-bold" data-legend-count="${escapeHtml(s)}">${counts[s]}</span></li>`,
   ).join("");
 }
 
@@ -102,9 +103,10 @@ function renderLoci(layout) {
       const state = stateOf(layout, l.rsid);
       return (
         `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
-        `<td>${escapeHtml(l.gene)}</td><td>${escapeHtml(l.rsid)}</td>` +
-        `<td>${escapeHtml(l.chrom)}:${escapeHtml(fmt(l.pos))}</td>` +
-        `<td>${escapeHtml(labels[state])}</td></tr>`
+        `<td class="font-bold">${escapeHtml(l.gene)}</td><td class="lds-data">${escapeHtml(l.rsid)}</td>` +
+        `<td class="lds-data">${escapeHtml(l.chrom)}:${escapeHtml(fmt(l.pos))}</td>` +
+        `<td><span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
+        `${escapeHtml(labels[state])}</span></td></tr>`
       );
     })
     .join("");
