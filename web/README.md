@@ -178,9 +178,9 @@ These all fail closed, with a visible error or an explicit state:
 
 ---
 
-## 🎨 Visual design is provisional
+## Visual design: the Lucidase design system
 
-Visual design and brand identity have not been established, and the design system that will own them is not yet authored. Styling is provisional. Styling lives in `tailwind.config.js`, `src/tailwind.input.css` (the `@tailwind` directives), `src/styles.css` (theme CSS variables, badge classes, glass panels, typography overrides) and the vendored daisyUI. The future design system will own all of them. See [`../docs/design-handoff.md`](../docs/design-handoff.md) for the current look as built.
+The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 14 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
 
 ---
 

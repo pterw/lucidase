@@ -337,13 +337,13 @@ export function apoeCardModel(apoe) {
 
 const ACMG_VERSION_FALLBACK = "ACMG SF";
 
-/** Hero chip text: the ACMG SF version and tested scope, both from the KB manifest. */
+/** Start-page scope line: the ACMG SF version and tested scope, both from the KB manifest. No emoji (design system). */
 export function heroScopeText(manifest) {
   const version = nonEmptyString(manifest && manifest.acmg_sf_version) ?? ACMG_VERSION_FALLBACK;
   const loci = numberOrNull(manifest && manifest.locus_count);
   const genes = numberOrNull(manifest && manifest.gene_count);
-  if (loci === null || genes === null) return `🧬 ${version}: tested scope ${NOT_AVAILABLE}`;
-  return `🧬 ${version}: ${loci} loci in ${genes} genes tested`;
+  if (loci === null || genes === null) return `${version}: tested scope ${NOT_AVAILABLE}`;
+  return `${version}: ${loci} loci in ${genes} genes tested`;
 }
 
 /** The ACMG SF version label, from the manifest. */

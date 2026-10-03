@@ -60,14 +60,15 @@ against **real captured payloads** pinned in `tools/fixtures/upstream/`,
 each with retrieval URL and date. Never test them against fixtures written to
 match the code.
 
-**Visual design.** The identity and design system are not yet authored, and
-styling is provisional. Make no design decisions (colours, fonts, spacing,
-themes, components) and reproduce the current look. Styling lives in
-`web/tailwind.config.js`, `web/src/tailwind.input.css` (the `@tailwind`
-directives), `web/src/styles.css` (theme CSS variables, badge classes, glass
-panels, typography overrides) and the vendored daisyUI. The future design system
-will own all of them. `docs/design-handoff.md`
-records the current look as built.
+**Visual design.** The Lucidase design system (owner ruling, 2026-10-03) owns
+the identity and every styling decision: colours, fonts, spacing, themes and
+components. Its tokens are vendored unchanged in `web/src/ds/`;
+`web/src/styles.css` imports them and holds the daisyUI theme bridge and the
+design system's components as `lds-*` classes; `web/tailwind.config.js` uses
+its preset. Do not add a colour, font or component outside it; if it does not
+cover a case, stop and ask. Colour is never the only signal (each result state
+also has a shape), and no emoji or ALL-CAPS labels. `docs/design-handoff.md`
+records the provisional look the design system replaced.
 
 ## 3. Principles, made concrete
 

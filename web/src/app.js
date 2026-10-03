@@ -81,7 +81,7 @@ if (document.readyState === "loading") {
 }
 
 // A value the record or the KB does not carry is shown as "Not available" in a muted style, never as a placeholder.
-const MUTED = "text-slate-500 dark:text-slate-400 italic";
+const MUTED = "lds-na-text";
 const naHtml = (text = NOT_AVAILABLE) => `<span class="${MUTED}">${escapeHtml(text)}</span>`;
 const valueHtml = (value, naText) => (value === null || value === undefined ? naHtml(naText) : escapeHtml(value));
 
@@ -233,14 +233,14 @@ function initEventListeners() {
   // Drag and drop
   dropzone.addEventListener("dragover", (e) => {
     e.preventDefault();
-    dropzone.classList.add("border-sky-500", "bg-sky-500/10");
+    dropzone.classList.add("is-over");
   });
   dropzone.addEventListener("dragleave", () => {
-    dropzone.classList.remove("border-sky-500", "bg-sky-500/10");
+    dropzone.classList.remove("is-over");
   });
   dropzone.addEventListener("drop", (e) => {
     e.preventDefault();
-    dropzone.classList.remove("border-sky-500", "bg-sky-500/10");
+    dropzone.classList.remove("is-over");
     if (e.dataTransfer.files.length > 0) {
       handleFileSelected(e.dataTransfer.files[0]);
     }
@@ -270,7 +270,7 @@ function initEventListeners() {
   if (btnDemo) {
     btnDemo.addEventListener("click", async () => {
       try {
-        updateProgress(10, "Fetching demo 23andMe profile...");
+        updateProgress(10, "Loading the made-up example file");
         const resp = await fetch("./demo-data/sample-23andme.txt");
         if (!resp.ok) throw new Error("Could not load sample file.");
         const text = await resp.text();
@@ -289,14 +289,14 @@ function initEventListeners() {
   });
 
   // Filter tabs
+  const markActiveFilter = (active) => filterButtons.forEach(b => {
+    b.classList.toggle("tab-active", b === active);
+    b.setAttribute("aria-pressed", String(b === active));
+  });
+  markActiveFilter(document.querySelector("[data-filter].tab-active"));
   filterButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      filterButtons.forEach(b => {
-        b.classList.remove("tab-active", "bg-sky-600", "text-white", "dark:bg-sky-500/20", "dark:text-sky-300", "border-sky-600", "dark:border-sky-400");
-        b.classList.add("text-slate-600", "dark:text-slate-400");
-      });
-      btn.classList.add("tab-active", "bg-sky-600", "text-white", "dark:bg-sky-500/20", "dark:text-sky-300", "border-sky-600", "dark:border-sky-400");
-      btn.classList.remove("text-slate-600", "dark:text-slate-400");
+      markActiveFilter(btn);
       state.filterCategory = btn.getAttribute("data-filter");
       renderVariantsTable();
     });
@@ -325,7 +325,7 @@ function initEventListeners() {
 
 function handleFileSelected(file) {
   state.fileName = file.name;
-  updateProgress(5, `Reading ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)...`);
+  updateProgress(5, `Reading ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`);
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -358,7 +358,8 @@ function updateProgress(percent, message) {
   const bar = document.getElementById("parse-progress-bar");
   const msg = document.getElementById("parse-progress-msg");
   const pct = document.getElementById("parse-progress-pct");
-  if (bar) bar.style.width = `${percent}%`;
+  // The bar grows by transform only (the design system's motion rule).
+  if (bar) bar.style.transform = `scaleX(${Math.min(100, Math.max(0, percent)) / 100})`;
   if (msg) msg.textContent = message;
   if (pct) pct.textContent = `${percent}%`;
 }
@@ -411,7 +412,7 @@ function renderQC() {
   const sexBadge = document.getElementById("qc-inferred-sex");
   sexBadge.textContent = qc.sex_signal;
   sexBadge.title = `X markers: ${qc.x_markers.toLocaleString()} | X heterozygosity: ${(qc.x_het_rate * 100).toFixed(1)}% | Y calls: ${qc.y_calls.toLocaleString()}`;
-  sexBadge.className = "inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
+  sexBadge.className = `lds-tag ${NEUTRAL_TAG}`;
 }
 
 /** Every card shows the worker's own figure: the category cards and the coverage cards are not recounted here. */
@@ -438,13 +439,17 @@ function renderSummaryCards() {
   set("count-state-insufficient", cov.insufficient_evidence_count);
 }
 
+// Badge tones (styles.css, from the design system's colour tokens). Each label is styled by an explicit map; anything
+// the page has no style for (an unknown category, tier or state) is the one neutral tone, never a "good" (green) one.
+const NEUTRAL_TAG = "lds-tag-neutral";
+
+// APOE tag tone per accent key from the view model; no diplotype asserted means the neutral tone.
 const APOE_ACCENTS = {
-  e4e4: { border: "border-rose-500", badge: "badge-pathogenic" },
-  e4: { border: "border-amber-500", badge: "badge-carrier" },
-  e2: { border: "border-purple-500", badge: "badge-pgx" },
-  e3e3: { border: "border-emerald-500", badge: "badge-benign" }
+  e4e4: "lds-tag-cat-pathogenic",
+  e4: "lds-tag-cat-carrier",
+  e2: "lds-tag-cat-pgx",
+  e3e3: "lds-tag-cat-not-detected"
 };
-const APOE_NEUTRAL_BADGE = "bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
 
 function renderApoeCard() {
   const card = document.getElementById("apoe-status-card");
@@ -475,19 +480,10 @@ function renderApoeCard() {
   pillEl.textContent = model.pill;
   setValue(hpaEl, model.hpaSummary);
 
-  // Visual accents depending on risk profile (existing classes only)
-  const accent = APOE_ACCENTS[model.accent] ?? null;
-
-  if (accent) {
-    card.className = `glass-panel p-6 border-l-4 ${accent.border} transition-all duration-200 bg-white dark:bg-slate-900/60`;
-    riskRatioEl.className = `px-2.5 py-1 text-xs font-bold rounded-sm font-mono border ${accent.badge}`;
-    pillEl.className = `px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border ${accent.badge}`;
-  } else {
-    // No diplotype asserted: neutral accents, never the normal-baseline green.
-    card.className = "glass-panel p-6 border-l-4 transition-all duration-200 bg-white dark:bg-slate-900/60 border-slate-300 dark:border-slate-700";
-    riskRatioEl.className = `px-2.5 py-1 text-xs font-bold rounded-sm font-mono ${APOE_NEUTRAL_BADGE}`;
-    pillEl.className = `px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm ${APOE_NEUTRAL_BADGE}`;
-  }
+  // Tag tone by risk profile. No diplotype asserted: the neutral tone, never the not-detected green.
+  const tone = APOE_ACCENTS[model.accent] ?? NEUTRAL_TAG;
+  riskRatioEl.className = `lds-tag ${tone}`;
+  pillEl.className = `lds-tag ${tone}`;
 }
 
 function renderAssortmentSection() {
@@ -507,73 +503,64 @@ function renderAssortmentSection() {
 
   section.classList.remove("hidden");
   if (badge) {
-    badge.textContent = `${totalFindings} Multi-Locus Finding${totalFindings === 1 ? '' : 's'}`;
+    badge.textContent = `${totalFindings} multi-locus finding${totalFindings === 1 ? '' : 's'}`;
   }
   container.innerHTML = "";
 
-  // Render Compound Heterozygotes (e.g. HFE C282Y / H63D). Every interpolated value is escaped.
+  // One row per finding, hairlines between (no nested cards). Every interpolated value is escaped.
+  const ROW = "flex flex-col gap-3 py-5 border-b border-line first:pt-0";
+
+  // Possible compound heterozygotes (e.g. HFE C282Y / H63D).
   compounds.forEach(ch => {
-    const card = document.createElement("div");
-    card.className = "p-4 rounded-sm bg-slate-50 dark:bg-slate-900/50 border border-indigo-200 dark:border-indigo-900/60 space-y-3";
-    card.innerHTML = `
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="text-xs uppercase font-bold tracking-wider text-indigo-700 dark:text-indigo-400 font-mono">Possible Compound Heterozygote · Phase Unknown</span>
-          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-pathogenic">${escapeHtml(ch.significance)}</span>
-        </div>
-        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${escapeHtml(ch.gene)}</span>
+    const row = document.createElement("div");
+    row.className = ROW;
+    row.innerHTML = `
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="lds-h3">Possible compound heterozygote · phase unknown</span>
+        <span class="lds-tag lds-tag-cat-pathogenic">${escapeHtml(ch.significance)}</span>
+        <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ch.gene)}</span>
       </div>
+      <div class="flex flex-col gap-1">
+        <p class="lds-h3 lds-data">${escapeHtml(ch.title)}</p>
+        <p class="lds-prose">${escapeHtml(ch.summary)}</p>
+      </div>
+      <p class="lds-meta"><strong class="text-ink">Segregation:</strong> ${escapeHtml(ch.segregation_notes)}</p>
       <div>
-        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">${escapeHtml(ch.title)}</h4>
-        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-1">${escapeHtml(ch.summary)}</p>
-      </div>
-      <div class="p-2.5 rounded-sm bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 text-[11px] font-mono text-indigo-900 dark:text-indigo-300">
-        ⚖️ <strong>Segregation:</strong> ${escapeHtml(ch.segregation_notes)}
-      </div>
-      <div class="flex justify-end pt-1">
-        <button type="button" class="btn btn-xs btn-outline border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/10 rounded-sm font-mono text-[11px] btn-inspect-gene" data-gene="${escapeHtml(ch.gene)}">
-          🔬 Inspect ${escapeHtml(ch.gene)} Locus ↗
+        <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(ch.gene)}">
+          See the ${escapeHtml(ch.gene)} details
         </button>
       </div>
     `;
-    container.appendChild(card);
+    container.appendChild(row);
   });
 
-  // Render co-occurring variant alleles on unlinked loci (e.g. F5 Chr 1 + F2 Chr 11)
+  // Co-occurring variant alleles on unlinked loci (e.g. F5 chr 1 + F2 chr 11).
   assortments.forEach(ia => {
-    const card = document.createElement("div");
-    card.className = "p-4 rounded-sm bg-slate-50 dark:bg-slate-900/50 border border-amber-200 dark:border-amber-900/60 space-y-3";
-    card.innerHTML = `
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="text-xs uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400 font-mono">Co-occurring Variant Alleles</span>
-          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-risk">Multi-Locus</span>
-        </div>
-        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${escapeHtml(ia.genes.join(" + "))}</span>
+    const row = document.createElement("div");
+    row.className = ROW;
+    row.innerHTML = `
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="lds-h3">Co-occurring variant alleles</span>
+        <span class="lds-tag lds-tag-cat-risk">Multi-locus</span>
+        <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
       </div>
-      <div>
-        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">${escapeHtml(ia.type)}</h4>
-        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-1">${escapeHtml(ia.description)}</p>
+      <div class="flex flex-col gap-1">
+        <p class="lds-h3">${escapeHtml(ia.type)}</p>
+        <p class="lds-prose">${escapeHtml(ia.description)}</p>
       </div>
-      <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-        <div class="p-2 rounded-sm bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/40">
-          <span class="text-[9px] uppercase text-slate-400 block">Loci on Different Chromosomes</span>
-          <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">${escapeHtml(ia.loci.join(" · "))}</span>
-        </div>
-        <div class="p-2 rounded-sm bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/40">
-          <span class="text-[9px] uppercase text-slate-400 block">Child Inherits All Listed Alleles</span>
-          <span class="font-bold text-amber-600 dark:text-amber-400 mt-0.5 block" title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</span>
-        </div>
-      </div>
-      <div class="flex justify-end space-x-2 pt-1">
+      <dl class="lds-datalist">
+        <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
+        <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>
+      </dl>
+      <div class="flex flex-wrap gap-2">
         ${ia.genes.map(g => `
-          <button type="button" class="btn btn-xs btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-500 rounded-sm font-mono text-[11px] btn-inspect-gene" data-gene="${escapeHtml(g)}">
-            Inspect ${escapeHtml(g)} ↗
+          <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(g)}">
+            See the ${escapeHtml(g)} details
           </button>
         `).join("")}
       </div>
     `;
-    container.appendChild(card);
+    container.appendChild(row);
   });
 
   // Attach inspection handlers
@@ -586,33 +573,35 @@ function renderAssortmentSection() {
   });
 }
 
-const STATE_BADGE_CLASS = {
-  supported_and_observed: "bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30",
-  supported_not_observed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30",
-  not_tested_by_array: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30",
-  insufficient_evidence: "bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
+// The coverage state as a tag with its shape-coded mark (the karyogram's dot language), so it reads without colour.
+const STATE_TAG_CLASS = {
+  supported_and_observed: "lds-tag-state-supported_and_observed",
+  supported_not_observed: "lds-tag-state-supported_not_observed",
+  not_tested_by_array: "lds-tag-state-not_tested_by_array",
+  outside_coverage: "lds-tag-state-outside_coverage",
+  insufficient_evidence: "lds-tag-state-insufficient_evidence"
 };
+const stateTagClass = (state) => `lds-tag ${Object.hasOwn(STATE_TAG_CLASS, state) ? STATE_TAG_CLASS[state] : NEUTRAL_TAG}`;
+const stateTagInnerHtml = (state, text) =>
+  (Object.hasOwn(STATE_TAG_CLASS, state) ? `<span class="lds-mark lds-mark-${state}" aria-hidden="true"></span>` : "") + escapeHtml(text);
+const stateTagHtml = (state, text) => `<span class="${stateTagClass(state)}">${stateTagInnerHtml(state, text)}</span>`;
 
-// The one neutral (slate) look: any category, tier or composite label the page has no explicit style for.
-const NEUTRAL_BADGE_COLOURS = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
-
-// Categories with an explicit style. A Carrier flag on the row also gets the carrier style. Everything else
-// (Trait, Not detected, a category added later) is neutral, never the benign (green) look.
-const CATEGORY_BADGE_CLASS = {
-  Pathogenic: "badge-pathogenic",
-  Carrier: "badge-carrier",
-  Pharmacogenomics: "badge-pgx",
-  "Risk Factor": "badge-risk"
+// The six KB categories each have their own tone (the design system's category colours). A Carrier flag on the row
+// also gets the carrier tone. Anything else (a category added later) is neutral.
+const CATEGORY_TAG_CLASS = {
+  Pathogenic: "lds-tag-cat-pathogenic",
+  Carrier: "lds-tag-cat-carrier",
+  Pharmacogenomics: "lds-tag-cat-pgx",
+  "Risk Factor": "lds-tag-cat-risk",
+  Trait: "lds-tag-cat-trait",
+  "Not detected": "lds-tag-cat-not-detected"
 };
-const categoryBadgeClass = (r) =>
-  CATEGORY_BADGE_CLASS[r.category] ?? (r.isCarrier ? CATEGORY_BADGE_CLASS.Carrier : `border ${NEUTRAL_BADGE_COLOURS}`);
+const categoryTagClass = (r) =>
+  (Object.hasOwn(CATEGORY_TAG_CLASS, r.category) ? CATEGORY_TAG_CLASS[r.category] : null) ??
+  (r.isCarrier ? CATEGORY_TAG_CLASS.Carrier : NEUTRAL_TAG);
 
-const TIER_BADGE_CLASS = {
-  "Tier A": "bg-sky-100 text-sky-800 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700",
-  "Tier B": "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700",
-  "Tier C": "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700",
-  "Tier D": "bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
-};
+// Evidence tiers are text in one neutral tone: a tier is not a result, so it gets no result colour.
+const TIER_TAG_CLASS = `lds-tag ${NEUTRAL_TAG} lds-data`;
 
 function renderVariantsTable() {
   const tbody = document.getElementById("variants-tbody");
@@ -645,23 +634,20 @@ function renderVariantsTable() {
     return true;
   });
 
-  let countLabel = `Showing ${filtered.length} of ${state.records.length} clinical findings`;
+  let countLabel = `Showing ${filtered.length} of ${state.records.length} findings`;
   if (state.filterCategory === "negative") {
-    countLabel = `Showing ${filtered.length} loci tested wild-type (supported but not observed)`;
+    countLabel = `Showing ${filtered.length} loci tested, variant not detected`;
   } else if (state.filterCategory === "gaps") {
-    countLabel = `Showing ${filtered.length} loci not genotyped on this chip (array gaps)`;
+    countLabel = `Showing ${filtered.length} loci your chip did not read`;
   } else if (state.filterCategory === "insufficient") {
-    countLabel = `Showing ${filtered.length} loci with conflicting / insufficient evidence (State 5)`;
+    countLabel = `Showing ${filtered.length} loci with conflicting or insufficient evidence`;
   }
   document.getElementById("showing-count").textContent = countLabel;
 
   if (filtered.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td colspan="8" class="py-12 text-center text-slate-500 dark:text-slate-400">
-        <div class="inline-block p-4 rounded-sm bg-slate-100 dark:bg-slate-800 mb-2">🔍</div>
-        <p class="font-medium">No variants match your search or filter.</p>
-      </td>
+      <td colspan="8" class="py-10 text-ink-muted">No variants match your search or filter.</td>
     `;
     tbody.appendChild(tr);
     return;
@@ -669,7 +655,6 @@ function renderVariantsTable() {
 
   filtered.forEach(r => {
     const tr = document.createElement("tr");
-    tr.className = "cursor-pointer border-b border-slate-200 dark:border-slate-800/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40";
     tr.tabIndex = 0;
     tr.setAttribute("aria-label", `${r.gene} ${r.id}`);
     tr.onclick = () => openDrawer(r, tr);
@@ -681,63 +666,45 @@ function renderVariantsTable() {
       }
     };
 
-    const categoryClass = categoryBadgeClass(r);
-
-    const stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${STATE_BADGE_CLASS[r.coverage_state]}">${escapeHtml(r.stateBadge)}</span>`;
     const tierBadge = r.tier === null
-      ? `<span class="mr-1.5">${naHtml()}</span>`
-      : `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono ${TIER_BADGE_CLASS[r.tier] ?? `border ${NEUTRAL_BADGE_COLOURS}`} mr-1.5">${escapeHtml(r.tier)}</span>`;
+      ? naHtml()
+      : `<span class="${TIER_TAG_CLASS}">${escapeHtml(r.tier)}</span>`;
     const categoryBadge = r.category === null
       ? naHtml()
-      : `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${categoryClass}">${escapeHtml(r.category)}</span>`;
+      : `<span class="lds-tag ${categoryTagClass(r)}">${escapeHtml(r.category)}</span>`;
 
     const acmgPill = r.acmg_actionable
-      ? `<span class="ml-1.5 px-1.5 py-0.5 text-[10px] uppercase font-bold rounded-sm bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30">ACMG</span>`
+      ? `<span class="lds-tag lds-tag-accent">ACMG</span>`
       : "";
-    // The limitation (and any caveats) travel with the row, as a badge with the full text as its tooltip.
+    // The limitation (and any caveats) travel with the row, as a tag with the full text as its tooltip.
     const limitationBadge = r.limitationTooltip === null
       ? ""
-      : `<span data-role="limitation" class="ml-1.5 px-1.5 py-0.5 text-[10px] uppercase font-bold rounded-sm bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30" title="${escapeHtml(r.limitationTooltip)}">${r.limitation === null ? "Caveats" : "Limitation"}</span>`;
+      : `<span data-role="limitation" class="lds-tag lds-tag-notice" title="${escapeHtml(r.limitationTooltip)}">${r.limitation === null ? "Caveats" : "Limitation"}</span>`;
 
     const guidance = r.statement ?? r.phenotype ?? r.significance;
     const guidanceTitle = [r.statement, r.phenotype, r.limitationTooltip].filter(part => part !== null).join(" ");
 
     tr.innerHTML = `
-      <td class="py-3 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">${escapeHtml(r.id)}</td>
-      <td class="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
-        ${escapeHtml(r.gene)} ${acmgPill} ${limitationBadge}
+      <td class="lds-data font-bold whitespace-nowrap">${escapeHtml(r.id)}</td>
+      <td>
+        <span class="flex flex-wrap items-center gap-1.5"><span class="font-bold">${escapeHtml(r.gene)}</span> ${acmgPill} ${limitationBadge}</span>
       </td>
-      <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">${valueHtml(r.genotype)}</td>
-      <td class="py-3 px-4">${stateBadge}</td>
-      <td class="py-3 px-4 flex items-center">
-        ${tierBadge}
-        ${categoryBadge}
+      <td class="lds-data font-bold">${valueHtml(r.genotype)}</td>
+      <td>${stateTagHtml(r.coverage_state, r.stateBadge)}</td>
+      <td>
+        <span class="flex flex-wrap items-center gap-1.5">${tierBadge} ${categoryBadge}</span>
       </td>
-      <td class="py-3 px-4 text-amber-500 text-xs font-mono tracking-wider">${r.starsMuted ? naHtml(r.starsText) : escapeHtml(r.starsText)}</td>
-      <td class="py-3 px-4 font-semibold text-xs ${r.magnitude !== null && r.magnitude >= 4 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">
-        ${valueHtml(r.magnitudeShort)} <span class="text-[10px] text-slate-400">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
+      <td class="lds-data text-ink-muted whitespace-nowrap">${r.starsMuted ? naHtml(r.starsText) : escapeHtml(r.starsText)}</td>
+      <td class="whitespace-nowrap ${r.magnitude !== null && r.magnitude >= 4 ? 'font-bold text-danger-ink' : ''}">
+        ${valueHtml(r.magnitudeShort)} <span class="lds-meta">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
       </td>
-      <td class="py-3 px-4 text-xs text-slate-700 dark:text-slate-300 max-w-md truncate" title="${escapeHtml(guidanceTitle)}">
+      <td class="text-ink-muted max-w-md truncate" title="${escapeHtml(guidanceTitle)}">
         ${escapeHtml(guidance)}
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
-
-const TIER_DRAWER_CLASS = {
-  "Tier A": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30",
-  "Tier B": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30",
-  "Tier C": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30"
-};
-const TIER_DRAWER_NEUTRAL = `px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono ${NEUTRAL_BADGE_COLOURS}`;
-
-const COVERAGE_DRAWER_CLASS = {
-  supported_and_observed: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30",
-  supported_not_observed: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30",
-  not_tested_by_array: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30",
-  insufficient_evidence: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/30"
-};
 
 // The element that opened the drawer; closeDrawer returns focus to it.
 let drawerOpener = null;
@@ -766,13 +733,13 @@ function openDrawer(record, opener = document.activeElement) {
   const covBadgeEl = document.getElementById("drawer-coverage-state-badge");
   if (tierBadgeEl) {
     setValue(tierBadgeEl, record.tier);
-    tierBadgeEl.className = TIER_DRAWER_CLASS[record.tier] ?? TIER_DRAWER_NEUTRAL;
+    tierBadgeEl.className = TIER_TAG_CLASS;
   }
   setValue(document.getElementById("drawer-footer-tier"), drawerTierText(record));
 
   if (covBadgeEl) {
-    covBadgeEl.textContent = record.stateLabel;
-    covBadgeEl.className = COVERAGE_DRAWER_CLASS[record.coverage_state];
+    covBadgeEl.className = stateTagClass(record.coverage_state);
+    covBadgeEl.innerHTML = stateTagInnerHtml(record.coverage_state, record.stateLabel);
   }
 
   // Limitation (e.g. the star-allele refusal or a single-variant test): from the KB, on every row that has one.
@@ -835,7 +802,7 @@ function openDrawer(record, opener = document.activeElement) {
         anchor = extra;
       }
       anchor.href = link.url;
-      anchor.textContent = `Open ClinVar Record${labelled ? ` (${link.rsid})` : ""} ↗`;
+      anchor.textContent = `Open the ClinVar record${labelled ? ` (${link.rsid})` : ""}`;
     });
   } else {
     clinvarLink.classList.add("hidden");
@@ -852,21 +819,18 @@ function openDrawer(record, opener = document.activeElement) {
   tissuesContainer.innerHTML = "";
   const tissueEntries = Object.entries(record.hpa_tissues);
   if (tissueEntries.length > 0) {
+    // The expression level is a word, not a result: one neutral tone.
     tissueEntries.forEach(([tissue, level]) => {
-      let colorClass = "bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-500/30";
-      if (level === "High") colorClass = "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30";
-      else if (level === "Medium") colorClass = "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30";
-
       const div = document.createElement("div");
-      div.className = "flex items-center justify-between p-2 rounded-sm bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 text-xs";
+      div.className = "flex items-center justify-between gap-3 py-1.5 border-b border-line last:border-b-0";
       div.innerHTML = `
-        <span class="capitalize text-slate-800 dark:text-slate-200 font-medium">${escapeHtml(tissue)}</span>
-        <span class="px-2 py-0.5 rounded-sm text-[11px] font-semibold border ${colorClass}">${escapeHtml(level)}</span>
+        <span class="capitalize text-14">${escapeHtml(tissue)}</span>
+        <span class="lds-tag ${NEUTRAL_TAG}">${escapeHtml(level)}</span>
       `;
       tissuesContainer.appendChild(div);
     });
   } else {
-    tissuesContainer.innerHTML = `<p class="text-xs">${naHtml()}</p>`;
+    tissuesContainer.innerHTML = `<p class="text-14">${naHtml()}</p>`;
   }
 
   // Subcellular localization
@@ -875,12 +839,12 @@ function openDrawer(record, opener = document.activeElement) {
   if (record.hpa_subcellular.length > 0) {
     record.hpa_subcellular.forEach(loc => {
       const span = document.createElement("span");
-      span.className = "px-2.5 py-1 rounded-sm text-xs font-medium bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 font-mono";
+      span.className = `lds-tag ${NEUTRAL_TAG}`;
       span.textContent = loc;
       subcellContainer.appendChild(span);
     });
   } else {
-    subcellContainer.innerHTML = `<span class="text-xs">${naHtml()}</span>`;
+    subcellContainer.innerHTML = `<span class="text-14">${naHtml()}</span>`;
   }
 
   // Show drawer
@@ -896,26 +860,26 @@ function renderDrawerSegregation(record) {
   const riskUnscreenedEl = document.getElementById("drawer-seg-risk-unscreened");
   const riskCarrierEl = document.getElementById("drawer-seg-risk-carrier");
   const container = document.getElementById("drawer-segregation-container");
-  const header = container ? container.querySelector("span.tracking-wider") : null;
+  const header = container ? container.querySelector("[data-role='seg-title']") : null;
   const simTitle = container ? container.querySelector("#drawer-partner-buttons").previousElementSibling : null;
   const mendelian = Boolean(seg && seg.mendelian_disease);
   const recessive = Boolean(seg && seg.model === "autosomal_recessive");
 
   // Wording follows the gene's inheritance model: disease and recurrence language is for Mendelian genes only.
   // For a recessive gene the headline figure is the genotype probability (two copies), before any penetrance.
-  setLabel(header, mendelian ? null : "Allele Transmission");
+  setLabel(header, mendelian ? null : "Allele transmission");
   setLabel(header && header.nextElementSibling, mendelian ? null : "Chance a child inherits the allele, from the patient genotype");
-  setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele Frequency (gnomAD)");
+  setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele frequency (gnomAD)");
   setLabel(
     riskUnscreenedEl.previousElementSibling,
-    !mendelian ? "Child Inherits vs Unscreened Partner" : recessive ? "Risk vs Unscreened Partner (genotype probability)" : null
+    !mendelian ? "Child inherits, unscreened partner" : recessive ? "Risk with an unscreened partner (genotype probability)" : null
   );
   setLabel(
     riskCarrierEl.previousElementSibling,
-    !mendelian ? "Child Inherits vs Wild-Type Partner" : recessive ? "Risk vs Carrier Partner (genotype probability)" : null
+    !mendelian ? "Child inherits, wild-type partner" : recessive ? "Risk with a carrier partner (genotype probability)" : null
   );
-  setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring Allele Simulator:");
-  setLabel(simTitle && simTitle.lastElementChild, "Select Partner Genotype");
+  setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring allele simulator");
+  setLabel(simTitle && simTitle.lastElementChild, "Partner's genotype");
   document.querySelectorAll(".partner-sim-btn").forEach(b => {
     setLabel(b, mendelian ? null : SIM_BUTTON_LABELS[b.getAttribute("data-partner")]);
   });
@@ -935,16 +899,8 @@ function renderDrawerSegregation(record) {
   const outcomeFor = (partner) => geneOutcome(state.genes[seg.gene], offspringDistribution(seg.altCount, partner, seg.af), seg.allele);
   const headline = (out) => (!out.available ? null : fmtPct(mendelian ? out.affected : out.inherits_allele));
 
-  if (modeBadge) {
-    modeBadge.textContent = MODEL_LABELS[seg.model] ?? seg.model;
-    if (seg.model === "autosomal_recessive") {
-      modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30 font-mono";
-    } else if (seg.model === "autosomal_dominant") {
-      modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-rose-50 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-500/30 font-mono";
-    } else {
-      modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-purple-50 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30 font-mono";
-    }
-  }
+  // The inheritance model is a label, not a result: one neutral tone.
+  if (modeBadge) modeBadge.textContent = MODEL_LABELS[seg.model] ?? seg.model;
 
   if (seg.af === null) {
     setValue(priorEl, null);
@@ -964,9 +920,7 @@ function renderDrawerSegregation(record) {
   // Setup simulator partner buttons
   const buttons = document.querySelectorAll(".partner-sim-btn");
   const setActive = (active) => buttons.forEach(b => {
-    b.className = b === active
-      ? "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-sky-600 text-white border border-sky-600 shadow-sm transition-all"
-      : "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all";
+    b.setAttribute("aria-pressed", String(b === active));
   });
   buttons.forEach(btn => {
     btn.onclick = () => {
@@ -982,7 +936,7 @@ function renderDrawerSegregation(record) {
 
 // The buttons keep their data-partner keys; each maps to a partner genotype model.
 const SIM_PARTNER_MODEL = { unscreened: "unscreened", carrier: "heterozygous", affected: "homozygous", wildtype: "wildtype" };
-const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "Heterozygous", affected: "Homozygous", wildtype: "Wild-Type" };
+const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "Heterozygous", affected: "Homozygous", wildtype: "Wild-type" };
 
 /** Sets an element's text, remembering the original so a later null restores it. */
 function setLabel(el, text) {
@@ -1008,33 +962,33 @@ function updateSimulator(partnerKey, record) {
 /** Three probability rows and the effective-penetrance line; a null outcome (no genotype) shows "Not available". */
 function renderSimulator(out, seg) {
   const rows = [
-    { id: "affected", label: "Affected Probability:", value: null },
-    { id: "carrier", label: "Carrier Probability:", value: null },
-    { id: "wildtype", label: "Wild-Type / Non-Carrier:", value: null }
+    { id: "affected", label: "Affected probability", value: null },
+    { id: "carrier", label: "Carrier probability", value: null },
+    { id: "wildtype", label: "Wild-type (non-carrier)", value: null }
   ];
   let effective = null;
-  let effectiveLabel = "Effective Penetrance Adjusted:";
+  let effectiveLabel = "Effective penetrance, adjusted";
   let reason = "";
   if (out && !out.available) {
     reason = out.reason;
   } else if (out && out.kind === "transmission") {
-    rows[0] = { id: "affected", label: `${out.label}:`, value: out.inherits_allele };
-    rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.one_copy };
-    rows[2] = { id: "wildtype", label: "Inherits No Copy:", value: out.none };
+    rows[0] = { id: "affected", label: out.label, value: out.inherits_allele };
+    rows[1] = { id: "carrier", label: "Inherits one copy", value: out.one_copy };
+    rows[2] = { id: "wildtype", label: "Inherits no copy", value: out.none };
     effective = "Not applicable";
-    effectiveLabel = "Clinical Penetrance:";
+    effectiveLabel = "Clinical penetrance";
   } else if (out && seg.model === "autosomal_recessive") {
     // Two different "affected" figures: the genotype probability (two copies), and that probability times the stated penetrance.
-    rows[0] = { id: "affected", label: "Affected Genotype Probability (two copies):", value: out.affected };
+    rows[0] = { id: "affected", label: "Affected genotype probability (two copies)", value: out.affected };
     rows[1].value = out.carrier;
     rows[2].value = out.p0;
-    effectiveLabel = "Affected Probability (adjusted for stated penetrance):";
+    effectiveLabel = "Affected probability, adjusted for stated penetrance";
     const adjusted = penetranceAdjustedAffected(out, seg.penetrance);
     effective = adjusted === null ? null : fmtPct(adjusted);
   } else if (out) {
-    rows[0] = { id: "affected", label: "Affected Probability (penetrance-adjusted):", value: out.affected };
-    rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.p1 };
-    rows[2] = { id: "wildtype", label: "Does Not Inherit:", value: out.p0 };
+    rows[0] = { id: "affected", label: "Affected probability (penetrance-adjusted)", value: out.affected };
+    rows[1] = { id: "carrier", label: "Inherits one copy", value: out.p1 };
+    rows[2] = { id: "wildtype", label: "Does not inherit", value: out.p0 };
     effective = fmtPct(out.affected);
   }
   for (const row of rows) {
@@ -1054,12 +1008,6 @@ function renderSimulator(out, seg) {
   }
 }
 
-function plddtClass(value) {
-  if (value >= 85) return "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30";
-  if (value >= 70) return "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30";
-  return "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30";
-}
-
 function renderDrawerBiotools(record) {
   const b = record.biotools;
   const geneBadge = document.getElementById("drawer-biotool-gene-badge");
@@ -1068,13 +1016,8 @@ function renderDrawerBiotools(record) {
   // AlphaFold
   setValue(document.getElementById("drawer-af-uniprot"), b.uniprot);
 
-  const plddtEl = document.getElementById("drawer-af-plddt");
-  if (plddtEl) {
-    setValue(plddtEl, b.plddt === null ? null : b.plddt.toFixed(1));
-    plddtEl.className = b.plddt === null
-      ? "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
-      : plddtClass(b.plddt);
-  }
+  // The pLDDT score is shown as its number in the neutral tone; the number carries the meaning.
+  setValue(document.getElementById("drawer-af-plddt"), b.plddt === null ? null : b.plddt.toFixed(1));
 
   setValue(document.getElementById("drawer-af-status"), b.status);
 
@@ -1084,16 +1027,15 @@ function renderDrawerBiotools(record) {
     if (b.domains.length > 0) {
       b.domains.forEach(d => {
         const div = document.createElement("div");
-        div.className = "p-1.5 rounded-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]";
-        div.textContent = `📍 ${d}`;
+        div.textContent = d;
         domainsEl.appendChild(div);
       });
     } else {
-      domainsEl.innerHTML = `<div class="text-xs">${naHtml()}</div>`;
+      domainsEl.innerHTML = `<div>${naHtml()}</div>`;
     }
   }
 
-  setValue(document.getElementById("drawer-af-joints"), b.joints === null ? null : `⚡ ${b.joints}`);
+  setValue(document.getElementById("drawer-af-joints"), b.joints);
 
   // Ensembl VEP
   setValue(document.getElementById("drawer-ens-transcript"), b.transcript);
@@ -1105,7 +1047,7 @@ function renderDrawerBiotools(record) {
   if (encodeEl) {
     encodeEl.innerHTML = "";
     if (b.tissues.length === 0) {
-      encodeEl.innerHTML = `<div class="text-xs">${naHtml()}</div>`;
+      encodeEl.innerHTML = `<div class="text-14">${naHtml()}</div>`;
       return;
     }
     // The bars are scaled to the largest value, with a floor of 100 TPM so a small value does not fill the bar.
@@ -1114,14 +1056,14 @@ function renderDrawerBiotools(record) {
     b.tissues.forEach(([tissue, tpm]) => {
       const pct = Math.round((tpm / maxTpm) * 100);
       const row = document.createElement("div");
-      row.className = "space-y-0.5";
+      row.className = "lds-prob";
       row.innerHTML = `
-        <div class="flex justify-between items-center text-[10px]">
-          <span class="capitalize text-slate-700 dark:text-slate-300 font-medium">${escapeHtml(tissue)}</span>
-          <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">${escapeHtml(tpm.toLocaleString())} TPM</span>
+        <div class="lds-prob-head">
+          <span class="capitalize">${escapeHtml(tissue)}</span>
+          <span>${escapeHtml(tpm.toLocaleString())} TPM</span>
         </div>
-        <div class="w-full bg-slate-200 dark:bg-slate-800 h-1 rounded-none overflow-hidden">
-          <div class="bg-emerald-500 h-1" style="width: ${pct}%"></div>
+        <div class="lds-prob-track lds-prob-track-thin">
+          <div class="lds-prob-bar" style="width: ${pct}%"></div>
         </div>
       `;
       encodeEl.appendChild(row);

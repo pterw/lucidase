@@ -1,273 +1,316 @@
-/* Lucidase - Modern Biotech Design System & Custom Tokens */
-/* Architecture: Sharp-Cornered Clinical Precision · Light Mode Foundation */
+/* Lucidase app styles, built on the Lucidase design system.
 
-:root {
-  /* Light Mode (Clinical Laboratory Baseline) */
-  --bg-canvas: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-surface-elevated: #ffffff;
-  --bg-surface-hover: #f1f5f9;
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-subtle: #64748b;
-  --border-subtle: #cbd5e1;
-  --border-strong: #94a3b8;
-  --header-bg: rgba(255, 255, 255, 0.98);
-  --header-border: #e2e8f0;
-  
-  /* Brand Clinical Accents */
-  --accent-cyan: #0284c7;
-  --accent-emerald: #059669;
-  --accent-purple: #7c3aed;
-  --accent-ruby: #e11d48;
-  --accent-amber: #d97706;
+   The tokens in ds/ are copied unchanged from the design system (its tokens/*.css; see ds/README.md). This file adds:
+   1. the daisyUI theme bridge (daisyUI is vendored prebuilt, so its themes are set here as variables);
+   2. the design system's components as plain CSS classes (lds-*), for these no-build pages;
+   3. the karyogram's SVG classes.
+   Link order is fixed: daisyUI, then this file, then the compiled Tailwind utilities (src/vendor/README.md). */
 
-  /* Badges - Light */
-  --badge-pathogenic-bg: #ffe4e6;
-  --badge-pathogenic-text: #9f1239;
-  --badge-pathogenic-border: #f43f5e;
+@import "ds/colors.css";
+@import "ds/typography.css";
+@import "ds/spacing.css";
+@import "ds/shape.css";
+@import "ds/motion.css";
+@import "ds/base.css";
 
-  --badge-carrier-bg: #fef3c7;
-  --badge-carrier-text: #92400e;
-  --badge-carrier-border: #f59e0b;
-
-  --badge-pgx-bg: #f3e8ff;
-  --badge-pgx-text: #6b21a8;
-  --badge-pgx-border: #a855f7;
-
-  --badge-risk-bg: #fee2e2;
-  --badge-risk-text: #991b1b;
-  --badge-risk-border: #ef4444;
-
-  --badge-benign-bg: #d1fae5;
-  --badge-benign-text: #065f46;
-  --badge-benign-border: #10b981;
+/* 1. daisyUI 4 theme bridge. Values are the design system's tailwind/lucidase.daisyui.js, as oklch triples. */
+:root,
+[data-theme="light"] {
+  --p: 60.864% 0.1044 210.90; --pc: 100% 0 0; --s: 21.171% 0.0263 244.63; --sc: 98.503% 0.0041 91.45;
+  --a: 60.864% 0.1044 210.90; --ac: 100% 0 0; --n: 21.171% 0.0263 244.63; --nc: 98.503% 0.0041 91.45;
+  --b1: 100% 0 0; --b2: 98.503% 0.0041 91.45; --b3: 95.853% 0.0098 87.47; --bc: 21.171% 0.0263 244.63;
+  --in: 49.426% 0.0845 211.36; --inc: 100% 0 0; --su: 53.076% 0.0978 159.01; --suc: 100% 0 0;
+  --wa: 60.767% 0.1243 71.52; --wac: 100% 0 0; --er: 53.328% 0.1588 11.33; --erc: 100% 0 0;
 }
-
 [data-theme="dark"] {
-  /* Dark Mode (Biotech HUD) */
-  --bg-canvas: #070b14;
-  --bg-surface: rgba(15, 23, 42, 0.75);
-  --bg-surface-elevated: #0f172a;
-  --bg-surface-hover: rgba(30, 41, 59, 0.85);
-  --text-main: #f1f5f9;
-  --text-muted: #cbd5e1;
-  --text-subtle: #94a3b8;
-  --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.25);
-  --header-bg: rgba(7, 11, 20, 0.88);
-  --header-border: rgba(255, 255, 255, 0.1);
-
-  /* Brand Clinical Accents */
-  --accent-cyan: #38bdf8;
-  --accent-emerald: #10b981;
-  --accent-purple: #a855f7;
-  --accent-ruby: #f43f5e;
-  --accent-amber: #f59e0b;
-
-  /* Badges - Dark */
-  --badge-pathogenic-bg: rgba(244, 63, 94, 0.18);
-  --badge-pathogenic-text: #fda4af;
-  --badge-pathogenic-border: rgba(244, 63, 94, 0.4);
-
-  --badge-carrier-bg: rgba(245, 158, 11, 0.18);
-  --badge-carrier-text: #fcd34d;
-  --badge-carrier-border: rgba(245, 158, 11, 0.4);
-
-  --badge-pgx-bg: rgba(168, 85, 247, 0.18);
-  --badge-pgx-text: #d8b4fe;
-  --badge-pgx-border: rgba(168, 85, 247, 0.4);
-
-  --badge-risk-bg: rgba(239, 68, 68, 0.18);
-  --badge-risk-text: #fca5a5;
-  --badge-risk-border: rgba(239, 68, 68, 0.4);
-
-  --badge-benign-bg: rgba(16, 185, 129, 0.18);
-  --badge-benign-text: #6ee7b7;
-  --badge-benign-border: rgba(16, 185, 129, 0.4);
-  /* Impeccable Dynamic Typography Tokens */
-  --font-sans: 'akzidenz-grotesk-next-pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: 'input-mono', ui-monospace, monospace;
-  --font-serif: 'orpheuspro', Georgia, serif;
-  --font-display: 'swiss-721-bt-condensed', 'akzidenz-grotesk-next-pro', sans-serif;
-  --editorial-size: 14.5px;
-  --mono-spacing: 0em;
+  --p: 85.149% 0.1148 204.32; --pc: 17.44% 0.0157 248.74; --s: 95.822% 0.0067 233.64; --sc: 17.44% 0.0157 248.74;
+  --a: 85.149% 0.1148 204.32; --ac: 17.44% 0.0157 248.74; --n: 95.822% 0.0067 233.64; --nc: 17.44% 0.0157 248.74;
+  --b1: 20.008% 0.0185 245.32; --b2: 17.44% 0.0157 248.74; --b3: 15.612% 0.0135 248.04; --bc: 95.822% 0.0067 233.64;
+  --in: 85.149% 0.1148 204.32; --inc: 17.44% 0.0157 248.74; --su: 76.32% 0.1305 158.04; --suc: 17.44% 0.0157 248.74;
+  --wa: 80.485% 0.1242 80.16; --wac: 17.44% 0.0157 248.74; --er: 72.046% 0.1494 10.13; --erc: 17.44% 0.0157 248.74;
+}
+/* No JS / first paint: follow the device unless a theme is set. Mirrors [data-theme="dark"] above; keep in sync. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --p: 85.149% 0.1148 204.32; --pc: 17.44% 0.0157 248.74; --s: 95.822% 0.0067 233.64; --sc: 17.44% 0.0157 248.74;
+    --a: 85.149% 0.1148 204.32; --ac: 17.44% 0.0157 248.74; --n: 95.822% 0.0067 233.64; --nc: 17.44% 0.0157 248.74;
+    --b1: 20.008% 0.0185 245.32; --b2: 17.44% 0.0157 248.74; --b3: 15.612% 0.0135 248.04; --bc: 95.822% 0.0067 233.64;
+    --in: 85.149% 0.1148 204.32; --inc: 17.44% 0.0157 248.74; --su: 76.32% 0.1305 158.04; --suc: 17.44% 0.0157 248.74;
+    --wa: 80.485% 0.1242 80.16; --wac: 17.44% 0.0157 248.74; --er: 72.046% 0.1494 10.13; --erc: 17.44% 0.0157 248.74;
+  }
+}
+:root,
+[data-theme] {
+  /* Square boxes, 2px controls, no press bounce (lucidase.daisyui.js "shared"). */
+  --rounded-box: 0; --rounded-btn: 2px; --rounded-badge: 2px; --tab-radius: 0;
+  --animation-btn: 0; --animation-input: 0; --btn-focus-scale: 1; --border-btn: 1px;
 }
 
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+/* 2. Components (the design system's components/, as classes). */
 
-body {
-  background-color: var(--bg-canvas);
-  color: var(--text-main);
-  font-family: var(--font-sans);
-  min-height: 100vh;
-  margin: 0;
-  overflow-x: hidden;
-  letter-spacing: -0.01em;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
+/* Layout */
+.lds-wrap { width: 100%; max-width: var(--layout-max); margin: 0 auto; padding: 0 var(--layout-gutter); }
+@media (max-width: 559px) { .lds-wrap { padding: 0 var(--layout-gutter-sm); } }
 
-code, kbd, samp, pre, .font-mono {
-  font-family: var(--font-mono) !important;
-  letter-spacing: var(--mono-spacing);
-}
+/* Skip link (AppHeader): the first focusable element on the page. */
+.lds-skip { position: absolute; left: -9999px; top: 8px; z-index: 60; padding: 8px 12px; background: var(--bg-panel); border: 1px solid var(--border-control); }
+.lds-skip:focus { left: 8px; }
 
-.font-serif, .font-editorial {
-  font-family: var(--font-serif) !important;
-  font-size: var(--editorial-size);
-}
+/* AppHeader: static (scrolls away), slim, the product name as plain text. */
+.lds-header { border-bottom: 1px solid var(--border-default); background: var(--bg-header); }
+.lds-header-inner { display: flex; align-items: center; gap: 28px; min-height: 56px; }
+.lds-brand { font: 700 16px var(--font-sans); letter-spacing: -0.01em; color: var(--text-body); text-decoration: none; padding: 8px 0; }
+.lds-brand:hover { color: var(--text-body); }
+.lds-nav { display: flex; align-items: center; gap: 2px; }
+.lds-header-spacer { flex: 1; }
+@media (max-width: 679px) { .lds-header-inner { gap: 8px; } .lds-header .lds-localnote { display: none; } }
 
-.font-display {
-  font-family: var(--font-display) !important;
-}
+/* NavLink */
+.lds-navlink { display: flex; align-items: center; min-height: 44px; padding: 0 10px; font: 700 15px var(--font-sans); color: var(--text-muted); text-decoration: none; }
+.lds-navlink:hover, .lds-navlink[aria-current="page"] { color: var(--text-body); }
+.lds-navlink[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--accent); }
 
-/* Sharp-Cornered Clinical Architecture */
-.glass-panel {
-  background: var(--bg-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
-  border-radius: 2px !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
+/* LocalNote: a still dot, never pulsing. */
+.lds-localnote { display: inline-flex; align-items: center; gap: 8px; font: 400 13px var(--font-sans); color: var(--text-muted); white-space: nowrap; }
+.lds-localnote::before { content: ""; width: 7px; height: 7px; border-radius: var(--radius-dot); background: var(--ok); }
 
-.glass-panel:hover {
-  border-color: var(--border-strong);
-}
+/* AppFooter + ThemeToggle: the theme override lives here, out of the way. */
+.lds-footer { border-top: 1px solid var(--border-default); font: 400 13px var(--font-sans); color: var(--text-muted); }
+.lds-footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding-top: 16px; padding-bottom: 16px; }
+.lds-footer-grow { flex: 1 1 auto; }
+.lds-theme { display: inline-flex; align-items: center; gap: 14px; }
+.lds-textlink { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: 400 13px var(--font-sans); color: var(--text-muted); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--border-strong); }
+.lds-textlink:hover { color: var(--text-body); }
 
-.glass-header {
-  background: var(--header-bg);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--header-border);
-}
+/* Masthead: the lockup, once, on the start page at >= 560px; the wordmark alone below that. */
+.lds-masthead { display: flex; flex-direction: column; gap: 28px; padding: 8px 0 4px; }
+.lds-masthead-art { width: 100%; max-width: 640px; }
+.lds-masthead-art img { display: block; width: 100%; height: auto; }
+.lds-masthead-wordmark { display: none; padding: 12px 0; }
+.lds-masthead-wordmark img { display: block; height: 56px; width: auto; }
+@media (max-width: 559px) { .lds-masthead-art { display: none; } .lds-masthead-wordmark { display: block; } }
+.lds-display { margin: 0; font: 400 40px/1.1 var(--font-serif); letter-spacing: -0.02em; max-width: 620px; text-wrap: balance; color: var(--text-body); }
+.lds-lede { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-list { margin: 0; padding-left: 18px; list-style: disc; font: 400 15px/1.7 var(--font-sans); }
 
-/* Strict Sharp Corners for Clinical Precision */
-.rounded-none,
-.rounded-sm,
-.btn,
-.input,
-.badge,
-.tab,
-table,
-th,
-td,
-.dropdown-content {
-  border-radius: 2px !important;
-}
+/* Icon: a vendored Lucide SVG (src/icons/) as a currentColor mask, so it follows theme and tone. */
+.lds-icon { display: inline-block; flex: none; width: 16px; height: 16px; background-color: currentColor;
+  -webkit-mask: var(--lds-icon) center / contain no-repeat; mask: var(--lds-icon) center / contain no-repeat; }
+.lds-icon-14 { width: 14px; height: 14px; }
+.lds-icon-18 { width: 18px; height: 18px; }
+.lds-icon-20 { width: 20px; height: 20px; }
+.lds-icon-22 { width: 22px; height: 22px; }
+.lds-i-file-up { --lds-icon: url("icons/file-up.svg"); }
+.lds-i-folder-open { --lds-icon: url("icons/folder-open.svg"); }
+.lds-i-circle-alert { --lds-icon: url("icons/circle-alert.svg"); }
+.lds-i-triangle-alert { --lds-icon: url("icons/triangle-alert.svg"); }
+.lds-i-info { --lds-icon: url("icons/info.svg"); }
+.lds-i-chevron-down { --lds-icon: url("icons/chevron-down.svg"); }
+.lds-i-moon { --lds-icon: url("icons/moon.svg"); }
+.lds-i-sun { --lds-icon: url("icons/sun.svg"); }
+.lds-i-x { --lds-icon: url("icons/x.svg"); }
+.lds-i-download { --lds-icon: url("icons/download.svg"); }
+.lds-i-file-text { --lds-icon: url("icons/file-text.svg"); }
+.lds-i-table { --lds-icon: url("icons/table.svg"); }
+.lds-i-search { --lds-icon: url("icons/search.svg"); }
+.lds-i-external-link { --lds-icon: url("icons/external-link.svg"); }
 
-/* Crisp Category Badges */
-.badge-pathogenic {
-  background: var(--badge-pathogenic-bg);
-  color: var(--badge-pathogenic-text);
-  border: 1px solid var(--badge-pathogenic-border);
-}
+/* Button: primary is ink (not teal, for contrast); no press shrink. */
+.lds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px;
+  font: 700 15px/1 var(--font-sans); letter-spacing: var(--tracking-ui); border: 1px solid transparent; border-radius: var(--radius-control);
+  cursor: pointer; text-decoration: none; white-space: nowrap; color: var(--text-body); background: transparent;
+  transition: background-color var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard); }
+.lds-btn-sm { height: 32px; padding: 0 12px; font-size: 14px; }
+.lds-btn-xs { height: 28px; padding: 0 10px; font-size: 13px; }
+.lds-btn-primary { background: var(--ink); color: var(--on-ink); }
+.lds-btn-primary:hover { background: var(--ink-muted); color: var(--on-ink); }
+.lds-btn-secondary { border-color: var(--border-control); }
+.lds-btn-secondary:hover { background: var(--bg-hover); border-color: var(--ink); color: var(--text-body); }
+.lds-btn-ghost:hover { background: var(--bg-hover); color: var(--text-body); }
+.lds-btn:disabled, .lds-btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+.lds-extlink::after { content: ""; flex: none; width: 14px; height: 14px; background-color: currentColor;
+  -webkit-mask: url("icons/external-link.svg") center / contain no-repeat; mask: url("icons/external-link.svg") center / contain no-repeat; }
+.lds-iconbtn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 0;
+  background: transparent; color: var(--text-muted); border-radius: var(--radius-control); cursor: pointer; }
+.lds-iconbtn:hover { background: var(--bg-hover); color: var(--text-body); }
 
-.badge-carrier {
-  background: var(--badge-carrier-bg);
-  color: var(--badge-carrier-text);
-  border: 1px solid var(--badge-carrier-border);
-}
+/* Dropzone: the one bordered field on the start page. */
+.lds-dropzone { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 28px 28px 24px;
+  background: var(--bg-panel); border: 1.5px dashed var(--border-control); border-radius: var(--radius-panel); cursor: pointer;
+  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+.lds-dropzone:hover, .lds-dropzone:focus-within, .lds-dropzone.is-over { border-color: var(--accent); }
+.lds-dropzone.is-over { background: var(--accent-wash); }
+.lds-dropzone-title { display: flex; align-items: center; gap: 12px; margin: 0; font: 700 17px var(--font-sans); color: var(--text-body); }
+.lds-dropzone-desc { margin: 0; font: 400 15px/1.55 var(--font-sans); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-dropzone-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 
-.badge-pgx {
-  background: var(--badge-pgx-bg);
-  color: var(--badge-pgx-text);
-  border: 1px solid var(--badge-pgx-border);
-}
+/* Progress: a 3px ink bar that grows by transform only. */
+.lds-progress { display: flex; flex-direction: column; gap: 8px; }
+.lds-progress-head { display: flex; justify-content: space-between; gap: 12px; font: 400 15px var(--font-sans); color: var(--text-body); }
+.lds-progress-value { font: 700 14px var(--font-mono); }
+.lds-progress-track { height: 3px; background: var(--line); overflow: hidden; }
+.lds-progress-bar { width: 100%; height: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-fast) linear; }
 
-.badge-risk {
-  background: var(--badge-risk-bg);
-  color: var(--badge-risk-text);
-  border: 1px solid var(--badge-risk-border);
-}
+/* Alert: a tone triple (ink / wash / line), square; icon, title, body in serif, technical detail in mono. */
+.lds-alert { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 12px; padding: 14px 16px; border: 1px solid; border-radius: var(--radius-panel); }
+.lds-alert > .lds-icon { margin-top: 1px; }
+.lds-alert-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.lds-alert-title { margin: 0; font: 700 14px/1.4 var(--font-sans); }
+.lds-alert-text { margin: 0; font: 400 15px/1.55 var(--font-serif); color: var(--text-body); text-wrap: pretty; }
+.lds-alert-detail { margin: 0; font: 400 12px/1.5 var(--font-mono); }
+.lds-alert-notice { background: var(--notice-wash); border-color: var(--notice-line); }
+.lds-alert-notice .lds-alert-title, .lds-alert-notice .lds-alert-detail, .lds-alert-notice > .lds-icon { color: var(--notice-ink); }
+.lds-alert-danger { background: var(--danger-wash); border-color: var(--danger-line); }
+.lds-alert-danger .lds-alert-title, .lds-alert-danger .lds-alert-detail, .lds-alert-danger > .lds-icon { color: var(--danger-ink); }
+.lds-alert-info { background: var(--accent-wash); border-color: var(--accent-line); }
+.lds-alert-info .lds-alert-title, .lds-alert-info .lds-alert-detail, .lds-alert-info > .lds-icon { color: var(--accent-ink); }
+.lds-alert-pgx { background: var(--cat-pgx-wash); border-color: var(--cat-pgx-line); }
+.lds-alert-pgx .lds-alert-title, .lds-alert-pgx .lds-alert-detail, .lds-alert-pgx > .lds-icon { color: var(--cat-pgx-ink); }
 
-.badge-benign {
-  background: var(--badge-benign-bg);
-  color: var(--badge-benign-text);
-  border: 1px solid var(--badge-benign-border);
-}
+/* ReportSection: the ledger. Heading in a 200px margin column, hairline above, no card. */
+.lds-section { display: flex; flex-wrap: wrap; column-gap: 40px; row-gap: 16px; padding-top: 28px; border-top: 1px solid var(--border-default); }
+.lds-section-head { flex: 0 1 var(--margin-col); min-width: 180px; display: flex; flex-direction: column; gap: 8px; }
+.lds-section-title { margin: 0; font: 400 24px/1.2 var(--font-serif); letter-spacing: var(--tracking-heading); color: var(--text-body); text-wrap: balance; }
+.lds-section-aside { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--text-muted); text-wrap: pretty; }
+.lds-section-body { flex: 1 1 520px; min-width: 0; }
+.lds-h3 { margin: 0; font: 700 15px/1.3 var(--font-sans); color: var(--text-body); }
+.lds-prose { margin: 0; font: 400 16px/1.55 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-meta { font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
+.lds-data { font-family: var(--font-mono); letter-spacing: var(--tracking-mono); }
 
-/* Custom Sharp Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* Counts: large condensed numbers with a plain label; hairlines, no boxes. */
+.lds-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); column-gap: 24px; border-top: 1px solid var(--border-default); }
+.lds-count { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--border-default); }
+.lds-count-label { display: inline-flex; align-items: center; gap: 8px; font: 700 13px/1.3 var(--font-sans); color: var(--text-body); }
+.lds-count-value { font: 700 30px/1.15 var(--font-condensed); color: var(--text-body); font-variant-numeric: tabular-nums; }
+.lds-count-help { font: 400 13px/1.4 var(--font-sans); color: var(--text-muted); }
 
-::-webkit-scrollbar-track {
-  background: var(--bg-canvas);
-}
+/* DataList: label / value pairs. */
+.lds-datalist { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px 24px; margin: 0; }
+.lds-datalist > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lds-datalist dt { font: 400 13px/1.4 var(--font-sans); color: var(--text-muted); }
+.lds-datalist dd { margin: 0; font: 700 14px/1.45 var(--font-mono); color: var(--text-body); overflow-wrap: anywhere; }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 2px;
-}
+/* Tag (badge): 2px corners, one tone triple each. Colour is never the only signal; the text always says it. */
+.lds-tag { display: inline-flex; align-items: center; gap: 6px; min-height: 22px; padding: 0 7px; border: 1px solid; border-radius: var(--radius-badge);
+  font: 700 12px/1.2 var(--font-sans); white-space: nowrap; vertical-align: middle; }
+.lds-tag-neutral { color: var(--state-outside-ink); background: var(--state-outside-wash); border-color: var(--state-outside-line); }
+.lds-tag-accent { color: var(--accent-ink); background: var(--accent-wash); border-color: var(--accent-line); }
+.lds-tag-notice { color: var(--notice-ink); background: var(--notice-wash); border-color: var(--notice-line); }
+.lds-tag-state-supported_and_observed { color: var(--state-observed-ink); background: var(--state-observed-wash); border-color: var(--state-observed-line); }
+.lds-tag-state-supported_not_observed { color: var(--state-not-observed-ink); background: var(--state-not-observed-wash); border-color: var(--state-not-observed-line); }
+.lds-tag-state-not_tested_by_array { color: var(--state-array-gap-ink); background: var(--state-array-gap-wash); border-color: var(--state-array-gap-line); }
+.lds-tag-state-outside_coverage { color: var(--state-outside-ink); background: var(--state-outside-wash); border-color: var(--state-outside-line); }
+.lds-tag-state-insufficient_evidence { color: var(--state-insufficient-ink); background: var(--state-insufficient-wash); border-color: var(--state-insufficient-line); }
+.lds-tag-cat-pathogenic { color: var(--cat-pathogenic-ink); background: var(--cat-pathogenic-wash); border-color: var(--cat-pathogenic-line); }
+.lds-tag-cat-risk { color: var(--cat-risk-ink); background: var(--cat-risk-wash); border-color: var(--cat-risk-line); }
+.lds-tag-cat-carrier { color: var(--cat-carrier-ink); background: var(--cat-carrier-wash); border-color: var(--cat-carrier-line); }
+.lds-tag-cat-pgx { color: var(--cat-pgx-ink); background: var(--cat-pgx-wash); border-color: var(--cat-pgx-line); }
+.lds-tag-cat-trait { color: var(--cat-trait-ink); background: var(--cat-trait-wash); border-color: var(--cat-trait-line); }
+.lds-tag-cat-not-detected { color: var(--cat-not-detected-ink); background: var(--cat-not-detected-wash); border-color: var(--cat-not-detected-line); }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-cyan);
-}
+/* StateMark: the karyogram's dot language, shape-coded so the state reads without colour.
+   Found = filled, Not found = ring, Not on your chip = dashed ring, Unclear = half, Not checked = small dot. */
+.lds-mark { display: inline-block; flex: none; width: 12px; height: 12px; border-radius: var(--radius-dot); box-sizing: border-box; color: var(--state-outside); }
+.lds-mark-supported_and_observed { color: var(--state-observed); background: currentColor; }
+.lds-mark-supported_not_observed { color: var(--state-not-observed); border: 2px solid currentColor; }
+.lds-mark-not_tested_by_array { color: var(--state-array-gap); border: 1.75px dashed currentColor; }
+.lds-mark-insufficient_evidence { color: var(--state-insufficient); border: 1.75px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.lds-mark-outside_coverage { color: var(--state-outside); background: radial-gradient(circle, currentColor 0 2.5px, transparent 3px); }
 
-/* Subtle Clinical Grid */
-.dna-bg-grid {
-  background-image: 
-    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
+/* SearchInput */
+.lds-field { position: relative; display: flex; align-items: center; }
+.lds-field > .lds-icon { position: absolute; left: 10px; color: var(--text-subtle); pointer-events: none; }
+.lds-input { height: 36px; width: 100%; padding: 0 12px 0 32px; font: 400 14px var(--font-sans); color: var(--text-body); background: var(--bg-panel);
+  border: 1px solid var(--border-control); border-radius: var(--radius-control); }
+.lds-input::placeholder { color: var(--text-subtle); }
+.lds-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-[data-theme="dark"] .dna-bg-grid {
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
+/* Native file input (daisyUI .file-input): sentence case, the secondary button's look. */
+.file-input::file-selector-button { text-transform: none; font: 700 14px var(--font-sans); letter-spacing: var(--tracking-ui);
+  background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.file-input { border-color: var(--border-control); background: var(--bg-panel); color: var(--text-body); font: 400 14px var(--font-sans); }
 
-/* Interactive Table Highlights */
-tbody tr {
-  transition: background-color 0.1s ease;
-}
+/* Menu (the daisyUI dropdown keeps its focus-within behaviour, which makes the items reachable with Tab). */
+.lds-menu { min-width: 200px; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--bg-panel); border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-menu); border-radius: var(--radius-control); }
+.lds-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; background: transparent; cursor: pointer;
+  text-align: left; font: 400 14px var(--font-sans); color: var(--text-body); border-radius: var(--radius-control); }
+.lds-menu-item:hover, .lds-menu-item:focus-visible { background: var(--bg-hover); }
+.lds-menu-item > .lds-icon { color: var(--text-muted); }
+.lds-menu-hint { margin-left: auto; font: 400 12px var(--font-mono); color: var(--text-subtle); }
 
-tbody tr:hover {
-  background-color: var(--bg-surface-hover) !important;
-}
+/* FilterTabs: plain text tabs, an accent underline on the current one. */
+.lds-tabs { display: flex; flex-wrap: wrap; gap: 2px 4px; border-bottom: 1px solid var(--border-default); }
+.lds-tab { display: inline-flex; align-items: center; min-height: 36px; padding: 0 10px; border: 0; background: transparent; cursor: pointer;
+  font: 700 14px var(--font-sans); color: var(--text-muted); white-space: nowrap; }
+.lds-tab:hover { color: var(--text-body); }
+.lds-tab.tab-active { color: var(--text-body); box-shadow: inset 0 -2px 0 var(--accent); }
 
-/* Drawer in Light Mode */
-#variant-drawer {
-  background-color: var(--bg-surface-elevated);
-  border-color: var(--border-subtle);
-  color: var(--text-main);
-}
+/* DataTable */
+.lds-table { width: 100%; border-collapse: collapse; text-align: left; font: 400 14px/1.45 var(--font-sans); color: var(--text-body); }
+.lds-table thead { position: sticky; top: 0; z-index: 1; background: var(--bg-canvas); }
+.lds-table th { padding: 10px 12px; font: 700 13px/1.3 var(--font-condensed); letter-spacing: var(--tracking-label); color: var(--text-muted);
+  border-bottom: 1px solid var(--border-strong); white-space: nowrap; vertical-align: bottom; }
+.lds-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-default); vertical-align: top; }
+.lds-table tbody tr { transition: background-color var(--dur-instant) ease; }
+.lds-table tbody tr[tabindex]:hover { background: var(--bg-hover); cursor: pointer; }
+.lds-table tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.lds-table .lds-data { font-family: var(--font-mono-narrow); font-size: 13px; }
 
-/* Karyogram page (karyogram-view.js emits these classes). Colours are the existing theme variables, the same hues
-   as the coverage-state cards: observed sky, tested-not-detected emerald, array gap amber, outside coverage slate,
-   insufficient evidence rose, reference neutral slate. No inline fills. */
-.kary-state-supported_and_observed { --kary-fill: var(--accent-cyan); }
-.kary-state-supported_not_observed { --kary-fill: var(--accent-emerald); }
-.kary-state-not_tested_by_array { --kary-fill: var(--accent-amber); }
-.kary-state-outside_coverage { --kary-fill: var(--border-strong); }
-.kary-state-insufficient_evidence { --kary-fill: var(--accent-ruby); }
-.kary-state-reference { --kary-fill: var(--text-subtle); }
+/* Inspector (the details panel). It still slides in over the page in this release. */
+.lds-inspector { background: var(--bg-panel); border-left: 1px solid var(--border-default); color: var(--text-body);
+  transition: transform var(--dur-slow) var(--ease-standard); }
+.lds-inspector-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 14px; border-bottom: 1px solid var(--border-default); }
+.lds-inspector-title { margin: 0; font: 400 26px/1.15 var(--font-serif); letter-spacing: var(--tracking-heading); color: var(--text-body); overflow-wrap: anywhere; }
+.lds-inspector-sub { margin: 0; font: 400 13px var(--font-mono); color: var(--text-muted); }
+.lds-inspector-body { padding: 4px 20px 20px; }
+.lds-inspector-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--border-default); }
+.lds-isec { padding: 16px 0; border-bottom: 1px solid var(--border-default); }
+.lds-isec-title { margin: 0 0 8px; font: 700 15px/1.3 var(--font-sans); color: var(--text-body); }
+.lds-isec-sub { margin: -4px 0 10px; font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
+.lds-isec-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; }
 
-.kary-bin { fill: var(--text-subtle); fill-opacity: 0.7; }
+/* SegmentedControl */
+.lds-segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--border-control); border-radius: var(--radius-control); overflow: hidden; }
+.lds-segment { min-height: 32px; padding: 0 10px; border: 0; border-left: 1px solid var(--border-control); background: transparent; cursor: pointer;
+  font: 700 13px var(--font-sans); color: var(--text-muted); }
+.lds-segment:first-child { border-left: 0; }
+.lds-segment:hover { background: var(--bg-hover); color: var(--text-body); }
+.lds-segment[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+
+/* ProbabilityBar: solid, square, labelled with the number. */
+.lds-prob { display: flex; flex-direction: column; gap: 4px; }
+.lds-prob-head { display: flex; justify-content: space-between; gap: 12px; font: 400 13px/1.4 var(--font-sans); color: var(--text-body); }
+.lds-prob-head > span:last-child { font: 700 13px var(--font-mono); }
+.lds-prob-track { height: 6px; background: var(--line); overflow: hidden; }
+.lds-prob-track-thin { height: 4px; }
+.lds-prob-bar { height: 100%; background: var(--ink); transition: width var(--dur-base) var(--ease-standard); }
+
+/* NotAvailable: missing is said, never filled in. */
+.lds-na-text { color: var(--text-subtle); font-style: italic; font-weight: 400; }
+
+/* 3. Karyogram (karyogram-view.js emits these classes; no inline fills). Bins keep the page's look in the design
+   system's colours; curated loci are halo + core in their state colour, hollow for "not detected" and dashed for
+   "not on the chip", so the result reads without colour. */
+.kary-state-supported_and_observed { --kary-fill: var(--state-observed); }
+.kary-state-supported_not_observed { --kary-fill: var(--state-not-observed); }
+.kary-state-not_tested_by_array { --kary-fill: var(--state-array-gap); }
+.kary-state-outside_coverage { --kary-fill: var(--state-outside); }
+.kary-state-insufficient_evidence { --kary-fill: var(--state-insufficient); }
+.kary-state-reference { --kary-fill: var(--ink-subtle); }
+
+.kary-bin { fill: var(--ink-subtle); fill-opacity: 0.7; }
 .kary-bin-empty { fill: var(--border-strong); fill-opacity: 0.45; }
-.kary-cen { stroke: var(--text-subtle); stroke-width: 1.5; }
-.kary-label { fill: var(--text-muted); font-family: var(--font-mono); }
-.kary-halo { fill: var(--kary-fill); fill-opacity: 0.22; }
-.kary-core { fill: var(--kary-fill); stroke: var(--bg-surface-elevated); stroke-width: 1; }
-.kary-swatch {
-  display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 9999px !important;
-  background: var(--kary-fill);
-}
-#karyogram-figure svg {
-  display: block;
-  width: 100%;
-  max-width: 760px;
-  height: auto;
-  margin: 0 auto;
-}
+.kary-cen { stroke: var(--ink-subtle); stroke-width: 1.5; }
+.kary-label { fill: var(--ink-muted); font-family: var(--font-mono); }
+.kary-halo { fill: var(--kary-fill); fill-opacity: 0.2; }
+.kary-core { fill: var(--kary-fill); stroke: var(--kary-fill); stroke-width: 1; }
+.kary-state-supported_not_observed .kary-core,
+.kary-state-not_tested_by_array .kary-core { fill: var(--bg-canvas); stroke-width: 1.75; }
+.kary-state-not_tested_by_array .kary-core { stroke-dasharray: 2 1.6; }
+.kary-swatch { display: inline-block; flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: var(--radius-dot); background: var(--kary-fill); }
+.kary-swatch.kary-state-supported_not_observed { background: transparent; border: 2px solid var(--kary-fill); }
+.kary-swatch.kary-state-not_tested_by_array { background: transparent; border: 1.75px dashed var(--kary-fill); }
+#karyogram-figure svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }

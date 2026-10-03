@@ -13,9 +13,11 @@ Download: https://github.com/tailwindlabs/tailwindcss/releases/tag/v3.4.17
 
 ## Link order in index.html (do not reorder)
 
-`daisyui-4.12.10.min.css`, then `src/styles.css`, then `tailwind.css`. The Tailwind Play CDN used to append its
-generated sheet after `styles.css`, so utilities beat the app's equal-specificity rules (dashed dropzone, accent
-borders, `text-*` over `.font-serif`, `dark:` over `.glass-panel`). `tests/e2e/test_cascade.py` guards this.
+`daisyui-4.12.10.min.css`, then `src/styles.css` (the design system's tokens and `lds-*` components, see
+`src/ds/README.md`), then `tailwind.css`. Utilities must beat the app's and daisyUI's equal-specificity rules (for
+example `hidden` over `.lds-alert`, and the design-system theme over daisyUI's own). `tests/e2e/test_cascade.py`
+guards this. Because Tailwind's preflight is compiled into `tailwind.css`, after `styles.css`, the two base rules it
+would otherwise reset (link colour, body line height) are restated in `src/tailwind.input.css`.
 
 ## Regenerate tailwind.css
 

@@ -129,9 +129,11 @@ Practical notes:
 
 ## 6. Design-system work: what to know before changing the look
 
-**Status.** Visual design and identity are **not established**. The UI is provisional. The owner is authoring a
-design system, and it will own all the styling files. Until it lands, earlier rules said "reproduce the current
-look exactly". The design-system work is the sanctioned exception, and it should be owner-led.
+**Status (2026-10-03).** The owner's **Lucidase design system** now owns the look; it superseded the provisional
+UI and ruling 15's font mapping. PR 1 (branch `feat/design-system-reskin`) applies it on the existing DOM and
+view-model wording; PR 2 brings its structure (grouped report, plain result words in the view model and exports,
+docked Inspector, StepNav). See `web/src/ds/README.md` and the "Visual design" rules in `AGENTS.md` and `CLAUDE.md`.
+The rest of this section describes the provisional stack it replaced, kept for reference.
 
 **Already decided by the owner (keep these unless the owner changes them):**
 - **Name:** **Lucidase**. The UI shows the name as text only.
