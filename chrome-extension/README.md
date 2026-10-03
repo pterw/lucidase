@@ -1,6 +1,6 @@
 # Lucidase Font Studio — Chrome Extension
 
-A dedicated Chrome Extension (Manifest V3) that loads your Adobe Typekit typography kit (`cqu4tvx`) and provides live, instant font role switching for Lucidase and clinical applications.
+A dedicated Chrome Extension (Manifest V3) that loads your Adobe Typekit typography kit (`gfe3vcu`) and provides live, instant font role switching for Lucidase and clinical applications.
 
 ---
 

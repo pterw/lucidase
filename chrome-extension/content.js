@@ -9,7 +9,7 @@
     const link = document.createElement("link");
     link.id = "typekit-stylesheet-ext";
     link.rel = "stylesheet";
-    link.href = "https://use.typekit.net/cqu4tvx.css";
+    link.href = "https://use.typekit.net/gfe3vcu.css";
     document.head.appendChild(link);
   }
 

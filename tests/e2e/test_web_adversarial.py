@@ -156,7 +156,7 @@ def test_apoe_e3e4_upload_and_inspect(loaded_page):
 
 
 def test_typekit_stylesheet_linked(loaded_page):
-    assert loaded_page.locator("link[href*='use.typekit.net/cqu4tvx.css']").count() == 1
+    assert loaded_page.locator("link[href*='use.typekit.net/gfe3vcu.css']").count() == 1
 
 
 def test_theme_toggle_round_trip(loaded_page):
