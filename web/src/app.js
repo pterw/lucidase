@@ -299,6 +299,9 @@ function renderSummaryCards() {
 
   const elOut = document.getElementById("count-state-outside");
   if (elOut) elOut.textContent = (cov.outside_coverage_count ?? 0).toLocaleString();
+
+  const elIns = document.getElementById("count-state-insufficient");
+  if (elIns) elIns.textContent = (cov.insufficient_evidence_count ?? state.insufficientEvidence.length);
 }
 
 function renderApoeCard() {
@@ -586,15 +589,23 @@ function openDrawer(record) {
   document.getElementById("drawer-coord").textContent = `chr${record.chrom}:${record.pos ? record.pos.toLocaleString() : '—'}`;
   document.getElementById("drawer-significance").textContent = record.significance;
   document.getElementById("drawer-phenotype").textContent = record.phenotype;
-  document.getElementById("drawer-stars").textContent = `${"★".repeat(record.clinvar_stars || 1)} (${record.clinvar_stars || 1} / 4 stars)`;
+  const stars = record.clinvar_stars ?? 0;
+  document.getElementById("drawer-stars").textContent = stars > 0 ? `${"★".repeat(stars)} (${stars} / 4 stars)` : "— (0 / 4 stars)";
   document.getElementById("drawer-magnitude").textContent = `${typeof record.magnitude === 'number' ? record.magnitude.toFixed(1) : '—'} / 10.0 (${record.repute || 'Neutral'})`;
-  document.getElementById("drawer-af").textContent = `${((record.gnomad_af || 0) * 100).toFixed(2)}%`;
+  const afEl = document.getElementById("drawer-af");
+  if (afEl) {
+    if (record.gnomad_af !== null && record.gnomad_af !== undefined && !isNaN(record.gnomad_af)) {
+      afEl.textContent = `${(record.gnomad_af * 100).toFixed(2)}%`;
+    } else {
+      afEl.textContent = "N/A (Not characterized)";
+    }
+  }
 
   // Tier and Coverage State badges
   const tierBadgeEl = document.getElementById("drawer-tier-badge");
   const covBadgeEl = document.getElementById("drawer-coverage-state-badge");
   if (tierBadgeEl) {
-    const tier = record.evidence_tier || "Tier B";
+    const tier = record.evidence_tier || "Tier D";
     tierBadgeEl.textContent = tier;
     if (tier === "Tier A") {
       tierBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30";
@@ -857,50 +868,75 @@ function renderDrawerBiotools(record) {
 
   const plddtEl = document.getElementById("drawer-af-plddt");
   if (plddtEl) {
-    plddtEl.textContent = biotools.alphafold.global_plddt.toFixed(1);
-    if (biotools.alphafold.global_plddt >= 85) {
-      plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30";
-    } else if (biotools.alphafold.global_plddt >= 70) {
-      plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30";
+    const plddtVal = biotools.alphafold?.global_plddt ?? record.alphafold_plddt;
+    if (plddtVal !== null && plddtVal !== undefined && !isNaN(plddtVal)) {
+      plddtEl.textContent = Number(plddtVal).toFixed(1);
+      if (plddtVal >= 85) {
+        plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30";
+      } else if (plddtVal >= 70) {
+        plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30";
+      } else {
+        plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30";
+      }
     } else {
-      plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30";
+      plddtEl.textContent = "N/A";
+      plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700";
     }
   }
 
   const statusEl = document.getElementById("drawer-af-status");
-  if (statusEl) statusEl.textContent = biotools.alphafold.folding_status;
+  if (statusEl) statusEl.textContent = biotools.alphafold?.folding_status || "Structural prediction available in AlphaFold DB.";
 
   const domainsEl = document.getElementById("drawer-af-domains");
   if (domainsEl) {
     domainsEl.innerHTML = "";
-    biotools.alphafold.domains.forEach(d => {
-      const div = document.createElement("div");
-      div.className = "p-1.5 rounded-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]";
-      div.textContent = `📍 ${d}`;
-      domainsEl.appendChild(div);
-    });
+    const domains = biotools.alphafold?.domains || [];
+    if (domains.length > 0) {
+      domains.forEach(d => {
+        const div = document.createElement("div");
+        div.className = "p-1.5 rounded-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]";
+        div.textContent = `📍 ${d}`;
+        domainsEl.appendChild(div);
+      });
+    } else {
+      domainsEl.innerHTML = `<div class="text-xs text-slate-500">Domain boundaries computed from PAE matrix.</div>`;
+    }
   }
 
   const jointsEl = document.getElementById("drawer-af-joints");
-  if (jointsEl) jointsEl.textContent = `⚡ ${biotools.alphafold.flexible_joints}`;
+  if (jointsEl) jointsEl.textContent = biotools.alphafold?.flexible_joints ? `⚡ ${biotools.alphafold.flexible_joints}` : "Flexible inter-domain links";
 
   // Ensembl VEP
   const transEl = document.getElementById("drawer-ens-transcript");
-  if (transEl) transEl.textContent = biotools.ensembl.canonical_transcript;
+  if (transEl) transEl.textContent = biotools.ensembl?.canonical_transcript || record.mane_transcript || "MANE Select Transcript";
 
   const amEl = document.getElementById("drawer-ens-alphamissense");
   if (amEl) {
-    amEl.textContent = `${biotools.ensembl.alphamissense_class} (${biotools.ensembl.alphamissense_pathogenicity !== null ? biotools.ensembl.alphamissense_pathogenicity : 'N/A'})`;
+    const amScore = biotools.ensembl?.alphamissense_pathogenicity ?? record.alphamissense_score;
+    const amClass = biotools.ensembl?.alphamissense_class ?? record.alphamissense_class;
+    if (amScore !== null && amScore !== undefined && !isNaN(amScore)) {
+      amEl.textContent = `${amClass || 'Scored'} (${Number(amScore).toFixed(2)})`;
+    } else if (amClass) {
+      amEl.textContent = amClass;
+    } else {
+      amEl.textContent = "N/A (Non-missense)";
+    }
   }
 
   const loeufEl = document.getElementById("drawer-ens-loeuf");
   if (loeufEl) {
-    const loeufText = biotools.ensembl.loeuf < 0.35 
-      ? `${biotools.ensembl.loeuf} (Extremely Constrained)` 
-      : biotools.ensembl.loeuf < 0.75 
-      ? `${biotools.ensembl.loeuf} (Constrained)` 
-      : `${biotools.ensembl.loeuf} (Tolerant)`;
-    loeufEl.textContent = loeufText;
+    const loeufVal = biotools.ensembl?.loeuf ?? record.gnomad_loeuf;
+    if (loeufVal !== null && loeufVal !== undefined && !isNaN(loeufVal)) {
+      const loeufNum = Number(loeufVal);
+      const loeufText = loeufNum < 0.35 
+        ? `${loeufNum.toFixed(2)} (Extremely Constrained)` 
+        : loeufNum < 0.75 
+        ? `${loeufNum.toFixed(2)} (Constrained)` 
+        : `${loeufNum.toFixed(2)} (Tolerant)`;
+      loeufEl.textContent = `LOEUF ${loeufText}`;
+    } else {
+      loeufEl.textContent = "Constraint N/A";
+    }
   }
 
   // ENCODE cCREs

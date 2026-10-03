@@ -5,6 +5,8 @@ Enforces strict architectural separation between:
 1. Identity Layer      - Genomic coordinates, REF/ALT, strand, palindromic status, HGVS.
 2. Evidence Layer      - Upstream scientific evidence (ClinVar, gnomAD, Ensembl, AlphaFold, HPA, CPIC)
                          with full field-level provenance, curation mode, and license tracking.
+                         Fails closed: missing evidence defaults to Tier D (research only),
+                         and missing numeric values are None (never masquerade as 0.0).
 3. Interpretation Layer- Curated clinical guidance, genotype assertions, caveats, and refusal notices.
 
 Upstream evidence updates MUST NOT silently mutate or corrupt curated interpretation semantics.
@@ -17,10 +19,16 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 from tools.coverage_taxonomy import (
+    AssayCoverage,
     CoverageState,
     CurationMode,
+    CurationScope,
+    EvidenceSufficiency,
     EvidenceTier,
     InterpretationCategory,
+    LocusCoverageEvaluation,
+    SampleObservation,
+    derive_coverage_evaluation,
 )
 
 class LicenseMeta(str):
@@ -115,8 +123,10 @@ class EvidenceLayer:
     """
     Layer 2: Evidence
     Empirical and clinical observations imported from upstream repositories.
+    Fails closed: missing evidence tier defaults to Tier D (research only).
+    Numeric scientific values default to None when absent to prevent masquerading as 0.0.
     """
-    evidence_tier: EvidenceTier = EvidenceTier.TIER_A
+    evidence_tier: EvidenceTier = EvidenceTier.TIER_D
     tier_rationale: str = ""
     clinvar_vcv: str = ""
     clinvar_stars: int = 0
@@ -124,14 +134,14 @@ class EvidenceLayer:
     clinvar_significance: str = ""
     clinvar_condition: str = ""
     clinvar_medgen: str = ""
-    gnomad_af: float = 0.0
-    gnomad_pli: float = 0.0
+    gnomad_af: Optional[float] = None
+    gnomad_pli: Optional[float] = None
     gnomad_loeuf: Optional[float] = None
     mane_transcript: str = ""
     alphamissense_class: str = ""
-    alphamissense_score: float = 0.0
+    alphamissense_score: Optional[float] = None
     uniprot_id: str = ""
-    alphafold_plddt: float = 0.0
+    alphafold_plddt: Optional[float] = None
     hpa_tissues: dict[str, str] = field(default_factory=dict)
     hpa_subcellular: list[str] = field(default_factory=list)
     encode_ccre: str = ""
@@ -153,6 +163,10 @@ class GenotypeInterpretation:
     user_guidance: str              # Actionable, responsible patient guidance
     drug_response: Optional[str] = None
     is_carrier: bool = False
+    assay_coverage: AssayCoverage = AssayCoverage.ASSAYED_CALLED
+    curation_scope: CurationScope = CurationScope.IN_SCOPE
+    evidence_sufficiency: EvidenceSufficiency = EvidenceSufficiency.SUFFICIENT
+    sample_observation: SampleObservation = SampleObservation.VARIANT_PRESENT
 
 
 @dataclass

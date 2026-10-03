@@ -141,6 +141,54 @@ class TestThreeLayerArchitecture(unittest.TestCase):
         self.assertIn("interpretation", first_locus)
         self.assertIn("provenance", first_locus)
 
+    def test_orthogonal_dimensions_persisted_in_db_and_json(self):
+        """Orthogonal evaluation dimensions must be present in SQLite and client JSON."""
+        # Check SQLite
+        test_db_path = "test_variome_ortho.db"
+        if os.path.exists(test_db_path):
+            os.remove(test_db_path)
+
+        try:
+            build_sqlite_variome_db(COMPILED_LOCI, test_db_path)
+            conn = sqlite3.connect(test_db_path)
+            cur = conn.cursor()
+
+            cur.execute("PRAGMA table_info(genotype_interpretations)")
+            columns = {row[1] for row in cur.fetchall()}
+            expected_cols = {"assay_coverage", "curation_scope", "evidence_sufficiency", "sample_observation"}
+            self.assertTrue(expected_cols.issubset(columns), f"Missing orthogonal columns in SQLite: {expected_cols - columns}")
+
+            cur.execute("SELECT assay_coverage, curation_scope, evidence_sufficiency, sample_observation FROM genotype_interpretations LIMIT 5")
+            rows = cur.fetchall()
+            for r in rows:
+                self.assertIsNotNone(r[0])
+                self.assertIsNotNone(r[1])
+                self.assertIsNotNone(r[2])
+                self.assertIsNotNone(r[3])
+
+            conn.close()
+        finally:
+            if os.path.exists(test_db_path):
+                os.remove(test_db_path)
+
+        # Check JSON artifact
+        json_path = os.path.join("web", "src", "knowledge-base.json")
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        self.assertIn("assay_coverage", data["manifest"]["coverage_taxonomy"])
+        self.assertIn("curation_scope", data["manifest"]["coverage_taxonomy"])
+        self.assertIn("evidence_sufficiency", data["manifest"]["coverage_taxonomy"])
+        self.assertIn("sample_observation", data["manifest"]["coverage_taxonomy"])
+
+        for rsid, var in data["variants"].items():
+            for gt, g_interp in var["interpretation"]["genotypes"].items():
+                self.assertIn("assay_coverage", g_interp)
+                self.assertIn("curation_scope", g_interp)
+                self.assertIn("evidence_sufficiency", g_interp)
+                self.assertIn("sample_observation", g_interp)
+
 
 if __name__ == "__main__":
     unittest.main()
+

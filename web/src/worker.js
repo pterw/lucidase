@@ -9,6 +9,11 @@ import {
   CURATED_KB, 
   ACMG_SF_GENES, 
   COVERAGE_STATES,
+  ASSAY_COVERAGE,
+  CURATION_SCOPE,
+  EVIDENCE_SUFFICIENCY,
+  SAMPLE_OBSERVATION,
+  deriveCoverageEvaluation,
   EVIDENCE_TIERS,
   ABSENCE_OF_FINDING_GUARDRAIL,
   computeSegregationReport, 
@@ -293,16 +298,29 @@ function parseGenomicText(text, fileName = "") {
 
     if (!assayed) {
       // State 3: Not Tested By This Array (Omitted from chip)
+      const isWeak = entry.evidence_tier === "Tier C" || entry.evidence_tier === "Tier D";
+      const evalRes = deriveCoverageEvaluation(
+        ASSAY_COVERAGE.UNPROBED,
+        CURATION_SCOPE.IN_SCOPE,
+        isWeak ? EVIDENCE_SUFFICIENCY.INSUFFICIENT : EVIDENCE_SUFFICIENCY.SUFFICIENT,
+        SAMPLE_OBSERVATION.CALL_UNAVAILABLE
+      );
       arrayGaps.push({
         rsid,
         gene: entry.gene,
         name: entry.name || rsid,
-        coverage_state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
+        coverage_state: evalRes.derived_state,
+        assay_coverage: evalRes.assay_coverage,
+        curation_scope: evalRes.curation_scope,
+        evidence_sufficiency: evalRes.evidence_sufficiency,
+        sample_observation: evalRes.sample_observation,
+        user_label: evalRes.user_label,
+        explanation: evalRes.explanation,
         reason: "Omitted from microarray chip manifest",
         chrom: entry.chrom,
         pos_grch37: entry.pos_grch37,
         pos_grch38: entry.pos_grch38,
-        evidence_tier: entry.evidence_tier || "Tier A",
+        evidence_tier: entry.evidence_tier || "Tier D",
         acmg_actionable: isAcmg
       });
       continue;
@@ -310,16 +328,29 @@ function parseGenomicText(text, fileName = "") {
 
     if (assayed.isNoCall) {
       // State 3: Assayed on array but uncallable / no-call
+      const isWeak = entry.evidence_tier === "Tier C" || entry.evidence_tier === "Tier D";
+      const evalRes = deriveCoverageEvaluation(
+        ASSAY_COVERAGE.NO_CALL,
+        CURATION_SCOPE.IN_SCOPE,
+        isWeak ? EVIDENCE_SUFFICIENCY.INSUFFICIENT : EVIDENCE_SUFFICIENCY.SUFFICIENT,
+        SAMPLE_OBSERVATION.CALL_UNAVAILABLE
+      );
       arrayGaps.push({
         rsid,
         gene: entry.gene,
         name: entry.name || rsid,
-        coverage_state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
+        coverage_state: evalRes.derived_state,
+        assay_coverage: evalRes.assay_coverage,
+        curation_scope: evalRes.curation_scope,
+        evidence_sufficiency: evalRes.evidence_sufficiency,
+        sample_observation: evalRes.sample_observation,
+        user_label: evalRes.user_label,
+        explanation: evalRes.explanation,
         reason: "No-call / uncallable on array (--)",
         chrom: entry.chrom,
         pos_grch37: entry.pos_grch37,
         pos_grch38: entry.pos_grch38,
-        evidence_tier: entry.evidence_tier || "Tier A",
+        evidence_tier: entry.evidence_tier || "Tier D",
         acmg_actionable: isAcmg
       });
       continue;
@@ -365,7 +396,7 @@ function parseGenomicText(text, fileName = "") {
       segregation
     };
 
-    // Determine Coverage State
+    // Determine Coverage State & Orthogonal Dimensions
     const isRiskOrActionable = match && (
       match.category === "Pathogenic" ||
       match.category === "Carrier" ||
@@ -376,19 +407,37 @@ function parseGenomicText(text, fileName = "") {
     );
 
     const isConflictingOrWeak = record.evidence_tier === "Tier C" || record.evidence_tier === "Tier D" || (entry.clinvar_status && entry.clinvar_status.includes("conflicting"));
+    const evSuff = isConflictingOrWeak ? EVIDENCE_SUFFICIENCY.INSUFFICIENT : EVIDENCE_SUFFICIENCY.SUFFICIENT;
+    const sampleObs = isRiskOrActionable ? SAMPLE_OBSERVATION.VARIANT_PRESENT : SAMPLE_OBSERVATION.WILD_TYPE;
 
-    if (isConflictingOrWeak && isRiskOrActionable) {
+    const evalRes = deriveCoverageEvaluation(
+      ASSAY_COVERAGE.ASSAYED_CALLED,
+      CURATION_SCOPE.IN_SCOPE,
+      evSuff,
+      sampleObs
+    );
+
+    record.coverage_state = evalRes.derived_state;
+    record.assay_coverage = evalRes.assay_coverage;
+    record.curation_scope = evalRes.curation_scope;
+    record.evidence_sufficiency = evalRes.evidence_sufficiency;
+    record.sample_observation = evalRes.sample_observation;
+    record.user_label = evalRes.user_label;
+    record.explanation = evalRes.explanation;
+
+    if (evalRes.derived_state === COVERAGE_STATES.INSUFFICIENT_EVIDENCE) {
       // State 5: Insufficient / Conflicting Evidence (e.g. MTHFR C677T)
-      record.coverage_state = COVERAGE_STATES.INSUFFICIENT_EVIDENCE;
       insufficientEvidence.push(record);
-      observedFindings.push(record); // Display in table with Tier C badge
-    } else if (isRiskOrActionable) {
+      if (sampleObs === SAMPLE_OBSERVATION.VARIANT_PRESENT) {
+        observedFindings.push(record);
+      } else {
+        negativeChecks.push(record);
+      }
+    } else if (evalRes.derived_state === COVERAGE_STATES.SUPPORTED_AND_OBSERVED) {
       // State 1: Supported and Observed
-      record.coverage_state = COVERAGE_STATES.SUPPORTED_AND_OBSERVED;
       observedFindings.push(record);
     } else {
       // State 2: Supported but Not Observed (Negative check / Wild-Type)
-      record.coverage_state = COVERAGE_STATES.SUPPORTED_NOT_OBSERVED;
       record.significance = "Negative / Wild-Type (Tested Normal)";
       record.repute = "Good";
       negativeChecks.push(record);
@@ -398,13 +447,25 @@ function parseGenomicText(text, fileName = "") {
   // Synthesize compound APOE Diplotype (rs429358 + rs7412)
   const apoeFinding = resolveApoeDiplotype(gt429, gt741);
   if (apoeFinding) {
-    if (apoeFinding.apoeInfo.diplotype.includes("ε4") || apoeFinding.apoeInfo.diplotype.includes("ε2/ε2")) {
-      apoeFinding.coverage_state = COVERAGE_STATES.SUPPORTED_AND_OBSERVED;
-      apoeFinding.evidence_tier = EVIDENCE_TIERS.TIER_A;
+    const isApoeRisk = apoeFinding.apoeInfo.diplotype.includes("ε4") || apoeFinding.apoeInfo.diplotype.includes("ε2/ε2");
+    const apoeObs = isApoeRisk ? SAMPLE_OBSERVATION.VARIANT_PRESENT : SAMPLE_OBSERVATION.WILD_TYPE;
+    const apoeEval = deriveCoverageEvaluation(
+      ASSAY_COVERAGE.ASSAYED_CALLED,
+      CURATION_SCOPE.IN_SCOPE,
+      EVIDENCE_SUFFICIENCY.SUFFICIENT,
+      apoeObs
+    );
+    apoeFinding.coverage_state = apoeEval.derived_state;
+    apoeFinding.assay_coverage = apoeEval.assay_coverage;
+    apoeFinding.curation_scope = apoeEval.curation_scope;
+    apoeFinding.evidence_sufficiency = apoeEval.evidence_sufficiency;
+    apoeFinding.sample_observation = apoeEval.sample_observation;
+    apoeFinding.user_label = apoeEval.user_label;
+    apoeFinding.explanation = apoeEval.explanation;
+    apoeFinding.evidence_tier = EVIDENCE_TIERS.TIER_A;
+    if (isApoeRisk) {
       observedFindings.push(apoeFinding);
     } else {
-      apoeFinding.coverage_state = COVERAGE_STATES.SUPPORTED_NOT_OBSERVED;
-      apoeFinding.evidence_tier = EVIDENCE_TIERS.TIER_A;
       negativeChecks.push(apoeFinding);
     }
   }
@@ -430,8 +491,8 @@ function parseGenomicText(text, fileName = "") {
     independent_assortment_count: independentAssortment.length,
     coverage_taxonomy: {
       cardinal_guardrail: ABSENCE_OF_FINDING_GUARDRAIL,
-      supported_and_observed_count: observedFindings.length,
-      supported_not_observed_count: negativeChecks.length,
+      supported_and_observed_count: observedFindings.filter(f => f.coverage_state === COVERAGE_STATES.SUPPORTED_AND_OBSERVED).length,
+      supported_not_observed_count: negativeChecks.filter(f => f.coverage_state === COVERAGE_STATES.SUPPORTED_NOT_OBSERVED).length,
       not_tested_by_array_count: arrayGaps.length,
       outside_coverage_count: outsideCoverageCount,
       insufficient_evidence_count: insufficientEvidence.length

@@ -2,25 +2,36 @@
 Unit Tests for GenomePulse Formal Coverage Taxonomy (Item 1)
 ============================================================
 Validates:
-1. 5 mutually exclusive coverage states:
+1. Four orthogonal scientific evaluation dimensions:
+   - AssayCoverage (ASSAYED_CALLED, NO_CALL, UNPROBED)
+   - CurationScope (IN_SCOPE, OUT_OF_SCOPE)
+   - EvidenceSufficiency (SUFFICIENT, INSUFFICIENT, UNASSESSED)
+   - SampleObservation (VARIANT_PRESENT, WILD_TYPE, CALL_UNAVAILABLE)
+2. Deterministic derivation of 5 mutually exclusive coverage states:
    - supported_and_observed
    - supported_not_observed
    - not_tested_by_array
    - outside_coverage
    - insufficient_evidence
-2. Cardinal scope guardrail enforcement:
+3. Cardinal scope guardrail enforcement:
    "Absence of a finding must never imply absence of genetic risk"
-3. Incomplete star-allele refusal requirement on all PGx loci.
-4. ACMG single-locus test caveats on ACMG SF loci.
-5. Invariant checking in build_canonical_kb.py fails non-zero on violations.
+4. Incomplete star-allele refusal requirement on all PGx loci.
+5. ACMG single-locus test caveats on ACMG SF loci.
+6. Invariant checking in build_canonical_kb.py fails non-zero on violations.
 """
 
 import unittest
 from tools.coverage_taxonomy import (
+    AssayCoverage,
     CoverageState,
+    CurationMode,
+    CurationScope,
+    EvidenceSufficiency,
     EvidenceTier,
     InterpretationCategory,
-    CurationMode,
+    LocusCoverageEvaluation,
+    SampleObservation,
+    derive_coverage_evaluation,
     ABSENCE_OF_FINDING_GUARDRAIL,
     INCOMPLETE_STAR_ALLELE_REFUSAL,
     ACMG_SINGLE_LOCUS_CAVEAT,
@@ -44,6 +55,82 @@ class TestCoverageTaxonomy(unittest.TestCase):
         self.assertEqual(len(states), 5)
         self.assertEqual(len(set(states)), 5, "Coverage states must be mutually exclusive")
         self.assertEqual(VALID_COVERAGE_STATES, set(states))
+
+    def test_orthogonal_evaluation_dimensions_distinct(self):
+        """Ensure the 4 orthogonal dimensions do not conflate assay, scope, evidence, and sample result."""
+        self.assertEqual(len(AssayCoverage), 3)
+        self.assertEqual(len(CurationScope), 2)
+        self.assertEqual(len(EvidenceSufficiency), 3)
+        self.assertEqual(len(SampleObservation), 3)
+
+        # Cross-dimension distinctness
+        assay_vals = {a.value for a in AssayCoverage}
+        scope_vals = {s.value for s in CurationScope}
+        ev_vals = {e.value for e in EvidenceSufficiency}
+        sample_vals = {o.value for o in SampleObservation}
+
+        self.assertTrue(assay_vals.isdisjoint(scope_vals))
+        self.assertTrue(ev_vals.isdisjoint(sample_vals))
+
+    def test_derive_coverage_evaluation_mappings(self):
+        """Test that derive_coverage_evaluation correctly and deterministically derives states."""
+        # 1. Out of scope
+        res_out = derive_coverage_evaluation(
+            assay=AssayCoverage.ASSAYED_CALLED,
+            scope=CurationScope.OUT_OF_SCOPE,
+            evidence=EvidenceSufficiency.UNASSESSED,
+            observation=SampleObservation.VARIANT_PRESENT
+        )
+        self.assertEqual(res_out.derived_state, CoverageState.OUTSIDE_COVERAGE)
+        self.assertEqual(res_out.user_label, "Outside Scope")
+
+        # 2. Unprobed array gap
+        res_gap = derive_coverage_evaluation(
+            assay=AssayCoverage.UNPROBED,
+            scope=CurationScope.IN_SCOPE,
+            evidence=EvidenceSufficiency.SUFFICIENT,
+            observation=SampleObservation.CALL_UNAVAILABLE
+        )
+        self.assertEqual(res_gap.derived_state, CoverageState.NOT_TESTED_BY_ARRAY)
+        self.assertIn("Array Gap", res_gap.user_label)
+
+        # 3. No-call on chip
+        res_nocall = derive_coverage_evaluation(
+            assay=AssayCoverage.NO_CALL,
+            scope=CurationScope.IN_SCOPE,
+            evidence=EvidenceSufficiency.SUFFICIENT,
+            observation=SampleObservation.CALL_UNAVAILABLE
+        )
+        self.assertEqual(res_nocall.derived_state, CoverageState.NOT_TESTED_BY_ARRAY)
+
+        # 4. Insufficient / Conflicting evidence (e.g. MTHFR)
+        res_mthfr = derive_coverage_evaluation(
+            assay=AssayCoverage.ASSAYED_CALLED,
+            scope=CurationScope.IN_SCOPE,
+            evidence=EvidenceSufficiency.INSUFFICIENT,
+            observation=SampleObservation.VARIANT_PRESENT
+        )
+        self.assertEqual(res_mthfr.derived_state, CoverageState.INSUFFICIENT_EVIDENCE)
+        self.assertEqual(res_mthfr.user_label, "Conflicting Evidence")
+
+        # 5. Supported and observed (risk allele present)
+        res_obs = derive_coverage_evaluation(
+            assay=AssayCoverage.ASSAYED_CALLED,
+            scope=CurationScope.IN_SCOPE,
+            evidence=EvidenceSufficiency.SUFFICIENT,
+            observation=SampleObservation.VARIANT_PRESENT
+        )
+        self.assertEqual(res_obs.derived_state, CoverageState.SUPPORTED_AND_OBSERVED)
+
+        # 6. Supported not observed (wild-type tested normal)
+        res_wt = derive_coverage_evaluation(
+            assay=AssayCoverage.ASSAYED_CALLED,
+            scope=CurationScope.IN_SCOPE,
+            evidence=EvidenceSufficiency.SUFFICIENT,
+            observation=SampleObservation.WILD_TYPE
+        )
+        self.assertEqual(res_wt.derived_state, CoverageState.SUPPORTED_NOT_OBSERVED)
+        self.assertEqual(res_wt.user_label, "Tested Wild-Type")
 
     def test_cardinal_scope_guardrail_verbiage(self):
         """Cardinal guardrail must explicitly state absence of finding does not imply absence of risk."""

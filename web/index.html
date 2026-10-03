@@ -209,10 +209,10 @@
         </div>
 
         <!-- 5-State Coverage Taxonomy Counters -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-800/80">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-800/80">
           <div class="p-3 rounded-sm bg-sky-50/70 dark:bg-slate-900/40 border border-sky-200 dark:border-sky-500/20">
             <div class="text-[11px] text-sky-700 dark:text-sky-300 font-mono font-semibold flex items-center justify-between">
-              <span>Observed Findings</span>
+              <span>Observed</span>
               <span class="text-[9px] uppercase px-1 rounded bg-sky-200 dark:bg-sky-900/60 font-bold">State 1</span>
             </div>
             <div id="count-state-observed" class="text-xl font-bold text-sky-600 dark:text-sky-400 mt-1 font-mono">0</div>
@@ -221,20 +221,20 @@
 
           <div class="p-3 rounded-sm bg-emerald-50/70 dark:bg-slate-900/40 border border-emerald-200 dark:border-emerald-500/20">
             <div class="text-[11px] text-emerald-700 dark:text-emerald-300 font-mono font-semibold flex items-center justify-between">
-              <span>Tested Wild-Type</span>
+              <span>Tested WT</span>
               <span class="text-[9px] uppercase px-1 rounded bg-emerald-200 dark:bg-emerald-900/60 font-bold">State 2</span>
             </div>
             <div id="count-state-negative" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Supported, not observed</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Supported, normal</div>
           </div>
 
           <div class="p-3 rounded-sm bg-amber-50/70 dark:bg-slate-900/40 border border-amber-200 dark:border-amber-500/20">
             <div class="text-[11px] text-amber-700 dark:text-amber-300 font-mono font-semibold flex items-center justify-between">
-              <span>Microarray Gaps</span>
+              <span>Array Gaps</span>
               <span class="text-[9px] uppercase px-1 rounded bg-amber-200 dark:bg-amber-900/60 font-bold">State 3</span>
             </div>
             <div id="count-state-gaps" class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Not tested by this chip</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Omitted from chip</div>
           </div>
 
           <div class="p-3 rounded-sm bg-slate-100/70 dark:bg-slate-900/40 border border-slate-300 dark:border-slate-700/50">
@@ -243,7 +243,16 @@
               <span class="text-[9px] uppercase px-1 rounded bg-slate-200 dark:bg-slate-800 font-bold">State 4</span>
             </div>
             <div id="count-state-outside" class="text-xl font-bold text-slate-700 dark:text-slate-300 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Array markers uncurated</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Markers uncurated</div>
+          </div>
+
+          <div class="p-3 rounded-sm bg-rose-50/70 dark:bg-slate-900/40 border border-rose-200 dark:border-rose-500/20">
+            <div class="text-[11px] text-rose-700 dark:text-rose-300 font-mono font-semibold flex items-center justify-between">
+              <span>Conflicting</span>
+              <span class="text-[9px] uppercase px-1 rounded bg-rose-200 dark:bg-rose-900/60 font-bold">State 5</span>
+            </div>
+            <div id="count-state-insufficient" class="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1 font-mono">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Disputed / Tier C</div>
           </div>
         </div>
       </div>

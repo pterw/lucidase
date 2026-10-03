@@ -1,0 +1,25 @@
+{
+  "toolUsed": "AlphaFold Monomer v2.0 pipeline",
+  "providerId": "GDM",
+  "entityType": "protein",
+  "isUniProt": true,
+  "modelEntityId": "AF-P02649-F1",
+  "modelCreatedDate": "2025-08-01T00:00:00Z",
+  "globalMetricValue": 75.5,
+  "fractionPlddtVeryLow": 0.161,
+  "fractionPlddtLow": 0.101,
+  "fractionPlddtConfident": 0.42,
+  "fractionPlddtVeryHigh": 0.319,
+  "latestVersion": 4,
+  "gene": "APOE",
+  "uniprotAccession": "P02649",
+  "uniprotId": "APOE_HUMAN",
+  "uniprotDescription": "Apolipoprotein E",
+  "taxId": 9606,
+  "organismScientificName": "Homo sapiens",
+  "folding_status": "Mostly confidently predicted with flexible terminal regions",
+  "domains": [
+    "Domain 1: residues 40 - 187 (Length: 148 AAs)",
+    "Domain 2: residues 219 - 305 (Length: 87 AAs)"
+  ]
+}

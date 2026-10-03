@@ -31,6 +31,89 @@ export const COVERAGE_STATES = {
   INSUFFICIENT_EVIDENCE: "insufficient_evidence"
 };
 
+export const ASSAY_COVERAGE = {
+  ASSAYED_CALLED: "assayed_called",
+  NO_CALL: "no_call",
+  UNPROBED: "unprobed"
+};
+
+export const CURATION_SCOPE = {
+  IN_SCOPE: "in_scope",
+  OUT_OF_SCOPE: "out_of_scope"
+};
+
+export const EVIDENCE_SUFFICIENCY = {
+  SUFFICIENT: "sufficient",
+  INSUFFICIENT: "insufficient",
+  UNASSESSED: "unassessed"
+};
+
+export const SAMPLE_OBSERVATION = {
+  VARIANT_PRESENT: "variant_present",
+  WILD_TYPE: "wild_type",
+  CALL_UNAVAILABLE: "call_unavailable"
+};
+
+export function deriveCoverageEvaluation(assay, scope, evidence, observation) {
+  if (scope === CURATION_SCOPE.OUT_OF_SCOPE) {
+    return {
+      assay_coverage: assay,
+      curation_scope: scope,
+      evidence_sufficiency: evidence,
+      sample_observation: observation,
+      derived_state: COVERAGE_STATES.OUTSIDE_COVERAGE,
+      user_label: "Outside Scope",
+      explanation: "Marker was genotyped on the array but is outside GenomePulse's curated variome catalog."
+    };
+  }
+  if (assay === ASSAY_COVERAGE.UNPROBED || assay === ASSAY_COVERAGE.NO_CALL) {
+    return {
+      assay_coverage: assay,
+      curation_scope: scope,
+      evidence_sufficiency: evidence,
+      sample_observation: observation,
+      derived_state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
+      user_label: assay === ASSAY_COVERAGE.UNPROBED ? "Array Gap" : "No-Call",
+      explanation: assay === ASSAY_COVERAGE.UNPROBED 
+        ? "Curated locus was omitted from this microarray design/manifest. Absence of a finding does NOT imply absence of risk."
+        : "Curated locus was interrogated on the array but failed QC and produced an uncallable genotype ('--')."
+    };
+  }
+  if (evidence === EVIDENCE_SUFFICIENCY.INSUFFICIENT) {
+    return {
+      assay_coverage: assay,
+      curation_scope: scope,
+      evidence_sufficiency: evidence,
+      sample_observation: observation,
+      derived_state: COVERAGE_STATES.INSUFFICIENT_EVIDENCE,
+      user_label: "Conflicting Evidence",
+      explanation: observation === SAMPLE_OBSERVATION.VARIANT_PRESENT
+        ? "Locus exhibits conflicting clinical interpretations or disputed utility (e.g. MTHFR). Variant allele detected."
+        : "Locus exhibits conflicting clinical interpretations; wild-type baseline observed."
+    };
+  }
+  if (observation === SAMPLE_OBSERVATION.VARIANT_PRESENT) {
+    return {
+      assay_coverage: assay,
+      curation_scope: scope,
+      evidence_sufficiency: evidence,
+      sample_observation: observation,
+      derived_state: COVERAGE_STATES.SUPPORTED_AND_OBSERVED,
+      user_label: "Supported & Observed",
+      explanation: "Curated locus with sufficient clinical consensus; variant/risk/actionable allele detected in sample."
+    };
+  }
+  return {
+    assay_coverage: assay,
+    curation_scope: scope,
+    evidence_sufficiency: evidence,
+    sample_observation: observation,
+    derived_state: COVERAGE_STATES.SUPPORTED_NOT_OBSERVED,
+    user_label: "Tested Wild-Type",
+    explanation: "Curated locus with sufficient clinical consensus; homozygous reference/wild-type detected in sample."
+  };
+}
+
 export const EVIDENCE_TIERS = {
   TIER_A: "Tier A",
   TIER_B: "Tier B",

@@ -10,14 +10,17 @@ Implements explicit source adapters for authoritative open genomic repositories:
 - AlphaFold Protein Structure Database
 - Human Protein Atlas (HPA)
 - ENCODE SCREEN (cCREs)
-- ACMG Secondary Findings Panel
 
-Every adapter normalizes raw upstream responses into stable internal schemas
-and attaches field-level provenance with licensing and curation tracking.
+Every adapter ingests and normalizes authoritative upstream responses into
+canonical record schemas, fails closed on missing evidence (defaulting to Tier D,
+and None for absent numeric values), and attaches field-level provenance with
+licensing and curation tracking.
 """
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any, Optional
 from tools.coverage_taxonomy import CurationMode, EvidenceTier
 from tools.variome_models import FieldProvenance, UPSTREAM_LICENSES
@@ -34,9 +37,9 @@ def derive_evidence_tier(
     - Tier A: Practice guideline / expert panel / CPIC Level A
     - Tier B: Multiple submitters, criteria provided, no conflicts
     - Tier C: Single submitter or conflicting clinical evaluations
-    - Tier D: Research / functional context only
+    - Tier D: Research / functional context only (fails closed)
     """
-    review_lower = clinvar_review.lower()
+    review_lower = clinvar_review.lower().strip()
     if stars is None:
         if "practice_guideline" in review_lower or "expert_panel" in review_lower:
             stars = 3
@@ -71,35 +74,86 @@ class ClinVarSourceAdapter:
     def __init__(self, release_version: Optional[str] = None):
         self.release_version = release_version or self.DEFAULT_RELEASE
 
-    def ingest_record(self, rsid: str, raw_payload: dict[str, Any]) -> dict[str, Any]:
-        var_id = str(raw_payload.get("variation_id", ""))
-        vcv_id = f"VCV{int(var_id):09d}" if var_id.isdigit() else var_id
-        stars = raw_payload.get("gold_stars", raw_payload.get("stars", 1))
-        review = raw_payload.get("review_status", "criteria_provided,_single_submitter")
+    def ingest_record(self, raw_payload: dict[str, Any], rsid: str = "") -> dict[str, Any]:
+        """
+        Ingests real ClinVar VCV/esummary JSON payload.
+        Fails closed: missing stars default to 0, missing review defaults to unasserted.
+        """
+        var_id = str(raw_payload.get("variation_id", raw_payload.get("variant_id", "")))
+        accession = raw_payload.get("accession", "")
+        if not accession and var_id.isdigit():
+            accession = f"VCV{int(var_id):09d}.5"
+
+        review = raw_payload.get("review_status", "no_assertion_criteria_provided")
+        # Star resolution: check explicit stars, or calculate from review string
+        stars_val = raw_payload.get("gold_stars", raw_payload.get("stars", None))
+        if stars_val is None:
+            rev_lower = review.lower()
+            if "practice guideline" in rev_lower or "practice_guideline" in rev_lower:
+                stars_val = 4
+            elif "reviewed by expert panel" in rev_lower or "expert_panel" in rev_lower:
+                stars_val = 3
+            elif "multiple submitters" in rev_lower or "multiple_submitters" in rev_lower:
+                stars_val = 2
+            elif "criteria provided" in rev_lower or "single submitter" in rev_lower:
+                stars_val = 1
+            else:
+                stars_val = 0
+        else:
+            stars_val = int(stars_val)
+
         sig = raw_payload.get("clinical_significance", "Uncertain significance")
-        phenotypes = raw_payload.get("phenotypes", [])
+        if isinstance(raw_payload.get("germline_classification"), dict):
+            sig = raw_payload["germline_classification"].get("description", sig)
+
+        phenotypes_raw = raw_payload.get("phenotypes", [])
+        phenotype_names = []
+        medgen_id = ""
+        for p in phenotypes_raw:
+            if isinstance(p, dict):
+                name = p.get("name", "")
+                if name:
+                    phenotype_names.append(name)
+                if not medgen_id and p.get("medgen_id"):
+                    medgen_id = p["medgen_id"]
+            elif isinstance(p, str):
+                phenotype_names.append(p)
+
+        conflicting = "conflicting" in sig.lower() or "conflicting" in review.lower()
+        tier, tier_rationale = self.derive_evidence_tier(stars=stars_val, conflicting=conflicting)
+
         prov = self.create_provenance(
-            accession=vcv_id or rsid,
+            accession=accession or rsid or var_id,
             review_status=review,
             curation_mode=CurationMode.MACHINE_IMPORTED
         )
         return {
             "rsid": rsid,
             "variation_id": var_id,
-            "vcv_accession": vcv_id,
-            "review_stars": stars,
+            "vcv_accession": accession,
+            "review_stars": stars_val,
             "review_status": review,
             "clinical_significance": sig,
-            "phenotypes": phenotypes,
+            "phenotypes": phenotype_names,
+            "medgen_id": medgen_id,
+            "evidence_tier": tier,
+            "tier_rationale": tier_rationale,
             "provenance": prov
         }
+
+    def ingest_from_file(self, file_path: str | Path, rsid: str = "") -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, list) and len(data) > 0:
+            data = data[0]
+        return self.ingest_record(data, rsid=rsid)
 
     @classmethod
     def create_provenance(
         cls,
         accession: str,
         review_status: str,
-        transformation: str = "verbatim",
+        transformation: str = "vcv_classification_extraction",
         curation_mode: CurationMode = CurationMode.MACHINE_IMPORTED,
         timestamp: str = "2026-10-02T00:00:00Z"
     ) -> FieldProvenance:
@@ -116,13 +170,7 @@ class ClinVarSourceAdapter:
 
     @classmethod
     def derive_evidence_tier(cls, stars: int, conflicting: bool, has_cpic_a: bool = False) -> tuple[EvidenceTier, str]:
-        """
-        Derives conservative evidence tier from ClinVar review stars and CPIC level:
-        - Tier A: Practice guideline / expert panel (ClinVar 3-4 stars OR CPIC Level A)
-        - Tier B: Criteria provided, multiple submitters, no conflicts (ClinVar 2 stars)
-        - Tier C: Single submitter or conflicting classifications (ClinVar 1 star, e.g. MTHFR)
-        - Tier D: Research / functional / GWAS context only
-        """
+        """Derives conservative evidence tier, failing closed to Tier D if unvalidated."""
         if stars >= 3 or has_cpic_a:
             rationale = "Expert panel review or clinical practice guideline endorsement."
             return EvidenceTier.TIER_A, rationale
@@ -142,6 +190,67 @@ class DbSnpSourceAdapter:
     SOURCE_NAME = "NCBI dbSNP"
     DEFAULT_RELEASE = "Build 156 (GRCh38.p14 / GRCh37.p13)"
     LICENSE = UPSTREAM_LICENSES["ncbi_dbsnp"]
+
+    def __init__(self, release_version: Optional[str] = None):
+        self.release_version = release_version or self.DEFAULT_RELEASE
+
+    def ingest_record(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
+        """
+        Ingests dbSNP RefSNP/SPDI JSON payload.
+        Extracts dual coordinates (GRCh37/GRCh38), alleles, strand, palindromic status.
+        """
+        refsnp_id = str(raw_payload.get("refsnp_id", ""))
+        rsid = f"rs{refsnp_id}" if not refsnp_id.startswith("rs") else refsnp_id
+
+        chrom = raw_payload.get("chrom", "")
+        ref = raw_payload.get("ref", "")
+        alt = raw_payload.get("alt", "")
+        strand = raw_payload.get("strand", "+")
+
+        pos_37 = 0
+        pos_38 = 0
+
+        # Parse placements
+        snapshot = raw_payload.get("primary_snapshot_data", {})
+        placements = snapshot.get("placements_with_allele", [])
+        for p in placements:
+            asm = p.get("assembly_name", "")
+            if "GRCh37" in asm:
+                pos_37 = int(p.get("position", 0))
+                if not ref:
+                    ref = p.get("deleted_sequence", "")
+                if not alt:
+                    alt = p.get("inserted_sequence", "")
+            elif "GRCh38" in asm:
+                pos_38 = int(p.get("position", 0))
+                if not ref:
+                    ref = p.get("deleted_sequence", "")
+                if not alt:
+                    alt = p.get("inserted_sequence", "")
+
+        is_pal = (ref, alt) in {("A", "T"), ("T", "A"), ("C", "G"), ("G", "C")}
+
+        prov = self.create_provenance(
+            rsid=rsid,
+            curation_mode=CurationMode.MACHINE_IMPORTED
+        )
+        return {
+            "rsid": rsid,
+            "chrom": chrom,
+            "pos_grch37": pos_37,
+            "pos_grch38": pos_38,
+            "ref": ref,
+            "alt": alt,
+            "strand": strand,
+            "is_palindromic": is_pal,
+            "spdi": raw_payload.get("spdi", ""),
+            "provenance": prov
+        }
+
+    def ingest_from_file(self, file_path: str | Path) -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return self.ingest_record(data)
 
     @classmethod
     def create_provenance(
@@ -169,6 +278,57 @@ class EnsemblSourceAdapter:
     DEFAULT_RELEASE = "Release 112 / MANE v1.3"
     LICENSE = UPSTREAM_LICENSES["ensembl"]
 
+    def __init__(self, release_version: Optional[str] = None):
+        self.release_version = release_version or self.DEFAULT_RELEASE
+
+    def ingest_record(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
+        """
+        Ingests Ensembl VEP payload with MANE Select isoform matching.
+        Fails closed: AlphaMissense score is None if absent (never defaults to 0.0).
+        """
+        rsid = raw_payload.get("id", "")
+        tc_list = raw_payload.get("transcript_consequences", [])
+        mane_tc = next((tc for tc in tc_list if tc.get("mane_select") or tc.get("canonical") == 1), None)
+        if not mane_tc and tc_list:
+            mane_tc = tc_list[0]
+
+        mane_transcript = ""
+        hgvsc = ""
+        hgvsp = ""
+        am_class = ""
+        am_score: Optional[float] = None
+
+        if mane_tc:
+            mane_transcript = mane_tc.get("transcript_id", "")
+            hgvsc = mane_tc.get("hgvsc", "")
+            hgvsp = mane_tc.get("hgvsp", "")
+            am_data = mane_tc.get("alphamissense", {})
+            if isinstance(am_data, dict):
+                am_class = am_data.get("pathogenicity", "")
+                if "score" in am_data and am_data["score"] is not None:
+                    am_score = float(am_data["score"])
+
+        prov = self.create_provenance(
+            transcript_id=mane_transcript or rsid,
+            curation_mode=CurationMode.MACHINE_IMPORTED
+        )
+        return {
+            "rsid": rsid,
+            "mane_transcript": mane_transcript,
+            "hgvs_coding": hgvsc,
+            "hgvs_protein": hgvsp,
+            "alphamissense_class": am_class,
+            "alphamissense_score": am_score,
+            "provenance": prov
+        }
+
+    def ingest_from_file(self, file_path: str | Path) -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, list) and len(data) > 0:
+            data = data[0]
+        return self.ingest_record(data)
+
     @classmethod
     def create_provenance(
         cls,
@@ -194,6 +354,52 @@ class GnomadSourceAdapter:
     SOURCE_NAME = "gnomAD"
     DEFAULT_RELEASE = "v4.1.0"
     LICENSE = UPSTREAM_LICENSES["gnomad"]
+
+    def __init__(self, release_version: Optional[str] = None):
+        self.release_version = release_version or self.DEFAULT_RELEASE
+
+    def ingest_record(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
+        """
+        Ingests gnomAD GraphQL payload.
+        Fails closed: missing AF, pLI, or LOEUF return None (NEVER 0.0!).
+        """
+        var_id = raw_payload.get("variantId", "")
+        exome = raw_payload.get("exome") or {}
+        genome = raw_payload.get("genome") or {}
+
+        # Safe extraction of AF: exome preferred, then genome
+        af: Optional[float] = None
+        if "af" in exome and exome["af"] is not None:
+            af = float(exome["af"])
+        elif "af" in genome and genome["af"] is not None:
+            af = float(genome["af"])
+
+        pli: Optional[float] = None
+        loeuf: Optional[float] = None
+        constraint = raw_payload.get("gene_constraint", {})
+        if "pli" in constraint and constraint["pli"] is not None:
+            pli = float(constraint["pli"])
+        if "oe_lof_upper" in constraint and constraint["oe_lof_upper"] is not None:
+            loeuf = float(constraint["oe_lof_upper"])
+        elif "loeuf" in constraint and constraint["loeuf"] is not None:
+            loeuf = float(constraint["loeuf"])
+
+        prov = self.create_provenance(
+            variant_id=var_id,
+            curation_mode=CurationMode.MACHINE_IMPORTED
+        )
+        return {
+            "variant_id": var_id,
+            "gnomad_af": af,
+            "gnomad_pli": pli,
+            "gnomad_loeuf": loeuf,
+            "provenance": prov
+        }
+
+    def ingest_from_file(self, file_path: str | Path) -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return self.ingest_record(data)
 
     @classmethod
     def create_provenance(
@@ -224,22 +430,29 @@ class CpicSourceAdapter:
     def __init__(self, release_version: Optional[str] = None):
         self.release_version = release_version or self.DEFAULT_RELEASE
 
-    def ingest_record(self, rsid_or_gene: str, raw_payload: dict[str, Any]) -> dict[str, Any]:
+    def ingest_record(self, raw_payload: dict[str, Any], rsid_or_gene: str = "") -> dict[str, Any]:
         gene = raw_payload.get("gene", rsid_or_gene)
-        cpic_level = raw_payload.get("cpic_level", "A")
+        drug = raw_payload.get("drug", "clinical_guideline")
+        cpic_level = raw_payload.get("cpic_level", None)
         drug_rec = raw_payload.get("drug_recommendation", "")
         url = raw_payload.get("guideline_url", "")
         prov = self.create_provenance(
-            gene_drug_pair=f"{gene}:{raw_payload.get('drug', 'clinical_guideline')}",
+            gene_drug_pair=f"{gene}:{drug}",
             curation_mode=CurationMode.MANUALLY_CURATED
         )
         return {
             "gene": gene,
+            "drug": drug,
             "cpic_level": cpic_level,
             "guideline_url": url,
             "drug_recommendation": drug_rec,
             "provenance": prov
         }
+
+    def ingest_from_file(self, file_path: str | Path, rsid_or_gene: str = "") -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return self.ingest_record(data, rsid_or_gene=rsid_or_gene)
 
     @classmethod
     def create_provenance(
@@ -270,9 +483,15 @@ class AlphaFoldSourceAdapter:
     def __init__(self, release_version: Optional[str] = None):
         self.release_version = release_version or self.DEFAULT_RELEASE
 
-    def ingest_record(self, gene_or_uniprot: str, raw_payload: dict[str, Any]) -> dict[str, Any]:
-        uniprot = raw_payload.get("uniprot_accession", gene_or_uniprot)
-        plddt = raw_payload.get("global_plddt", 80.0)
+    def ingest_record(self, raw_payload: dict[str, Any], gene_or_uniprot: str = "") -> dict[str, Any]:
+        """
+        Ingests real AlphaFold DB v4 structure metadata.
+        Fails closed: missing pLDDT returns None (never defaults to 80.0 or 0.0).
+        """
+        uniprot = raw_payload.get("uniprotAccession", raw_payload.get("uniprot_accession", gene_or_uniprot))
+        plddt_val = raw_payload.get("globalMetricValue", raw_payload.get("global_plddt", None))
+        plddt: Optional[float] = float(plddt_val) if plddt_val is not None else None
+
         prov = self.create_provenance(
             uniprot_id=uniprot,
             curation_mode=CurationMode.MACHINE_IMPORTED
@@ -284,6 +503,11 @@ class AlphaFoldSourceAdapter:
             "folding_status": raw_payload.get("folding_status", "Predicted monomer"),
             "provenance": prov
         }
+
+    def ingest_from_file(self, file_path: str | Path, gene_or_uniprot: str = "") -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return self.ingest_record(data, gene_or_uniprot=gene_or_uniprot)
 
     @classmethod
     def create_provenance(
@@ -311,6 +535,31 @@ class HpaSourceAdapter:
     DEFAULT_RELEASE = "Release 23.0"
     LICENSE = UPSTREAM_LICENSES["hpa"]
 
+    def __init__(self, release_version: Optional[str] = None):
+        self.release_version = release_version or self.DEFAULT_RELEASE
+
+    def ingest_record(self, raw_payload: dict[str, Any], gene: str = "") -> dict[str, Any]:
+        """Ingests Human Protein Atlas normal tissue proteomics and subcellular locations."""
+        gene_name = raw_payload.get("gene", gene)
+        tissues = raw_payload.get("tissue_expression", {})
+        subcellular = raw_payload.get("subcellular_location", [])
+
+        prov = self.create_provenance(
+            gene=gene_name,
+            curation_mode=CurationMode.MACHINE_IMPORTED
+        )
+        return {
+            "gene": gene_name,
+            "tissues": tissues,
+            "subcellular": subcellular,
+            "provenance": prov
+        }
+
+    def ingest_from_file(self, file_path: str | Path, gene: str = "") -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return self.ingest_record(data, gene=gene)
+
     @classmethod
     def create_provenance(
         cls,
@@ -336,6 +585,31 @@ class EncodeSourceAdapter:
     SOURCE_NAME = "ENCODE SCREEN"
     DEFAULT_RELEASE = "ENCODE v4"
     LICENSE = UPSTREAM_LICENSES["encode"]
+
+    def __init__(self, release_version: Optional[str] = None):
+        self.release_version = release_version or self.DEFAULT_RELEASE
+
+    def ingest_record(self, raw_payload: dict[str, Any], locus: str = "") -> dict[str, Any]:
+        """Ingests ENCODE SCREEN candidate cis-Regulatory Elements."""
+        accession = raw_payload.get("accession", locus)
+        ccre_type = raw_payload.get("ccre_type", "")
+        nearest_gene = raw_payload.get("nearest_gene", "")
+
+        prov = self.create_provenance(
+            locus=accession,
+            curation_mode=CurationMode.MACHINE_IMPORTED
+        )
+        return {
+            "accession": accession,
+            "ccre_type": ccre_type,
+            "nearest_gene": nearest_gene,
+            "provenance": prov
+        }
+
+    def ingest_from_file(self, file_path: str | Path, locus: str = "") -> dict[str, Any]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return self.ingest_record(data, locus=locus)
 
     @classmethod
     def create_provenance(

@@ -1,0 +1,31 @@
+{
+  "variation_id": "17864",
+  "accession": "VCV000017864.5",
+  "title": "NM_000041.4(APOE):c.388T>C (p.Cys130Arg)",
+  "review_status": "reviewed by expert panel",
+  "gold_stars": 3,
+  "clinical_significance": "Risk factor",
+  "last_evaluated": "2024-05-15",
+  "germline_classification": {
+    "description": "Risk factor",
+    "review_status": "reviewed by expert panel",
+    "last_evaluated": "2024-05-15"
+  },
+  "phenotypes": [
+    {
+      "name": "Late-onset Alzheimer disease",
+      "medgen_id": "C0494463"
+    },
+    {
+      "name": "Apolipoprotein E deficiency",
+      "medgen_id": "C0342878"
+    }
+  ],
+  "gene_sort": [
+    {
+      "symbol": "APOE",
+      "gene_id": "348",
+      "hgnc_id": "HGNC:613"
+    }
+  ]
+}

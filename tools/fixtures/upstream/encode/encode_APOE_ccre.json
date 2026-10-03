@@ -1,0 +1,13 @@
+{
+  "accession": "EH38E1519412",
+  "encode_release": "ENCODE v4",
+  "chrom": "chr19",
+  "start": 44908000,
+  "end": 44909000,
+  "ccre_type": "Candidate Enhancer (dELS)",
+  "z_score_dnase": 2.14,
+  "z_score_h3k4me3": 0.85,
+  "z_score_h3k27ac": 2.45,
+  "nearest_gene": "APOE",
+  "description": "Distal enhancer-like signature in strong open chromatin region with prominent H3K27ac enrichment in human liver and neural tissue."
+}

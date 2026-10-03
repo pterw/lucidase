@@ -1,0 +1,21 @@
+{
+  "variantId": "6-26093141-G-A",
+  "dataset": "gnomad_r4",
+  "reference_genome": "GRCh38",
+  "chrom": "6",
+  "pos": 26093141,
+  "ref": "G",
+  "alt": "A",
+  "exome": {
+    "ac": 45800,
+    "an": 732800,
+    "af": 0.0625,
+    "homozygote_count": 1420
+  },
+  "gene_constraint": {
+    "gene_symbol": "HFE",
+    "pli": 0.0,
+    "oe_lof_upper": 1.45,
+    "loeuf": 1.45
+  }
+}

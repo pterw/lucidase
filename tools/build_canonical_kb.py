@@ -41,10 +41,16 @@ from tools.coverage_taxonomy import (
     ABSENCE_OF_FINDING_GUARDRAIL,
     ACMG_SINGLE_LOCUS_CAVEAT,
     INCOMPLETE_STAR_ALLELE_REFUSAL,
+    AssayCoverage,
     CoverageState,
     CurationMode,
+    CurationScope,
+    EvidenceSufficiency,
     EvidenceTier,
     InterpretationCategory,
+    LocusCoverageEvaluation,
+    SampleObservation,
+    derive_coverage_evaluation,
 )
 from tools.source_adapters import (
     AlphaFoldSourceAdapter,
@@ -1498,13 +1504,13 @@ class CanonicalQCEngine:
             errors.append(f"{rsid}: Invalid ClinVar accession {ev.clinvar_vcv}. Expected VCV prefix.")
 
         # Check 4: gnomAD Allele Frequencies & constraint scores
-        if not (0.0 <= ev.gnomad_af <= 1.0):
+        if ev.gnomad_af is not None and not (0.0 <= ev.gnomad_af <= 1.0):
             errors.append(f"{rsid}: gnomAD AF {ev.gnomad_af} out of bounds [0.0, 1.0]")
-        if not (0.0 <= ev.gnomad_pli <= 1.0):
+        if ev.gnomad_pli is not None and not (0.0 <= ev.gnomad_pli <= 1.0):
             errors.append(f"{rsid}: gnomAD pLI {ev.gnomad_pli} out of bounds [0.0, 1.0]")
 
         # Check 5: AlphaFold pLDDT
-        if not (0.0 <= ev.alphafold_plddt <= 100.0):
+        if ev.alphafold_plddt is not None and not (0.0 <= ev.alphafold_plddt <= 100.0):
             errors.append(f"{rsid}: AlphaFold pLDDT {ev.alphafold_plddt} out of bounds [0.0, 100.0]")
 
         # Check 6: Genotypes
@@ -1574,6 +1580,10 @@ def build_pipeline(strict_qc: bool = True) -> tuple[dict[str, Any], list[str]]:
                 "magnitude": gt_data.magnitude,
                 "repute": gt_data.repute,
                 "coverage_state": gt_data.coverage_state.value,
+                "assay_coverage": gt_data.assay_coverage.value,
+                "curation_scope": gt_data.curation_scope.value,
+                "evidence_sufficiency": gt_data.evidence_sufficiency.value,
+                "sample_observation": gt_data.sample_observation.value,
                 "phenotype": gt_data.phenotype,
                 "user_guidance": gt_data.user_guidance,
                 "drug_response": gt_data.drug_response,
@@ -1751,6 +1761,10 @@ def build_pipeline(strict_qc: bool = True) -> tuple[dict[str, Any], list[str]]:
         "sha256": digest,
         "coverage_taxonomy": {
             "states": [s.value for s in CoverageState],
+            "assay_coverage": [a.value for a in AssayCoverage],
+            "curation_scope": [c.value for c in CurationScope],
+            "evidence_sufficiency": [e.value for e in EvidenceSufficiency],
+            "sample_observation": [o.value for o in SampleObservation],
             "categories": [c.value for c in InterpretationCategory],
             "evidence_tiers": [t.value for t in EvidenceTier],
             "cardinal_guardrail": ABSENCE_OF_FINDING_GUARDRAIL
@@ -1861,6 +1875,10 @@ def export_sqlite_canonical(payload: dict[str, Any], db_path: Path):
             magnitude REAL,
             repute TEXT,
             coverage_state TEXT,
+            assay_coverage TEXT,
+            curation_scope TEXT,
+            evidence_sufficiency TEXT,
+            sample_observation TEXT,
             phenotype TEXT,
             user_guidance TEXT,
             drug_response TEXT,
@@ -1978,11 +1996,17 @@ def export_sqlite_canonical(payload: dict[str, Any], db_path: Path):
 
         for gt, g in interp["genotypes"].items():
             cur.execute("""
-                INSERT INTO genotype_interpretations (rsid, genotype, category, significance, magnitude, repute, coverage_state, phenotype, user_guidance, drug_response, is_carrier)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO genotype_interpretations (
+                    rsid, genotype, category, significance, magnitude, repute,
+                    coverage_state, assay_coverage, curation_scope, evidence_sufficiency, sample_observation,
+                    phenotype, user_guidance, drug_response, is_carrier
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 rsid, gt, g["category"], g["significance"], g["magnitude"],
-                g["repute"], g["coverage_state"], g["phenotype"], g["user_guidance"],
+                g["repute"], g["coverage_state"],
+                g.get("assay_coverage"), g.get("curation_scope"), g.get("evidence_sufficiency"), g.get("sample_observation"),
+                g["phenotype"], g["user_guidance"],
                 g["drug_response"], 1 if g["is_carrier"] else 0
             ))
 
