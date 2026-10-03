@@ -285,7 +285,7 @@ def select_clinvar_record(
              and STAR_ALLELE_TITLE.fullmatch(_require(r, "title", str, "ClinVar record"))]
     if stars:
         if len(stars) > 1:
-            raise AdapterError(f"{rsid}: several star-allele haplotype records match: {[r['accession'] for r in stars]}")
+            raise AdapterError(f"{rsid}: several star-allele haplotype records match: {[r.get('accession') for r in stars]}")
         return _clinvar_record(stars[0], "star-allele haplotype record containing the locus variant", provenance)
     singles = [r for r in matches if len(r["variation_set"]) == 1]
     if len(singles) > 1:
@@ -383,13 +383,18 @@ def parse_vep(
     record = raw[0] if isinstance(raw, list) and raw else raw
     if not isinstance(record, dict) or record.get("id") != rsid:
         raise AdapterError(f"VEP payload is not for {rsid}")
-    vep_ref = str(record.get("allele_string", "")).split("/")[0]
+    where = f"VEP {rsid}"
+    vep_ref = _require(record, "allele_string", str, where).split("/")[0]
     want = normalize_edit(0, ref, alt)[1:]
+    consequences = _require(record, "transcript_consequences", list, where)
+    for tc in consequences:
+        if not isinstance(tc, dict):
+            raise AdapterError(f"{where}.transcript_consequences[] must be an object, got {type(tc).__name__}")
     rows = [
-        tc for tc in record.get("transcript_consequences", [])
+        tc for tc in consequences
         if "MANE_Select" in (tc.get("mane") or [])
         and tc.get("gene_symbol") == gene
-        and normalize_edit(0, vep_ref, tc.get("variant_allele", ""))[1:] == want
+        and normalize_edit(0, vep_ref, _require(tc, "variant_allele", str, f"{where}.transcript_consequences[]"))[1:] == want
     ]
     transcripts = {(tc.get("transcript_id"), tc.get("mane_select")) for tc in rows}
     if len(transcripts) > 1:
@@ -449,9 +454,11 @@ def parse_gnomad_variant(raw: dict[str, Any], provenance: Optional[ImportProvena
         if record is None:
             continue  # this dataset has no record of the variant
         where = f"gnomAD variant {variant.get('variant_id')!r} {key}"
-        an = record.get("an") if isinstance(record, dict) else None
-        if not isinstance(record, dict) or (an is not None and (not isinstance(an, int) or isinstance(an, bool) or an < 0)):
+        if not isinstance(record, dict):
             raise AdapterError(f"{where}: expected an object with an integer an >= 0, got {record!r}")
+        an = _require(record, "an", (int, type(None)), where)  # a missing key is a partial record; null is real
+        if an is not None and an < 0:
+            raise AdapterError(f"{where}.an must be >= 0, got {an}")
         if not an:
             continue  # an of 0 or null: no called alleles, so no frequency from this record
         ac = _require(record, "ac", int, where)

@@ -1052,3 +1052,143 @@ def test_every_curated_locus_has_all_its_pinned_captures(rsid):
     for source, key in captures:
         assert (REAL / source / f"{key}.json").is_file(), f"{source}/{key}.json"
         assert (REAL / source / f"{key}.meta.json").is_file(), f"{source}/{key}.meta.json"
+
+
+# ---------------------------------------------------------------------------
+# S3-F2b fix round: every fail-fast branch has a test that fails when the branch is reverted
+# ---------------------------------------------------------------------------
+def _without(container, *path):
+    """Delete the key at the end of `path` (keys and list indexes) from `container` and return the container."""
+    node = container
+    for step in path[:-1]:
+        node = node[step]
+    del node[path[-1]]
+    return container
+
+
+@pytest.mark.parametrize("path,message", [
+    (("result", "1", "variation_set"), "ClinVar record '1'.variation_set is missing"),
+    (("result", "1", "variation_set", 0, "variation_xrefs"), r"variation_set\[\].variation_xrefs is missing"),
+    (("result", "uids"), "ClinVar esummary.result.uids is missing"),
+])
+def test_synthetic_clinvar_selection_refuses_a_missing_structure_key(path, message):
+    """Branches variation_set, variation_xrefs and esummary.result.uids of select_clinvar_record."""
+    with pytest.raises(AdapterError, match=message):
+        select_clinvar_record(_without(_synthetic_summary(), *path), "rs123", 100, "A", "G")
+
+
+@pytest.mark.parametrize("key,message", [
+    ("variation_set", "variation_set must be list, got dict"),
+    ("variation_xrefs", "variation_xrefs must be list, got dict"),
+    ("uids", "uids must be list, got dict"),
+])
+def test_synthetic_clinvar_selection_refuses_a_mistyped_structure_key(key, message):
+    summary = _synthetic_summary()
+    record = summary["result"]["1"]
+    if key == "variation_set":
+        record["variation_set"] = {}
+    elif key == "variation_xrefs":
+        record["variation_set"][0]["variation_xrefs"] = {}
+    else:
+        summary["result"]["uids"] = {}
+    with pytest.raises(AdapterError, match=message):
+        select_clinvar_record(summary, "rs123", 100, "A", "G")
+
+
+def _placement_path(raw, *tail):
+    index = raw["primary_snapshot_data"]["placements_with_allele"].index(_grch38_placement(raw))
+    return ("primary_snapshot_data", "placements_with_allele", index, *tail)
+
+
+@pytest.mark.parametrize("tail,message", [
+    (("placement_annot",), r"placements_with_allele\[\].placement_annot is missing"),
+    (("placement_annot", "seq_type"), "placement_annot.seq_type is missing"),
+    (("placement_annot", "seq_id_traits_by_assembly"), "placement_annot.seq_id_traits_by_assembly is missing"),
+    (("placement_annot", "seq_id_traits_by_assembly", 0, "assembly_name"),
+     r"seq_id_traits_by_assembly\[\].assembly_name is missing"),
+    (("alleles",), r"placements_with_allele\[\].alleles is missing"),
+])
+def test_synthetic_dbsnp_refuses_a_missing_placement_structure_key(tail, message):
+    """Branches placement_annot, seq_type, seq_id_traits_by_assembly, assembly_name and the alleles container."""
+    raw = _synthetic_dbsnp()
+    _without(raw, *_placement_path(raw, *tail))
+    with pytest.raises(AdapterError, match=message):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_dbsnp_refuses_a_mistyped_assembly_name():
+    raw = _synthetic_dbsnp()
+    annot = _grch38_placement(raw)["placement_annot"]
+    annot["seq_id_traits_by_assembly"][0]["assembly_name"] = None
+    with pytest.raises(AdapterError, match="assembly_name must be str, got NoneType"):
+        parse_dbsnp(raw)
+
+
+def test_synthetic_meta_without_retrieved_at_raises_adapter_error_naming_the_field(pinned_copy):
+    """Branch retrieved_at of PinnedPayload.provenance."""
+    meta = pinned_copy / "dbsnp" / "rs671.meta.json"
+    info = json.loads(meta.read_text(encoding="utf-8"))
+    del info["retrieved_at"]
+    meta.write_text(json.dumps(info), encoding="utf-8")
+    with pytest.raises(AdapterError, match="retrieved_at is missing"):
+        UpstreamSnapshot(pinned_copy).dbsnp("rs671")
+
+
+# --- VEP row reads ------------------------------------------------------------
+@pytest.mark.parametrize("key", ["allele_string", "transcript_consequences"])
+def test_synthetic_vep_record_without_a_row_field_raises(key):
+    raw = _synthetic_vep([_vep_row()])
+    del raw[0][key]
+    with pytest.raises(AdapterError, match=f"{key} is missing"):
+        parse_vep(raw, "rs1", "GENE", "A", "G")
+
+
+@pytest.mark.parametrize("key,value", [("allele_string", None), ("transcript_consequences", {})])
+def test_synthetic_vep_record_with_a_mistyped_row_field_raises(key, value):
+    raw = _synthetic_vep([_vep_row()])
+    raw[0][key] = value
+    with pytest.raises(AdapterError, match=key):
+        parse_vep(raw, "rs1", "GENE", "A", "G")
+
+
+@pytest.mark.parametrize("row", [None, "ENST00000000001", [1]])
+def test_synthetic_vep_consequence_that_is_not_an_object_raises_adapter_error(row):
+    with pytest.raises(AdapterError, match="transcript_consequences"):
+        parse_vep(_synthetic_vep([_vep_row(), row]), "rs1", "GENE", "A", "G")
+
+
+def test_synthetic_vep_mane_row_for_the_gene_without_a_variant_allele_raises():
+    row = _vep_row()
+    del row["variant_allele"]
+    with pytest.raises(AdapterError, match="variant_allele is missing"):
+        parse_vep(_synthetic_vep([row]), "rs1", "GENE", "A", "G")
+
+
+def test_synthetic_vep_row_for_another_gene_needs_no_variant_allele():
+    """A row the filter drops before the allele comparison may lack variant_allele."""
+    other = {"transcript_id": "ENST00000000009", "gene_symbol": "OTHER"}
+    assert parse_vep(_synthetic_vep([other, _vep_row()]), "rs1", "GENE", "A", "G").mane_select_refseq == "NM_000001.1"
+
+
+# --- the star-allele error message --------------------------------------------
+def test_synthetic_clinvar_star_allele_error_is_readable_when_a_record_has_no_accession():
+    summary = _synthetic_summary(obj_type="Haplotype", title="GENE*2")
+    second = copy.deepcopy(summary["result"]["1"])
+    second["uid"] = "2"
+    for record in (summary["result"]["1"], second):
+        del record["accession"]
+    summary["result"]["uids"].append("2")
+    summary["result"]["2"] = second
+    with pytest.raises(AdapterError, match="several star-allele"):
+        select_clinvar_record(summary, "rs123", 100, "A", "G")
+
+
+# --- gnomAD: a record with ac but no an ---------------------------------------
+def test_synthetic_gnomad_record_with_ac_but_no_an_key_raises():
+    with pytest.raises(AdapterError, match="exome.an is missing"):
+        parse_gnomad_variant(_gnomad(exome={"ac": 1}))
+
+
+def test_synthetic_gnomad_record_with_an_null_is_still_skipped():
+    """Real exome records carry an: null; only a missing key is a partial record."""
+    assert parse_gnomad_variant(_gnomad(exome={"ac": None, "an": None}, genome={"ac": 1, "an": 10})).af == pytest.approx(0.1)
