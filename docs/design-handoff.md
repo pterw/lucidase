@@ -4,13 +4,13 @@
 > Owner ruling (verbatim): *"Webdev and identity haven't been established so when tailwind and daisy ui land properly and install design of this is within a system that is yet to be authored."*
 > It proposes **no** new colours, fonts, spacing scales, themes or components. Every visual value below is a **de facto** value found in code, not a design decision. Citations are `file:line`.
 
-Sources: `web/index.html` (I), `web/src/app.js` (A), `web/src/styles.css` (S), `web/tailwind.config.js` (T), `web/src/vendor/README.md`, `AGENTS.md` sections 3-5, `task.md` (provisional), `tests/e2e/*.py`, briefs T7/T8/T9.
+Sources: `web/index.html` (I), `web/src/app.js` (A), `web/src/view-model.js` (V), `web/src/core/apoe.js` (C), `web/src/worker.js` (W), `web/src/styles.css` (S), `web/tailwind.config.js` (T), `web/src/vendor/README.md`, `AGENTS.md` sections 3-5, `task.md` (provisional), `tests/e2e/*.py`. The I, A, V, C and W line numbers were re-checked at the final commit of the hardening branch (T7, T8 and T9 have landed). The S and T cites were not re-measured.
 
 ---
 
 ## Overview
 
-Single-page, client-only analysis of raw DNA files (23andMe, AncestryDNA, MyHeritage, VCF). Flow: **Upload -> Progress -> (Error | Results)**. Results = guardrail banner, QC summary, coverage-state cards, APOE card, multi-locus section, filter bar, findings table, slide-out variant drawer. No routing; one page; one drawer.
+Single-page, client-only analysis of raw DNA files (23andMe, AncestryDNA, MyHeritage, VCF). Flow: **Upload -> Progress -> (Error | Results)**. Results = guardrail banner, QC summary, coverage-state cards, APOE card, multi-locus section, filter bar, findings table, slide-out variant drawer. Every table row, drawer field and export value is read from one view model per record (V:131-268; A:8-10). No routing; one page; one drawer.
 
 | Item | Fact |
 |---|---|
@@ -18,18 +18,18 @@ Single-page, client-only analysis of raw DNA files (23andMe, AncestryDNA, MyHeri
 | **Load-bearing link order** | `daisyui` -> `src/styles.css` -> `vendor/tailwind.css` (I:12-17). Utilities must come last so they beat equal-specificity app rules. Do not reorder. Guarded by `tests/e2e/test_cascade.py` (dashed dropzone, accent borders, `text-[13px]` over `.font-serif`, `dark:` over `.glass-panel`). |
 | External hosts | Only Typekit (fonts), I:9. CSP `script-src 'self'`, `connect-src 'self'` (`test_csp.py`). No third-party script. |
 | task.md status | Its typography/brand sections (Gotham / Attribute Mono / Orpheus Pro / Neuzeit, "High-Tech - Clinical - Crisp", sharp corners) are **PROVISIONAL**, not an established identity. |
-| Test hook | `window.__genomePulse` exposes `state`, `processText`, exports, `setTheme` (A:42-48). Tests read `state.records`, `negativeChecks`, `arrayGaps`, `insufficientEvidence`, `coverageSummary`. |
+| Test hook | `window.__genomePulse` exposes `state`, `processText`, exports, `setTheme` (A:65-71). Tests read `state.records`, `negativeChecks`, `arrayGaps`, `insufficientEvidence`, `coverageSummary`. |
 
 ## Layout
 
 | Region | Container (de facto) | Notes |
 |---|---|---|
 | Body | `dna-bg-grid min-h-screen flex flex-col justify-between` (I:19) | 28px grid background (S:214-226) |
-| Header | `glass-header sticky top-0 z-40 px-6 py-4 flex justify-between border-b` (I:22) | Brand left; theme toggle + 2 badges right |
-| Main | `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6` (I:59) | Sections stacked vertically |
+| Header | `glass-header sticky top-0 z-40 px-6 py-4 flex justify-between border-b` (I:22) | Brand left; theme toggle + the Local-First pill right (I:41-50) |
+| Main | `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6` (I:54) | Sections stacked vertically |
 | Order in `main` | hero/dropzone -> `#progress-section` -> `#analysis-error` -> `#results-section` | Results children: guardrail banner, QC panel (+5 KPI + 5 coverage cards), `#apoe-status-card`, `#assortment-section`, filter/search/export bar, table card |
-| Drawer | `#variant-drawer` `fixed inset-y-0 right-0 z-50 w-full sm:w-[540px]`, scrolls internally (I:420) | Header, ACMG/CPIC/refusal/caveat boxes, metrics grid, phenotype, segregation + simulator, biotools, HPA, subcellular, footer |
-| Footer | `glass-header px-6 py-4 mt-12` (I:698) | Static text |
+| Drawer | `#variant-drawer` `fixed inset-y-0 right-0 z-50 w-full sm:w-[540px]`, scrolls internally (I:409) | Header, ACMG/CPIC/refusal/caveat boxes, metrics grid, phenotype, segregation + simulator, biotools, HPA, subcellular, footer |
+| Footer | `glass-header px-6 py-4 mt-12` (I:686) | Static text (I:688-690): no release, source or tier claims |
 | Z-order | header 40, dropdown 30, drawer 50 | No overlay/backdrop behind drawer |
 
 ## Design Tokens Used (provisional, de facto, **not a design system**)
@@ -84,44 +84,44 @@ Sizes in use: `text-[9px]`, `[10px]`, `[11px]`, `[13px]`, `text-xs`, `text-sm`, 
 | Table viewport | `max-h-[600px] overflow-y-auto`, sticky `thead` |
 | Icons | Emoji characters only (no icon system) |
 
-Dark-mode mechanism: `data-theme` on `<html>` + Tailwind `darkMode: ['selector','[data-theme="dark"]']` (T:7) + the CSS variables above. Persisted in `localStorage["genomepulse-theme"]` (A:34,70). Default `light` (I:2 and A:34).
+Dark-mode mechanism: `data-theme` on `<html>` + Tailwind `darkMode: ['selector','[data-theme="dark"]']` (T:7) + the CSS variables above. Persisted in `localStorage["genomepulse-theme"]` (A:56, 93). Default `light` (I:2 and A:56).
 
 ## Components
 
 One entry per screen/region. State conventions: D default, H hover, F focus, A active, X disabled, L loading, E error, Em empty. "NI" = not implemented (no code for it).
 
-### 1. Header / nav (I:22-56)
+### 1. Header / nav (I:22-51)
 
 | Element | Notes | D | H | F | A | X | L | E | Em |
 |---|---|---|---|---|---|---|---|---|---|
 | Brand mark + wordmark + "Clinical Variome" chip + tagline | Static; mark is emoji in gradient square (`transition-all duration-300` with no changing property) | static | NI | n/a | n/a | n/a | n/a | n/a | n/a |
 | `#btn-theme-toggle` | daisyUI `btn btn-sm btn-outline`; label "Dark HUD" (light) / "Light Mode" (dark) with emoji; label text `hidden sm:inline` (icon only < sm) | outline | `hover:border-sky-500` | daisyUI default only | daisyUI default | NI | NI | NI | n/a |
-| "Local-First (Client-Side Only)" pill | Static; `hidden sm:flex`; green dot `animate-pulse` (I:46-47) | static | NI | n/a | n/a | n/a | n/a | n/a | n/a |
-| `#redis-status-indicator` "Redis Edge Ready" | **Static text; no code updates it** (no reference in A). Not tied to any real state. | static | NI | n/a | n/a | n/a | n/a | n/a | n/a |
+| "Local-First (Client-Side Only)" pill | Static; `hidden sm:flex`; green dot `animate-pulse` (I:46-48) | static | NI | n/a | n/a | n/a | n/a | n/a | n/a |
+| *(removed)* `#redis-status-indicator` "Redis Edge Ready" | Deleted by T9: the header holds the toggle and the pill only (I:41-50). There is no Redis. `tests/e2e/test_ui_honesty.py:254` asserts the element is absent. | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 
-### 2. Upload and dropzone (I:62-98; A:170-220)
+### 2. Upload and dropzone (I:56-91; A:242-292)
 
 | Element | D | H | F | A | X | L | E | Em |
 |---|---|---|---|---|---|---|---|---|
-| `#dropzone` (div; click opens file dialog; ignores clicks on button/a, A:202) | dashed 2px `slate-300` / dark `slate-700`, `bg-white` / dark `slate-900/40` | `hover:border-sky-500`; icon `group-hover:scale-105` | **NI** (div, no tabindex, not keyboard reachable) | NI | NI (not disabled while analysing) | NI | see Analysis error | n/a |
-| Drag-over | adds `border-sky-500 bg-sky-500/10` on `dragover`, removed on `dragleave`/`drop` (A:171-184). Only first dropped file used | | | | | | | |
-| `#file-input` (hidden, `accept=".txt,.csv,.vcf,.tsv,.gz"`) | hidden | n/a | n/a | n/a | `disabled` while analysing (A:143-148) | n/a | n/a | n/a |
+| `#dropzone` (div; click opens file dialog; ignores clicks on button/a, A:274-277) | dashed 2px `slate-300` / dark `slate-700`, `bg-white` / dark `slate-900/40` | `hover:border-sky-500`; icon `group-hover:scale-105` | **NI** (div, no tabindex, not keyboard reachable) | NI | NI (not disabled while analysing) | NI | see Analysis error | n/a |
+| Drag-over | adds `border-sky-500 bg-sky-500/10` on `dragover`, removed on `dragleave`/`drop` (A:243-256). Only first dropped file used (A:253-255) | | | | | | | |
+| `#file-input` (hidden, `accept=".txt,.csv,.vcf,.tsv,.gz"`) | hidden | n/a | n/a | n/a | `disabled` while analysing (A:213-218) | n/a | n/a | n/a |
 | `#btn-browse-files` (daisyUI `btn-primary`, `bg-sky-600 hover:bg-sky-700`) | filled | darker | daisyUI default | daisyUI default | **NI** (not disabled while analysing) | NI | NI | n/a |
-| `#btn-load-demo` (`btn-outline`) | outline | `hover:border-sky-500`, text sky | daisyUI default | daisyUI default | `disabled` while analysing | NI (no spinner on button) | blocking `alert()` on fetch failure (A:216-218, 1212) - in flight to change (T9) | n/a |
-| Source/dataset chips (ClinVar 2026.1, ACMG SF v3.2 (81 Genes), HPA, CPIC) | static text, emoji | | | | | | | |
+| `#btn-load-demo` (`btn-outline`) | outline | `hover:border-sky-500`, text sky | daisyUI default | daisyUI default | `disabled` while analysing | NI (no spinner on button) | fetch failure shows the `#analysis-error` alert, no `alert()` (A:288-290) | n/a |
+| Scope chips (I:82-88): `#hero-scope` reads "<ACMG SF version>: N loci in M genes tested" from the KB manifest (V:304-310; A:133-134), or "tested scope Not available" when the manifest cannot be read; "Human Protein Atlas" and "CPIC Pharmacogenomics" are static text (I:85, 87) | static, emoji | | | | | | | |
 
-### 3. Progress (I:101-114; A:285-292)
+### 3. Progress (I:94-107; A:357-364)
 
 | Element | Fact |
 |---|---|
 | Visibility | `#progress-section` `hidden` until `processText` removes it; hidden again on error/complete |
-| Message `#parse-progress-msg` | daisyUI `loading loading-spinner loading-xs` + text; replaced by worker `status` strings. `textContent =` on the span **removes the spinner element** on the first update (A:290; the spinner is a child of that span, I:104) |
+| Message `#parse-progress-msg` | daisyUI `loading loading-spinner loading-xs` + text; replaced by worker `status` strings. `textContent =` on the span **removes the spinner element** on the first update (A:362; the spinner is a child of that span, I:97-98) |
 | Percent `#parse-progress-pct` | `${percent}%` |
 | Bar `#parse-progress-bar` | `width: N%`, gradient sky-500 -> indigo-600, `transition-all duration-150`; track `h-2` |
-| Watchdog | 30000 ms inactivity (A:15), re-armed on each progress message; failure -> Analysis error |
+| Watchdog | 30000 ms inactivity (A:37), re-armed on each progress message (A:194-200); failure -> Analysis error |
 | States | D/L implemented; H/F/A/X n/a (non-interactive); E -> separate alert; Em n/a. **No cancel control (NI).** |
 
-### 4. Analysis error alert (I:117-120; A:150-157)
+### 4. Analysis error alert (I:109-113; A:220-229)
 
 | Fact | Detail |
 |---|---|
@@ -129,97 +129,116 @@ One entry per screen/region. State conventions: D default, H hover, F focus, A a
 | Copy (fixed) | "The analysis could not be completed. Nothing was uploaded, and no results are shown. Please try again, or try a different file." + `Technical detail: <span id="analysis-error-detail">` (raw message via `textContent`) |
 | Triggers | worker `onerror` / `onmessageerror` / `type:"error"` message / watchdog timeout / unsupported format (text contains "unsupported") / KB fetch 500 |
 | Required behaviour (tests) | hidden until an analysis starts; on failure: alert visible, progress hidden, results hidden, inputs re-enabled; cleared at next run start; retry recovers; worker terminated per run |
-| Second error path (to be retired) | `showError()` -> blocking `alert("GenomePulse Processing Notice: ...")` for FileReader failure and demo fetch failure (A:216-218, 271-273, 1212-1214). See Pending |
+| One error path | `showAnalysisError()` (A:220-229) is the only error path. FileReader failure (A:343-345), demo fetch failure (A:288-290), worker failures (A:158-169, 184-186) and an error inside `handleParseComplete` (A:179-183) all end there. `alert()` is not used (resolved by T9; e2e for FileReader failure in `tests/e2e/test_ui_honesty.py`) |
 | States | D hidden; visible = E; no dismiss control (NI); no focus move on appearance (NI) |
 
-### 5. QC summary (I:137-167; A:363-379)
+### 5. QC summary (I:129-160; A:398-415)
 
 | Element | Fact |
 |---|---|
 | `#qc-filename` | `textContent` of file name |
 | Chips | Format (`FORMAT (build)`), Markers (`toLocaleString`), Call Rate (green text class), Heterozygosity, Sex-chromosome QC badge |
-| Missing rate | `null` -> text "Not available", `title` = `qc.qc_note` (A:359-372). Call Rate keeps its green text class even when "Not available" - verify |
-| Sex badge | Shows `qc.sex_signal` verbatim, e.g. "Indeterminate (too few X markers)" (`test_formats.py`); `title` = X markers / X het / Y calls. **Must not claim sex or karyotype.** |
+| Missing rate | `null` -> text "Not available" in the muted style, `title` = `qc.qc_note` (A:405-408). The Call Rate element keeps its green text class (I:147) around the muted span - verify |
+| Sex badge | Shows `qc.sex_signal` verbatim, e.g. "Indeterminate (too few X markers)" (`test_formats.py`); `title` = X markers / X het / Y calls (A:410-414). **Must not claim sex or karyotype.** |
 | Placeholders | "sample.txt", "—" are pre-render defaults only |
 | States | Non-interactive; hover only for `title` tooltips (not keyboard reachable) |
 
-### 6. Coverage-state cards (5-state taxonomy) (I:203-248; A:381-406)
+### 6. Coverage-state cards (5-state taxonomy) (I:195-241; A:417-439)
 
 | # | Card label (current) | Subtitle (current) | Count source | Tone classes |
 |---|---|---|---|---|
 | 1 | Observed | "Supported & observed" | `supported_and_observed_count` | sky |
-| 2 | Tested WT | "Supported, normal" | `supported_not_observed_count` | emerald |
+| 2 | Tested WT | "Supported, not detected" (I:212) | `supported_not_observed_count` | emerald |
 | 3 | Array Gaps | "Omitted from chip" | `not_tested_by_array_count` | amber |
 | 4 | Outside Scope | "Markers uncurated" | `outside_coverage_count` | slate |
-| 5 | Conflicting | "Disputed / Tier C" | `insufficient_evidence_count` | rose |
+| 5 | Conflicting | "Disputed / insufficient" (I:239) | `insufficient_evidence_count` | rose |
 
 - Static `State 1..5` pill on each card. Cards are **not** interactive (no click-to-filter); the filter tabs are the only way into states 2, 3, 5. State 4 has **no table view** (NI).
-- `renderSummaryCards` uses fallbacks like `?? state.records.length` (A:393-405): silent defaults, flagged by AGENTS.md section 3; T9 moves counts to the worker `summary`.
-- Wording conflict with AGENTS.md section 4.1: card 2 subtitle "Supported, normal" and label "Tested WT" use "normal" for a not-detected result. See Pending T9 wording rule.
+- `renderSummaryCards` shows the worker's own figures and recounts nothing; a figure that is not a number renders "Not available" (A:417-439; counts built in W:60-65, 94-103).
+- Wording (AGENTS.md section 4.1): the card 2 subtitle is "Supported, not detected" (I:212); the label "Tested WT" (I:208; V:27) remains. No "normal" wording remains on the page: `tests/e2e/test_ui_honesty.py:25-37` bans "Tested Normal" and "Normal Baseline".
 - `test_each_locus_is_counted_in_exactly_one_state`: states 1,2,3,5 sum to `total_loci`.
 
-### 7. Category cards (I:170-200; A:381-389)
+### 7. Category cards (I:163-193; A:428-432)
 
-Five KPI cards: Pathogenic (rose), ACMG SF v3.2 (sky), Pharmacogenomics (purple), Carrier Status (amber), Elevated Risk (red). Counts from `state.summary.*` (`pathogenic_count`, `acmg_actionable_findings`, `pgx_count`, `carrier_count`, `risk_factor_count`). Grid `grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`. Non-interactive. Subtitle text static ("High clinical priority", "Recessive & APOE alleles").
+Five KPI cards: Pathogenic (rose), ACMG SF v3.2 (sky), Pharmacogenomics (purple), Carrier Status (amber), Elevated Risk (red). Counts from `state.summary.*` (`pathogenic_count`, `acmg_actionable_findings`, `pgx_count`, `carrier_count`, `risk_factor_count`), which the worker counts over observed findings only (W:84-103). The ACMG label comes from the manifest (`data-acmg-version`, I:171; A:135-137). Grid `grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`. Non-interactive. Subtitle text static ("High clinical priority" I:167, "Recessive & APOE alleles" I:185).
 
-### 8. APOE card (I:252-295; A:408-456)
+### 8. APOE card (I:244-284; A:443-490)
 
 | Aspect | Current behaviour |
 |---|---|
-| Visibility | `hidden` unless `state.apoe` truthy |
-| Fields | Title `APOE <diplotype> (<label>)`; risk-ratio badge; narrative; raw-loci string; lifetime-risk stat; static "Actionable Modulation" and "HPA Proteomic Abundance" text (**hard-coded in HTML, identical for every genotype**, I:288,292) |
-| Variants by diplotype | e4/e4: rose `border-l-4`, `badge-pathogenic`, pill "High Risk Locus"; any other e4: amber, `badge-carrier`, "Carrier Status"; any e2: purple, `badge-pgx`, "Neuroprotective / Carrier"; else emerald, `badge-benign`, **"Normal Baseline"** (A:434-455) |
-| Button `#btn-inspect-apoe` | `btn-outline border-sky-500`; opens drawer for the APOE record; no-op if none found |
-| Missing component / atypical / indeterminate | **Not implemented**: card hidden if no `state.apoe`; no indeterminate state exists today (see Pending T7) |
-| Honesty gap | "Normal Baseline" contradicts AGENTS.md section 4.1 (T9 test bans it) |
+| Visibility | `hidden` unless `state.apoe` truthy (A:447-450) |
+| Fields | Every value comes from `apoeCardModel` (V:271-299) and the KB, set at A:464-470: title (`APOE ε3/ε4`, or `APOE: no diplotype` / `APOE: atypical` when none is asserted, V:286), state-and-significance pill (V:291), relative-risk badge, narrative, raw-loci string (`rs429358: CT · rs7412: CC`, V:287), lifetime-risk stat and HPA abundance summary. A missing value renders "Not available" (muted). Nothing is hard-coded in the HTML: the text in I:250-267 is a pre-render default that A:464-470 overwrites, and I:277, 281 are empty |
+| Variants by diplotype | e4/e4: rose `border-l-4`, `badge-pathogenic`; any other e4: amber, `badge-carrier`; any e2: purple, `badge-pgx`; e3/e3: emerald, `badge-benign` (A:473-483). No diplotype asserted: neutral slate classes, never the green (A:484-488). Pill text is "<state> · <significance>" from the KB (V:291); state wording is V:33-38 |
+| Button `#btn-inspect-apoe` | `btn-outline border-sky-500`; opens the drawer for the APOE row; no-op if none (A:325-331) |
+| Missing component / atypical / indeterminate | Implemented by `resolveApoe` (C:46-139); the table below is the spec. A missing, no-call or unresolvable component asserts **no diplotype**: state `not_tested_by_array` or `insufficient_evidence` carrying the component's reason, never wild-type and never "presumed e3" (C:90-101) |
+| Honesty | "Normal Baseline" is banned in page text and exports (`tests/e2e/test_ui_honesty.py:25-37`) |
 
-### 9. Multi-locus (assortment) section (I:298-327; A:458-552)
+Diplotype resolution (C:22-32, 103-139; e4 = alt count of rs429358, e2 = alt count of rs7412):
 
-Hidden when 0 findings. Badge `N Multi-Locus Finding(s)`. Cards built by `innerHTML` from worker data: **Compound heterozygote** ("Trans Phase Compound Heterozygote" label, `badge-pathogenic` significance) and **Independent assortment** (genes, loci, "Offspring Joint Probability" shown as `Math.round(p*100)% (0.50 × 0.50)`). Each card has "Inspect <gene>" `btn-xs btn-outline` buttons that open the drawer if a record exists. **"Trans phase" asserts phase on unphased data** (flagged in `test_segregation_biotools.py` docstring and T8). Pending T8.
+| e4 alt count | e2 alt count | Diplotype | State |
+|---|---|---|---|
+| 0 | 0 | e3/e3 | supported_not_observed (sample_observation wild_type) |
+| 1 | 0 | e3/e4 | supported_and_observed |
+| 2 | 0 | e4/e4 | supported_and_observed |
+| 0 | 1 | e2/e3 | supported_and_observed |
+| 0 | 2 | e2/e2 | supported_and_observed |
+| 1 | 1 | e2/e4, caveat "phase unknown: e1/e3 is the rare alternative" (C:19) | supported_and_observed |
+| 2/1, 1/2, 2/2 | | atypical: "requires an e1-type haplotype; cannot be resolved from genotype array data" (C:16-18) | insufficient_evidence, variant_present |
 
-### 10. Findings table with filters and search (I:331-414; A:228-240, 554-680)
+The row also moves to `insufficient_evidence` when a component locus's evidence is insufficient (C:120-130). The component SNP records attach as `components`; the APOE row is the only APOE row and the coverage cards count it once (C:141-152).
+
+### 9. Multi-locus (assortment) section (I:286-316; A:492-586)
+
+Hidden when 0 findings (A:502-505). Badge `N Multi-Locus Finding(s)` (A:509). Cards are built by `innerHTML` from worker data, every interpolated value through `escapeHtml` (A:513-576). The section heading and sub-heading are static text (I:297, 304, 309).
+
+- **Possible compound heterozygote, phase unknown** (A:514-539): label "Possible Compound Heterozygote · Phase Unknown" (A:520), `badge-pathogenic` significance, title, summary and segregation note from the worker. The wording is "phase unknown (cis or trans cannot be determined from unphased genotypes)" and never "trans" (contracts C5; `tests/vectors/inheritance.json`).
+- **Co-occurring variant alleles** (A:542-576): label "Co-occurring Variant Alleles" (A:548), "Loci on Different Chromosomes" (A:559), and "Child Inherits All Listed Alleles" with the percentage, whose `title` carries the stated assumption "assumes unlinked loci and a partner without these alleles" (A:563-564; `MULTI_LOCUS_ASSUMPTION`, `web/src/core/inheritance.js:14`).
+- Scope: only genes whose KB inheritance model is `risk_factor` (F5 and F2 today), on different chromosomes, with alt count > 0 (`web/src/core/inheritance.js:123-134`; contracts C5, owner ruling 9).
+- Each card has "Inspect <gene>" `btn-xs btn-outline` buttons that open the drawer when `state.records` holds a record for that gene (A:579-585).
+
+### 10. Findings table with filters and search (I:319-404; A:294-312, 602-706)
 
 | Element | Fact |
 |---|---|
 | Filter tabs (9) | `data-filter`: all "Observed Findings", negative "Tested Wild-Type (State 2)", gaps "Array Gaps (State 3)", insufficient "Conflicting Evidence (State 5)", carrier, pathogenic, acmg, pgx, risk. Plain `<button>`s in an `overflow-x-auto` strip |
-| Tab states | D: `text-slate-600 dark:text-slate-400`; H: `hover:text-slate-900` + `transition-colors`; Active: `tab-active bg-sky-600 text-white` (dark: `bg-sky-500/20 text-sky-300`, sky border) toggled by JS class swap; **no `aria-selected`/`aria-pressed`** (NI); F: browser/daisy default only; X/L/E/Em: NI |
-| Dataset selection | all/pathogenic/carrier/pgx/risk/acmg filter `state.records`; negative -> `negativeChecks`; gaps -> `arrayGaps`; insufficient -> `insufficientEvidence` |
-| Search `#search-input` | daisyUI `input input-sm`, `focus:border-sky-500`, placeholder "Search rsID, gene, drug…", live on `input`; matches rsid, gene, phenotype, genotype, category, significance, drug_response, APOE info. No `<label>`, no clear button (NI) |
-| Count `#showing-count` | "Showing N of M clinical findings" / state-specific strings (A:593-601); not `aria-live` |
-| Columns (8) | rsID, Gene (+ACMG pill), Genotype, Coverage State badge, Tier / Category, ClinVar (stars), Magnitude (+repute; `text-rose` if >= 4), Clinical Guidance (truncated `max-w-md`, `title` tooltip) |
+| Tab states (A:300-312) | D: `text-slate-600 dark:text-slate-400`; H: `hover:text-slate-900` + `transition-colors`; Active: `tab-active bg-sky-600 text-white` (dark: `bg-sky-500/20 text-sky-300`, sky border) toggled by JS class swap; **no `aria-selected`/`aria-pressed`** (NI); F: browser/daisy default only; X/L/E/Em: NI |
+| Dataset selection (A:606-621) | all/pathogenic/carrier/pgx/risk/acmg filter `state.records`; negative -> `negativeChecks`; gaps -> `arrayGaps`; insufficient -> `insufficientEvidence` |
+| Search `#search-input` | daisyUI `input input-sm`, `focus:border-sky-500`, placeholder "Search rsID, gene, drug…", live on `input`; matches id, gene, phenotype, genotype, category, significance, drug_response and the APOE diplotype (A:624-629). No `<label>`, no clear button (NI) |
+| Count `#showing-count` | "Showing N of M clinical findings" / state-specific strings (A:633-641); not `aria-live` |
+| Columns (8, I:388-395; A:685-703) | rsID (APOE reads "APOE (rs429358 + rs7412)", V:178), Gene (+ACMG pill A:674-676, +limitation badge A:678-680), Genotype, Coverage State badge, Tier / Category, ClinVar (stars, or "No ClinVar review status", V:96), Magnitude (+repute; `text-rose` if >= 4), Clinical Guidance (`statement ?? phenotype ?? significance`, truncated `max-w-md`, `title` tooltip, A:682-683, 700-702) |
 | Row states | D: `cursor-pointer`; H: `hover:bg-slate-50/80` / dark `slate-800/40`, plus global `tbody tr:hover` `--bg-surface-hover !important` (S:233); F/A/X: **NI** (rows not focusable; `onclick` only, no Enter/Space) |
-| Empty | One row `colspan=8` "No variants match your search or filter." with emoji tile |
+| Empty | One row `colspan=8` "No variants match your search or filter." with emoji tile (A:643-653) |
 | Loading | NI (table is not shown during progress) |
-| Sorting | `state.sortBy="magnitude"` exists (A:32) but there is **no sort UI and no sort applied** in `renderVariantsTable` |
-| Row badges | Coverage-state: Observed (sky) / Tested WT (emerald) / Array Gap (amber) / Conflicting (rose); Tier A sky / B emerald / C amber / D slate; Category via `.badge-*`; unknown tier defaults to "Tier B" (A:638, silent default, T9 removes) |
+| Sorting | `state.sortBy="magnitude"` exists (A:54) but there is **no sort UI and no sort applied** in `renderVariantsTable` |
+| Row badges | Coverage-state: Observed (sky) / Tested WT (emerald) / Array Gap (amber) / Conflicting (rose) (A:588-593; texts V:25-30; an unknown state throws, V:133); Tier A sky / B emerald / C amber / D slate (A:595-600); Category via `.badge-*` (A:660-665). A missing tier or category renders "Not available" in the muted style (A:667-672); there is no "Tier B" default. A **limitation badge** ("Limitation", or "Caveats" when only caveats exist) on the row carries the full text as its tooltip (A:678-680; V:225) |
 
-### 11. Variant drawer (I:420-695; A:682-843, 1069-1072)
+### 11. Variant drawer (I:409-683; A:722-864, 1107-1110)
 
 | Element | Fact |
 |---|---|
-| Open | Row click, "Inspect" buttons (APOE card, assortment cards): removes `translate-x-full` |
-| Close | `#btn-close-drawer` (daisyUI `btn-circle btn-ghost`, "✕"): adds `translate-x-full`. **No Escape key, no backdrop click, no focus trap, no focus return** (no `keydown`/`Escape`/`aria-*`/`inert` in A or I) |
+| Open | Row click, "Inspect" buttons (APOE card, assortment cards): removes `translate-x-full` (A:863) |
+| Close | `#btn-close-drawer` (daisyUI `btn-circle btn-ghost`, "✕"): adds `translate-x-full` (A:1107-1110). **No Escape key, no backdrop click, no focus trap, no focus return** (no `keydown`/`Escape`/`aria-*`/`inert` in A or I) |
 | Closed state | Off-canvas via transform only; contents remain in tab order and accessibility tree (NI: `inert`/`aria-hidden`/`visibility`) |
-| Header | rsID (sky, `text-2xl font-black`), gene, coordinates `chr<chrom>:<pos>`, Tier badge, Coverage-state badge |
-| Coverage badge labels | "Supported & Observed", "Tested Wild-Type (State 2)", "Array Gap (State 3)", "Conflicting Evidence (State 5)"; any other value prints the raw key (A:737) |
-| Conditional boxes | ACMG (sky; "does not independently evaluate ACMG/AMP 2015" wording), CPIC drug alert (purple, with single-SNP caveat text), **Star-allele refusal** (purple, shown if `record.limitation` or category = Pharmacogenomics, A:742-754), **Scientific caveats** list (slate); each toggled with `hidden` |
-| Metrics grid | Genotype, ClinVar Stars ("— (0 / 4 stars)" when none), Magnitude / Repute ("x / 10.0 (Neutral)" default), gnomAD AF ("N/A (Not characterized)" when null) |
+| Header | rsID or, for APOE, "APOE (rs429358 + rs7412)" (sky, `text-2xl font-black`), gene, coordinates `chr<chrom>:<pos>` (APOE shows both component positions, V:182-184), Tier badge (or "Not available"), Coverage-state badge (A:727-752) |
+| Coverage badge labels | "Supported & Observed", "Tested Wild-Type (State 2)", "Array Gap (State 3)", "Conflicting Evidence (State 5)" (V:25-30; A:749-752). An unknown state throws instead of printing a raw key (V:133) |
+| Conditional boxes | ACMG (sky; "does not independently evaluate ACMG/AMP 2015" wording, I:435; A:779-785), CPIC drug alert (purple, with single-SNP caveat text, I:445; A:787-795), **Limitation of this Test** (purple; shown whenever the KB gives the record a `limitation`, for example the CYP2C19 star-allele refusal or a single-variant test, A:754-764), **Scientific caveats** list (slate, A:766-777); each toggled with `hidden` |
+| Metrics grid | Genotype, ClinVar Stars (exact stars, or "No ClinVar review status"), Magnitude / Repute ("x / 10.0 (Repute)"), gnomAD AF; each shows "Not available" (muted) when the record lacks the value (A:729-738; V:96-97, 201) |
 | Phenotype | "Clinical Significance & Phenotype" + serif paragraph |
-| Segregation panel | Mode badge (amber recessive / rose dominant / purple other / sky default); Carrier prior, Penetrance, Risk vs Unscreened, Risk vs Carrier; if no `segregation`: "Complex", "N/A", "Variable" (A:854-862) |
-| Offspring simulator | 4 buttons `Unscreened / Carrier / Affected / Wild-Type` (`partner-sim-btn`, `grid-cols-4`). D: white / bordered; H: `hover:border-sky-500`; selected: `bg-sky-600 text-white shadow-sm`, swapped by `className` rewrite; F: browser default; X/L/E: NI; no `aria-pressed`. Output: three probability bars + "Effective Penetrance Adjusted". Resets to "Unscreened" each time the drawer opens. Inputs today = partner status + gene only (`simulateOffspringPedigree(gene, partner)`, A:913); the patient's genotype is **not** an input (changes in T8) |
-| Biotools panel | AlphaFold DB (UniProt chip, pLDDT chip toned by value: >=85 emerald, >=70 sky, else amber, N/A slate; status; domains; joints), Ensembl VEP (transcript chip, AlphaMissense, LOEUF with text band), ENCODE (TPM bars). With no insights: placeholder strings "UniProt Search", "MANE Select Pending", "Score Available in API", "Constraint Available" (A:953-963) presented as if data; flagged by AGENTS.md section 3 (T9) |
-| HPA | Tissue rows with level pill (High emerald / Medium amber / other sky); empty copy "Normal protein abundance widely expressed across human tissues."; subcellular chips, empty copy "Cytosol / Nucleus" (invented default, A:838) |
-| Footer | "Open ClinVar Record ↗" (`<a target=_blank rel="noopener noreferrer">`, hidden if no accession; hard-coded APOE fallback link variation/17864, A:793); static text "Evidence Tier 1" (I:693) regardless of record, **not data-driven** |
+| Segregation panel (A:866-957) | Mode badge (amber recessive / rose dominant / purple other; text from `MODEL_LABELS`, V:40-46). Mendelian genes show carrier prior, penetrance and risk vs unscreened / carrier partner (a genotype probability for a recessive gene, A:880-892). Every other model is relabelled for allele transmission ("Allele Transmission", "Allele Frequency (gnomAD)", "Child Inherits vs Unscreened Partner") and penetrance reads "Not applicable" (A:882-896, 934). With no `segregation` (not tested, no-call) every figure reads "Not available" (A:899-909) |
+| Offspring simulator | 4 buttons (`partner-sim-btn`, `grid-cols-4`). Labels `Unscreened / Carrier / Affected / Wild-Type` for Mendelian genes and `Unscreened / Heterozygous / Homozygous / Wild-Type` for every other model (A:960-961, 895-897). D: white / bordered; H: `hover:border-sky-500`; selected: `bg-sky-600 text-white shadow-sm`, swapped by `className` rewrite (A:942-946); F: browser default; X/L/E: NI; no `aria-pressed`. Inputs are the patient's alt-allele count, a partner model (wildtype 0, heterozygous 0.5, homozygous 1, unscreened = the KB gnomAD allele frequency) and the gene's inheritance model (A:911, 960, 977-981; contracts C5). `#drawer-partner-model-note` states which partner model produced the figures (I:540; A:971-975; V:342-350); with no allele frequency the unscreened model reads "Not available" (V:344-345). Output: three probability bars and a fourth line, worded by model (A:985-1030): disease wording only for Mendelian genes; every other model reads "chance a child inherits the allele" and "Clinical Penetrance: Not applicable". Resets to "Unscreened" each time the drawer opens (A:954-956) |
+| Biotools panel (A:1038-1104) | AlphaFold DB (UniProt chip, pLDDT chip toned by value: >=85 emerald, >=70 sky, else amber, null slate; status; domains; joints), Ensembl VEP (transcript chip, AlphaMissense, LOEUF with text band, V:114-118), ENCODE (TPM bars, floor of 100 TPM, A:1087). Every field absent from the KB insights reads "Not available" (muted). The old placeholder strings are gone and `tests/e2e/test_ui_honesty.py:25-37` bans them. The content is manually curated KB data |
+| HPA | Tissue rows with level pill (High emerald / Medium amber / other sky, A:829-843); subcellular chips (A:849-857); each empty case reads "Not available" (A:845, 859). The tissue and subcellular values are manually curated |
+| Footer | "Open ClinVar Record ↗" (`<a target=_blank rel="noopener noreferrer">`, I:678). A link appears only for a locus whose accession is `machine_imported` (V:91, 98) and is hidden when there is none; a composite APOE row gets one link per component, labelled with its rsID (A:797-818). `#drawer-footer-tier` shows "Evidence Tier X" or "Evidence tier: Not available" for the open record (I:681; A:747; V:331-333) |
 
-### 12. Exports (I:376-384; A:1074-1210)
+### 12. Exports (I:365-373; A:1112-1152)
 
 | Element | Fact |
 |---|---|
 | Control | daisyUI `dropdown dropdown-end`; trigger `div tabindex=0 role=button` "Export ▾"; `ul.menu` with `<a>` items **without `href`** (Markdown Report, CSV Dataset); opens via CSS focus (daisyUI) |
-| States | D/H (`hover:bg-slate-100`)/F (daisyUI focus-within); X: **NI**, handlers silently return if no records (A:1075), not visually disabled; L/E/Em: NI; control exists only inside `#results-section` |
-| Markdown | Title, guardrail text from `state.manifest.guardrail`, sample/QC line, 5-state summary, APOE, multi-locus, three tables (observed, tested WT, array gaps). File `GenomePulse_Report_<ts>.md` |
-| CSV | 19 columns incl. Coverage_State, Evidence_Tier, Refusal_Notices, Caveats. Rows = records + negativeChecks + arrayGaps (not insufficientEvidence). Silent fallbacks (`'Tier B'`, magnitude `0`, `'Neutral'`, stars `0`; Markdown `"★".repeat(stars || 1)`) are placeholders-as-data (T9). File `GenomePulse_Variants_<ts>.csv` |
-| Required (AGENTS.md 4.6) | Single-variant-test limitations appear in every export; today caveats/refusals appear in CSV only |
+| States | D/H (`hover:bg-slate-100`)/F (daisyUI focus-within); X: **NI**, handlers silently return if there is no QC result (A:1120, 1139), not visually disabled; L/E/Em: NI; control exists only inside `#results-section` |
+| Markdown (V:437-533) | Title, guardrail text from `state.manifest.guardrail` (V:442), sample/QC line, 5-state summary, APOE section (diplotype, state, caveat, limitation, underlying loci, V:453-468), possible compound heterozygotes (phase unknown), co-occurring alleles on unlinked loci, then tables for observed findings, tested wild-type, array gaps and insufficient evidence. Each table has a Limitation and a Missing fields column. A not-detected row reads "<allele> not detected (N variants tested in <gene>)" (V:76-83). File `GenomePulse_Report_<ts>.md` |
+| CSV (V:358-364, 391-420) | 22 columns incl. Coverage_State, Evidence_Tier, Inheritance_Mode, three offspring columns (child inherits the allele with a wild-type partner and with an unscreened partner; child affected with an unscreened partner), Result_Statement, Limitation, Caveats, Missing_Fields. Rows = every row once: records, negativeChecks, arrayGaps and insufficientEvidence (A:1113-1117). A missing value is an empty cell named in Missing_Fields; "N/A" appears only for the affected cell of a non-Mendelian gene (V:372-387). APOE exports as one row with both rsIDs joined by ";" (V:179). File `GenomePulse_Variants_<ts>.csv` |
+| Required (AGENTS.md 4.6) | Single-variant-test limitations appear in every export: the CSV Limitation and Caveats columns (V:413-414) and the Markdown Limitation columns (V:492-530) |
 
 ### 13. Dark mode ("Dark HUD")
 
@@ -227,7 +246,7 @@ Hidden when 0 findings. Badge `N Multi-Locus Finding(s)`. Cards built by `innerH
 |---|---|
 | Trigger | `#btn-theme-toggle`; icon/label swap (🌙 "Dark HUD" <-> ☀️ "Light Mode") |
 | Mechanism | `data-theme` on `<html>`; Tailwind `dark:` variants (selector strategy); CSS variable block `[data-theme="dark"]` |
-| Persistence | `localStorage` key `genomepulse-theme`; **no `prefers-color-scheme` handling**; read/write not wrapped in try/catch (A:34,70) |
+| Persistence | `localStorage` key `genomepulse-theme`; **no `prefers-color-scheme` handling**; read/write not wrapped in try/catch (A:56, 93) |
 | Transition | `body` colour 0.2s ease; `#dropzone` `transition-all duration-200` (test waits 600 ms) |
 | Test coverage | `test_theme_toggle_round_trip`; `test_dark_utilities_beat_glass_panel` (dropzone alpha 0.4, not `.glass-panel` 0.75) |
 
@@ -238,7 +257,7 @@ Hidden when 0 findings. Badge `N Multi-Locus Finding(s)`. Cards built by `innerH
 | State | UI | Entry | Exit |
 |---|---|---|---|
 | Idle | dropzone only; progress, error, results hidden | page load | file chosen / dropped / demo click |
-| Reading | progress 5% "Reading <name> (x MB)..." | `handleFileSelected` | FileReader load -> Analysing; FileReader error -> `alert()` (see Pending) |
+| Reading | progress 5% "Reading <name> (x MB)..." | `handleFileSelected` (A:335-347) | FileReader load -> Analysing; FileReader error -> the error alert (A:343-345) |
 | Analysing | progress shown; results hidden; error hidden; file input + demo button disabled | `processText` | `complete` -> Results; failure -> Error |
 | Results | progress hidden; results shown; inputs re-enabled | `complete` | new run (results hidden at start) |
 | Error | progress hidden; results hidden; alert visible; inputs re-enabled | any failure | next run clears it |
@@ -250,19 +269,19 @@ Requirements only (what must be distinguishable), not visual treatments. Sources
 | # | Requirement | Current mapping |
 |---|---|---|
 | H1 | **Supported and observed** (`supported_and_observed`): alt allele present among variants tested | "Observed" / "Supported & Observed" |
-| H2 | **Supported, not observed**: wording is *"not detected among the N variants tested"*; never "normal" or any statement of absent risk (4.1) | "Tested WT" / "Supported, normal" - **wording currently conflicts** |
+| H2 | **Supported, not observed**: wording is *"not detected among the N variants tested"*; never "normal" or any statement of absent risk (4.1) | "Tested WT" / "Supported, not detected" (I:208, 212); row statement "<allele> not detected (N variants tested in <gene>)" (V:76-83) |
 | H3 | **Not tested by array** (`not_tested_by_array`): locus absent from the file or a no-call; shows reason | "Array Gap" |
 | H4 | **Outside coverage** (State 4): markers present but uncurated; counted only, no per-row view today | "Outside Scope" count |
 | H5 | **Insufficient evidence** (`insufficient_evidence`): conflicting, Tier C/D, or unresolvable genotype; fail-closed results land here, never "wild-type" | "Conflicting" (label implies only conflict; the key also covers atypical/indeterminate) |
-| H6 | **"Not available"** for missing data, muted, never a placeholder value or invented default (section 3) | Only for QC rates today; elsewhere placeholders (see Edge cases) |
-| H7 | **Limitation / caveat badge** on the row, in the drawer and in exports for single-variant tests of multi-variant genes (DPYD, CFTR, CYP2C19 star alleles, ACMG SF loci) (4.6) | Drawer refusal box + caveat list only; **no row badge** |
-| H8 | **Insufficient-evidence badge** distinct from category badges, shown beside a category when a variant is present | Not implemented as a separate badge |
-| H9 | **Phase-unknown wording** where unphased genotypes could be cis or trans (compound het, APOE e2/e4) | Not implemented; current UI asserts "Trans Phase" |
-| H10 | **Global scope guardrail**: absence of a finding is not absence of risk, visible with results and in Markdown | `#coverage-guardrail-banner` (amber, static copy) |
+| H6 | **"Not available"** for missing data, muted, never a placeholder value or invented default (section 3) | Implemented: one muted italic treatment (A:109-124) in the table, drawer, QC chips, cards and APOE card; exports use an empty cell plus `Missing_Fields` (V:253-266) |
+| H7 | **Limitation / caveat badge** on the row, in the drawer and in exports for single-variant tests of multi-variant genes (DPYD, CFTR, CYP2C19 star alleles, ACMG SF loci) (4.6) | Row badge with tooltip (A:678-680), drawer box and caveat list (A:754-777), CSV and Markdown columns (V:413-414, 492-530) |
+| H8 | **Insufficient-evidence badge** distinct from category badges, shown beside a category when a variant is present | The "Conflicting" state badge sits in its own Coverage State column, separate from the category badge (A:666, 670-672, 691); there is no extra badge beside the category |
+| H9 | **Phase-unknown wording** where unphased genotypes could be cis or trans (compound het, APOE e2/e4) | Implemented: "Possible Compound Heterozygote · Phase Unknown" (A:520); APOE e2/e4 carries "phase unknown: e1/e3 is the rare alternative" (C:19, 118) |
+| H10 | **Global scope guardrail**: absence of a finding is not absence of risk, visible with results and in Markdown | `#coverage-guardrail-banner` (amber, static copy, I:119-127); Markdown uses `manifest.guardrail` (V:442) |
 | H11 | **Fail visibly**: worker/KB/parse errors surface in the alert, never swallowed (section 3) | `#analysis-error` |
-| H12 | **Offspring/recurrence figures** only for Mendelian disease loci, from the patient's genotype and a stated partner model; trait/PGx loci show allele-transmission wording only (4.4) | Not yet (T8) |
-| H13 | **Provenance never fabricated**: no invented versions or retrieval dates (4.5) | Static strings "ClinVar 2024-06 / dbSNP 156" (KB badge, footer) vs hero "ClinVar 2026.1" disagree; **to verify against KB** |
-| H14 | **Privacy affirmation** visible; no third-party script; data never leaves the browser (section 5) | Header pill + footer text (static) |
+| H12 | **Offspring/recurrence figures** only for Mendelian disease loci, from the patient's genotype and a stated partner model; trait/PGx loci show allele-transmission wording only (4.4) | Implemented for the drawer and CSV: disease wording only for Mendelian genes, allele-transmission wording otherwise (A:880-938; V:377-388) |
+| H13 | **Provenance never fabricated**: no invented versions or retrieval dates (4.5) | The KB badge and hero chip read the KB manifest (release, sha256 prefix, locus and gene counts; no source versions) (A:127-138; V:303-328); no page text names a ClinVar, dbSNP or other release |
+| H14 | **Privacy affirmation** visible; no third-party script; data never leaves the browser (section 5) | Header pill (I:46-49) + footer text (I:688-690), static |
 
 ## Responsive Behavior
 
@@ -284,16 +303,16 @@ Breakpoints actually used (Tailwind defaults: sm 640, md 768, lg 1024):
 | Variants-only VCF (no call rate) | "Not available" + `title` note |
 | Unsupported / garbage / empty file | Error alert containing "unsupported"; no NaN/Infinity on empty file (`test_web_adversarial.py`) |
 | Header row in Ancestry file | Not counted as SNP (`test_formats.py`) |
-| XSS payload in rsID | Test asserts no execution; table, cards and caveat list are built with `innerHTML` from data (A:605-677, 483, 511, 763), relying on CSP and sanitised data; **to verify** |
+| XSS payload in rsID | Test asserts no execution. Table, cards and caveat list are built with `innerHTML`, and every record or KB value in those strings goes through `escapeHtml` (V:20-22; A:8-10, 517-576, 685-703, 772), with the CSP as a second layer |
 | Wild-type loci | Not in `records`; reachable only via "Tested Wild-Type" tab (`test_classification.py`) |
 | APOE components | Never separate rows; one APOE row + card |
 | No matches for search/filter | Empty row message |
 | Long phenotype text | `truncate max-w-md` with `title` |
 | KB fetch failure / worker failure / silent worker | Error alert; watchdog 30 s |
 | Healthy slow progress | Watchdog re-armed per progress message; no false timeout |
-| Placeholder-as-data (rendered today) | "MANE Select Transcript", "MANE Select Pending", "Score Available in API", "Constraint Available", "N/A (Non-missense)", "N/A (Not characterized)", "Domain boundaries computed from PAE matrix.", "Cytosol / Nucleus", "Tier B"/"Tier D" defaults, "Neutral", "★" minimum 1 in Markdown, "Evidence Tier 1" footer |
-| Gap / not-tested row fields | Genotype "—"; phenotype/significance fall back to `rec.reason` (A:308-311) |
-| Multiple files dropped | First only, silently |
+| Placeholder-as-data | Removed by T9. None of the old placeholder strings renders (`tests/e2e/test_ui_honesty.py:25-37` bans them); a missing value reads "Not available" (A:109-124) |
+| Gap / not-tested row fields | Genotype "Not available" (A:690); the phenotype is `record.reason` (V:161), the significance falls back to the state label (V:193), and the guidance cell is `statement ?? phenotype ?? significance` (A:682) |
+| Multiple files dropped | First only, silently (A:253-255) |
 | Drawer open + new analysis | Drawer not closed on a new run (NI) |
 
 ## Animation / Motion
@@ -335,56 +354,16 @@ Factual audit from code; "to verify" = cannot be proven without rendering.
 | Theme toggle | Native button with text label (>= sm) | Icon-only below sm: no `aria-label` |
 | Colour-only meaning | Badges carry text labels | Bars (simulator, ENCODE) rely on colour + adjacent number |
 | Focus ring | daisyUI/browser defaults only; no custom `:focus-visible` in `styles.css` | Visibility on all backgrounds, in dark mode: to verify |
-| Contrast (to verify) | - | `text-[9px]`/`[10px]` labels in `text-slate-400`/`slate-500` on white/slate-50 (I:283,288,291,524, "Select Partner Status"); `text-slate-400` "or" on white; `text-amber-500` stars on white; `text-white` on `bg-sky-600`; `text-emerald-600` on white; dark `text-slate-500` on `slate-900/60` (I:210 etc.); muted text on translucent glass over the grid |
+| Contrast (to verify) | - | `text-[9px]`/`[10px]` labels in `text-slate-400`/`slate-500` on white/slate-50 (I:266, 276, 280, 532); `text-slate-400` "or" on white; `text-amber-500` stars on white; `text-white` on `bg-sky-600`; `text-emerald-600` on white; dark `text-slate-500` on `slate-900/60` (I:203 etc.); muted text on translucent glass over the grid |
 | Touch targets | - | `btn-sm`/`btn-xs`, 11px tabs, `btn-circle btn-sm` close: likely below 44px, to verify |
 | Motion | - | `animate-pulse` and spinner with no reduced-motion override |
 | Emoji | Used as icons/labels | Read aloud by screen readers; not marked `aria-hidden` |
-| Tooltips | `title` on QC rates, sex badge, KB badge, truncated phenotype | Not available to keyboard/touch |
+| Tooltips | `title` on QC rates, sex badge, KB badge (A:131), limitation badge (A:680), truncated phenotype | Not available to keyboard/touch |
 | External link | `rel="noopener noreferrer"` | n/a |
 
-## Pending changes (in flight, not yet on this branch)
+## Pending changes
 
-> Sourced from briefs `T7.md`, `T8.md`, `T9.md` in `.superpowers/sdd/2026-10-02-genomepulse-hardening/briefs/`. None of this is current behaviour; briefs may change.
-
-### T7 - APOE card states (`core/apoe.js`; card renders KB values)
-
-| e4 alt count | e2 alt count | Diplotype | State |
-|---|---|---|---|
-| 0 | 0 | e3/e3 | supported_not_observed, wild_type |
-| 1 | 0 | e3/e4 | supported_and_observed |
-| 2 | 0 | e4/e4 | supported_and_observed |
-| 0 | 1 | e2/e3 | supported_and_observed |
-| 0 | 2 | e2/e2 | supported_and_observed |
-| 1 | 1 | e2/e4 with caveat "phase unknown: e1/e3 is the rare alternative" | supported_and_observed |
-| 2/1, 1/2, 2/2 | | atypical: "requires an e1-type haplotype; cannot be resolved from genotype array data" | insufficient_evidence, variant_present |
-
-- A missing, no-call or unresolvable component asserts **no diplotype**: state `not_tested_by_array` or `insufficient_evidence` carrying the component's reason; never wild-type, never "presumed e3".
-- Card renders diplotype, state, caveat and KB-sourced numbers; no hard-coded APOE values (stars, af, magnitude, ClinVar link). Component SNP records attach as `components`; the APOE finding is the only APOE row; coverage cards count it once.
-- e2e: CC/CT fixture shows indeterminate wording not "Tested Normal"; rs429358-only shows "not tested"; demo still shows e4/e4.
-
-### T8 - Offspring simulator inputs and wording (`core/inheritance.js`)
-
-- Simulator inputs become **patient alt-allele count + partner model** (wildtype 0, heterozygous 0.5, homozygous 1, unscreened = population af from KB). Old partner-only API removed. If af is null, the "unscreened" model is **unavailable and says so**, no default.
-- Output is a distribution of alt alleles in the child; wording depends on the KB inheritance model:
-  - Mendelian recessive: affected / carrier probabilities.
-  - Mendelian dominant: affected = (het + hom) x penetrance; null penetrance -> unavailable.
-  - Any other model (trait, risk, PGx): allele-transmission only, worded "chance a child inherits the <allele> allele"; **never** "affected", "recurrence" or "disease risk".
-- Patient status `is_affected`/`is_carrier` exist only for Mendelian loci; wild-type is never affected.
-- Multi-locus findings: only loci with alt count > 0 on different chromosomes; labelled "assumes unlinked loci and a partner without these alleles"; "combined thrombophilia" text only from KB.
-- Compound heterozygosity: "possible compound heterozygote: phase unknown (cis or trans cannot be determined from unphased genotypes)"; never "trans".
-- e2e: APOE e4/e4 drawer shows 100% chance a child inherits e4 and no "affected" wording; wild-type F5 shows no affected status and no 50%; CSV has no `0.5` risk for wild-type loci.
-
-### T9 - Single view-model and honest rendering (`web/src/view-model.js`)
-
-- One `toViewModel(record, genes)` feeds table, drawer, Markdown and CSV; no view formats a clinical field itself.
-- **"Not available"** rendered as text in a **muted style** for any missing value; exports write an empty cell plus a `missing_fields` column. All `||` clinical fallbacks deleted (placeholder strings in Edge cases, tier defaults, `"★".repeat(stars || 1)`).
-- Stars rendered exactly from evidence, or "No ClinVar review status". ClinVar links only when accession provenance is `machine_imported`. Tier identical across views.
-- Gap / not-tested rows show state label and reason; "undefined" never appears.
-- **Limitation badges**: row badge with tooltip, drawer, and both exports; CYP2C19 star-allele refusal on the row; DPYD/CFTR "only one variant tested" wherever a not-detected result is shown.
-- Not-detected wording: "<allele> not detected (1 of N known variants in <gene> tested)"; never "Normal" or "Tested Normal"; "Normal Baseline" banned in page text and exports.
-- Coverage cards use the worker `summary` only; category cards count only `sample_observation == variant_present`; insufficient-evidence records with a variant present show the insufficient-evidence badge.
-- **One error path**: `showError()`/`alert()` deleted; every error (including FileReader failure) goes through `showAnalysisError()` into `#analysis-error`; e2e for FileReader failure.
-- e2e `test_ui_honesty.py`: page text, Markdown and CSV downloads contain none of `undefined`, `null`, `NaN`, the placeholder strings, "Tested Normal", "Normal Baseline".
+None. T7 (APOE card states), T8 (offspring simulator inputs, wording and multi-locus scope) and T9 (single view model, "Not available", limitation badges, one error path) landed on this branch. Their behaviour is described in the sections above, with `file:line` cites, and is no longer pending.
 
 ## Open questions for the design system
 
@@ -397,12 +376,12 @@ Decisions the design-system author must take; no values are recommended here.
 5. **Badge semantics**: what do the colour families mean, given today's reuse (amber = carrier, warning, State 3, Tier C, guardrail, "Medium"; rose/red = pathogenic, risk, conflicting, error; emerald = benign, tested WT, Tier B, privacy; sky = observed, Tier A, primary action, selected)? Are category, coverage state, evidence tier, severity and UI chrome one vocabulary or several?
 6. **Honesty states**: how are H1-H5 distinguished without relying on colour alone, and how is "not detected" kept distinct from "normal"? Where do H7/H8 (limitation badge, insufficient-evidence badge) sit relative to category and tier badges on a row?
 7. **State 4 (outside coverage)**: a count only, or a navigable view?
-8. **"Not available"**: one muted treatment for all contexts (table cell, drawer metric, QC chip, exports), and what is its reason/tooltip affordance?
+8. **"Not available"** (an interim muted italic treatment now exists, A:109-124; the question stays open): one muted treatment for all contexts (table cell, drawer metric, QC chip, exports), and what is its reason/tooltip affordance?
 9. **Interactive semantics**: are table rows buttons, links or selectable rows? Are filter tabs a tablist or a toggle group? Should the dropzone itself be a focusable control?
 10. **Drawer**: modal dialog or non-modal panel? Escape/backdrop/focus-return expectations? Does it close on a new analysis? Small-screen behaviour?
 11. **Error pattern**: single alert region only, or also inline errors? Dismissible? Does focus move to it?
 12. **Counts vs states**: should coverage cards act as filters? How are "Observed" findings and category cards (subsets) explained so totals are not misread?
-13. **Static claims**: header "Redis Edge Ready", KB badge "ClinVar 2024-06", hero "ClinVar 2026.1" and footer "Evidence Tier 1" are static text. Which should be data-driven from the KB manifest, and which dropped?
+13. ~~**Static claims**~~ **Resolved by T9.** The "Redis Edge Ready" indicator was deleted (I:41-50; `tests/e2e/test_ui_honesty.py:254`). The KB badge and hero chip are data-driven from the KB manifest (A:127-138; V:303-328), and the footer tier is data-driven per record (A:747; V:331-333). Which of these the design system keeps is a design question and is not decided here.
 14. **Responsive scope**: which viewports are supported (tests cover only 1440x900)? How should the 8-column table behave at narrow widths?
 15. **Motion**: which transitions are intentional (several carry no changing property), and what is the reduced-motion policy?
 16. **Density and sizes**: are 9-11px text and `btn-xs/sm` targets acceptable for this audience, and what are the minimum text and target sizes?

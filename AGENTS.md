@@ -28,10 +28,14 @@ copy of the data may exist in JS or Python source.
 
 ```
 web/src/app.js, index.html     UI: renders view models, owns DOM, no genetics
+web/src/view-model.js          pure display model: one view model per record
+                               feeds the table, drawer, Markdown and CSV
 web/src/worker.js              adapter: message in -> core -> message out
-web/src/core/*.js              pure domain: parse, alleles, classify, apoe,
-                               inheritance, qc. No DOM, no worker globals,
-                               no fetch. Unit-tested in Node.
+web/src/kb-loader.js           the one KB loader (JSON module import), used
+                               by the worker and the page
+web/src/core/*.js              pure domain: parse, alleles, classify,
+                               coverage, apoe, inheritance, qc, kb. No DOM,
+                               no worker globals, no fetch. Unit-tested in Node.
 web/src/knowledge-base.json    data, validated against a schema on load
 ```
 
@@ -47,6 +51,13 @@ Nothing downstream reads a raw upstream field name. The adapters are tested
 against **real captured payloads** pinned in `tools/fixtures/upstream/`,
 each with retrieval URL and date. Never test them against fixtures written to
 match the code.
+
+**Visual design.** The identity and design system are not yet authored, and
+styling is provisional. Make no design decisions (colours, fonts, spacing,
+themes, components) and reproduce the current look. All styling configuration
+lives only in `web/tailwind.config.js` and `web/src/tailwind.input.css`, with
+the vendored daisyUI, which the future design system will own. `docs/design-handoff.md`
+records the current look as built.
 
 ## 3. Principles, made concrete
 
@@ -125,14 +136,18 @@ match the code.
 
 ```
 python -m pytest tests -q -p no:cacheprovider --ignore=tests/e2e
-node --test "web/tests/**/*.test.mjs"
+node --test --test-reporter=spec "web/tests/**/*.test.mjs"
 python -m pytest tests/e2e -q -p no:cacheprovider
 python tools/build_canonical_kb.py --verify-only
+python tools/check_vendored_css.py
 ```
 
 `--verify-only` rebuilds the KB in memory and fails if the result differs
 from the committed `web/src/knowledge-base.json`. That makes the build
-deterministic and the committed file reproducible.
+deterministic and the committed file reproducible. `check_vendored_css.py`
+fails if `web/src/vendor/tailwind.css` is not what the Tailwind CLI generates
+from the current classes (regenerate it with the command in
+`web/src/vendor/README.md`).
 
 ## 8. Change hygiene
 

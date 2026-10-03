@@ -2,25 +2,31 @@
 
 ## Design Context
 
+> **Provisional (owner ruling, 2026-10-02).** Visual design and brand identity have not been established, and the
+> design system that will own them has not been authored yet. The Brand Personality, Aesthetic Direction,
+> Typography Specification and Design Principles sections below describe the current look and are provisional, not
+> authoritative. Styling configuration lives only in `web/tailwind.config.js` and `web/src/tailwind.input.css`
+> (with the vendored daisyUI), which the future design system will own.
+
 ### Users
 - **Target Audience**: Proactive health explorers, biohackers, individuals analyzing their own 23andMe / AncestryDNA / VCF raw files, clinicians, and genetics enthusiasts.
 - **Context & Motivation**: Users who "want more from their analysis" than basic consumer summaries, seeking Promethease-level depth without sacrificing privacy, clarity, or interface elegance.
 - **Job to Be Done**: Rapidly evaluate genetic risk factors, carrier conditions, pharmacogenomics (drug metabolism), and actionable medical findings with complete local privacy.
 - **Emotional Goals**: Confidence, clinical clarity, empowering comprehension, and peace of mind.
 
-### Brand Personality
+### Brand Personality (provisional)
 - **Voice & Tone**: High-tech, clinical, authoritative, crisp, and user-centric.
 - **3-Word Personality**: **High-Tech · Clinical · Crisp**.
 - **User Focus**: Prioritize clear, actionable UX for people who want rigorous, deep insights into their biological blueprints.
 
-### Aesthetic Direction
+### Aesthetic Direction (provisional)
 - **Visual Direction**: High-tech clinical with **sharp corners** (clean geometric cards, refined structural borders, high-density professional tables).
 - **Theme**: **Light Mode** foundation with a bespoke design system, plus a toggleable **Dark HUD** biotech mode.
 - **Anti-References**:
   - **Promethease**: Explicitly avoid clunky, outdated web 1.0 styling, overwhelming walls of unformatted text, and confusing layouts.
   - **Toy / Gamified Apps**: Avoid overly cartoonish, bubbly, rounded consumer tropes that compromise clinical credibility.
 
-### Impeccable Typography Specification (Adobe Typekit `cqu4tvx`)
+### Impeccable Typography Specification (Adobe Typekit `cqu4tvx`) (provisional)
 - **Kit Source**: `<link rel="stylesheet" href="https://use.typekit.net/cqu4tvx.css">`
 - **Primary Body & Interface**: **`gotham`** (400 Normal, 500 Medium, 200 Light)
   - *Rationale*: Architectural rigor, geometric purity, and clinical confidence.
@@ -43,12 +49,12 @@
   - Manifest V3 extension with custom popup, active-tab scripting, and live injection.
   - Allows swapping typography in real time directly from the Chrome toolbar.
 
-### Design Principles
+### Design Principles (principles 1, 2, 3 and 6 are provisional design direction)
 1. **Sharp Clinical Precision**: Use crisp geometric architecture, sharp corners (`rounded-none` / `rounded-sm`), and precise structural dividers. Data must look scientific, authoritative, and expertly curated.
 2. **Actionable Synthesis Over Text Walls**: Replace Promethease-style walls of text with structured, glanceable cards, high-density sortable datagrids, and deep on-demand flyout drawers.
 3. **Compound Haplotype Intelligence**: Multi-SNP loci (specifically **APOE ε2/ε3/ε4 diplotypes** and CYP450 pharmacogenomic star alleles) must be synthesized into dedicated, definitive clinical calls, never fragmented or lost as isolated neutral SNPs.
 4. **Uncompromising Zero-Knowledge Privacy**: Raw genomic data never leaves the browser. The interface must transparently affirm local-first processing at all times.
-5. **Ultra-Responsive Edge Enrichment**: Leverage Upstash Redis edge caching to provide lightning-fast (<10ms) literature lookups and proteomic insights for users seeking deeper exploration.
+5. **One Curated Knowledge Base, Honest Provenance**: All annotations come from one build-time knowledge base (`web/src/knowledge-base.json`, built from pinned upstream payloads plus labelled manual curation). There is no edge cache, no Redis and no live literature lookup: nothing about a user's variants is sent to any server, and every value shows where it came from or is shown as "not available".
 6. **Editorial Typography Hierarchy**: Use Gotham for authoritative human communication and Attribute Mono for raw biological blueprints.
 
 

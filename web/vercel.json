@@ -4,7 +4,8 @@
   "builds": [
     {
       "src": "api/manifest.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": { "includeFiles": "src/knowledge-base.json" }
     },
     {
       "src": "**",
@@ -14,10 +15,6 @@
   "routes": [
     {
       "src": "/api/manifest",
-      "dest": "/api/manifest.js"
-    },
-    {
-      "src": "/api/enrich",
       "dest": "/api/manifest.js"
     },
     {

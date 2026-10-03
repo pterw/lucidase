@@ -7,7 +7,7 @@ Validates that:
 2. Web Worker file processing executes in-memory without initiating network requests.
 3. No tracking or telemetry scripts (Google Analytics, Sentry, Mixpanel, Segment) exist.
 4. The client application NEVER transmits user variants or positive findings to any backend.
-5. The /api/enrich manifest endpoint returns static release provenance with zero input acceptance.
+5. The /api/manifest endpoint returns static release provenance with zero input acceptance.
 """
 
 import json
@@ -96,8 +96,7 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         self.assertIn("local_analysis: true", content)
         self.assertIn("genomic_uploads: false", content)
         self.assertIn("variant_identifiers_transmitted: false", content)
-        self.assertIn("clinvar_release: \"2024-06\"", content)
-        self.assertIn("dbsnp_build: 156", content)
+        # Release facts are read from knowledge-base.json (web/tests/manifest.test.mjs), not asserted as constants.
 
 
 if __name__ == "__main__":

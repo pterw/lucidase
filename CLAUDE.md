@@ -11,6 +11,9 @@ untracked workspace `.superpowers/sdd/2026-10-02-genomepulse-hardening/`. Before
 `## RESUME HERE` block of `ledger.md`, then `constraints.md` (owner rulings, Lessons, gates, Shared files),
 `contracts.md` (C1-C6) and `plan.md`.
 
+The branch is pushed to the private repo `pterw/genomepulse`, with draft PR #1. The controller pushes only commits
+that passed gate-runner, by explicit SHA, with `git push --atomic`. Implementers never push.
+
 ## Owner rulings that bind every change
 
 - Single source of genomic knowledge: `web/src/knowledge-base.json`. It is built by `tools/build_canonical_kb.py`
