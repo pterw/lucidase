@@ -44,6 +44,7 @@ from segregation_engine import (
     offspring_distribution,
 )
 from tools.coverage_taxonomy import (
+    INSUFFICIENT_LOCUS_REASON,
     NO_CALL_REASON,
     NOT_ASSAYED_REASON,
     VCF_ABSENT_REASON,
@@ -53,21 +54,6 @@ from tools.coverage_taxonomy import (
 )
 
 DEFAULT_KB_PATH = Path(__file__).resolve().parent / "web" / "src" / "knowledge-base.json"
-
-# ===========================================================================
-# ACMG SF v3.2 Actionable Gene List (81 Genes)
-# ===========================================================================
-ACMG_SF_GENES = {
-    "ACTA2", "ACTC1", "ACVRL1", "APC", "APOB", "ATP7B", "BAG3", "BMPR1A", "BRCA1",
-    "BRCA2", "BTD", "CACNA1S", "CALM1", "CALM2", "CALM3", "CASQ2", "COL3A1",
-    "DES", "DSC2", "DSG2", "DSP", "ENG", "FBN1", "FLNC", "GAA", "GLA", "HFE",
-    "HNF1A", "KCNH2", "KCNJ2", "KCNQ1", "LDLR", "LMNA", "MAX", "MEN1", "MLH1",
-    "MSH2", "MSH6", "MUTYH", "MYBPC3", "MYH11", "MYH7", "MYL2", "MYL3", "NF2",
-    "OTC", "PALB2", "PCSK9", "PKP2", "PMS2", "PRKAG2", "PTEN", "RB1", "RBM20",
-    "RET", "RPE65", "RYR1", "RYR2", "SCN5A", "SDHAF2", "SDHB", "SDHC", "SDHD",
-    "SMAD3", "SMAD4", "STK11", "TGFBR1", "TGFBR2", "TMEM127", "TMEM43", "TNNC1",
-    "TNNI3", "TNNT2", "TP53", "TPM1", "TRDN", "TSC1", "TSC2", "TTN", "VHL", "WT1",
-}
 
 # ===========================================================================
 # Knowledge base loading and validation (contract C2, schema v2)
@@ -616,7 +602,7 @@ def resolve_apoe(component_records: list[dict], kb: Any) -> dict:
         "genotype_display": f"{display_diplotype(diplotype)} ({_component_summary(components)})",
         "coverage_state": state,
         "sample_observation": OBSERVATION_WILD_TYPE if wild_type else OBSERVATION_VARIANT_PRESENT,
-        "reason": None if sufficient else "locus evidence is insufficient",
+        "reason": None if sufficient else INSUFFICIENT_LOCUS_REASON,
         "interpretation_key": diplotype,
         "interpretation": {**kb_interp, "caveats": [*kb_interp["caveats"], *([caveat] if caveat else [])]},
         "diplotype": diplotype,

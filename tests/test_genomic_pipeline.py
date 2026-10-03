@@ -38,7 +38,6 @@ from genomic_parser import (
 from segregation_engine import gene_outcome, offspring_distribution
 from tools.build_canonical_kb import build_kb, load_curation
 from variant_annotator import (
-    ACMG_SF_GENES,
     KbSchemaError,
     VariantAnnotator,
     load_knowledge_base,
@@ -478,11 +477,6 @@ class TestAnnotation(unittest.TestCase):
         # The same coordinates read as GRCh37 are not a match.
         wrong = self.annotator.annotate_genome(parse_genotype_file(head.replace("GRCh38", "GRCh37") + row))
         self.assertEqual(self.record(wrong, "rs4244285").coverage_state, "not_tested_by_array")
-
-    def test_acmg_genes_constant(self):
-        self.assertIn("BRCA1", ACMG_SF_GENES)
-        self.assertIn("HFE", ACMG_SF_GENES)
-        self.assertEqual(len(ACMG_SF_GENES), 81)
 
 
 class TestInheritanceArithmetic(unittest.TestCase):

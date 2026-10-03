@@ -159,12 +159,44 @@ def _run_inheritance(vector):
     _assert_text_and_absent(result, vector["expected"], vector["id"])
 
 
+def _run_qc(vector):
+    from genomic_parser import Call, ParseResult, ParseStats, compute_qc
+
+    inp = vector["input"]
+    parse = ParseResult("23andme", "unknown", inp["assay"], [Call(**c) for c in inp["calls"]], ParseStats())
+    _assert_close(compute_qc(parse), vector["expected"], vector["id"])
+
+
+def _run_kb(vector):
+    from variant_annotator import KbSchemaError, validate_kb
+
+    try:
+        validate_kb(vector["input"]["kb"])
+        result = {"problems": []}
+    except KbSchemaError as err:
+        result = {"problems": err.problems}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
+def _run_assemble(vector):
+    from variant_annotator import assemble_findings
+
+    inp = vector["input"]
+    kb = SimpleNamespace(genes=inp["kb"]["genes"], loci=inp["kb"]["loci"])
+    out = assemble_findings(copy.deepcopy(inp["records"]), kb, inp["outside_count"])
+    result = {"listed_rsids": [r["rsid"] for r in out["listed"]], "apoe": out["apoe"], "summary": out["summary"]}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
 AREAS = {
     "parse": _run_parse,
     "alleles": _run_alleles,
     "classify": _run_classify,
     "apoe": _run_apoe,
     "inheritance": _run_inheritance,
+    "qc": _run_qc,
+    "kb": _run_kb,
+    "assemble": _run_assemble,
 }
 
 

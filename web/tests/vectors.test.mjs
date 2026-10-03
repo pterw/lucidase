@@ -103,6 +103,33 @@ const HANDLERS = {
     }
   },
 
+  // input: { assay, calls }; expected is a subset of computeQc's result (numbers within 1e-12).
+  "qc.json": async (vector) => {
+    const { computeQc } = await import("../src/core/qc.js");
+    assertClose(computeQc({ assay: vector.input.assay, calls: vector.input.calls }), vector.expected, vector.id);
+  },
+
+  // input: { kb }; expected: { problems }, the exact list validateKb reports ([] for a valid KB).
+  "kb.json": async (vector) => {
+    const { validateKb } = await import("../src/core/kb.js");
+    let result = { problems: [] };
+    try {
+      validateKb(vector.input.kb);
+    } catch (err) {
+      if (err.name !== "KbSchemaError") throw err;
+      result = { problems: err.problems };
+    }
+    assertClose(result, vector.expected, vector.id);
+  },
+
+  // input: { kb: {genes, loci}, records: classified records, outside_count }; expected: { listed_rsids, apoe, summary }.
+  "assemble.json": async (vector) => {
+    const { assembleFindings } = await import("../src/core/apoe.js");
+    const { kb, records, outside_count: outside } = vector.input;
+    const out = assembleFindings(structuredClone(records), kb, outside);
+    assertClose({ listed_rsids: out.listed.map((r) => r.rsid), apoe: out.apoe, summary: out.summary }, vector.expected, vector.id);
+  },
+
   // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4", ... }. Numbers compare within
   // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
   // lower-cased JSON of the result (scenario, multi_locus, compound).

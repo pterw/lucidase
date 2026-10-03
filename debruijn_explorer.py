@@ -135,7 +135,6 @@ from ml_engine import (  # noqa: E402
     kmer_spectrum,
 )
 from variant_annotator import (  # noqa: E402
-    ACMG_SF_GENES,
     APOE_ROW_ID,
     AnnotationRecord,
     VariantAnnotator,
