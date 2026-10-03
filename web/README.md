@@ -17,7 +17,7 @@ A privacy-first consumer genomics analysis page supporting **23andMe**, **Ancest
 | APOE diplotype, inheritance and multi-locus figures | Browser | Nothing |
 | Exports (Markdown / CSV) | Browser (a downloaded Blob) | Nothing |
 
-There is no enrichment endpoint, no cache and no Redis. The page makes no network request that carries variant data: the CSP is `connect-src 'self'`, and the only same-origin fetch is the demo file.
+There is no enrichment endpoint, no cache and no Redis. The page makes no network request that carries variant data: the CSP is `connect-src 'self'`, and there are two same-origin GETs, each of a bundled static demo file that carries no user data: the main page's `demo-data/sample-23andme.txt` and the karyogram page's `demo-data/sample-karyogram-23andme.txt`.
 
 The one server function is `GET /api/manifest` (`web/api/manifest.js`, Vercel only). It accepts no input and returns a static manifest of the shipped knowledge base: its release, locus count and sha256. Every value is read from `src/knowledge-base.json` at request time, so the manifest cannot drift from the file the app loads. CORS is same-origin; set `ALLOWED_ORIGIN` in Vercel env vars for a custom domain.
 

@@ -1,6 +1,6 @@
 # Handoff Spec: Lucidase web app (provisional UI)
 
-> **BANNER - READ FIRST.** This document records the **current, provisional UI as built** on branch `fix/genomepulse-hardening`, plus the behavioural, state and clinical-honesty requirements any future design system must satisfy.
+> **BANNER - READ FIRST.** This document records the **current, provisional UI as built** on branches `fix/genomepulse-hardening` and `feat/karyogram` (the karyogram page lives on the latter), plus the behavioural, state and clinical-honesty requirements any future design system must satisfy.
 > Owner ruling (verbatim): *"Webdev and identity haven't been established so when tailwind and daisy ui land properly and install design of this is within a system that is yet to be authored."*
 > It proposes **no** new colours, fonts, spacing scales, themes or components. Every visual value below is a **de facto** value found in code, not a design decision. Citations are `file:line`.
 
