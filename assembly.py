@@ -13,7 +13,7 @@ from collections import Counter
 
 import networkx as nx
 
-from bio_engine import _gc_content, find_orfs, safe_mw
+from bio_engine import _gc_content, find_orfs, revcomp, safe_mw
 
 
 def build_assembly_graph(kmers: list[str]) -> nx.DiGraph:
@@ -35,7 +35,11 @@ def _remove_tips(ag: nx.DiGraph, k: int) -> int:
 
     A tip is a non-branching path shorter than ``2 * k`` edges ending at a
     dead-end node.  Such paths typically arise from base-call errors near
-    the ends of reads.  Returns the number of nodes removed."""
+    the ends of reads.  Returns the number of nodes removed.
+
+    Known limitation (teaching tool): the test is on path length only and is
+    coverage-blind, so a genuine read end next to a branch or repeat can be
+    clipped.  Each pass rescans all nodes, which is quadratic in the worst case."""
     max_tip_len = 2 * k
     removed = 0
     changed = True
@@ -115,11 +119,65 @@ def simplify_graph(ag: nx.DiGraph, k: int, min_cov: int = 0) -> tuple[nx.DiGraph
     return ag, notes
 
 
-def extract_contigs(ag: nx.DiGraph, k: int) -> list[dict]:
+def _least_rotation(s: str) -> str:
+    """Lexicographically least rotation of *s* (Booth's algorithm, O(n))."""
+    n = len(s)
+    if n < 2:
+        return s
+    ss = s + s
+    f = [-1] * (2 * n)
+    least = 0
+    for j in range(1, 2 * n):
+        sj = ss[j]
+        i = f[j - least - 1]
+        while i != -1 and sj != ss[least + i + 1]:
+            if sj < ss[least + i + 1]:
+                least = j - i - 1
+            i = f[i]
+        if sj != ss[least + i + 1]:
+            if sj < ss[least]:
+                least = j
+            f[j - least] = -1
+        else:
+            f[j - least] = i + 1
+    return ss[least : least + n]
+
+
+def _strand_key(contig: dict) -> str:
+    """Strand-independent identity of a contig: the smaller of its sequence and
+    reverse complement. Circular contigs are compared up to rotation."""
+    seq = contig["sequence"]
+    if contig.get("circular"):
+        core = seq[: contig["edges"]]  # the cycle without its repeated k-1 tail
+        return min(_least_rotation(core), _least_rotation(revcomp(core)))
+    return min(seq, revcomp(seq))
+
+
+def _drop_reverse_complement_twins(contigs: list[dict]) -> list[dict]:
+    """Keep one contig per strand pair: the lexicographically smaller strand.
+    A contig whose twin is absent (for example clipped) is kept as it is."""
+    best: dict[str, dict] = {}
+    for c in contigs:
+        key = (c.get("circular", False), _strand_key(c))
+        if key not in best or c["sequence"] < best[key]["sequence"]:
+            best[key] = c
+    kept = {id(c) for c in best.values()}
+    return [c for c in contigs if id(c) in kept]
+
+
+def extract_contigs(ag: nx.DiGraph, k: int, canonical: bool = False) -> list[dict]:
     """Extract contigs (maximal non-branching paths) from the assembly graph.
 
     Each contig follows a maximal chain of nodes where every internal node has
-    in-degree = out-degree = 1. Isolated cycles are also reported."""
+    in-degree = out-degree = 1. Isolated cycles are also reported.
+
+    With ``canonical=True`` (use it when the graph holds both strands, DNA only)
+    each contig and its reverse complement count once: the lexicographically
+    smaller strand is kept, so lengths and metrics are not doubled.
+
+    Known limitation (teaching tool): the graph is collapsed, so repeats longer
+    than k merge into one path and linear reads through them are lost; a pure
+    repeat such as ``AAAAAAAAAA`` is reported as a short circular contig."""
 
     def is_internal(n: str) -> bool:
         return ag.in_degree(n) == 1 and ag.out_degree(n) == 1
@@ -197,6 +255,8 @@ def extract_contigs(ag: nx.DiGraph, k: int) -> list[dict]:
                     "circular": True,
                 })
 
+    if canonical:
+        contigs = _drop_reverse_complement_twins(contigs)
     contigs.sort(key=lambda c: -c["length"])
     for i, c in enumerate(contigs, 1):
         c["id"] = i

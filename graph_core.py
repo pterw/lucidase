@@ -76,20 +76,43 @@ def _require_dna(items: list[str]) -> None:
             )
 
 
+def _limit_error(n: int) -> ValueError:
+    return ValueError(
+        f"Input produced more than {MAX_KMERS:,} k-mers (counted {n:,} before stopping); "
+        f"limit is {MAX_KMERS:,}. Use a smaller file or larger k."
+    )
+
+
+def _iter_read_kmers(records: list[str], k: int, both: bool):
+    """Yield the k-mers of every record (and its reverse complement if `both`)
+    lazily, so the caller can stop as soon as a limit is exceeded."""
+    for rec in records:
+        if len(rec) < k:
+            continue
+        for s in [rec] + ([revcomp(rec)] if both else []):
+            for i in range(len(s) - k + 1):
+                yield s[i : i + k]
+
+
 def collect_kmers(text: str, mode: str, k: int, both: bool, unique: bool):
     """Turn raw input into a list of k-mers (a multiset unless `unique`).
-    Returns (kmers, notes). Raises ValueError with a readable message."""
+    Returns (kmers, notes). Raises ValueError with a readable message.
+
+    The MAX_KMERS limit is enforced while k-mers are generated, so an oversized
+    input is rejected without first building the whole list."""
     notes: list[str] = []
     if mode == "kmers":
-        kmers = [
-            t.upper()
-            for t in re.split(r"[\s,;]+", text.strip())
-            if t and not t.startswith(">")
-        ]
+        # FASTA header lines are dropped whole, so header words never become k-mers.
+        body = "\n".join(
+            ln for ln in text.splitlines() if not ln.lstrip().startswith(">")
+        )
+        kmers = [t.upper() for t in re.split(r"[\s,;]+", body.strip()) if t]
         if not kmers:
             raise ValueError("Enter some k-mers (separated by spaces, commas or new lines).")
         if len({len(x) for x in kmers}) != 1:
             raise ValueError("All k-mers must have the same length.")
+        if len(kmers) * (2 if both else 1) > MAX_KMERS:
+            raise _limit_error(len(kmers) * (2 if both else 1))
         if both:
             _require_dna(kmers)
             kmers = kmers + [revcomp(x) for x in kmers]
@@ -99,15 +122,12 @@ def collect_kmers(text: str, mode: str, k: int, both: bool, unique: bool):
             raise ValueError("Enter a sequence or FASTA text.")
         if both:
             _require_dna(records)
+        short_count = sum(1 for rec in records if len(rec) < k)
         kmers = []
-        short_count = 0
-        for rec in records:
-            if len(rec) < k:
-                short_count += 1
-                continue
-            strand = [rec] + ([revcomp(rec)] if both else [])
-            for s in strand:
-                kmers.extend(s[i : i + k] for i in range(len(s) - k + 1))
+        for km in _iter_read_kmers(records, k, both):
+            kmers.append(km)
+            if len(kmers) > MAX_KMERS:
+                raise _limit_error(len(kmers))
         if not kmers:
             raise ValueError(f"No records are at least k={k} characters long.")
         if short_count:
@@ -118,11 +138,16 @@ def collect_kmers(text: str, mode: str, k: int, both: bool, unique: bool):
         kmers = sorted(set(kmers))
         if before != len(kmers):
             notes.append(f"Deduplicated {before} k-mers down to {len(kmers)} unique.")
-    if len(kmers) > MAX_KMERS:
-        raise ValueError(
-            f"Input produced {len(kmers):,} k-mers; limit is {MAX_KMERS:,}. Use a smaller file or larger k."
-        )
     return kmers, notes
+
+
+def _is_strand_symmetric(kmers: list[str]) -> bool:
+    """True when the k-mer set is closed under reverse complement (DNA only),
+    which is what the both-strands option produces."""
+    seen = set(kmers)
+    if any(set(x) - set("ACGT") for x in seen):
+        return False
+    return all(revcomp(x) in seen for x in seen)
 
 
 def build_graph(kmers: list[str]) -> nx.MultiDiGraph:
@@ -134,10 +159,11 @@ def build_graph(kmers: list[str]) -> nx.MultiDiGraph:
         raise ValueError("all k-mers must have the same length")
     if lengths.pop() < 2:
         raise ValueError("k must be at least 2")
-    counts = Counter(kmers)
+    # Repeated k-mers become parallel edges. Copy counts live in the k-mer
+    # multiset (see analyze), not on the edges.
     g = nx.MultiDiGraph()
     for km in kmers:
-        g.add_edge(km[:-1], km[1:], kmer=km, coverage=counts[km])
+        g.add_edge(km[:-1], km[1:], kmer=km)
     return g
 
 
@@ -401,7 +427,8 @@ def analyze(
     ag = build_assembly_graph(kmers)
     err_thresh, gmm_stats = fit_kmer_error_model(spectrum)
     ag, simp_notes = simplify_graph(ag, k, min_cov=err_thresh)
-    contigs = extract_contigs(ag, k)
+    # A strand-symmetric k-mer set (both strands on) yields every contig twice.
+    contigs = extract_contigs(ag, k, canonical=_is_strand_symmetric(kmers))
     metrics = assembly_metrics(contigs)
 
     # ---- Scikit-learn: Metagenomic Contig Binning, PCA, Anomaly Detection ----

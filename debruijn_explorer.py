@@ -7,7 +7,7 @@ and metagenomics.
 
 Quickstart:
     python debruijn_explorer.py              # Launch interactive desktop GUI
-    python debruijn_explorer.py --selftest   # Run full 400-round + ML/Bio validation
+    python -m pytest tests/test_debruijn.py  # Run the tool's tests
     python debruijn_explorer.py --headless --seq ACGTGCAATG CAATGCCGTA -k 5 --metrics --binning
 
 Architecture:
@@ -22,12 +22,8 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import io
 import os
-import random
 import sys
-import unittest
-from collections import Counter
 
 # Configure UTF-8 stdout / stderr on Windows consoles to prevent cp1252 charmap errors
 if hasattr(sys.stdout, "reconfigure"):
@@ -145,12 +141,16 @@ from variant_annotator import (  # noqa: E402
 )
 
 
+# One default k for the Python API and the CLI (matches the GUI's default).
+DEFAULT_K = 3
+
+
 # ===========================================================================
 # High-Level Programmatic API
 # ===========================================================================
 def assemble(
     text: str,
-    k: int = 31,
+    k: int = DEFAULT_K,
     mode: str = "seq",
     both_strands: bool = False,
     unique: bool = False,
@@ -164,7 +164,8 @@ def assemble(
     text : str
         Sequence data (raw sequence, FASTA, or space-separated k-mers).
     k : int
-        K-mer length (default 31, typical for bacterial genomes).
+        K-mer length (default ``DEFAULT_K``, shared with the CLI ``-k`` option;
+        use a larger k such as 31 for real reads).
     mode : str
         ``'seq'`` for sequences / FASTA, ``'kmers'`` for pre-computed k-mers.
     both_strands : bool
@@ -394,178 +395,6 @@ def run_headless(args) -> int:
 
 
 # ===========================================================================
-# Correctness Self-Tests
-# ===========================================================================
-def selftest(rounds: int = 50) -> int:
-    """Property checks on random inputs and advanced Biopython / Scikit-learn validation."""
-    import networkx as nx
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-
-    rng = random.Random(2026)
-
-    def covered_once(m):
-        seen = [e for t in m.trails for e in t]
-        return len(seen) == len(set(seen)) == m.g.number_of_edges()
-
-    def contiguous(m):
-        return all(t[i][1] == t[i + 1][0] for t in m.trails for i in range(len(t) - 1))
-
-    def expected_trails(g):
-        total = 0
-        for comp in nx.weakly_connected_components(g):
-            surplus = sum(max(g.out_degree(n) - g.in_degree(n), 0) for n in comp)
-            total += max(surplus, 1)
-        return total
-
-    checks = 0
-    for _ in range(rounds):
-        k = rng.randint(2, 6)
-        seq = "".join(rng.choice("ACGT") for _ in range(rng.randint(k, 40)))
-        # 1. Linear sequence has one Eulerian path spelling exactly its k-mers
-        km, _ = collect_kmers(seq, "seq", k, False, False)
-        m = analyze(km)
-        assert len(m.trails) == 1 and covered_once(m) and contiguous(m), seq
-        out = m.spelled[0]
-        assert len(out) == len(seq) and Counter(
-            out[i : i + k] for i in range(len(out) - k + 1)
-        ) == Counter(km), seq
-
-        # 2. Both strands / sets / multiple reads: trail count is the proven minimum
-        for both, unique in ((True, False), (False, True), (True, True)):
-            km2, _ = collect_kmers(seq, "seq", k, both, unique)
-            m2 = analyze(km2)
-            assert covered_once(m2) and contiguous(m2), (seq, both, unique)
-            assert len(m2.trails) == expected_trails(m2.g), (seq, both, unique)
-        reads = [seq, "".join(rng.choice("ACGT") for _ in range(rng.randint(k, 20)))]
-        km3, _ = collect_kmers("\n".join(reads), "seq", k, False, False)
-        m3 = analyze(km3)
-        assert (
-            covered_once(m3)
-            and contiguous(m3)
-            and len(m3.trails) == expected_trails(m3.g)
-        )
-        checks += 4
-
-    # 3. Rendering never crashes, including self-loops, multi-trail and step states
-    for ex in EXAMPLES.values():
-        km, _ = collect_kmers(
-            ex["text"], ex["mode"], ex["k"], ex["both"], ex["unique"]
-        )
-        m = analyze(km)
-        fig = Figure()
-        FigureCanvasAgg(fig)
-        for step in (0, max(1, m.total // 2), m.total):
-            render(fig, m, step)
-        checks += 1
-
-    # 4. Biopython and Scikit-learn unit checks
-    test_dna = "ATGCGATCGATCGTAA"
-    assert 0.0 < _gc_content(test_dna) < 1.0
-    assert safe_mw(test_dna) > 1000.0
-
-    # BioPython ORF finder
-    gene = "ATGAAACCCGGGTTTTAA"
-    orfs = find_orfs(gene, min_aa_len=3)
-    assert len(orfs) >= 1
-    assert orfs[0]["protein"] == "MKPGF"
-    checks += 1
-
-    # Scikit-learn GMM error modeling
-    spec_with_errors = {
-        1: 800,
-        2: 60,
-        3: 10,
-        18: 40,
-        19: 90,
-        20: 150,
-        21: 80,
-        22: 30,
-    }
-    cutoff, gmm_stats = fit_kmer_error_model(spec_with_errors)
-    assert cutoff >= 2
-    assert gmm_stats.get("converged") is True
-    checks += 1
-
-    # Scikit-learn Contig Binning & PCA
-    dummy_contigs = [
-        {
-            "id": 1,
-            "sequence": "GCGCGCGCGCGCGCGCGCGC",
-            "length": 20,
-            "gc_content": 1.0,
-            "mean_coverage": 25.0,
-        },
-        {
-            "id": 2,
-            "sequence": "GCGCGCGCGCGCCCGGGGGG",
-            "length": 20,
-            "gc_content": 1.0,
-            "mean_coverage": 24.0,
-        },
-        {
-            "id": 3,
-            "sequence": "ATATATATATATATATATAT",
-            "length": 20,
-            "gc_content": 0.0,
-            "mean_coverage": 10.0,
-        },
-        {
-            "id": 4,
-            "sequence": "ATATATATATATAAATTTTT",
-            "length": 20,
-            "gc_content": 0.0,
-            "mean_coverage": 9.5,
-        },
-    ]
-    binned, b_summary = bin_contigs(dummy_contigs)
-    assert b_summary["n_bins"] == 2
-    assert binned[0]["pca_x"] is not None
-    checks += 1
-
-    # BioPython SeqRecord and GenBank writer
-    recs = contigs_to_seqrecords(binned)
-    assert len(recs) == 4
-    assert recs[0].id == "ctg1"
-    checks += 1
-
-    # Bio.Align reference evaluation
-    ref_seq = "ACGTGCAATGCAATGCCGTACCGTAACGTG"
-    eval_ctgs = [
-        {"id": 1, "sequence": "ACGTGCAATGCAATG"},
-        {"id": 2, "sequence": "CAATGCCGTACCGTAACGTG"},
-    ]
-    ref_res = evaluate_assembly_against_reference(eval_ctgs, ref_seq)
-    assert ref_res["genome_fraction"] == 1.0
-    assert ref_res["mean_identity"] == 1.0
-    checks += 1
-
-    # High-level assemble() API
-    asm_res = assemble(
-        ">r1\nACGTGCAATG\n>r2\nCAATGCCGTA", k=5, ref_seq="ACGTGCAATGCCGTA"
-    )
-    assert len(asm_res["contigs"]) >= 1
-    assert len(asm_res["records"]) >= 1
-    assert "binning" in asm_res
-    checks += 1
-
-    # 5. Genomic Parser, QC, ClinVar, HPA, and PGx unit checks
-    from test_genomic_pipeline import TestGenomicPipeline
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestGenomicPipeline)
-    runner = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0)
-    result = runner.run(suite)
-    assert result.wasSuccessful(), f"Genomic pipeline tests failed: {result.errors} {result.failures}"
-    checks += result.testsRun
-
-    print(
-        f"selftest OK: {checks} checks over {rounds} random sequences + "
-        f"{len(EXAMPLES)} examples + ML/Bio + Genomic Pipeline tests"
-    )
-    return 0
-
-
-# ===========================================================================
 # Argument Parser & CLI Entry Point
 # ===========================================================================
 def parse_args(argv=None):
@@ -576,9 +405,6 @@ def parse_args(argv=None):
         "--headless",
         action="store_true",
         help="no GUI: print results / save a figure",
-    )
-    p.add_argument(
-        "--selftest", action="store_true", help="run correctness checks and exit"
     )
     src = p.add_mutually_exclusive_group()
     src.add_argument("--seq", nargs="+", help="one or more sequences")
@@ -598,7 +424,12 @@ def parse_args(argv=None):
         metavar="FILE",
         help="write annotated clinical findings and QC metrics to Markdown or CSV",
     )
-    p.add_argument("-k", type=int, default=3, help="k for --seq/--fasta (default 3)")
+    p.add_argument(
+        "-k",
+        type=int,
+        default=DEFAULT_K,
+        help=f"k for --seq/--fasta (default {DEFAULT_K})",
+    )
     p.add_argument(
         "--both-strands",
         action="store_true",
@@ -653,8 +484,6 @@ def parse_args(argv=None):
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-    if args.selftest:
-        return selftest()
     if args.headless:
         return run_headless(args)
     return run_gui()
