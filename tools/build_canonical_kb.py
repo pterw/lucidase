@@ -2,8 +2,16 @@
 """
 Canonical knowledge-base build (schema v2, contract C2)
 =======================================================
-Reads the hand-edited curation file `tools/curation/kb_curation.json`, validates it, derives
-`evidence_tier` and `evidence_sufficiency` by rule, and writes `web/src/knowledge-base.json`.
+Reads the hand-edited curation file `tools/curation/kb_curation.json`, validates it, overlays the
+machine-imported evidence from the pinned upstream payloads (`tools/fixtures/upstream/real/`, read
+only through `tools/source_adapters.py`), derives `evidence_tier` and `evidence_sufficiency` by rule,
+and writes `web/src/knowledge-base.json`.
+
+Imported values (ClinVar accession, review status, stars and significance; gnomAD allele frequency,
+pLI and LOEUF; VEP MANE Select transcript and AlphaMissense; dbSNP positions) carry provenance
+`machine_imported` with the capture's real `retrieved_at` and `url`. Curated values remain only where
+no adapter value exists. QC cross-checks the curated positions, alleles and ClinVar accession against
+the payloads and verifies the sha256 of every pinned payload.
 
 The KB describes loci and what each alt-allele count means. Nothing in it depends on one
 person's sample: observed genotype and coverage state are computed at analysis time.
@@ -17,6 +25,7 @@ Cardinal Scientific Rule:
 Execution:
     python tools/build_canonical_kb.py                  # validate and write the KB
     python tools/build_canonical_kb.py --verify-only    # rebuild in memory, diff, exit 1 on any difference
+    (--upstream-path DIR picks another pinned-payload directory)
 """
 
 from __future__ import annotations
@@ -26,6 +35,7 @@ import hashlib
 import json
 import re
 import sys
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Any, Optional
 
@@ -42,11 +52,14 @@ from tools.coverage_taxonomy import (  # noqa: E402
     derive_evidence_tier,
     derive_tier_from_cpic_level,
 )
+from tools.source_adapters import REVIEW_STATUS_STARS, AdapterError, UpstreamSnapshot  # noqa: E402
 from tools.variome_models import GenotypeInterpretation  # noqa: E402
 
 SCHEMA_VERSION = 2
 DEFAULT_CURATION_PATH = PROJECT_ROOT / "tools" / "curation" / "kb_curation.json"
 DEFAULT_KB_PATH = PROJECT_ROOT / "web" / "src" / "knowledge-base.json"
+DEFAULT_UPSTREAM_ROOT = PROJECT_ROOT / "tools" / "fixtures" / "upstream" / "real"
+BUILDS = (("GRCh37", "pos_grch37"), ("GRCh38", "pos_grch38"))
 
 # ACMG Secondary Findings v3.2 Actionable Gene Panel (81 Genes)
 ACMG_SF_V3_2_GENES = frozenset([
@@ -68,15 +81,6 @@ LIMITATION_REFS = {
 }
 STAR_ALLELE_GENES = frozenset({"CYP2C19"})
 
-# ClinVar review status -> gold stars (ClinVar's published mapping).
-REVIEW_STATUS_STARS = {
-    "practice guideline": 4,
-    "reviewed by expert panel": 3,
-    "criteria provided, multiple submitters, no conflicts": 2,
-    "criteria provided, single submitter": 1,
-    "criteria provided, conflicting classifications": 1,
-    "no assertion criteria provided": 0,
-}
 INHERITANCE_MODELS = frozenset(
     {"autosomal_recessive", "autosomal_dominant", "risk_factor", "pharmacogenomic", "trait"}
 )
@@ -442,14 +446,128 @@ def _build_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def _build_locus(rsid: str, locus: dict[str, Any], gene: dict[str, Any]) -> dict[str, Any]:
+def _decimal_places(value: float) -> int:
+    """Decimal places of a curated number as written (its shortest repr, so 0.14229 has 5)."""
+    return max(0, -Decimal(repr(value)).as_tuple().exponent)
+
+
+def _af_agrees(curated: float, imported: float) -> bool:
+    """The imported af, rounded half-up to the curated value's decimal places, equals the curated value."""
+    places = _decimal_places(curated)
+    rounded = Decimal(repr(imported)).quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP)
+    return rounded == Decimal(repr(curated))
+
+
+def _clinvar_drift(rsid: str, curated: dict[str, Any], imported: Any) -> list[str]:
+    """QC errors for each curated ClinVar field that is present and differs from the imported record."""
+    errors = []
+    for field in ("review_status", "stars", "significance"):
+        if curated.get(field) is not None and curated[field] != getattr(imported, field):
+            errors.append(f"{rsid}: curated clinvar.{field} {curated[field]!r} differs from the imported "
+                          f"{getattr(imported, field)!r}")
+    return errors
+
+
+def _overlay_imported(rsid: str, locus: dict[str, Any], evidence: dict[str, Any], snapshot: UpstreamSnapshot) -> list[str]:
+    """Replace curated evidence with adapter values where an adapter has them, and cross-check the rest.
+
+    Mutates `evidence`. Returns QC errors: curated positions or alleles that dbSNP disagrees with (L1, L8),
+    a curated ClinVar accession that differs from the imported one (P2-011), a gnomAD capture for another
+    variant or gene, or a payload an adapter refuses.
+    """
+    errors: list[str] = []
+    ref, alt, gene = locus["ref"], locus["alt"], locus["gene"]
+    variant_id = f"{locus['chrom']}-{locus['pos_grch38']}-{ref}-{alt}"
+    try:
+        dbsnp = snapshot.dbsnp(rsid)
+        if dbsnp is not None:
+            clean = True
+            for build, key in BUILDS:
+                reason = dbsnp.check_locus(build, locus[key], ref, alt)
+                if reason is not None:
+                    clean = False
+                    errors.append(f"{rsid}: curated locus disagrees with dbSNP: {reason}")
+            if clean:
+                evidence["dbsnp"] = {
+                    **{key: dbsnp.placements[build].locate(ref, alt) for build, key in BUILDS},
+                    "provenance": dbsnp.provenance.to_dict(),
+                }
+
+        curated_clinvar = evidence.get("clinvar")
+        clinvar = snapshot.clinvar(rsid, locus["pos_grch38"], ref, alt)
+        if clinvar is None:
+            if curated_clinvar is not None:
+                errors.append(f"{rsid}: no ClinVar record matches the locus alleles, so the curated accession "
+                              f"{curated_clinvar['accession']} cannot be verified")
+        elif clinvar.accession is None or clinvar.significance is None:
+            errors.append(f"{rsid}: selected ClinVar record is incomplete: {clinvar.reasons}")
+        elif curated_clinvar is not None and curated_clinvar["accession"] != clinvar.accession:
+            errors.append(f"{rsid}: curated ClinVar accession {curated_clinvar['accession']} differs from the "
+                          f"imported {clinvar.accession} ({clinvar.selected_by})")
+        elif curated_clinvar is not None and (drift := _clinvar_drift(rsid, curated_clinvar, clinvar)):
+            errors.extend(drift)
+        else:
+            evidence["clinvar"] = {
+                "accession": clinvar.accession,
+                "review_status": clinvar.review_status,
+                "stars": clinvar.stars,
+                "significance": clinvar.significance,
+                "provenance": clinvar.provenance.to_dict(),
+            }
+
+        variant = snapshot.gnomad_variant(rsid, variant_id)
+        constraint = snapshot.constraint(gene)
+        if variant is not None and variant.refusal is not None:
+            errors.append(f"{rsid}: gnomAD af cannot be imported: {variant.reasons['af']}")
+            variant = None
+        if variant is not None and variant.variant_id not in (None, variant_id):
+            errors.append(f"{rsid}: gnomAD capture is for {variant.variant_id}, the locus is {variant_id}")
+            variant = None
+        if constraint is not None and constraint.symbol not in (None, gene):
+            errors.append(f"{rsid}: gnomAD constraint capture is for {constraint.symbol}, the locus gene is {gene}")
+            constraint = None
+        curated_af = (evidence.get("gnomad") or {}).get("af")
+        if variant is not None and variant.af is not None and curated_af is not None:
+            if not _af_agrees(curated_af, variant.af):
+                errors.append(f"{rsid}: curated gnomad.af {curated_af!r} differs from the imported {variant.af!r} "
+                              f"(rounded half-up to the curated {_decimal_places(curated_af)} places)")
+        gnomad = dict(evidence.get("gnomad") or {"af": None, "pli": None, "loeuf": None, "provenance": None})
+        gnomad["constraint_provenance"] = None
+        if variant is not None and variant.af is not None:
+            gnomad["af"], gnomad["provenance"] = variant.af, variant.provenance.to_dict()
+        if constraint is not None and (constraint.pli is not None or constraint.loeuf is not None):
+            gnomad["pli"], gnomad["loeuf"] = constraint.pli, constraint.loeuf
+            gnomad["constraint_provenance"] = constraint.provenance.to_dict()
+        if evidence.get("gnomad") is not None or gnomad["constraint_provenance"] or gnomad["provenance"]:
+            evidence["gnomad"] = gnomad
+
+        vep = snapshot.vep(rsid, gene, ref, alt)
+        if vep is not None:
+            evidence["vep"] = {
+                "mane_select_ensembl": vep.mane_select_ensembl,
+                "mane_select_refseq": vep.mane_select_refseq,
+                "alphamissense_class": vep.alphamissense_class,
+                "alphamissense_score": vep.alphamissense_score,
+                "provenance": vep.provenance.to_dict(),
+            }
+    except (AdapterError, ValueError) as exc:
+        errors.append(f"{rsid}: upstream payload cannot be imported: {exc}")
+    return errors
+
+
+def _build_locus(
+    rsid: str, locus: dict[str, Any], gene: dict[str, Any], snapshot: Optional[UpstreamSnapshot]
+) -> tuple[dict[str, Any], list[str]]:
     evidence = _build_evidence(locus["evidence"])
+    evidence.setdefault("dbsnp", None)
+    evidence.setdefault("vep", None)
+    errors = [] if snapshot is None else _overlay_imported(rsid, locus, evidence, snapshot)
     basis = locus.get("tier")
     source = tier_source_for(gene)
-    if source == "clinvar_review":  # Mendelian-disease gene: ClinVar review stars
+    if source == "clinvar_review":  # Mendelian-disease gene: ClinVar review stars (imported where available)
         clinvar = evidence["clinvar"]
         tier = derive_evidence_tier(clinvar["stars"], "conflicting" in clinvar["review_status"].lower())
-    elif source == "curated":  # risk_factor / trait gene: curated tier
+    elif source == "curated":  # risk_factor / trait gene: curated tier. ClinVar stays evidence only (L7)
         tier = EvidenceTier(basis["curated_tier"])
     else:  # pharmacogenomic gene: CPIC level
         tier = derive_tier_from_cpic_level(evidence["cpic"]["level"])
@@ -471,16 +589,33 @@ def _build_locus(rsid: str, locus: dict[str, Any], gene: dict[str, Any]) -> dict
         "tier_citation": basis["citation"] if basis else None,
         "limitation": _resolve_limitation(locus),
         "role": locus["role"],
-    }
+    }, errors
 
 
-def build_kb(curation: dict[str, Any]) -> tuple[Optional[dict[str, Any]], list[str]]:
-    """Build the KB document in memory. Returns (None, errors) when QC finds any error."""
+def build_kb(
+    curation: dict[str, Any], upstream_root: Optional[Path | str] = DEFAULT_UPSTREAM_ROOT
+) -> tuple[Optional[dict[str, Any]], list[str]]:
+    """Build the KB document in memory. Returns (None, errors) when QC finds any error.
+
+    `upstream_root` holds the pinned upstream payloads. Their sha256 is verified first; a tampered
+    payload is a QC error and nothing is imported from it. `upstream_root=None` is the explicit
+    curation-only build (no overlay, no cross-checks); the CLI never uses it.
+    """
     errors = validate_curation(curation)
     if errors:
         return None, errors
+    snapshot = None if upstream_root is None else UpstreamSnapshot(upstream_root)
+    errors = [] if snapshot is None else snapshot.verify_integrity()
+    if errors:
+        return None, errors
     genes = {symbol: _build_gene(curation["genes"][symbol]) for symbol in sorted(curation["genes"])}
-    loci = {rsid: _build_locus(rsid, curation["loci"][rsid], curation["genes"][curation["loci"][rsid]["gene"]]) for rsid in sorted(curation["loci"])}
+    loci = {}
+    for rsid in sorted(curation["loci"]):
+        locus = curation["loci"][rsid]
+        loci[rsid], locus_errors = _build_locus(rsid, locus, curation["genes"][locus["gene"]], snapshot)
+        errors.extend(locus_errors)
+    if errors:
+        return None, errors
     canonical = json.dumps({"genes": genes, "loci": loci}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     manifest = {
         "release": curation["release"],
@@ -532,6 +667,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                         help="rebuild in memory and compare with the KB file; write nothing")
     parser.add_argument("--kb-path", type=Path, default=DEFAULT_KB_PATH, help="KB JSON file to write or compare")
     parser.add_argument("--curation-path", type=Path, default=DEFAULT_CURATION_PATH, help="curation source file")
+    parser.add_argument("--upstream-path", type=Path, default=DEFAULT_UPSTREAM_ROOT, help="pinned upstream payload directory")
     args = parser.parse_args(argv)
 
     try:
@@ -539,7 +675,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     except (OSError, ValueError) as exc:
         print(f"cannot read curation file {args.curation_path}: {exc}")
         return 1
-    payload, errors = build_kb(curation)
+    payload, errors = build_kb(curation, args.upstream_path)
     print(f"QC errors: {len(errors)}")
     for error in errors:
         print(f"  QC ERROR: {error}")

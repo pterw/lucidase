@@ -3,8 +3,11 @@ Canonical Variome data models
 =============================
 Models shared by the KB build and the source adapters:
 
-- `UPSTREAM_LICENSES` and `FieldProvenance`: the anti-corruption layer's provenance record
-  (`tools/source_adapters.py`).
+- `UPSTREAM_LICENSES`: redistribution terms of the upstream sources.
+- The adapter output models (`ClinVarRecord`, `DbsnpRecord`, `VepRecord`, `GnomadVariant`,
+  `GnomadConstraint`, `ImportProvenance`): the only shapes downstream code sees from an upstream
+  payload (anti-corruption layer, `tools/source_adapters.py`). A value the payload lacks is `None`
+  and the model's `reasons` says why. Nothing is ever synthesised.
 - `GenotypeInterpretation`: what one alt-allele count means at a locus (contract C2 `Interp`).
   It holds knowledge only. Nothing here depends on one person's sample: observed genotype,
   coverage state and sample observation are computed at analysis time.
@@ -71,17 +74,143 @@ UPSTREAM_LICENSES["ENCODE"] = UPSTREAM_LICENSES["encode"]
 UPSTREAM_LICENSES["ACMG"] = UPSTREAM_LICENSES["acmg"]
 
 
-@dataclass
-class FieldProvenance:
-    """Provenance audit record for an individual data field."""
+def normalize_edit(pos: int, ref: str, alt: str) -> tuple[int, str, str]:
+    """Reduce a (1-based pos, ref, alt) change to its minimal left-aligned edit (start, deleted, inserted).
+
+    Trailing bases shared by ref and alt are trimmed first, then leading ones (each leading base moves
+    `start` right). Trimming the suffix first keeps an edit at the left edge of a repeat, which is how
+    gnomAD and ClinVar write it. dbSNP SPDI deletions (`TCTT` > `T`) and VCF anchored deletions
+    (`ATCT` > `A`) both reduce to the same edit (start, `TCT`, ``). Without the reference sequence this
+    cannot shift an edit left past the allele's own bases, so it is exact only for SPDI or VCF input
+    that already starts at the left edge of its repeat.
+    """
+    while ref and alt and ref[-1] == alt[-1]:
+        ref, alt = ref[:-1], alt[:-1]
+    while ref and alt and ref[0] == alt[0]:
+        ref, alt, pos = ref[1:], alt[1:], pos + 1
+    return pos, ref, alt
+
+
+@dataclass(frozen=True)
+class ImportProvenance:
+    """Where a machine-imported value came from. Every field comes from the pinned payload or its meta."""
     source: str
-    source_release: str
-    accession_id: str
-    retrieval_timestamp: str
-    transformation: str
-    review_status: str
-    curation_mode: CurationMode
-    license: str
+    release: Optional[str]
+    accession: Optional[str]
+    url: str
+    retrieved_at: str
+    sha256: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Contract C2 provenance (the sha256 is checked by QC and is not part of the KB)."""
+        return {
+            "source": self.source,
+            "release": self.release,
+            "accession": self.accession,
+            "url": self.url,
+            "curation_mode": CurationMode.MACHINE_IMPORTED.value,
+            "retrieved_at": self.retrieved_at,
+        }
+
+
+@dataclass(frozen=True)
+class ClinVarRecord:
+    """The ClinVar record selected for one locus. `accession` is None when the payload carries none."""
+    accession: Optional[str]            # VCV000007105 (no version)
+    accession_version: Optional[str]    # VCV000007105.212
+    title: str
+    obj_type: str
+    review_status: str                  # exact ClinVar vocabulary
+    stars: int
+    conflicting: bool
+    significance: Optional[str]
+    selected_by: str
+    reasons: dict[str, str] = field(default_factory=dict)
+    provenance: Optional[ImportProvenance] = None
+
+
+@dataclass(frozen=True)
+class DbsnpPlacement:
+    """One chromosome placement (one assembly) of a refsnp. `alleles` are SPDI (0-based pos, deleted, inserted)."""
+    seq_id: str
+    build: str                          # GRCh37 | GRCh38
+    alleles: tuple[tuple[int, str, str], ...]
+
+    @property
+    def allele_set(self) -> frozenset[str]:
+        """Every allele dbSNP lists at this placement, including the assembly reference."""
+        return frozenset(seq for _, deleted, inserted in self.alleles for seq in (deleted, inserted))
+
+    def locate(self, ref: str, alt: str) -> Optional[int]:
+        """The 1-based VCF-style position of {ref, alt} at this placement, or None when dbSNP lacks the alleles.
+
+        A single-base ref and alt must both be among dbSNP's alleles (ref/alt are build-independent
+        variant and non-variant alleles, not assembly bases). An indel must equal one dbSNP edit after
+        both are reduced with `normalize_edit`; its position is that of the VCF anchor base.
+        """
+        if len(ref) == 1 and len(alt) == 1:
+            if {ref, alt} <= self.allele_set:
+                return next((pos + 1 for pos, deleted, _ in self.alleles if len(deleted) == 1), None)
+            return None
+        _, deleted, inserted = normalize_edit(0, ref, alt)
+        for pos, spdi_deleted, spdi_inserted in self.alleles:
+            if spdi_deleted == spdi_inserted:
+                continue
+            start, d, i = normalize_edit(pos + 1, spdi_deleted, spdi_inserted)
+            if (d, i) == (deleted, inserted):
+                return start - 1
+        return None
+
+
+@dataclass(frozen=True)
+class DbsnpRecord:
+    rsid: str
+    release: Optional[str]
+    placements: dict[str, DbsnpPlacement]   # keyed by build
+    reasons: dict[str, str] = field(default_factory=dict)
+    provenance: Optional[ImportProvenance] = None
+
+    def check_locus(self, build: str, pos: int, ref: str, alt: str) -> Optional[str]:
+        """None when the curated position and alleles agree with dbSNP for `build`, else the reason."""
+        placement = self.placements.get(build)
+        if placement is None:
+            return f"dbSNP has no {build} placement"
+        found = placement.locate(ref, alt)
+        if found is None:
+            return f"{build} alleles {ref}/{alt} are not in dbSNP's allele set {sorted(placement.allele_set)}"
+        if found != pos:
+            return f"{build} position {pos} differs from dbSNP's {found}"
+        return None
+
+
+@dataclass(frozen=True)
+class VepRecord:
+    """MANE Select transcript and AlphaMissense for the locus allele. Absent values are None with a reason."""
+    rsid: str
+    mane_select_ensembl: Optional[str]
+    mane_select_refseq: Optional[str]
+    alphamissense_class: Optional[str]
+    alphamissense_score: Optional[float]
+    reasons: dict[str, str] = field(default_factory=dict)
+    provenance: Optional[ImportProvenance] = None
+
+
+@dataclass(frozen=True)
+class GnomadVariant:
+    variant_id: Optional[str]
+    af: Optional[float]                 # pooled ac/an over the exome and genome records that have an > 0
+    reasons: dict[str, str] = field(default_factory=dict)
+    provenance: Optional[ImportProvenance] = None
+    refusal: Optional[str] = None       # a named reason (source_adapters.GNOMAD_REFUSAL_*) when gnomAD refused the query
+
+
+@dataclass(frozen=True)
+class GnomadConstraint:
+    symbol: Optional[str]
+    pli: Optional[float]
+    loeuf: Optional[float]              # the upper bound of the observed/expected LoF ratio
+    reasons: dict[str, str] = field(default_factory=dict)
+    provenance: Optional[ImportProvenance] = None
 
 
 @dataclass

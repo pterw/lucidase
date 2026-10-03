@@ -41,8 +41,8 @@ what each *alt-allele count* means. Whatever depends on one person's sample
 analysis time and never stored in the KB.
 
 **Anti-Corruption Layer.** Only `tools/source_adapters.py` knows the shape
-of upstream payloads (ClinVar, dbSNP, Ensembl VEP, gnomAD, CPIC, AlphaFold,
-HPA, ENCODE). It translates them into our own models (`tools/variome_models.py`).
+of upstream payloads (ClinVar, dbSNP, Ensembl VEP, gnomAD). It translates them
+into our own models (`tools/variome_models.py`).
 Nothing downstream reads a raw upstream field name. The adapters are tested
 against **real captured payloads** pinned in `tools/fixtures/upstream/`,
 each with retrieval URL and date. Never test them against fixtures written to

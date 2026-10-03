@@ -603,28 +603,48 @@
         "clinvar": {
           "accession": "VCV000007105",
           "provenance": {
-            "accession": "VCV000007105",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000007105.212",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000007105 (hand-transcribed from pinned capture clinvar/rs113993960.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/7105/"
+            "retrieved_at": "2026-10-03T00:21:57Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=634837%2C7105&retmode=json"
           },
           "review_status": "practice guideline",
           "significance": "Pathogenic",
           "stars": 4
         },
+        "dbsnp": {
+          "pos_grch37": 117199644,
+          "pos_grch38": 117559590,
+          "provenance": {
+            "accession": "rs113993960",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:56Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/113993960"
+          }
+        },
         "gnomad": {
-          "af": 0.011931,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.011931254341569912,
+          "constraint_provenance": {
+            "accession": "CFTR",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.193105532032236,
+          "pli": 3.7662138794205147e-65,
           "provenance": {
             "accession": "7-117559590-ATCT-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs113993960.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:59Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -645,6 +665,20 @@
             "gallbladder": "High",
             "lung": "High",
             "pancreas": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000003084",
+          "mane_select_refseq": "NM_000492.4",
+          "provenance": {
+            "accession": "rs113993960",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:58Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs113993960?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -698,28 +732,48 @@
         "clinvar": {
           "accession": "VCV000000010",
           "provenance": {
-            "accession": "VCV000000010",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000000010.141",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000000010 (hand-transcribed from pinned capture clinvar/rs1799945.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/10/"
+            "retrieved_at": "2026-10-03T00:21:12Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=10&retmode=json"
           },
           "review_status": "criteria provided, conflicting classifications",
           "significance": "Conflicting classifications of pathogenicity; other",
           "stars": 1
         },
+        "dbsnp": {
+          "pos_grch37": 26091179,
+          "pos_grch38": 26090951,
+          "provenance": {
+            "accession": "rs1799945",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:10Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1799945"
+          }
+        },
         "gnomad": {
-          "af": 0.131952,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.131951957310809,
+          "constraint_provenance": {
+            "accession": "HFE",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:03Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.161310736713692,
+          "pli": 1.7623125883910847e-11,
           "provenance": {
             "accession": "6-26090951-C-G",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1799945.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:14Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -737,6 +791,20 @@
           "tissues": {
             "duodenum": "High",
             "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.455,
+          "mane_select_ensembl": "ENST00000357618",
+          "mane_select_refseq": "NM_000410.4",
+          "provenance": {
+            "accession": "rs1799945",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:13Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1799945?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -790,28 +858,48 @@
         "clinvar": {
           "accession": "VCV000013310",
           "provenance": {
-            "accession": "VCV000013310",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000013310.156",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000013310 (hand-transcribed from pinned capture clinvar/rs1799963.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/13310/"
+            "retrieved_at": "2026-10-03T00:21:20Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=13310&retmode=json"
           },
           "review_status": "criteria provided, multiple submitters, no conflicts",
           "significance": "Pathogenic/Likely pathogenic/Pathogenic, low penetrance/Established risk allele; risk factor",
           "stars": 2
         },
+        "dbsnp": {
+          "pos_grch37": 46761055,
+          "pos_grch38": 46739505,
+          "provenance": {
+            "accession": "rs1799963",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:18Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1799963"
+          }
+        },
         "gnomad": {
-          "af": 0.011385,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.011384996668959431,
+          "constraint_provenance": {
+            "accession": "F2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.5529335583888805,
+          "pli": 0.17975232140063657,
           "provenance": {
             "accession": "11-46739505-G-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1799963.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:25Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -829,6 +917,20 @@
           "tissues": {
             "liver": "High",
             "plasma": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000311907",
+          "mane_select_refseq": "NM_000506.5",
+          "provenance": {
+            "accession": "rs1799963",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:24Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1799963?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -882,28 +984,48 @@
         "clinvar": {
           "accession": "VCV000000009",
           "provenance": {
-            "accession": "VCV000000009",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000000009.147",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000000009 (hand-transcribed from pinned capture clinvar/rs1800562.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/9/"
+            "retrieved_at": "2026-10-03T00:21:07Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=9&retmode=json"
           },
           "review_status": "criteria provided, multiple submitters, no conflicts",
           "significance": "Pathogenic/Pathogenic, low penetrance; risk factor",
           "stars": 2
         },
+        "dbsnp": {
+          "pos_grch37": 26093141,
+          "pos_grch38": 26092913,
+          "provenance": {
+            "accession": "rs1800562",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:05Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1800562"
+          }
+        },
         "gnomad": {
-          "af": 0.056982,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.0569822579785817,
+          "constraint_provenance": {
+            "accession": "HFE",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:03Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.161310736713692,
+          "pli": 1.7623125883910847e-11,
           "provenance": {
             "accession": "6-26092913-G-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1800562.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:10Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -924,6 +1046,20 @@
             "liver": "High",
             "placenta": "Medium",
             "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.9585,
+          "mane_select_ensembl": "ENST00000357618",
+          "mane_select_refseq": "NM_000410.4",
+          "provenance": {
+            "accession": "rs1800562",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:09Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1800562?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -977,28 +1113,48 @@
         "clinvar": {
           "accession": "VCV000003520",
           "provenance": {
-            "accession": "VCV000003520",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000003520.143",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000003520 (hand-transcribed from pinned capture clinvar/rs1801133.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3520/"
+            "retrieved_at": "2026-10-03T00:21:44Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=128852%2C3522%2C3521%2C3520&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
           "stars": 3
         },
+        "dbsnp": {
+          "pos_grch37": 11856378,
+          "pos_grch38": 11796321,
+          "provenance": {
+            "accession": "rs1801133",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:42Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1801133"
+          }
+        },
         "gnomad": {
-          "af": 0.318214,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.3182137576943525,
+          "constraint_provenance": {
+            "accession": "MTHFR",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:08Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.9172636726566925,
+          "pli": 1.047047121188445e-12,
           "provenance": {
             "accession": "1-11796321-G-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1801133.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:46Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1018,6 +1174,20 @@
             "cerebral cortex": "Medium",
             "kidney": "Medium",
             "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.6324,
+          "mane_select_ensembl": "ENST00000376590",
+          "mane_select_refseq": "NM_005957.5",
+          "provenance": {
+            "accession": "rs1801133",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:45Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1801133?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1071,12 +1241,12 @@
         "clinvar": {
           "accession": "VCV000000432",
           "provenance": {
-            "accession": "VCV000000432",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000000432.149",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000000432 (hand-transcribed from pinned capture clinvar/rs3918290.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/432/"
+            "retrieved_at": "2026-10-03T00:21:40Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=2429124%2C432&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
@@ -1094,17 +1264,37 @@
             "url": null
           }
         },
+        "dbsnp": {
+          "pos_grch37": 97915614,
+          "pos_grch38": 97450058,
+          "provenance": {
+            "accession": "rs3918290",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:38Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/3918290"
+          }
+        },
         "gnomad": {
-          "af": 0.005061,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.0050607701392873655,
+          "constraint_provenance": {
+            "accession": "DPYD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0997871251550417,
+          "pli": 5.141188106751485e-35,
           "provenance": {
             "accession": "1-97450058-C-T",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs3918290.1-97450058-C-T.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:22:43Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1123,6 +1313,20 @@
             "colon": "Medium",
             "kidney": "Medium",
             "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000370192",
+          "mane_select_refseq": "NM_000110.4",
+          "provenance": {
+            "accession": "rs3918290",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:41Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs3918290?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1176,12 +1380,12 @@
         "clinvar": {
           "accession": "VCV000037346",
           "provenance": {
-            "accession": "VCV000037346",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000037346.109",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000037346 (hand-transcribed from pinned capture clinvar/rs4149056.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/37346/"
+            "retrieved_at": "2026-10-03T00:21:35Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=37346&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
@@ -1199,17 +1403,37 @@
             "url": null
           }
         },
+        "dbsnp": {
+          "pos_grch37": 21331549,
+          "pos_grch38": 21178615,
+          "provenance": {
+            "accession": "rs4149056",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:34Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/4149056"
+          }
+        },
         "gnomad": {
-          "af": 0.14229,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.1422902706314068,
+          "constraint_provenance": {
+            "accession": "SLCO1B1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3897183564496676,
+          "pli": 1.0599735911178368e-31,
           "provenance": {
             "accession": "12-21178615-T-C",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs4149056.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:38Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1226,6 +1450,20 @@
           ],
           "tissues": {
             "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.6134,
+          "mane_select_ensembl": "ENST00000256958",
+          "mane_select_refseq": "NM_006446.5",
+          "provenance": {
+            "accession": "rs4149056",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:37Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs4149056?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1279,12 +1517,12 @@
         "clinvar": {
           "accession": "VCV000633856",
           "provenance": {
-            "accession": "VCV000633856",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000633856.3",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000633856 (hand-transcribed from pinned capture clinvar/rs4244285.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/633856/"
+            "retrieved_at": "2026-10-03T00:30:37Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1703261%2C638797%2C634407%2C634406%2C634360%2C634359%2C634336%2C634335%2C634285%2C634284%2C634238%2C634237%2C634105%2C634104%2C634103%2C634102%2C634010%2C634009%2C634008%2C634007%2C634006%2C633974%2C633973%2C633972%2C633971%2C633904%2C633903%2C633902%2C633901%2C633870%2C633869%2C633868%2C633867%2C633866%2C633857%2C633856%2C16897&retmode=json"
           },
           "review_status": "practice guideline",
           "significance": "drug response",
@@ -1302,17 +1540,37 @@
             "url": null
           }
         },
+        "dbsnp": {
+          "pos_grch37": 96541616,
+          "pos_grch38": 94781859,
+          "provenance": {
+            "accession": "rs4244285",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:26Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/4244285"
+          }
+        },
         "gnomad": {
-          "af": 0.160234,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.1602339404880087,
+          "constraint_provenance": {
+            "accession": "CYP2C19",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:06Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.7936723070559686,
+          "pli": 9.948487222945463e-27,
           "provenance": {
             "accession": "10-94781859-G-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs4244285.10-94781859-G-A.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:22:40Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1330,6 +1588,20 @@
           "tissues": {
             "duodenum": "Medium",
             "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000371321",
+          "mane_select_refseq": "NM_000769.4",
+          "provenance": {
+            "accession": "rs4244285",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:29Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs4244285?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1383,28 +1655,48 @@
         "clinvar": {
           "accession": "VCV000017864",
           "provenance": {
-            "accession": "VCV000017864",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000017864.51",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000017864 (hand-transcribed from pinned capture clinvar/rs429358.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17864/"
+            "retrieved_at": "2026-10-03T00:20:57Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=694742%2C694585%2C441269%2C441268%2C441267%2C440870%2C17864%2C17863&retmode=json"
           },
           "review_status": "criteria provided, conflicting classifications",
           "significance": "Conflicting classifications of pathogenicity; other; risk factor",
           "stars": 1
         },
+        "dbsnp": {
+          "pos_grch37": 45411941,
+          "pos_grch38": 44908684,
+          "provenance": {
+            "accession": "rs429358",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:20:56Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/429358"
+          }
+        },
         "gnomad": {
-          "af": 0.14852,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.14852043380538965,
+          "constraint_provenance": {
+            "accession": "APOE",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:03Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2948667658800423,
+          "pli": 0.0014179720427969992,
           "provenance": {
             "accession": "19-44908684-T-C",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs429358.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:00Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1425,6 +1717,20 @@
             "cerebral cortex": "Medium",
             "liver": "High",
             "plasma": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0365,
+          "mane_select_ensembl": "ENST00000252486",
+          "mane_select_refseq": "NM_000041.4",
+          "provenance": {
+            "accession": "rs429358",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:00Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs429358?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1478,28 +1784,48 @@
         "clinvar": {
           "accession": "VCV000007685",
           "provenance": {
-            "accession": "VCV000007685",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000007685.6",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000007685 (hand-transcribed from pinned capture clinvar/rs4988235.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/7685/"
+            "retrieved_at": "2026-10-03T00:21:48Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=7685&retmode=json"
           },
           "review_status": "no assertion criteria provided",
           "significance": "association",
           "stars": 0
         },
+        "dbsnp": {
+          "pos_grch37": 136608646,
+          "pos_grch38": 135851076,
+          "provenance": {
+            "accession": "rs4988235",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:47Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/4988235"
+          }
+        },
         "gnomad": {
-          "af": 0.396813,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.39681266518520464,
+          "constraint_provenance": {
+            "accession": "MCM6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:09Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.6236947288179308,
+          "pli": 4.3866095169515806e-05,
           "provenance": {
             "accession": "2-135851076-G-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed genome ac/an (capture holds a genome record only) from pinned capture gnomad/rs4988235.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:51Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1517,6 +1843,20 @@
           "tissues": {
             "duodenum": "High",
             "small intestine": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000264156",
+          "mane_select_refseq": "NM_005915.6",
+          "provenance": {
+            "accession": "rs4988235",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:50Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs4988235?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1572,28 +1912,48 @@
         "clinvar": {
           "accession": "VCV000000642",
           "provenance": {
-            "accession": "VCV000000642",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000000642.133",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000000642 (hand-transcribed from pinned capture clinvar/rs6025.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/642/"
+            "retrieved_at": "2026-10-03T00:21:16Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=226007%2C1940%2C642&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
           "stars": 3
         },
+        "dbsnp": {
+          "pos_grch37": 169519049,
+          "pos_grch38": 169549811,
+          "provenance": {
+            "accession": "rs6025",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:14Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/6025"
+          }
+        },
         "gnomad": {
-          "af": 0.021432,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.021432388235308703,
+          "constraint_provenance": {
+            "accession": "F5",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:04Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7346297124509565,
+          "pli": 1.1824824616561569e-27,
           "provenance": {
             "accession": "1-169549811-C-T",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs6025.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1611,6 +1971,20 @@
           "tissues": {
             "liver": "High",
             "plasma": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.205,
+          "mane_select_ensembl": "ENST00000367797",
+          "mane_select_refseq": "NM_000130.5",
+          "provenance": {
+            "accession": "rs6025",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:17Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs6025?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1664,28 +2038,48 @@
         "clinvar": {
           "accession": "VCV000018390",
           "provenance": {
-            "accession": "VCV000018390",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000018390.12",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000018390 (hand-transcribed from pinned capture clinvar/rs671.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/18390/"
+            "retrieved_at": "2026-10-03T00:21:53Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=18390&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
           "stars": 3
         },
+        "dbsnp": {
+          "pos_grch37": 112241766,
+          "pos_grch38": 111803962,
+          "provenance": {
+            "accession": "rs671",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:52Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/671"
+          }
+        },
         "gnomad": {
-          "af": 0.007036,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.007035519550363402,
+          "constraint_provenance": {
+            "accession": "ALDH2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:10Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.9493762631259881,
+          "pli": 1.486898577513336e-11,
           "provenance": {
             "accession": "12-111803962-G-A",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs671.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:55Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1704,6 +2098,20 @@
             "heart muscle": "Medium",
             "kidney": "High",
             "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.8864,
+          "mane_select_ensembl": "ENST00000261733",
+          "mane_select_refseq": "NM_000690.4",
+          "provenance": {
+            "accession": "rs671",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:54Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs671?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1757,28 +2165,48 @@
         "clinvar": {
           "accession": "VCV000017848",
           "provenance": {
-            "accession": "VCV000017848",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000017848.38",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000017848 (hand-transcribed from pinned capture clinvar/rs7412.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17848/"
+            "retrieved_at": "2026-10-03T00:21:02Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1341575%2C441265%2C441262%2C17848&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
           "stars": 3
         },
+        "dbsnp": {
+          "pos_grch37": 45412079,
+          "pos_grch38": 44908822,
+          "provenance": {
+            "accession": "rs7412",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:01Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/7412"
+          }
+        },
         "gnomad": {
-          "af": 0.07424,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.07424017237686671,
+          "constraint_provenance": {
+            "accession": "APOE",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:03Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2948667658800423,
+          "pli": 0.0014179720427969992,
           "provenance": {
             "accession": "19-44908822-C-T",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs7412.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1797,6 +2225,20 @@
             "cerebral cortex": "Medium",
             "liver": "High",
             "plasma": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4222,
+          "mane_select_ensembl": "ENST00000252486",
+          "mane_select_refseq": "NM_000041.4",
+          "provenance": {
+            "accession": "rs7412",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:04Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs7412?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1850,12 +2292,12 @@
         "clinvar": {
           "accession": "VCV000002211",
           "provenance": {
-            "accession": "VCV000002211",
-            "curation_mode": "manually_curated",
+            "accession": "VCV000002211.20",
+            "curation_mode": "machine_imported",
             "release": null,
-            "retrieved_at": null,
-            "source": "ClinVar VCV000002211 (hand-transcribed from pinned capture clinvar/rs9923231.json)",
-            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2211/"
+            "retrieved_at": "2026-10-03T00:21:31Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=166563%2C37344%2C2211&retmode=json"
           },
           "review_status": "reviewed by expert panel",
           "significance": "drug response",
@@ -1873,17 +2315,37 @@
             "url": null
           }
         },
+        "dbsnp": {
+          "pos_grch37": 31107689,
+          "pos_grch38": 31096368,
+          "provenance": {
+            "accession": "rs9923231",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-03T00:21:30Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/9923231"
+          }
+        },
         "gnomad": {
-          "af": 0.319017,
-          "loeuf": null,
-          "pli": null,
+          "af": 0.31901743681455963,
+          "constraint_provenance": {
+            "accession": "VKORC1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:06Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3096889009658736,
+          "pli": 0.0002826760614985898,
           "provenance": {
             "accession": "16-31096368-C-T",
-            "curation_mode": "manually_curated",
-            "release": null,
-            "retrieved_at": null,
-            "source": "gnomAD (hand-computed genome ac/an (capture holds a genome record only) from pinned capture gnomad/rs9923231.json)",
-            "url": null
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-03T00:21:33Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
           }
         },
         "hpa": {
@@ -1901,6 +2363,20 @@
           "tissues": {
             "liver": "High",
             "placenta": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000394975",
+          "mane_select_refseq": "NM_024006.6",
+          "provenance": {
+            "accession": "rs9923231",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:21:33Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs9923231?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
           }
         }
       },
@@ -1958,7 +2434,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "4fcd366fb0154ddf4f1f5d984ffa8ddc89047e810e2c097ed53d012796cdd4cb"
+    "sha256": "b79e6a67bb68c33f43e844dea9af2a3961f5fa3c448cccf98433933be74d2d83"
   },
   "schema_version": 2
 }

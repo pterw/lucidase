@@ -8,9 +8,14 @@ Tests for the identity / evidence / interpretation separation in KB schema v2 (c
 """
 
 import copy
+import hashlib
+import json
+import shutil
+import tempfile
 import unittest
+from pathlib import Path
 
-from tools.build_canonical_kb import build_kb, load_curation
+from tools.build_canonical_kb import DEFAULT_UPSTREAM_ROOT as UPSTREAM_ROOT, build_kb, load_curation
 from tools.variome_models import GenotypeInterpretation
 
 IDENTITY_KEYS = {"rsid", "gene", "chrom", "pos_grch37", "pos_grch38", "ref", "alt", "allele_codes", "role"}
@@ -44,22 +49,45 @@ class TestThreeLayerArchitecture(unittest.TestCase):
                 self.assertTrue(interp["phenotype"])
 
     def test_interpretation_isolation_from_evidence_updates(self):
-        """An upstream evidence update must not alter curated interpretation semantics."""
-        before = copy.deepcopy(self.curation)
-        after = copy.deepcopy(self.curation)
+        """An upstream evidence update must not alter curated interpretation semantics.
+
+        The update is a changed ClinVar review status in a temp copy of the pinned payloads, with its
+        meta sha256 re-pinned in the copy only. The committed fixtures are never touched.
+        """
         rsid = "rs1800562"
-        after["loci"][rsid]["evidence"]["clinvar"].update(
-            review_status="practice guideline", stars=4, significance="Pathogenic"
-        )
-        after["loci"][rsid]["evidence"]["gnomad"]["af"] = 0.05
-        kb_before, _ = build_kb(before)
-        kb_after, errors = build_kb(after)
+        kb_before, errors = build_kb(copy.deepcopy(self.curation))
         self.assertEqual(errors, [])
-        self.assertEqual(kb_before["loci"][rsid]["interpretations"], kb_after["loci"][rsid]["interpretations"])
-        self.assertEqual(kb_before["loci"][rsid]["limitation"], kb_after["loci"][rsid]["limitation"])
-        # The derived tier did change with the evidence, which is the point of keeping them apart.
-        self.assertEqual(kb_before["loci"][rsid]["evidence_tier"], "Tier B")
-        self.assertEqual(kb_after["loci"][rsid]["evidence_tier"], "Tier A")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "real"
+            shutil.copytree(UPSTREAM_ROOT, root)
+            body = root / "clinvar" / f"{rsid}.json"
+            meta = root / "clinvar" / f"{rsid}.meta.json"
+            data = body.read_bytes()
+            old = b"criteria provided, multiple submitters, no conflicts"
+            self.assertIn(old, data)
+            data = data.replace(old, b"practice guideline")
+            body.write_bytes(data)
+            info = json.loads(meta.read_text(encoding="utf-8"))
+            info["sha256_of_body"], info["bytes"] = hashlib.sha256(data).hexdigest(), len(data)
+            meta.write_text(json.dumps(info), encoding="utf-8")
+            # The curated ClinVar fields must agree with the import (QC drift check), so the curator
+            # re-transcribes the two evidence fields; interpretations and limitation are not touched.
+            curation_after = copy.deepcopy(self.curation)
+            curated_clinvar = curation_after["loci"][rsid]["evidence"]["clinvar"]
+            curated_clinvar["review_status"], curated_clinvar["stars"] = "practice guideline", 4
+            kb_after, errors = build_kb(curation_after, root)
+        self.assertEqual(errors, [])
+        before, after = kb_before["loci"][rsid], kb_after["loci"][rsid]
+        self.assertEqual(after["evidence"]["clinvar"]["stars"], 4)
+        for key in ("interpretations", "limitation"):
+            self.assertEqual(json.dumps(before[key], sort_keys=True), json.dumps(after[key], sort_keys=True), key)
+        gene = self.curation["loci"][rsid]["gene"]
+        self.assertEqual(
+            json.dumps(kb_before["genes"][gene], sort_keys=True), json.dumps(kb_after["genes"][gene], sort_keys=True)
+        )
+        # The derived tier did change with the imported stars, which is the point of keeping them apart.
+        self.assertEqual(before["evidence_tier"], "Tier B")
+        self.assertEqual(after["evidence_tier"], "Tier A")
 
     def test_locus_and_gene_counts_come_from_the_curation_file(self):
         self.assertEqual(self.kb["manifest"]["locus_count"], len(self.curation["loci"]))

@@ -9,6 +9,7 @@ import copy
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -140,12 +141,12 @@ def test_no_per_sample_fields_anywhere(built):
 
 
 def test_unknown_evidence_is_null_never_a_placeholder(built):
-    """CR-9: no gnomAD pLI of 0.0 placeholder; unknown values are null."""
+    """CR-9: no gnomAD pLI of 0.0 placeholder; unknown values are null (T5: pLI and LOEUF are now imported)."""
     for rsid, locus in built["loci"].items():
         gnomad = locus["evidence"]["gnomad"]
         assert "pli" in gnomad and "loeuf" in gnomad
-        assert gnomad["pli"] is None, rsid
-        assert gnomad["loeuf"] is None, rsid
+        for key in ("pli", "loeuf"):
+            assert gnomad[key] is None or gnomad[key] > 0.0, (rsid, key)
     for path, key, value in walk(built["loci"]):
         if key in ("pli", "loeuf"):
             assert value != 0.0
@@ -154,12 +155,13 @@ def test_unknown_evidence_is_null_never_a_placeholder(built):
 
 
 def test_manually_curated_provenance_has_no_retrieval_time(built):
-    curated = [(p, v) for p, k, v in walk(built) if k == "provenance"]
-    assert curated, "expected provenance records in the KB"
-    for path, prov in curated:
+    """Curated values carry no retrieval time; machine-imported ones (T5) carry the capture's real one."""
+    records = [(p, v) for p, k, v in walk(built) if k in ("provenance", "constraint_provenance") and v is not None]
+    assert records, "expected provenance records in the KB"
+    for path, prov in records:
         assert set(prov) == PROVENANCE_KEYS, path
-        assert prov["curation_mode"] == "manually_curated", path
-        assert prov["retrieved_at"] is None, path
+        assert prov["curation_mode"] in ("manually_curated", "machine_imported"), path
+        assert (prov["retrieved_at"] is None) == (prov["curation_mode"] == "manually_curated"), path
 
 
 # ---------------------------------------------------------------------------
@@ -642,3 +644,198 @@ def test_default_run_writes_the_file_deterministically(tmp_path, curation):
     result = run_cli("--kb-path", str(out))
     assert result.returncode == 0, result.stdout + result.stderr
     assert out.read_text(encoding="utf-8") == render_kb(build_kb(curation)[0])
+
+
+# ---------------------------------------------------------------------------
+# T5: machine-imported evidence overlay and upstream cross-checks
+# ---------------------------------------------------------------------------
+UPSTREAM = ROOT / "tools" / "fixtures" / "upstream" / "real"
+# Tier of every locus before the overlay existed (T4 build). Importing evidence must not move any of them.
+TIERS_BEFORE_OVERLAY = {
+    "rs113993960": "Tier A", "rs1799945": "Tier D", "rs1799963": "Tier A", "rs1800562": "Tier B",
+    "rs1801133": "Tier C", "rs3918290": "Tier A", "rs4149056": "Tier A", "rs4244285": "Tier A",
+    "rs429358": "Tier A", "rs4988235": "Tier A", "rs6025": "Tier A", "rs671": "Tier A",
+    "rs7412": "Tier A", "rs9923231": "Tier A",
+}
+
+
+def write_curation(tmp_path, doc):
+    path = tmp_path / "curation.json"
+    path.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def cli_with_curation(tmp_path, good_kb, doc, *extra):
+    path = write_curation(tmp_path, doc)
+    return run_cli("--verify-only", "--kb-path", str(good_kb), "--curation-path", str(path), *extra)
+
+
+def test_imported_evidence_is_machine_imported_with_the_captures_retrieval_time(built):
+    for rsid, locus in built["loci"].items():
+        clinvar = locus["evidence"]["clinvar"]
+        meta = json.loads((UPSTREAM / "clinvar" / f"{rsid}.meta.json").read_text(encoding="utf-8"))
+        prov = clinvar["provenance"]
+        assert prov["curation_mode"] == "machine_imported", rsid
+        assert (prov["retrieved_at"], prov["url"]) == (meta["retrieved_at"], meta["url"]), rsid
+        assert prov["accession"].startswith(clinvar["accession"] + "."), rsid
+        gnomad = locus["evidence"]["gnomad"]
+        assert gnomad["provenance"]["curation_mode"] == "machine_imported", rsid
+        assert gnomad["constraint_provenance"]["curation_mode"] == "machine_imported", rsid
+        assert gnomad["pli"] is not None and gnomad["loeuf"] is not None, rsid
+
+
+def test_values_without_an_adapter_stay_manually_curated(built, curation):
+    """CPIC level, HPA tissues and gene insights have no adapter: they keep their curated provenance."""
+    for rsid, locus in built["loci"].items():
+        evidence = locus["evidence"]
+        if evidence.get("hpa") is not None:
+            assert evidence["hpa"]["provenance"]["curation_mode"] == "manually_curated", rsid
+        if evidence.get("cpic") is not None:
+            assert evidence["cpic"]["provenance"]["curation_mode"] == "manually_curated", rsid
+            assert evidence["cpic"]["provenance"]["retrieved_at"] is None, rsid
+    for symbol, gene in built["genes"].items():
+        if gene["insights"] is not None:
+            assert gene["insights"]["provenance"]["curation_mode"] == "manually_curated", symbol
+
+
+def test_vep_and_dbsnp_evidence_is_imported(built):
+    vep = built["loci"]["rs429358"]["evidence"]["vep"]
+    assert vep["mane_select_refseq"] == "NM_000041.4" and vep["alphamissense_class"] == "likely_benign"
+    assert built["loci"]["rs1799963"]["evidence"]["vep"]["alphamissense_class"] is None
+    dbsnp = built["loci"]["rs113993960"]["evidence"]["dbsnp"]
+    assert (dbsnp["pos_grch37"], dbsnp["pos_grch38"]) == (117199644, 117559590)
+    assert dbsnp["provenance"]["curation_mode"] == "machine_imported"
+
+
+def test_importing_evidence_changes_no_evidence_tier(built):
+    """L7: imported ClinVar stars feed the tier only for Mendelian-disease genes; nothing else moves."""
+    assert {r: l["evidence_tier"] for r, l in built["loci"].items()} == TIERS_BEFORE_OVERLAY
+
+
+def test_mendelian_tier_follows_the_imported_stars(built):
+    for rsid in ("rs113993960", "rs1799945", "rs1800562"):
+        clinvar = built["loci"][rsid]["evidence"]["clinvar"]
+        assert clinvar["provenance"]["curation_mode"] == "machine_imported"
+        conflicting = "conflicting" in clinvar["review_status"]
+        assert built["loci"][rsid]["evidence_tier"] == derive_evidence_tier(clinvar["stars"], conflicting).value
+
+
+def test_clinvar_stays_evidence_only_for_non_mendelian_genes(built):
+    """rs429358 (APOE, risk factor) has a 1-star conflicting ClinVar record yet keeps its curated Tier A."""
+    locus = built["loci"]["rs429358"]
+    assert locus["evidence"]["clinvar"]["stars"] == 1
+    assert (locus["evidence_tier"], locus["tier_source"]) == ("Tier A", "curated")
+
+
+def test_crosscheck_position_mismatch_fails_the_build(tmp_path, good_kb, curation):
+    for key, build in (("pos_grch38", "GRCh38"), ("pos_grch37", "GRCh37")):
+        bad = copy.deepcopy(curation)
+        bad["loci"]["rs671"][key] += 1
+        result = cli_with_curation(tmp_path, good_kb, bad)
+        assert result.returncode == 1, key
+        assert "rs671" in result.stdout and "dbSNP" in result.stdout and build in result.stdout
+
+
+def test_crosscheck_allele_outside_dbsnps_set_fails_the_build(tmp_path, good_kb, curation):
+    bad = copy.deepcopy(curation)
+    bad["loci"]["rs671"]["alt"] = "C"
+    result = cli_with_curation(tmp_path, good_kb, bad)
+    assert result.returncode == 1
+    assert "rs671" in result.stdout and "dbSNP" in result.stdout and "allele" in result.stdout
+
+
+def test_crosscheck_indel_anchor_off_by_one_fails_the_build(tmp_path, good_kb, curation):
+    bad = copy.deepcopy(curation)
+    bad["loci"]["rs113993960"]["pos_grch38"] += 1
+    result = cli_with_curation(tmp_path, good_kb, bad)
+    assert result.returncode == 1
+    assert "rs113993960" in result.stdout and "GRCh38" in result.stdout
+
+
+def test_crosscheck_curated_clinvar_accession_must_equal_the_imported_one(tmp_path, good_kb, curation):
+    """P2-011: a hand-typed accession that ClinVar's record for the locus does not carry fails the build."""
+    bad = copy.deepcopy(curation)
+    bad["loci"]["rs671"]["evidence"]["clinvar"]["accession"] = "VCV000009999"
+    result = cli_with_curation(tmp_path, good_kb, bad)
+    assert result.returncode == 1
+    assert "QC errors: 1" in result.stdout
+    assert "VCV000009999" in result.stdout and "VCV000018390" in result.stdout
+
+
+def test_crosscheck_tampered_pinned_payload_fails_the_build(tmp_path, good_kb, curation):
+    upstream = tmp_path / "real"
+    shutil.copytree(UPSTREAM, upstream)
+    target = upstream / "gnomad" / "rs671.json"
+    target.write_bytes(target.read_bytes().replace(b'"ac":', b'"ac": ', 1))
+    result = cli_with_curation(tmp_path, good_kb, curation, "--upstream-path", str(upstream))
+    assert result.returncode == 1
+    assert "gnomad/rs671.json" in result.stdout and "sha256" in result.stdout
+
+
+def test_build_in_memory_reports_a_missing_payload_directory(curation, tmp_path):
+    payload, errors = build_kb(curation, tmp_path / "absent")
+    assert payload is None and has_error(errors, "not found")
+
+
+def test_curation_only_build_is_reachable_through_an_explicit_parameter(curation):
+    """upstream_root=None skips the overlay: curated provenance, null pLI, no vep/dbsnp blocks."""
+    payload, errors = build_kb(curation, upstream_root=None)
+    assert errors == []
+    evidence = payload["loci"]["rs671"]["evidence"]
+    assert evidence["clinvar"]["provenance"]["curation_mode"] == "manually_curated"
+    assert evidence["gnomad"]["pli"] is None
+    assert evidence["vep"] is None and evidence["dbsnp"] is None
+
+
+def test_missing_per_variant_gnomad_capture_fails_the_build(tmp_path, good_kb, curation):
+    """Review Minor 4: gnomAD refuses the rsid query for rs4244285 (L6). Without its per-variant capture the build
+    must fail and name the rsid and the expected file, not fall back to the rsid file or the curated af."""
+    upstream = tmp_path / "real"
+    shutil.copytree(UPSTREAM, upstream)
+    for suffix in (".json", ".meta.json"):
+        (upstream / "gnomad" / f"rs4244285.10-94781859-G-A{suffix}").unlink()
+    result = cli_with_curation(tmp_path, good_kb, curation, "--upstream-path", str(upstream))
+    assert result.returncode == 1
+    assert "QC errors: 1" in result.stdout
+    assert "rs4244285" in result.stdout and "gnomad/rs4244285.10-94781859-G-A.json" in result.stdout
+
+
+def test_missing_per_variant_capture_names_a_reason_on_the_adapter_model(tmp_path):
+    """The ACL: the adapter recognises the refusal payload and hands over a named reason."""
+    from tools.source_adapters import GNOMAD_REFUSAL_MULTIPLE_VARIANTS, UpstreamSnapshot
+
+    upstream = tmp_path / "real"
+    shutil.copytree(UPSTREAM, upstream)
+    for suffix in (".json", ".meta.json"):
+        (upstream / "gnomad" / f"rs3918290.1-97450058-C-A{suffix}").unlink()
+    model = UpstreamSnapshot(upstream).gnomad_variant("rs3918290", "1-97450058-C-A")
+    assert model.refusal == GNOMAD_REFUSAL_MULTIPLE_VARIANTS and model.af is None
+    assert "gnomad/rs3918290.1-97450058-C-A.json" in model.reasons["af"]
+
+
+def _drift(tmp_path, good_kb, curation, rsid, mutate):
+    bad = copy.deepcopy(curation)
+    mutate(bad["loci"][rsid]["evidence"])
+    return cli_with_curation(tmp_path, good_kb, bad)
+
+
+def test_drift_curated_gnomad_af_must_round_to_the_imported_one(tmp_path, good_kb, curation):
+    result = _drift(tmp_path, good_kb, curation, "rs671", lambda e: e["gnomad"].__setitem__("af", 0.007037))
+    assert result.returncode == 1
+    assert "rs671" in result.stdout and "gnomad.af" in result.stdout
+
+
+def test_drift_curated_clinvar_significance_must_equal_the_imported_one(tmp_path, good_kb, curation):
+    result = _drift(tmp_path, good_kb, curation, "rs671", lambda e: e["clinvar"].__setitem__("significance", "Pathogenic"))
+    assert result.returncode == 1
+    assert "rs671" in result.stdout and "clinvar.significance" in result.stdout
+
+
+def test_drift_curated_clinvar_review_status_and_stars_must_equal_the_imported_ones(tmp_path, good_kb, curation):
+    def mutate(evidence):
+        evidence["clinvar"]["review_status"] = "practice guideline"
+        evidence["clinvar"]["stars"] = 4
+
+    result = _drift(tmp_path, good_kb, curation, "rs671", mutate)
+    assert result.returncode == 1
+    assert "rs671" in result.stdout and "clinvar.review_status" in result.stdout and "clinvar.stars" in result.stdout
