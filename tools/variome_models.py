@@ -1,35 +1,21 @@
 """
-Canonical Variome Data Models: 3-Layer Knowledge Architecture
-==============================================================
-Enforces strict architectural separation between:
-1. Identity Layer      - Genomic coordinates, REF/ALT, strand, palindromic status, HGVS.
-2. Evidence Layer      - Upstream scientific evidence (ClinVar, gnomAD, Ensembl, AlphaFold, HPA, CPIC)
-                         with full field-level provenance, curation mode, and license tracking.
-                         Fails closed: missing evidence defaults to Tier D (research only),
-                         and missing numeric values are None (never masquerade as 0.0).
-3. Interpretation Layer- Curated clinical guidance, genotype assertions, caveats, and refusal notices.
+Canonical Variome data models
+=============================
+Models shared by the KB build and the source adapters:
 
-Upstream evidence updates MUST NOT silently mutate or corrupt curated interpretation semantics.
+- `UPSTREAM_LICENSES` and `FieldProvenance`: the anti-corruption layer's provenance record
+  (`tools/source_adapters.py`).
+- `GenotypeInterpretation`: what one alt-allele count means at a locus (contract C2 `Interp`).
+  It holds knowledge only. Nothing here depends on one person's sample: observed genotype,
+  coverage state and sample observation are computed at analysis time.
 """
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
-from tools.coverage_taxonomy import (
-    AssayCoverage,
-    CoverageState,
-    CurationMode,
-    CurationScope,
-    EvidenceSufficiency,
-    EvidenceTier,
-    InterpretationCategory,
-    LocusCoverageEvaluation,
-    SampleObservation,
-    derive_coverage_evaluation,
-)
+from tools.coverage_taxonomy import CurationMode
 
 class LicenseMeta(str):
     """String subclass supporting attribute and dict-like metadata access."""
@@ -99,101 +85,23 @@ class FieldProvenance:
 
 
 @dataclass
-class IdentityLayer:
-    """
-    Layer 1: Identity
-    Invariant genomic coordinates, alleles, and identifiers.
-    """
-    rsid: str
-    aliases: list[str] = field(default_factory=list)
-    chrom: str = ""
-    pos_grch37: int = 0
-    pos_grch38: int = 0
-    ref: str = ""
-    alt: str = ""
-    is_palindromic: bool = False
-    strand: str = "+"
-    hgvs_genomic: str = ""
-    hgvs_coding: str = ""
-    hgvs_protein: str = ""
-
-
-@dataclass
-class EvidenceLayer:
-    """
-    Layer 2: Evidence
-    Empirical and clinical observations imported from upstream repositories.
-    Fails closed: missing evidence tier defaults to Tier D (research only).
-    Numeric scientific values default to None when absent to prevent masquerading as 0.0.
-    """
-    evidence_tier: EvidenceTier = EvidenceTier.TIER_D
-    tier_rationale: str = ""
-    clinvar_vcv: str = ""
-    clinvar_stars: int = 0
-    clinvar_status: str = ""
-    clinvar_significance: str = ""
-    clinvar_condition: str = ""
-    clinvar_medgen: str = ""
-    gnomad_af: Optional[float] = None
-    gnomad_pli: Optional[float] = None
-    gnomad_loeuf: Optional[float] = None
-    mane_transcript: str = ""
-    alphamissense_class: str = ""
-    alphamissense_score: Optional[float] = None
-    uniprot_id: str = ""
-    alphafold_plddt: Optional[float] = None
-    hpa_tissues: dict[str, str] = field(default_factory=dict)
-    hpa_subcellular: list[str] = field(default_factory=list)
-    encode_ccre: str = ""
-    cpic_level: Optional[str] = None
-    cpic_drug: Optional[str] = None
-    literature_pmids: list[str] = field(default_factory=list)
-    field_provenance: dict[str, FieldProvenance] = field(default_factory=dict)
-
-
-@dataclass
 class GenotypeInterpretation:
-    """Interpretation assertion for a specific genotype call."""
-    category: str                   # Pathogenic, Carrier, Pharmacogenomics, Risk Factor, Trait
+    """Interpretation of one alt-allele count (0, 1 or 2) at a locus (contract C2 `Interp`)."""
+    category: str                   # e.g. Pathogenic, Carrier, Pharmacogenomics, Risk Factor, Trait, Not detected
     significance: str               # Short assertion label
     magnitude: float                # Clinical priority scale (0.0 to 10.0)
     repute: str                     # Good, Bad, Neutral
-    coverage_state: CoverageState   # supported_and_observed vs supported_not_observed
     phenotype: str                  # Scientific phenotype description
-    user_guidance: str              # Actionable, responsible patient guidance
     drug_response: Optional[str] = None
-    is_carrier: bool = False
-    assay_coverage: AssayCoverage = AssayCoverage.ASSAYED_CALLED
-    curation_scope: CurationScope = CurationScope.IN_SCOPE
-    evidence_sufficiency: EvidenceSufficiency = EvidenceSufficiency.SUFFICIENT
-    sample_observation: SampleObservation = SampleObservation.VARIANT_PRESENT
-
-
-@dataclass
-class InterpretationLayer:
-    """
-    Layer 3: Interpretation
-    Curated clinical guidance and genotype assertions.
-    """
-    category: InterpretationCategory
-    phenotype_summary: str
-    acmg_sf_actionable: bool
-    supported_genotypes: dict[str, GenotypeInterpretation]
     caveats: list[str] = field(default_factory=list)
-    refusal_notices: list[str] = field(default_factory=list)
-    multi_locus_dependencies: list[str] = field(default_factory=list)
-
-
-@dataclass
-class CanonicalLocusRecord:
-    """Complete 3-layer canonical record for a single genetic locus."""
-    rsid: str
-    gene: str
-    name: str
-    identity: IdentityLayer
-    evidence: EvidenceLayer
-    interpretation: InterpretationLayer
 
     def to_dict(self) -> dict[str, Any]:
-        """Serializes the complete record to a nested dictionary."""
-        return asdict(self)
+        return {
+            "category": self.category,
+            "significance": self.significance,
+            "magnitude": self.magnitude,
+            "repute": self.repute,
+            "phenotype": self.phenotype,
+            "drug_response": self.drug_response,
+            "caveats": list(self.caveats),
+        }

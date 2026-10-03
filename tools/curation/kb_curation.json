@@ -1,0 +1,1648 @@
+{
+  "release": "2026.10.02",
+  "acmg_sf_version": "ACMG SF v3.2",
+  "genes": {
+    "HFE": {
+      "inheritance": {
+        "model": "autosomal_recessive",
+        "mendelian_disease": true,
+        "disease": "Hereditary Hemochromatosis Type 1",
+        "omim": "235200",
+        "penetrance": 0.2
+      },
+      "acmg_sf": true,
+      "insights": {
+        "uniprot_id": "P55899",
+        "alphafold": {
+          "global_plddt": 86.4,
+          "folding_status": "Confidently Folded MHC-like α1/α2/α3 Domains",
+          "domains": [
+            "Domain 1 (α1/α2 domains): residues 23–204 (Length: 182 AAs)",
+            "Domain 2 (α3 domain): residues 205–297 (Length: 93 AAs)"
+          ],
+          "flexible_joints": "Transmembrane anchor (residues 307–337)"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000010704",
+          "canonical_transcript": "ENST00000357618 (MANE Select)",
+          "sift_prediction": "deleterious (0.00)",
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_pathogenicity": 0.842,
+          "loeuf": 0.82
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 1820.4,
+            "duodenum": 1410.2,
+            "spleen": 950.1,
+            "bone marrow": 820.6
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "CFTR": {
+      "inheritance": {
+        "model": "autosomal_recessive",
+        "mendelian_disease": true,
+        "disease": "Cystic Fibrosis",
+        "omim": "219700",
+        "penetrance": 1
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P13569",
+        "alphafold": {
+          "global_plddt": 84.8,
+          "folding_status": "12-Transmembrane ABC Transporter",
+          "domains": [
+            "TMD1 & NBD1: residues 1–650 (NBD1 contains deltaF508 at position 508)",
+            "Regulatory (R) Domain: residues 651–843 (intrinsically disordered)",
+            "TMD2 & NBD2: residues 844–1480"
+          ],
+          "flexible_joints": "R domain acts as dynamic phosphorylation-regulated switch"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000001626",
+          "canonical_transcript": "ENST00000003084 (MANE Select)",
+          "sift_prediction": "inframe deletion (deltaF508)",
+          "alphamissense_class": "pathogenic (misfolding & ERAD degradation)",
+          "alphamissense_pathogenicity": 0.985,
+          "loeuf": 0.44
+        },
+        "encode": {
+          "top_tissues": {
+            "lung": 450.2,
+            "pancreas": 780.5,
+            "colon": 610.1
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "APOE": {
+      "inheritance": {
+        "model": "risk_factor",
+        "mendelian_disease": false,
+        "disease": "Late-Onset Alzheimer's Disease & Dysbetalipoproteinemia",
+        "omim": "107741",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P02649",
+        "alphafold": {
+          "global_plddt": 75.5,
+          "folding_status": "Structured Core with Flexible Termini",
+          "domains": [
+            "Domain 1 (Receptor-binding): residues 40–187 (Length: 148 AAs)",
+            "Domain 2 (Lipid-binding): residues 219–305 (Length: 87 AAs)"
+          ],
+          "flexible_joints": "Residues 188–218 form a hinge region mediating lipid vesicle interaction"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000130203",
+          "canonical_transcript": "ENST00000252486 (MANE Select)",
+          "sift_prediction": "tolerated (1.0)",
+          "alphamissense_class": "likely_benign",
+          "alphamissense_pathogenicity": 0.0365,
+          "loeuf": 1.26
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 4615.5,
+            "adrenal gland": 3591.9,
+            "heart": 2336,
+            "brain": 1166.3,
+            "kidney": 1321.3
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      },
+      "diplotypes": {
+        "e3/e3": {
+          "category": "Not detected",
+          "significance": "No ε2 or ε4 allele detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "APOE ε3/ε3 pattern: no ε2 or ε4 allele detected at rs429358 or rs7412 (the 2 APOE variants tested). This is the most common APOE genotype (~60–65% population frequency) and corresponds to the population-baseline lifetime risk for late-onset Alzheimer's disease, which is not an absence of risk.",
+          "drug_response": null,
+          "caveats": [
+            "Relative risk: 1.0× (Average Population Baseline)",
+            "Lifetime risk: 10–15% lifetime Alzheimer's risk",
+            "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
+          ]
+        },
+        "e3/e4": {
+          "category": "Carrier",
+          "significance": "Risk Factor / Carrier",
+          "magnitude": 4.2,
+          "repute": "Bad",
+          "phenotype": "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring ~3–4× elevated risk for late-onset Alzheimer's disease (~20–25% population prevalence; ~25–35% lifetime risk). Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
+          "drug_response": null,
+          "caveats": [
+            "Relative risk: 3–4× Increased Risk",
+            "Lifetime risk: 25–35% lifetime Alzheimer's risk",
+            "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
+          ]
+        },
+        "e4/e4": {
+          "category": "Risk Factor",
+          "significance": "High Risk Factor",
+          "magnitude": 6.0,
+          "repute": "Bad",
+          "phenotype": "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). Confers ~12–15× increased lifetime risk of late-onset Alzheimer's disease and increased LDL/atherosclerosis susceptibility.",
+          "drug_response": null,
+          "caveats": [
+            "Relative risk: 12–15× Markedly Elevated Risk",
+            "Lifetime risk: 50–65% lifetime Alzheimer's risk",
+            "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
+          ]
+        },
+        "e2/e3": {
+          "category": "Carrier",
+          "significance": "Protective / Carrier",
+          "magnitude": 2.2,
+          "repute": "Good",
+          "phenotype": "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele (~10–15% population prevalence). Associated with ~40–50% lower lifetime risk of Alzheimer's disease and lower circulating LDL-cholesterol.",
+          "drug_response": null,
+          "caveats": [
+            "Relative risk: 0.6× (Protective Effect)",
+            "Lifetime risk: 5–8% lifetime Alzheimer's risk",
+            "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
+          ]
+        },
+        "e2/e2": {
+          "category": "Carrier",
+          "significance": "Protective AD / Lipid Risk",
+          "magnitude": 3.5,
+          "repute": "Bad",
+          "phenotype": "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic predisposition to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
+          "drug_response": null,
+          "caveats": [
+            "Relative risk: Protective AD / Type III HLP Risk",
+            "Lifetime risk: <5% AD risk; Monitor blood lipid panels",
+            "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
+          ]
+        },
+        "e2/e4": {
+          "category": "Carrier",
+          "significance": "Risk Factor / Carrier",
+          "magnitude": 3.2,
+          "repute": "Bad",
+          "phenotype": "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4.",
+          "drug_response": null,
+          "caveats": [
+            "Relative risk: 1.5–2× Intermediate Risk",
+            "Lifetime risk: 15–20% lifetime Alzheimer's risk",
+            "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
+          ]
+        }
+      }
+    },
+    "F5": {
+      "inheritance": {
+        "model": "risk_factor",
+        "mendelian_disease": false,
+        "disease": "Thrombophilia due to Factor V Leiden",
+        "omim": "188055",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P12259",
+        "alphafold": {
+          "global_plddt": 82.1,
+          "folding_status": "Multi-domain Coagulation Factor",
+          "domains": [
+            "A1 Domain: residues 29–335",
+            "A2 Domain: residues 336–684",
+            "A3-C1-C2 Domains: residues 1546–2224"
+          ],
+          "flexible_joints": "B-domain (residues 685–1545) is heavily intrinsically disordered"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000198734",
+          "canonical_transcript": "ENST00000367520 (MANE Select)",
+          "sift_prediction": "tolerated (0.28)",
+          "alphamissense_class": "ambiguous / pathogenic (APC cleavage resistant)",
+          "alphamissense_pathogenicity": 0.612,
+          "loeuf": 0.74
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 5420,
+            "plasma": 4890.2
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "F2": {
+      "inheritance": {
+        "model": "risk_factor",
+        "mendelian_disease": false,
+        "disease": "Thrombophilia due to Prothrombin G20210A",
+        "omim": "176930",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P00734",
+        "alphafold": {
+          "global_plddt": 89.2,
+          "folding_status": "Serine Protease Proenzyme",
+          "domains": [
+            "Gla Domain: residues 44–89",
+            "Kringle Domains: residues 109–284",
+            "Peptidase S1: residues 328–622"
+          ],
+          "flexible_joints": "Inter-kringle linker segments"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000188404",
+          "canonical_transcript": "ENST00000344445 (MANE Select)",
+          "sift_prediction": "N/A (3' UTR regulatory variant)",
+          "alphamissense_class": "N/A (elevates mRNA cleavage/polyadenylation)",
+          "alphamissense_pathogenicity": null,
+          "loeuf": 0.68
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 8940
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "CYP2C19": {
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Clopidogrel / Antidepressant Metabolism",
+        "omim": "124020",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P33261",
+        "alphafold": {
+          "global_plddt": 91.8,
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
+          "domains": [
+            "Transmembrane Anchor: residues 1–44",
+            "Catalytic P450 Core: residues 45–490 (Heme-binding Cys435)"
+          ],
+          "flexible_joints": "Substrate recognition loops B-C and F-G"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000165841",
+          "canonical_transcript": "ENST00000371401 (MANE Select)",
+          "sift_prediction": "deleterious (0.00)",
+          "alphamissense_class": "pathogenic (*2 splice defect / *3 stop)",
+          "alphamissense_pathogenicity": 0.941,
+          "loeuf": 0.72
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 3840.1,
+            "small intestine": 410.5
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "VKORC1": {
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Warfarin Sensitivity",
+        "omim": "608547",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "Q9BQB6",
+        "alphafold": {
+          "global_plddt": 88.5,
+          "folding_status": "4-Transmembrane Helical Bundle",
+          "domains": [
+            "Helices 1–4: residues 10–160 (Active site Cys132-Cys135 redox triad)"
+          ],
+          "flexible_joints": "ER luminal loop 1 (residues 31–78)"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000167397",
+          "canonical_transcript": "ENST00000394985 (MANE Select)",
+          "sift_prediction": "N/A (Promoter -1639G>A regulatory variant)",
+          "alphamissense_class": "N/A (Altered transcription factor binding)",
+          "alphamissense_pathogenicity": null,
+          "loeuf": 0.65
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 2950.4,
+            "placenta": 620.1
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "SLCO1B1": {
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Statin-Induced Myopathy Sensitivity",
+        "omim": "604843",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "Q9Y6L6",
+        "alphafold": {
+          "global_plddt": 85.3,
+          "folding_status": "12-Transmembrane MFS Superfamily Transporter",
+          "domains": [
+            "TMD 1–6 (N-terminal bundle): residues 1–280",
+            "Extracellular Loop 5 (Disulfide stabilized): residues 115–230",
+            "TMD 7–12 (C-terminal bundle): residues 281–691"
+          ],
+          "flexible_joints": "Central rocker-switch substrate translocation cavity"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000134538",
+          "canonical_transcript": "ENST00000256958 (MANE Select)",
+          "sift_prediction": "deleterious (0.02)",
+          "alphamissense_class": "likely_pathogenic (Val174Ala)",
+          "alphamissense_pathogenicity": 0.792,
+          "loeuf": 0.62
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 6420,
+            "gallbladder": 310.2
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "DPYD": {
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Fluoropyrimidine (5-FU / capecitabine) toxicity",
+        "omim": null,
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "Q12882",
+        "alphafold": {
+          "global_plddt": 88.7,
+          "folding_status": "5-Domain Heterotetramer-equivalent Catalytic Dimer",
+          "domains": [
+            "Domain I (4Fe-4S Cluster): residues 1–172",
+            "Domain II (FAD-binding): residues 173–286",
+            "Domain III (NADPH-binding): residues 287–524",
+            "Domain IV (Pyrimidine-binding core): residues 525–847",
+            "Domain V (Second 4Fe-4S Cluster): residues 848–1025"
+          ],
+          "flexible_joints": "Interdomain linkers coordinate electron transfer between flavin centers"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000188641",
+          "canonical_transcript": "ENST00000370192 (MANE Select)",
+          "sift_prediction": "deleterious (0.00)",
+          "alphamissense_class": "pathogenic (*2A splice disruption)",
+          "alphamissense_pathogenicity": 0.965,
+          "loeuf": 0.58
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 3210.5,
+            "small intestine": 1140.2,
+            "colon": 845
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "MTHFR": {
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": "Homocysteine & Folate Metabolism Variation. OMIM 236250 (homocystinuria due to MTHFR deficiency) is a severe recessive deficiency caused by other variants and is not what rs1801133 tests",
+        "omim": "607093",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P42417",
+        "alphafold": {
+          "global_plddt": 87.2,
+          "folding_status": "Two-Domain Folate-Metabolizing Homodimer",
+          "domains": [
+            "N-terminal Catalytic TIM Barrel: residues 1–356",
+            "C-terminal Regulatory SAM-binding Domain: residues 357–656"
+          ],
+          "flexible_joints": "Interdomain linker (residues 338–362; Ala222Val alters thermal stability)"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000185010",
+          "canonical_transcript": "ENST00000376585 (MANE Select)",
+          "sift_prediction": "tolerated (0.34)",
+          "alphamissense_class": "likely_benign (thermolabile modifier)",
+          "alphamissense_pathogenicity": 0.215,
+          "loeuf": 0.54
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 1650,
+            "kidney": 1210.3,
+            "brain": 720.4
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    },
+    "MCM6": {
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": "Lactase persistence / adult-type hypolactasia (regulatory variant upstream of LCT, located in MCM6)",
+        "omim": null,
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": null
+    },
+    "ALDH2": {
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": "Alcohol Flush Reaction / Acetaldehyde Toxicity",
+        "omim": "100650",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P05091",
+        "alphafold": {
+          "global_plddt": 93.4,
+          "folding_status": "High-Confidence Homotetrameric Mitochondrial Dehydrogenase",
+          "domains": [
+            "NAD-binding Rossmann Fold: residues 1–135",
+            "Catalytic Subunit: residues 136–470",
+            "Oligomerization Interface: residues 471–517 (Glu504Lys disrupts tetramer)"
+          ],
+          "flexible_joints": "Coenzyme-binding entrance loop"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000111275",
+          "canonical_transcript": "ENST00000261733 (MANE Select)",
+          "sift_prediction": "deleterious (0.00)",
+          "alphamissense_class": "pathogenic (Glu504Lys dominant negative)",
+          "alphamissense_pathogenicity": 0.912,
+          "loeuf": 0.61
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 5670.2,
+            "heart": 1840,
+            "kidney": 1420.5
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
+      }
+    }
+  },
+  "loci": {
+    "rs429358": {
+      "gene": "APOE",
+      "chrom": "19",
+      "pos_grch37": 45411941,
+      "pos_grch38": 44908684,
+      "ref": "T",
+      "alt": "C",
+      "allele_codes": null,
+      "role": "apoe_component",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No APOE ε4-determining (rs429358 C) allele detected at this position. Combine with rs7412 to assign the APOE diplotype.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Carrier / Risk Factor",
+          "magnitude": 3.8,
+          "repute": "Bad",
+          "phenotype": "APOE ε4 carrier (heterozygote ε3/ε4 or ε2/ε4): ~3-4× elevated risk of late-onset Alzheimer's disease.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Risk Factor",
+          "significance": "High Risk Factor",
+          "magnitude": 5,
+          "repute": "Bad",
+          "phenotype": "APOE ε4/ε4 homozygote: ~12-15× elevated lifetime risk of late-onset Alzheimer's disease.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017864",
+          "review_status": "criteria provided, conflicting classifications",
+          "stars": 1,
+          "significance": "Conflicting classifications of pathogenicity; other; risk factor",
+          "provenance": {
+            "source": "ClinVar VCV000017864 (hand-transcribed from pinned capture clinvar/rs429358.json)",
+            "accession": "VCV000017864",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17864/"
+          }
+        },
+        "gnomad": {
+          "af": 0.14852,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs429358.json)",
+            "accession": "19-44908684-T-C"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "cerebral cortex": "Medium",
+            "plasma": "High",
+            "adrenal gland": "Medium"
+          },
+          "subcellular": [
+            "Secreted",
+            "Endoplasmic reticulum"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "APOE e4 is the strongest common genetic risk factor for late-onset Alzheimer disease, replicated in large case-control meta-analyses.",
+        "citation": "Farrer et al. 1997, APOE genotype and Alzheimer disease meta-analysis (Effects of age, sex, and ethnicity on the association between apolipoprotein E genotype and Alzheimer disease), JAMA"
+      }
+    },
+    "rs7412": {
+      "gene": "APOE",
+      "chrom": "19",
+      "pos_grch37": 45412079,
+      "pos_grch38": 44908822,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "apoe_component",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No APOE ε2-determining (rs7412 T) allele detected at this position. Combine with rs429358 to assign the APOE diplotype.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Protective / Carrier",
+          "magnitude": 2,
+          "repute": "Good",
+          "phenotype": "APOE ε2 carrier: modestly lower LDL cholesterol and slightly reduced Alzheimer's risk.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Carrier",
+          "significance": "Protective AD / Lipid Risk",
+          "magnitude": 3.5,
+          "repute": "Bad",
+          "phenotype": "APOE ε2/ε2: Associated with Type III Hyperlipoproteinemia (dysbetalipoproteinemia), but protective against Alzheimer's.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017848",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000017848 (hand-transcribed from pinned capture clinvar/rs7412.json)",
+            "accession": "VCV000017848",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17848/"
+          }
+        },
+        "gnomad": {
+          "af": 0.07424,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs7412.json)",
+            "accession": "19-44908822-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "cerebral cortex": "Medium",
+            "plasma": "High"
+          },
+          "subcellular": [
+            "Secreted"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "APOE e2 vs e3/e4 effects on Alzheimer risk and type III hyperlipoproteinemia are replicated in large meta-analyses.",
+        "citation": "Farrer et al. 1997, APOE genotype and Alzheimer disease meta-analysis (Effects of age, sex, and ethnicity on the association between apolipoprotein E genotype and Alzheimer disease), JAMA"
+      }
+    },
+    "rs1800562": {
+      "gene": "HFE",
+      "chrom": "6",
+      "pos_grch37": 26093141,
+      "pos_grch38": 26092913,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "ACMG_SINGLE_LOCUS_CAVEAT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No HFE C282Y allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Pathogenic (Carrier)",
+          "magnitude": 2,
+          "repute": "Good",
+          "phenotype": "Carrier for Hereditary Hemochromatosis (C282Y heterozygote). Low individual risk unless compound heterozygous with H63D.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 5.5,
+          "repute": "Bad",
+          "phenotype": "HFE C282Y homozygote: Primary genetic cause of Hereditary Hemochromatosis (iron overload). Regular ferritin monitoring recommended.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000009",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Pathogenic/Pathogenic, low penetrance; risk factor",
+          "provenance": {
+            "source": "ClinVar VCV000000009 (hand-transcribed from pinned capture clinvar/rs1800562.json)",
+            "accession": "VCV000000009",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/9/"
+          }
+        },
+        "gnomad": {
+          "af": 0.056982,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1800562.json)",
+            "accession": "6-26092913-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "duodenum": "High",
+            "spleen": "Medium",
+            "placenta": "Medium"
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      }
+    },
+    "rs1799945": {
+      "gene": "HFE",
+      "chrom": "6",
+      "pos_grch37": 26091179,
+      "pos_grch38": 26090951,
+      "ref": "C",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "ACMG_SINGLE_LOCUS_CAVEAT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No HFE H63D allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Risk Factor (Carrier)",
+          "magnitude": 1,
+          "repute": "Good",
+          "phenotype": "HFE H63D carrier: common variant with minimal clinical significance unless paired with C282Y.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 2.5,
+          "repute": "Bad",
+          "phenotype": "HFE H63D homozygote: Slight predisposition to mildly elevated serum ferritin.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000010",
+          "review_status": "criteria provided, conflicting classifications",
+          "stars": 1,
+          "significance": "Conflicting classifications of pathogenicity; other",
+          "provenance": {
+            "source": "ClinVar VCV000000010 (hand-transcribed from pinned capture clinvar/rs1799945.json)",
+            "accession": "VCV000000010",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/10/"
+          }
+        },
+        "gnomad": {
+          "af": 0.131952,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1799945.json)",
+            "accession": "6-26090951-C-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "duodenum": "High"
+          },
+          "subcellular": [
+            "Plasma membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      }
+    },
+    "rs6025": {
+      "gene": "F5",
+      "chrom": "1",
+      "pos_grch37": 169519049,
+      "pos_grch38": 169549811,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No Factor V Leiden allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Risk Factor",
+          "significance": "Pathogenic",
+          "magnitude": 4,
+          "repute": "Bad",
+          "phenotype": "Factor V Leiden heterozygote: 4-8× increased risk of venous thromboembolism. Caution with oral contraceptives or prolonged immobility.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 6,
+          "repute": "Bad",
+          "phenotype": "Factor V Leiden homozygote: 50-80× markedly increased risk of venous thromboembolism (VTE/DVT/PE).",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000642",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000000642 (hand-transcribed from pinned capture clinvar/rs6025.json)",
+            "accession": "VCV000000642",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/642/"
+          }
+        },
+        "gnomad": {
+          "af": 0.021432,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs6025.json)",
+            "accession": "1-169549811-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "plasma": "High"
+          },
+          "subcellular": [
+            "Secreted"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "Factor V Leiden is an established inherited risk factor for venous thromboembolism.",
+        "citation": "EGAPP Working Group 2011 recommendation statement on Factor V Leiden and prothrombin 20210G>A testing in adults with a history of idiopathic venous thromboembolism, Genetics in Medicine"
+      }
+    },
+    "rs1799963": {
+      "gene": "F2",
+      "chrom": "11",
+      "pos_grch37": 46761055,
+      "pos_grch38": 46739505,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No Prothrombin G20210A allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Risk Factor",
+          "significance": "Pathogenic",
+          "magnitude": 3.5,
+          "repute": "Bad",
+          "phenotype": "Prothrombin G20210A heterozygote: 2-3× increased risk of venous blood clots.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 5.5,
+          "repute": "Bad",
+          "phenotype": "Prothrombin G20210A homozygote: ~10× increased risk of thrombosis.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000013310",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Pathogenic/Likely pathogenic/Pathogenic, low penetrance/Established risk allele; risk factor",
+          "provenance": {
+            "source": "ClinVar VCV000013310 (hand-transcribed from pinned capture clinvar/rs1799963.json)",
+            "accession": "VCV000013310",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/13310/"
+          }
+        },
+        "gnomad": {
+          "af": 0.011385,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1799963.json)",
+            "accession": "11-46739505-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "plasma": "High"
+          },
+          "subcellular": [
+            "Secreted"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "Prothrombin G20210A is an established inherited risk factor for venous thromboembolism.",
+        "citation": "EGAPP Working Group 2011 recommendation statement on Factor V Leiden and prothrombin 20210G>A testing in adults with a history of idiopathic venous thromboembolism, Genetics in Medicine"
+      }
+    },
+    "rs113993960": {
+      "gene": "CFTR",
+      "chrom": "7",
+      "pos_grch37": 117199644,
+      "pos_grch38": 117559590,
+      "ref": "ATCT",
+      "alt": "A",
+      "allele_codes": {
+        "D": "alt",
+        "I": "ref"
+      },
+      "role": "standard",
+      "limitation": "Single-variant test: F508del is 1 of more than 2,000 reported CFTR variants. Not detecting it does not rule out being a carrier of, or affected by, another CFTR variant.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CFTR F508del allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Pathogenic (Carrier)",
+          "magnitude": 2.5,
+          "repute": "Good",
+          "phenotype": "Cystic Fibrosis Carrier (ΔF508 heterozygote). Asymptomatic carrier; 1 in 4 risk with carrier partner.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 7,
+          "repute": "Bad",
+          "phenotype": "Cystic Fibrosis (ΔF508 homozygote): Classic severe cystic fibrosis affecting lungs and digestive system.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000007105",
+          "review_status": "practice guideline",
+          "stars": 4,
+          "significance": "Pathogenic",
+          "provenance": {
+            "source": "ClinVar VCV000007105 (hand-transcribed from pinned capture clinvar/rs113993960.json)",
+            "accession": "VCV000007105",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/7105/"
+          }
+        },
+        "gnomad": {
+          "af": 0.011931,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs113993960.json)",
+            "accession": "7-117559590-ATCT-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "pancreas": "High",
+            "lung": "High",
+            "duodenum": "High",
+            "colon": "High",
+            "gallbladder": "High"
+          },
+          "subcellular": [
+            "Plasma membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      }
+    },
+    "rs4244285": {
+      "gene": "CYP2C19",
+      "chrom": "10",
+      "pos_grch37": 96541616,
+      "pos_grch38": 94781859,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "INCOMPLETE_STAR_ALLELE_REFUSAL",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CYP2C19 *2 allele detected at this position. Other CYP2C19 alleles (for example *3, *17) are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3,
+          "repute": "Bad",
+          "phenotype": "CYP2C19 Intermediate Metabolizer (*1/*2): Reduced clopidogrel activation; CPIC recommends alternative agent for acute coronary syndrome.",
+          "drug_response": "Clopidogrel: Intermediate Metabolizer (Reduced activation)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.5,
+          "repute": "Bad",
+          "phenotype": "CYP2C19 Poor Metabolizer (*2/*2): Significantly impaired clopidogrel activation. Alternative antiplatelet (ticagrelor/prasugrel) strongly indicated by CPIC.",
+          "drug_response": "Clopidogrel: Poor Metabolizer (Alternative drug recommended)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000633856",
+          "review_status": "practice guideline",
+          "stars": 4,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000633856 (hand-transcribed from pinned capture clinvar/rs4244285.json)",
+            "accession": "VCV000633856",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/633856/"
+          }
+        },
+        "gnomad": {
+          "af": 0.160234,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs4244285.10-94781859-G-A.json)",
+            "accession": "10-94781859-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "duodenum": "Medium"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "clopidogrel",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for CYP2C19 and clopidogrel, 2022 update"
+      }
+    },
+    "rs9923231": {
+      "gene": "VKORC1",
+      "chrom": "16",
+      "pos_grch37": 31107689,
+      "pos_grch38": 31096368,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: VKORC1 -1639G>A is one factor in warfarin dosing. CYP2C9 and CYP4F2 genotypes, age, weight and other factors also matter and are not assessed here.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No VKORC1 -1639G>A (warfarin-sensitivity) allele detected at this position. Warfarin sensitivity cannot be inferred from this single variant.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.5,
+          "repute": "Bad",
+          "phenotype": "Intermediate Warfarin sensitivity: Moderate dose reduction typically required.",
+          "drug_response": "Warfarin: Intermediate Sensitivity (20-30% lower dose)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4,
+          "repute": "Bad",
+          "phenotype": "High Warfarin sensitivity (-1639A/A): Significantly lower dose required to prevent bleeding complications.",
+          "drug_response": "Warfarin: High Sensitivity (50-60% lower initial dose)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000002211",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000002211 (hand-transcribed from pinned capture clinvar/rs9923231.json)",
+            "accession": "VCV000002211",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2211/"
+          }
+        },
+        "gnomad": {
+          "af": 0.319017,
+          "provenance": {
+            "source": "gnomAD (hand-computed genome ac/an (capture holds a genome record only) from pinned capture gnomad/rs9923231.json)",
+            "accession": "16-31096368-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "placenta": "Medium"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "warfarin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update"
+      }
+    },
+    "rs4149056": {
+      "gene": "SLCO1B1",
+      "chrom": "12",
+      "pos_grch37": 21331549,
+      "pos_grch38": 21178615,
+      "ref": "T",
+      "alt": "C",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: SLCO1B1 c.521T>C (*5) is one of several SLCO1B1 function-altering alleles. Statin myopathy risk also depends on the drug, the dose and other factors.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No SLCO1B1 c.521C (Val174Ala, *5) allele detected at this position. Statin myopathy risk cannot be excluded from this single variant.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3,
+          "repute": "Bad",
+          "phenotype": "Intermediate SLCO1B1 function: 4.5× elevated risk of simvastatin-induced myopathy.",
+          "drug_response": "Simvastatin: Moderate Myopathy Risk (Limit dose to ≤20mg)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.5,
+          "repute": "Bad",
+          "phenotype": "Poor SLCO1B1 transporter function (521C/C): ~17× higher risk of simvastatin-induced myopathy/rhabdomyolysis.",
+          "drug_response": "Simvastatin: High Myopathy Risk (Prescribe rosuvastatin/pravastatin)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000037346",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000037346 (hand-transcribed from pinned capture clinvar/rs4149056.json)",
+            "accession": "VCV000037346",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/37346/"
+          }
+        },
+        "gnomad": {
+          "af": 0.14229,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs4149056.json)",
+            "accession": "12-21178615-T-C"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High"
+          },
+          "subcellular": [
+            "Plasma membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "simvastatin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update"
+      }
+    },
+    "rs3918290": {
+      "gene": "DPYD",
+      "chrom": "1",
+      "pos_grch37": 97915614,
+      "pos_grch38": 97450058,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: this assay covers only DPYD c.1905+1G>A (*2A), one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No DPYD *2A (c.1905+1G>A) allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 5,
+          "repute": "Bad",
+          "phenotype": "DPYD Partial Deficiency (*2A heterozygote): High risk of life-threatening neutropenia and mucositis. CPIC mandates ≥50% dose reduction.",
+          "drug_response": "5-Fluorouracil / Capecitabine: Intermediate (Reduce dose ≥50%)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response (Critical)",
+          "magnitude": 6.5,
+          "repute": "Bad",
+          "phenotype": "DPYD Complete Deficiency (*2A/*2A): Fatal toxicity with standard 5-FU/capecitabine chemotherapy. Alternate therapy required.",
+          "drug_response": "5-Fluorouracil / Capecitabine: Complete Deficiency (Contraindicated)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000432",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000000432 (hand-transcribed from pinned capture clinvar/rs3918290.json)",
+            "accession": "VCV000000432",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/432/"
+          }
+        },
+        "gnomad": {
+          "af": 0.005061,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs3918290.1-97450058-C-T.json)",
+            "accession": "1-97450058-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "colon": "Medium"
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update"
+      }
+    },
+    "rs1801133": {
+      "gene": "MTHFR",
+      "chrom": "1",
+      "pos_grch37": 11856378,
+      "pos_grch38": 11796321,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No MTHFR C677T allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1,
+          "repute": "Good",
+          "phenotype": "MTHFR 677CT heterozygote (~65% normal enzyme activity): Generally benign with normal dietary folate.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 2,
+          "repute": "Bad",
+          "phenotype": "MTHFR 677TT homozygote (~30% residual enzyme activity): Predisposition to elevated homocysteine if folate intake is deficient.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000003520",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000003520 (hand-transcribed from pinned capture clinvar/rs1801133.json)",
+            "accession": "VCV000003520",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3520/"
+          }
+        },
+        "gnomad": {
+          "af": 0.318214,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1801133.json)",
+            "accession": "1-11796321-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "cerebral cortex": "Medium"
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleus"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier C",
+        "rationale": "MTHFR C677T has weak, contested clinical utility and ACMG advises against clinical testing.",
+        "citation": "ACMG 2013 practice guideline on MTHFR polymorphism testing (Hickey et al.), Genetics in Medicine"
+      }
+    },
+    "rs4988235": {
+      "gene": "MCM6",
+      "chrom": "2",
+      "pos_grch37": 136608646,
+      "pos_grch38": 135851076,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: this assay covers only the MCM6/LCT -13910C>T lactase-persistence variant. Other lactase-persistence variants exist in some populations, so a result without it does not establish lactase non-persistence.",
+      "interpretations": {
+        "0": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Bad",
+          "phenotype": "Lactose non-persistent (primary adult hypolactasia): Susceptible to lactose intolerance symptoms.",
+          "drug_response": null,
+          "caveats": [
+            "Based on a single variant (-13910C>T); other lactase persistence variants exist in some populations."
+          ]
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1,
+          "repute": "Good",
+          "phenotype": "Lactase persistent: Tolerates dairy lactose well.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Good",
+          "phenotype": "Lactase persistent: Capable of digesting dairy lactose normally in adulthood.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000007685",
+          "review_status": "no assertion criteria provided",
+          "stars": 0,
+          "significance": "association",
+          "provenance": {
+            "source": "ClinVar VCV000007685 (hand-transcribed from pinned capture clinvar/rs4988235.json)",
+            "accession": "VCV000007685",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/7685/"
+          }
+        },
+        "gnomad": {
+          "af": 0.396813,
+          "provenance": {
+            "source": "gnomAD (hand-computed genome ac/an (capture holds a genome record only) from pinned capture gnomad/rs4988235.json)",
+            "accession": "2-135851076-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "small intestine": "High",
+            "duodenum": "High"
+          },
+          "subcellular": [
+            "Plasma membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "The -13910 variant is the established cause of lactase persistence in European-ancestry populations.",
+        "citation": "Enattah et al. 2002, Identification of a variant associated with adult-type hypolactasia, Nature Genetics"
+      }
+    },
+    "rs671": {
+      "gene": "ALDH2",
+      "chrom": "12",
+      "pos_grch37": 112241766,
+      "pos_grch38": 111803962,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No ALDH2*2 (Glu504Lys) allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Risk Factor",
+          "magnitude": 2.5,
+          "repute": "Bad",
+          "phenotype": "ALDH2*2 heterozygote (~20-40% enzyme activity): Marked facial flushing, tachycardia, and acetaldehyde accumulation after alcohol consumption.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Risk Factor",
+          "magnitude": 4,
+          "repute": "Bad",
+          "phenotype": "ALDH2*2 homozygote (near-zero acetaldehyde dehydrogenase activity): Severe alcohol flush reaction, nausea, and increased esophageal cancer risk with alcohol consumption.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000018390",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000018390 (hand-transcribed from pinned capture clinvar/rs671.json)",
+            "accession": "VCV000018390",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/18390/"
+          }
+        },
+        "gnomad": {
+          "af": 0.007036,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs671.json)",
+            "accession": "12-111803962-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "High",
+            "heart muscle": "Medium"
+          },
+          "subcellular": [
+            "Mitochondria"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "ALDH2*2 (Glu504Lys) is the established cause of the alcohol flushing response.",
+        "citation": "Brooks et al. 2009, The alcohol flushing response: an unrecognized risk factor for esophageal cancer from alcohol consumption, PLoS Medicine"
+      }
+    }
+  }
+}
