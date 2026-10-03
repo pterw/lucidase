@@ -15,7 +15,8 @@ const BOTTOM_PAD = 10;
 const CEN_TICK = 6;
 const LOCUS_STEP = 10;
 const R_MIN = 0.9;
-const R_SPAN = 2.3;
+const R_MARKED_MIN = 1.6; // a bin with even one marker must read as larger than an empty bin
+const R_MARKED_SPAN = 1.6; // R_MARKED_MIN + R_MARKED_SPAN = 3.2, the busiest bin
 
 const f = (n) => n.toFixed(1);
 const esc = escapeHtml;
@@ -59,7 +60,7 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
         continue;
       }
       if (count > 0) {
-        const r = R_MIN + R_SPAN * Math.sqrt(count / maxCount);
+        const r = R_MARKED_MIN + R_MARKED_SPAN * Math.sqrt(count / maxCount);
         g.push(`<circle class="kary-bin" cx="${f(c.x)}" cy="${f(y)}" r="${f(r)}"/>`);
       } else {
         g.push(`<circle class="kary-bin kary-bin-empty" cx="${f(c.x)}" cy="${f(y)}" r="${f(R_MIN)}"/>`);
@@ -108,9 +109,10 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
   const stateText = [...stateCounts].map(([s, n]) => `${labelOf(s)}: ${n}`).join("; ");
   // Unknown file build: the GRCh38 geometry is only a fallback reference, so never present it as the file's build.
   const fallback = sample && sample.density !== "available";
-  const title = fallback ? `Karyogram (${geometry.build} reference; file build unknown)` : `Karyogram (${geometry.build})`;
+  const fallbackLead = `Karyogram: your file's genome version is unknown, so the chromosomes are drawn from the ${geometry.build} reference`;
+  const title = fallback ? fallbackLead : `Karyogram (${geometry.build})`;
   const desc = fallback
-    ? `${geometry.build} reference; file build unknown. ${markerText}. Loci per state: ${stateText}.`
+    ? `${fallbackLead}. ${markerText}. Loci per state: ${stateText}.`
     : `${markerText}. Loci per state: ${stateText}.`;
 
   return (

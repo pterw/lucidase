@@ -114,9 +114,14 @@ function renderProvenance(layout) {
   const { build } = layout.geometry;
   const assembly = view.kb.assemblies[build];
   const tables = assembly.sources.map((s) => `${s.table} retrieved ${s.retrieved}`).join("; ");
-  const assumed = layout.sample && layout.sample.density === "unavailable" ? " (the file's build is unknown)" : "";
+  const unknown = layout.sample && layout.sample.density === "unavailable";
+  const shapes = !layout.sample
+    ? `Chromosome shapes: ${build}.`
+    : unknown
+      ? `Chromosome shapes: ${build} reference, used because your file doesn't say which genome version it was made with.`
+      : `Chromosome shapes: ${build}, matching your file.`;
   $("karyogram-provenance").textContent =
-    `Geometry: ${build}${assumed}, UCSC ${assembly.ucsc} tables ${tables}. ` +
+    `${shapes} Source: UCSC ${assembly.ucsc} tables ${tables}. ` +
     `Knowledge base release ${view.kb.manifest.release}.`;
 }
 

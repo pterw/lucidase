@@ -16,7 +16,7 @@ Lucidase reads a raw genotype file in your browser and interprets the 14 curated
   <img src="docs/assets/lucidase-karyogram-light.png" alt="The Lucidase karyogram of the bundled synthetic sample: 24 chromosome columns of marker-density dots with the 14 curated loci marked by result">
 </picture>
 
-`web/karyogram.html` maps a genotype file onto the chromosomes. Each dot is a 4 Mb stretch, sized by how many markers from your file fall there, and the 14 curated loci are marked with their coverage state. A file whose genome build is unknown is not placed by position: the page says so and still shows the loci's results. The map is drawn in the browser from UCSC chromosome lengths and centromeres stored in the knowledge base, and your file never leaves the page.
+`web/karyogram.html` maps a genotype file onto the chromosomes. Each dot is a 4 Mb stretch, sized by how many markers from your file fall there, and the 14 curated loci are marked with their coverage state. A file that doesn't say which genome version it uses is not placed on the chromosomes: the page says so and still shows the highlighted genes' results. The map is drawn in the browser from UCSC chromosome lengths and centromeres stored in the knowledge base, and your file never leaves the page.
 
 ## What it does
 

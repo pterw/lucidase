@@ -34,7 +34,17 @@ test("the busiest bin has r=3.2 and empty bins r=0.9", () => {
   assert.equal(count(svg, /class="kary-bin" [^>]*r="3\.2"/g), 1);
   assert.equal(count(svg, /class="kary-bin" /g), 2);
   assert.ok(count(svg, /kary-bin-empty" [^>]*r="0\.9"/g) > 100);
-  assert.match(svg, /r="2\.0"/); // 0.9 + 2.3 * sqrt(1/4) = 2.05
+  assert.match(svg, /class="kary-bin" [^>]*r="2\.4"/); // 1.6 + 1.6 * sqrt(1/4) = 2.4
+});
+
+test("a one-marker bin beside a busiest bin of 300 is visibly larger than an empty bin", () => {
+  const calls = [call("2", 9_000_001)];
+  for (let i = 0; i < 300; i++) calls.push(call("2", 5_000_001 + i));
+  const svg = renderKaryogramSvg(sampleLayout(calls));
+  const radii = [...svg.matchAll(/class="kary-bin" [^>]*r="([\d.]+)"/g)].map((m) => Number(m[1])).sort((a, b) => a - b);
+  assert.equal(radii.length, 2);
+  assert.ok(radii[0] >= 1.6, `one-marker bin r=${radii[0]}`);
+  assert.equal(radii[1], 3.2);
 });
 
 test("density unavailable draws only empty dots", () => {
@@ -167,15 +177,17 @@ test("centromeres align across columns and loci sit at the exact y of their bin"
 
 test("an unknown build says the GRCh38 geometry is a fallback and the file build is unknown", () => {
   const svg = renderKaryogramSvg(sampleLayout([call("2", 5_000_001)], "unknown"));
-  const title = svg.match(/<title id="kary-title">([^<]*)<\/title>/)[1];
-  const desc = svg.match(/<desc id="kary-desc">([^<]*)<\/desc>/)[1];
-  assert.equal(title, "Karyogram (GRCh38 reference; file build unknown)");
-  assert.match(desc, /GRCh38 reference; file build unknown/);
+  const unescape = (t) => t.replaceAll("&#39;", "'").replaceAll("&#x27;", "'").replaceAll("&apos;", "'");
+  const title = unescape(svg.match(/<title id="kary-title">([^<]*)<\/title>/)[1]);
+  const desc = unescape(svg.match(/<desc id="kary-desc">([^<]*)<\/desc>/)[1]);
+  const lead = "Karyogram: your file's genome version is unknown, so the chromosomes are drawn from the GRCh38 reference";
+  assert.equal(title, lead);
+  assert.ok(desc.startsWith(`${lead}. `), desc);
   assert.match(desc, /density unavailable/);
 });
 
 test("a known build keeps the plain title and desc", () => {
   const svg = renderKaryogramSvg(sampleLayout([call("2", 5_000_001)]));
   assert.match(svg, /<title id="kary-title">Karyogram \(GRCh37\)<\/title>/);
-  assert.doesNotMatch(svg, /file build unknown/);
+  assert.doesNotMatch(svg, /genome version is unknown/);
 });

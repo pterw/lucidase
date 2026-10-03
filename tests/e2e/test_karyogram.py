@@ -119,8 +119,8 @@ def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):
     )
     _wait_result(page)
     expect(page.locator("#karyogram-density-notice")).to_be_visible()
-    expect(page.locator("#karyogram-density-notice")).to_contain_text("genome build is unknown")
-    expect(page.locator("#karyogram-provenance")).to_contain_text("build is unknown")
+    expect(page.locator("#karyogram-density-notice")).to_contain_text("doesn't say which genome version")
+    expect(page.locator("#karyogram-provenance")).to_contain_text("doesn't say which genome version it was made with")
     assert _total(page, "density") == "Unavailable"
     assert _total(page, "placed") == "0"
     assert _total(page, "notPlacedBuildUnknown") == "5"

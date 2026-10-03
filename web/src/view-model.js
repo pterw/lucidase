@@ -33,7 +33,7 @@ const STATE_TEXT = {
 };
 
 /** The reference-only marker state on the karyogram: the locus has a position but no sample is loaded. */
-const REFERENCE_STATE_LABEL = "Reference position (no sample)";
+const REFERENCE_STATE_LABEL = "Location only (no file loaded)";
 
 /**
  * Human label per karyogram marker state: the four per-locus coverage states reuse the analysis labels above, plus
