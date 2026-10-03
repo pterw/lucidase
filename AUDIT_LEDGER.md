@@ -71,6 +71,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-007 | `task.md` | Stale design specification referenced in-app `web/src/font-studio.js`. | REMEDIATED (updated to reflect extraction to `tools/font-kit-studio/`) |
 | P2-008 | Version Control | Tracked caches, binaries (`bin/uv*.exe`), and `alphafold_data/` in git index. | REMEDIATED (removed from index and `.gitignore` strengthened) |
 | P2-009 | `graph_core.py`, `assembly.py`, `debruijn_explorer.py`, `tests/test_debruijn.py` | de Bruijn tool: duplicate reverse-complement contigs, header words as k-mers, late k-mer cap, dead `--selftest`, overcounted coverage, inconsistent default k. | REMEDIATED (canonical contigs, header-safe kmers mode, streaming MAX_KMERS check, selftest removed for pytest, dead coverage attr deleted, shared DEFAULT_K; tip clipping/repeat collapse documented as limitations) |
+| P2-011 | `tools/fetch_upstream.py`, `tools/fixtures/upstream/real/**` | Curated ClinVar accessions and allele frequencies were unverified hand-typed values: 11 of the 14 curated `clinvar_id`s do not match ClinVar's record for the rsid. | PARTIAL (T2; remaining: T5) |
 
 ---
 
@@ -80,6 +81,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 
 - **P0-004** (T1): `worker.js` had `if (isNoCall) {...} else {...} else {...}` since 7ab8674, a parse error that stopped the worker from loading. Fixed the branch structure, and the worker and `app.js` now report failures (`{type: "error", message}`, `onerror`, `onmessageerror`) in a visible `#analysis-error` alert instead of hanging.
 - **P1-019** (T1, partial): added the Node seam (`web/tests/worker-load.test.mjs`) and the Playwright seam (`tests/e2e/conftest.py`, which fails any test on page or console errors). Converted the three browser scripts into collected tests under `tests/e2e/`. Remaining: the two Python scripts (T10).
+- **P2-011** (T2, partial): captured pinned, byte-verbatim ClinVar, dbSNP, Ensembl VEP and gnomAD payloads once for the 14 curated loci (`tools/fetch_upstream.py`, `tools/fixtures/upstream/real/**`, 2.98 MB, sha256 per body, `.gitattributes` `-text`). ClinVar check (esummary records whose dbSNP xref equals the rsid; rs4244285 verified complete at 37 of 37 uids): only rs113993960, rs429358 and rs671 match the curated `clinvar_id`; the other 11 do not. Accession verification in the build is T5.
 - **P2-009** (T11): de Bruijn tool fixed (G-F1..G-F5, G-F7) and covered by `tests/test_debruijn.py`; G-F6 (coverage-blind tip clipping, repeat collapse) documented as a known limitation.
 
 ### 2026-10-02
