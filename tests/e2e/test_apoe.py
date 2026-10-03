@@ -74,7 +74,9 @@ def test_apoe_numbers_come_from_the_knowledge_base(loaded_page):
         "async () => (await (await fetch('./src/knowledge-base.json')).json()).genes.APOE.diplotypes['e3/e4']"
     )
     assert apoe["magnitude"] == kb_interp["magnitude"]
-    assert apoe["phenotype"] == kb_interp["phenotype"]
+    note = " [Figures: manually curated; source citation pending verification]"
+    assert apoe["phenotype"].startswith(kb_interp["phenotype"])
+    assert apoe["phenotype"][len(kb_interp["phenotype"]):] == note
     # The composite row carries each component's own evidence, never one component's as its own.
     assert apoe["clinvar_stars"] is None
     kb_loci = loaded_page.evaluate(

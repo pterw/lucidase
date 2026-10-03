@@ -123,7 +123,7 @@
           ],
           "drug_response": null,
           "magnitude": 6.0,
-          "phenotype": "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). Confers ~12–15× increased lifetime risk of late-onset Alzheimer's disease and increased LDL/atherosclerosis susceptibility.",
+          "phenotype": "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). Confers a ~12–15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease, and increased LDL/atherosclerosis susceptibility.",
           "repute": "Bad",
           "significance": "High Risk Factor"
         }
@@ -1761,7 +1761,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 5,
-          "phenotype": "APOE ε4/ε4 homozygote: ~12-15× elevated lifetime risk of late-onset Alzheimer's disease.",
+          "phenotype": "APOE ε4/ε4 homozygote: ~12-15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease.",
           "repute": "Bad",
           "significance": "High Risk Factor"
         }
@@ -2434,7 +2434,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "b79e6a67bb68c33f43e844dea9af2a3961f5fa3c448cccf98433933be74d2d83"
+    "sha256": "043abc11111da0de959ff18f2453f3ebb37548a681527d0542ae57dddc0b9e60"
   },
   "schema_version": 2
 }

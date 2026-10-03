@@ -9,6 +9,7 @@ import { assembleFindings } from "../src/core/apoe.js";
 import { describeSegregation } from "../src/core/inheritance.js";
 import {
   NOT_AVAILABLE,
+  APOE_FIGURES_NOTE,
   NO_CLINVAR_STATUS,
   apoeCardModel,
   csvReport,
@@ -344,4 +345,110 @@ test("the partner model is stated in words", () => {
   assert.match(partnerModelNote("unscreened", null), /No gnomAD allele frequency/);
   assert.match(partnerModelNote("heterozygous", 0.1), /heterozygous/);
   assert.throws(() => partnerModelNote("carrier", 0.1), /unknown partner model/);
+});
+
+/** The Markdown table under a "## <heading>" line as rows keyed by rsID, with `\|` read as a literal pipe. */
+function markdownRows(md, heading) {
+  const lines = md.split("\n");
+  const start = lines.findIndex((l) => l.startsWith(`## ${heading}`));
+  assert.ok(start >= 0, `no section "${heading}"`);
+  const cells = (line) =>
+    line.replace(/^\| /, "").replace(/ \|$/, "").split(/ \| /).map((c) => c.replace(/\\\|/g, "|"));
+  const table = [];
+  for (let i = start + 2; i < lines.length && lines[i].startsWith("|"); i++) table.push(lines[i]);
+  const [header, , ...body] = table.map(cells);
+  return Object.fromEntries(body.map((r) => [r[0], Object.fromEntries(header.map((h, i) => [h, r[i]]))]));
+}
+
+test("a hostile genotype is neutralised in the CSV and the Markdown", () => {
+  const a = analyse(DEMO);
+  for (const hostile of ["=1+1", "+1", "-1", "@SUM(A1)", "\tx", "\rx", "  =1+1"]) {
+    const rec = structuredClone(a.byRsid.rs6025);
+    rec.genotype_display = hostile;
+    const vm = toViewModel(rec, a.kb.genes);
+    const cell = parseCsv(csvReport([vm], a.kb.genes))[0].Genotype;
+    assert.equal(cell, `'${hostile}`, JSON.stringify(hostile));
+  }
+  const plain = toViewModel(a.byRsid.rs6025, a.kb.genes);
+  assert.equal(parseCsv(csvReport([plain], a.kb.genes))[0].Genotype, plain.genotype, "a normal genotype is untouched");
+
+  const rec = structuredClone(a.byRsid.rs6025);
+  rec.genotype_display = "<DEL>/a|b&c";
+  const md = markdownReport(reportData(a, { records: [toViewModel(rec, a.kb.genes)], negativeChecks: [], arrayGaps: [], insufficientEvidence: [] }));
+  const row = md.split("\n").find((l) => l.startsWith("| rs6025 "));
+  assert.ok(row.includes("&lt;DEL&gt;/a\\|b&amp;c"), row);
+  assert.ok(!row.includes("<DEL>"), row);
+  assert.equal(markdownRows(md, "Observed").rs6025.Genotype, "&lt;DEL&gt;/a|b&amp;c", "the pipe did not move any cell");
+});
+
+test("the tested-variant count leaves out a sibling locus whose genotype is not interpretable", () => {
+  // rs1799945 TT is neither ref/alt nor a strand flip of them: insufficient evidence, no altCount.
+  const a = analyse(
+    DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG").replace(/^rs1799945\t6\t26092913\tCG/m, "rs1799945\t6\t26092913\tTT")
+  );
+  assert.equal(a.byRsid.rs1799945.coverage_state, "insufficient_evidence");
+  assert.equal(a.byRsid.rs1800562.statement, "rs1800562 variant not detected (1 variant tested in HFE)");
+});
+
+test("the constraint line is the numeric gnomAD LOEUF value with no curated band", () => {
+  const a = analyse(DEMO);
+  const shown = [...a.vms, a.apoe].map((v) => v.biotools.constraint).filter((c) => c !== null);
+  assert.ok(shown.length > 0, "the demo shows at least one LOEUF value");
+  for (const text of shown) {
+    assert.match(text, /^gnomAD LOEUF \d+\.\d\d$/);
+    for (const band of ["Constrained", "Tolerant"]) assert.ok(!text.includes(band), text);
+  }
+});
+
+test("Markdown rows match the CSV rows per record: tier, stars, limitation, genotype", () => {
+  const a = analyse(DEMO);
+  const all = a.vms.some((v) => v.id === a.apoe.id) ? a.vms : [...a.vms, a.apoe];
+  const md = markdownReport(reportData(a, { records: all, negativeChecks: [], arrayGaps: [], insufficientEvidence: [] }));
+  const csv = parseCsv(csvReport(all, a.kb.genes));
+  const starsText = (n) => (n === "" ? NO_CLINVAR_STATUS : Number(n) > 0 ? "\u2605".repeat(Number(n)) : "0 stars");
+  const compare = (mdText) => {
+    const rows = markdownRows(mdText, "Observed Clinical Findings");
+    assert.equal(Object.keys(rows).length, csv.length);
+    for (const c of csv) {
+      const r = rows[c.rsID];
+      assert.ok(r, `${c.rsID} is missing from the Markdown: ${Object.keys(rows)}`);
+      assert.equal(r.Tier, c.Evidence_Tier, `${c.rsID} tier`);
+      assert.equal(r.ClinVar, c.ClinVar_Stars.split(";").map(starsText).join(";"), `${c.rsID} stars`);
+      assert.ok(r.Limitation.startsWith(c.Limitation), `${c.rsID} limitation`);
+      assert.equal(r.Genotype, c.Genotype, `${c.rsID} genotype`);
+    }
+  };
+  compare(md);
+  // Dropping one record's tier from the Markdown must be caught.
+  const dropped = md
+    .split("\n")
+    .map((l) => (l.startsWith("| rs6025 ") ? l.replace(/ \| Tier [A-D] \| /, " |  | ") : l))
+    .join("\n");
+  assert.notEqual(dropped, md);
+  assert.throws(() => compare(dropped), /rs6025 tier/);
+});
+
+test("the APOE figures are labelled as curated and unverified on the card and in both exports", () => {
+  const a = analyse(DEMO);
+  const card = apoeCardModel(a.apoe);
+  assert.equal(card.resolved, true);
+  assert.equal(APOE_FIGURES_NOTE, "manually curated; source citation pending verification");
+  for (const text of [card.riskBadge, card.lifetime, card.description]) assert.ok(text.includes(APOE_FIGURES_NOTE), text);
+  const md = markdownReport(reportData(a));
+  for (const label of ["Risk Ratio", "Estimated Lifetime Risk", "Clinical Guidance"]) {
+    const line = md.split("\n").find((l) => l.startsWith(`- **${label}**`));
+    assert.ok(line.includes(APOE_FIGURES_NOTE), line);
+  }
+  const csv = parseCsv(csvReport([a.apoe], a.kb.genes))[0];
+  assert.ok(csv.Condition_Phenotype.includes(APOE_FIGURES_NOTE));
+  assert.ok(csv.Caveats.includes(APOE_FIGURES_NOTE));
+});
+
+test("the APOE phenotype wording states 12-15x as a relative figure, not a lifetime risk", () => {
+  // The curation source; the landing rebuilds the KB from it, and kb-verify pins the two together.
+  const e44 = JSON.parse(readText("../../tools/curation/kb_curation.json")).genes.APOE.diplotypes["e4/e4"];
+  assert.match(e44.phenotype, /relative risk/i);
+  assert.match(e44.phenotype, /ε3\/ε3/);
+  assert.ok(!/increased lifetime risk/.test(e44.phenotype));
+  assert.ok(e44.phenotype.includes("12–15×"), "the numbers are unchanged");
 });
