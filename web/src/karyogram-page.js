@@ -87,7 +87,7 @@ function renderTotals(layout) {
     unplaced: unplaced.length === 0 ? "None" : unplaced.map(([name, n]) => `${name}: ${fmt(n)}`).join(", "),
     outOfBounds: fmt(t.outOfBounds),
     notPlacedBuildUnknown: fmt(t.notPlacedBuildUnknown),
-    density: sample.density === "available" ? "Available" : "Unavailable",
+    density: sample.density === "available" ? "Yes" : "No",
   };
   for (const [name, text] of Object.entries(values)) {
     document.querySelector(`#karyogram-totals [data-total="${name}"]`).textContent = text;
@@ -244,9 +244,9 @@ async function loadSample() {
     $("karyogram-error").classList.add("hidden");
     setViewState("loading");
     $("karyogram-progress").classList.remove("hidden");
-    updateProgress(10, "Fetching the synthetic karyogram sample...");
+    updateProgress(10, "Loading the example file...");
     const resp = await fetch(SAMPLE_URL);
-    if (!resp.ok) throw new Error("Could not load the synthetic sample file.");
+    if (!resp.ok) throw new Error("Could not load the example file.");
     processText(await resp.text(), SAMPLE_NAME);
   } catch (err) {
     showError((err && err.message) || err);

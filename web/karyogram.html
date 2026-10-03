@@ -58,14 +58,15 @@
 
     <section class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-4">
       <p class="text-sm text-slate-700 dark:text-slate-300 font-serif">
-        Each dot is a 4 Mb stretch of a chromosome, and its size shows how many markers from your file fall there; the
-        curated loci are marked with their result. Your file is read in this browser and nothing leaves it.
+        Each dot stands for a stretch of chromosome about 4 million DNA letters long. The more markers from your file
+        fall in that stretch, the bigger the dot. Coloured rings mark the genes this report checks, with your result
+        for each. Your file is read in this browser and never leaves it.
       </p>
       <div class="flex flex-wrap items-center gap-3">
         <input type="file" id="karyogram-file-input" class="file-input file-input-sm file-input-bordered rounded-sm text-xs" accept=".txt,.csv,.vcf,.tsv,.gz">
         <span class="text-xs text-slate-400 font-mono">or</span>
         <button type="button" id="btn-load-karyogram-sample" class="btn btn-sm btn-outline border-slate-400 dark:border-slate-700 hover:border-sky-500 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-300 rounded-sm">
-          Load synthetic karyogram sample
+          Try a made-up example file
         </button>
       </div>
     </section>
@@ -98,30 +99,30 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <section class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-3">
-        <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Legend: curated loci by result</h2>
+        <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Key: the genes this report checks, by your result</h2>
         <ul id="karyogram-legend" class="space-y-1.5 text-xs font-mono"></ul>
       </section>
 
       <section id="karyogram-totals" class="hidden glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-3">
         <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Markers in your file</h2>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs font-mono">
-          <dt class="text-slate-500 dark:text-slate-400">Rows</dt><dd data-total="rows" class="font-bold text-right"></dd>
+          <dt class="text-slate-500 dark:text-slate-400">Lines read from your file</dt><dd data-total="rows" class="font-bold text-right"></dd>
           <dt class="text-slate-500 dark:text-slate-400">Placed on a chromosome</dt><dd data-total="placed" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Mitochondrial (MT)</dt><dd data-total="mt" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Unplaced, by name</dt><dd data-total="unplaced" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Out of bounds</dt><dd data-total="outOfBounds" class="font-bold text-right"></dd>
+          <dt class="text-slate-500 dark:text-slate-400">Mitochondrial DNA (not drawn)</dt><dd data-total="mt" class="font-bold text-right"></dd>
+          <dt class="text-slate-500 dark:text-slate-400">On other DNA sequences (not drawn)</dt><dd data-total="unplaced" class="font-bold text-right"></dd>
+          <dt class="text-slate-500 dark:text-slate-400">Past the end of a chromosome (not drawn)</dt><dd data-total="outOfBounds" class="font-bold text-right"></dd>
           <dt class="text-slate-500 dark:text-slate-400">Not placed (genome version unknown)</dt><dd data-total="notPlacedBuildUnknown" class="font-bold text-right"></dd>
-          <dt class="text-slate-500 dark:text-slate-400">Density</dt><dd data-total="density" class="font-bold text-right"></dd>
+          <dt class="text-slate-500 dark:text-slate-400">Markers drawn on the map</dt><dd data-total="density" class="font-bold text-right"></dd>
         </dl>
         <p id="karyogram-density-notice" class="hidden p-3 rounded-sm bg-amber-50/90 dark:bg-amber-950/40 border-l-4 border-amber-500 border border-amber-200 dark:border-amber-900/60 text-xs text-slate-800 dark:text-slate-200">
           Your file doesn't say which genome version it uses, so its markers can't be placed on the chromosomes. The
-          highlighted genes still show your results.
+          genes this report checks still show your results.
         </p>
       </section>
     </div>
 
     <section class="glass-panel p-6 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 space-y-3">
-      <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Curated loci</h2>
+      <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Genes this report checks</h2>
       <div class="overflow-x-auto">
         <table class="table table-sm w-full text-xs">
           <thead>

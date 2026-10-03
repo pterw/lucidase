@@ -64,6 +64,11 @@ def test_load_shows_reference_only_karyogram(page):
     expect(page.locator("#karyogram-provenance")).to_contain_text("hg38")
     expect(page.locator("#karyogram-provenance")).to_contain_text(KB["manifest"]["release"])
     expect(page.locator("#karyogram-provenance")).to_contain_text("2026-10-03")
+    provenance = page.locator("#karyogram-provenance")
+    expect(provenance).to_contain_text("Chromosome shapes: GRCh38.")
+    expect(provenance).not_to_contain_text("matching")
+    expect(provenance).not_to_contain_text("doesn't say")
+    expect(page.locator("#btn-load-karyogram-sample")).to_have_text("Try a made-up example file")
 
 
 def test_synthetic_sample_matches_the_file_and_the_main_app(page):
@@ -81,10 +86,13 @@ def test_synthetic_sample_matches_the_file_and_the_main_app(page):
     assert _total(page, "mt") == "0"
     assert _total(page, "outOfBounds") == "0"
     assert _total(page, "notPlacedBuildUnknown") == "0"
-    assert _total(page, "density") == "Available"
+    assert _total(page, "density") == "Yes"
     assert page.locator("#karyogram-figure .kary-col").count() == 24
     assert page.locator("#karyogram-figure .kary-bin:not(.kary-bin-empty)").count() > 0
     expect(page.locator("#karyogram-provenance")).to_contain_text("hg19")
+    expect(page.locator("#karyogram-provenance")).to_contain_text("matching your file")
+    expect(page.locator("#karyogram-totals")).to_contain_text("Lines read from your file")
+    expect(page.locator("#karyogram-totals")).to_contain_text("Markers drawn on the map")
     karyogram_states = page.evaluate(LOCUS_STATES)
     assert "reference" not in karyogram_states.values()
 
@@ -121,7 +129,7 @@ def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):
     expect(page.locator("#karyogram-density-notice")).to_be_visible()
     expect(page.locator("#karyogram-density-notice")).to_contain_text("doesn't say which genome version")
     expect(page.locator("#karyogram-provenance")).to_contain_text("doesn't say which genome version it was made with")
-    assert _total(page, "density") == "Unavailable"
+    assert _total(page, "density") == "No"
     assert _total(page, "placed") == "0"
     assert _total(page, "notPlacedBuildUnknown") == "5"
     assert page.locator("#karyogram-figure .kary-bin:not(.kary-bin-empty)").count() == 0
