@@ -27,8 +27,10 @@ Every plan task (T1-T13 and T10a) has landed. What remains, in order:
   Never hand-edit it.
 - The desktop Python stack is kept, and stays in parity with the web app through `tests/vectors/*.json`.
 - Visual design and identity are NOT established. Make no design decisions (colours, fonts, themes, components).
-  Reproduce the current look exactly. Styling config lives only in `web/tailwind.config.js` plus
-  `web/src/tailwind.input.css`. A design system will be authored later.
+  Reproduce the current look exactly. Styling lives in `web/tailwind.config.js`,
+  `web/src/tailwind.input.css` (the `@tailwind` directives), `web/src/styles.css` (theme variables, badge classes,
+  glass panels, typography overrides) and the vendored daisyUI. A design system will be authored later and will own
+  all of them.
 - Owner ruling 10 (2026-10-02) makes exceptions to that:
   - the product gets a new one-word name, chosen in the style of "Promethease" and shown in the UI. Proposed:
     Lucidase;

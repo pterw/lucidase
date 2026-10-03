@@ -127,7 +127,7 @@ One entry per screen/region. State conventions: D default, H hover, F focus, A a
 |---|---|
 | Element | `#analysis-error`, `role="alert"` (asserted in `test_web_smoke.py`), red surface, `border-l-4 border-red-500` |
 | Copy (fixed) | "The analysis could not be completed. Nothing was uploaded, and no results are shown. Please try again, or try a different file." + `Technical detail: <span id="analysis-error-detail">` (raw message via `textContent`) |
-| Triggers | worker `onerror` / `onmessageerror` / `type:"error"` message / watchdog timeout / unsupported format (text contains "unsupported") / KB fetch 500 |
+| Triggers | worker `onerror` / `onmessageerror` / `type:"error"` message / watchdog timeout / unsupported format (text contains "unsupported") / KB load failure (the JSON module import through `web/src/kb-loader.js` fails) |
 | Required behaviour (tests) | hidden until an analysis starts; on failure: alert visible, progress hidden, results hidden, inputs re-enabled; cleared at next run start; retry recovers; worker terminated per run |
 | One error path | `showAnalysisError()` (A:220-229) is the only error path. FileReader failure (A:343-345), demo fetch failure (A:288-290), worker failures (A:158-169, 184-186) and an error inside `handleParseComplete` (A:179-183) all end there. `alert()` is not used (resolved by T9; e2e for FileReader failure in `tests/e2e/test_ui_honesty.py`) |
 | States | D hidden; visible = E; no dismiss control (NI); no focus move on appearance (NI) |
@@ -308,7 +308,7 @@ Breakpoints actually used (Tailwind defaults: sm 640, md 768, lg 1024):
 | APOE components | Never separate rows; one APOE row + card |
 | No matches for search/filter | Empty row message |
 | Long phenotype text | `truncate max-w-md` with `title` |
-| KB fetch failure / worker failure / silent worker | Error alert; watchdog 30 s |
+| KB load failure (JSON module import) / worker failure / silent worker | Error alert; watchdog 30 s |
 | Healthy slow progress | Watchdog re-armed per progress message; no false timeout |
 | Placeholder-as-data | Removed by T9. None of the old placeholder strings renders (`tests/e2e/test_ui_honesty.py:25-37` bans them); a missing value reads "Not available" (A:109-124) |
 | Gap / not-tested row fields | Genotype "Not available" (A:690); the phenotype is `record.reason` (V:161), the significance falls back to the state label (V:193), and the guidance cell is `statement ?? phenotype ?? significance` (A:682) |

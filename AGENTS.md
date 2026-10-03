@@ -54,9 +54,11 @@ match the code.
 
 **Visual design.** The identity and design system are not yet authored, and
 styling is provisional. Make no design decisions (colours, fonts, spacing,
-themes, components) and reproduce the current look. All styling configuration
-lives only in `web/tailwind.config.js` and `web/src/tailwind.input.css`, with
-the vendored daisyUI, which the future design system will own. `docs/design-handoff.md`
+themes, components) and reproduce the current look. Styling lives in
+`web/tailwind.config.js`, `web/src/tailwind.input.css` (the `@tailwind`
+directives), `web/src/styles.css` (theme CSS variables, badge classes, glass
+panels, typography overrides) and the vendored daisyUI. The future design system
+will own all of them. `docs/design-handoff.md`
 records the current look as built.
 
 ## 3. Principles, made concrete

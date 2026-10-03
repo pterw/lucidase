@@ -55,7 +55,7 @@ Each curated locus lands in exactly one state per sample:
 | State | Meaning |
 |:---|:---|
 | Supported & observed | The variant allele is present among the variants tested. |
-| Supported, not observed | "Not detected among the N variants tested". Never worded as "normal" or as absence of risk. |
+| Supported, not observed | "<allele> not detected (N variant(s) tested in <gene>)". Never worded as "normal" or as absence of risk. |
 | Not tested by array | The locus is absent from the file, or the call is a no-call. A variants-only VCF reads "absent from VCF (variants-only VCFs omit reference calls)". |
 | Outside coverage | Markers in the file that the knowledge base does not curate. Counted only. |
 | Insufficient evidence | A conflicting or weak locus, or a genotype that cannot be resolved against ref/alt. Fail-closed results land here, never as wild-type. |
@@ -167,11 +167,15 @@ These all fail closed, with a visible error or an explicit state:
 
 ---
 
+---
+
 ## 🎨 Visual design is provisional
 
-Visual design and brand identity have not been established, and the design system that will own them is not yet authored. Styling is provisional. All styling configuration lives in `tailwind.config.js` and `src/tailwind.input.css`, with the vendored daisyUI. See [`../docs/design-handoff.md`](../docs/design-handoff.md) for the current look as built.
+Visual design and brand identity have not been established, and the design system that will own them is not yet authored. Styling is provisional. Styling lives in `tailwind.config.js`, `src/tailwind.input.css` (the `@tailwind` directives), `src/styles.css` (theme CSS variables, badge classes, glass panels, typography overrides) and the vendored daisyUI. The future design system will own all of them. See [`../docs/design-handoff.md`](../docs/design-handoff.md) for the current look as built.
 
-## 🎨 Developer Tooling: Font Kit Studio
+---
+
+## 🛠️ Developer Tooling: Font Kit Studio
 
 Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studio/` and is **not bundled** in the production clinical app.
 

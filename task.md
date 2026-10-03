@@ -5,8 +5,9 @@
 > **Provisional (owner ruling, 2026-10-02).** Visual design and brand identity have not been established, and the
 > design system that will own them has not been authored yet. The Brand Personality, Aesthetic Direction,
 > Typography Specification and Design Principles sections below describe the current look and are provisional, not
-> authoritative. Styling configuration lives only in `web/tailwind.config.js` and `web/src/tailwind.input.css`
-> (with the vendored daisyUI), which the future design system will own.
+> authoritative. Styling lives in `web/tailwind.config.js`, `web/src/tailwind.input.css` (the `@tailwind`
+> directives), `web/src/styles.css` (theme CSS variables, badge classes, glass panels, typography overrides) and the
+> vendored daisyUI. The future design system will own all of them.
 
 ### Users
 - **Target Audience**: Proactive health explorers, biohackers, individuals analyzing their own 23andMe / AncestryDNA / VCF raw files, clinicians, and genetics enthusiasts.
@@ -52,7 +53,7 @@
 ### Design Principles (principles 1, 2, 3 and 6 are provisional design direction)
 1. **Sharp Clinical Precision**: Use crisp geometric architecture, sharp corners (`rounded-none` / `rounded-sm`), and precise structural dividers. Data must look scientific, authoritative, and expertly curated.
 2. **Actionable Synthesis Over Text Walls**: Replace Promethease-style walls of text with structured, glanceable cards, high-density sortable datagrids, and deep on-demand flyout drawers.
-3. **Compound Haplotype Intelligence**: Multi-SNP loci (specifically **APOE ε2/ε3/ε4 diplotypes** and CYP450 pharmacogenomic star alleles) must be synthesized into dedicated, definitive clinical calls, never fragmented or lost as isolated neutral SNPs.
+3. **Compound Haplotype Intelligence**: Multi-SNP loci (specifically **APOE ε2/ε3/ε4 diplotypes**) must be synthesized into one dedicated clinical record, never fragmented or lost as isolated neutral SNPs. CYP450 star alleles are not called: single-SNP array data cannot support a star-allele diplotype, so the app shows the single interrogated SNP with a limitation notice and refuses a metabolizer assignment (provisional, like the rest of this section).
 4. **Uncompromising Zero-Knowledge Privacy**: Raw genomic data never leaves the browser. The interface must transparently affirm local-first processing at all times.
 5. **One Curated Knowledge Base, Honest Provenance**: All annotations come from one build-time knowledge base (`web/src/knowledge-base.json`, built from pinned upstream payloads plus labelled manual curation). There is no edge cache, no Redis and no live literature lookup: nothing about a user's variants is sent to any server, and every value shows where it came from or is shown as "not available".
 6. **Editorial Typography Hierarchy**: Use Gotham for authoritative human communication and Attribute Mono for raw biological blueprints.
