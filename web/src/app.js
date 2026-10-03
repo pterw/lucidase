@@ -11,6 +11,8 @@ import { simulateOffspringPedigree, BIOTOOLS_GENE_INSIGHTS, computeSegregationRe
 // Global Application State
 const state = {
   worker: null,
+  watchdog: null,
+  workerTimeoutMs: 30000,
   fileName: "",
   qc: null,
   records: [],
@@ -34,7 +36,6 @@ const state = {
 function initApp() {
   console.log("initApp executed, readyState:", document.readyState);
   initTheme();
-  initWorker();
   initEventListeners();
   window.__genomePulse = {
     state,
@@ -80,27 +81,53 @@ function setTheme(theme) {
   }
 }
 
-function initWorker() {
-  state.worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
-
-  state.worker.onerror = (err) => {
-    showAnalysisError((err && err.message) || "The analysis worker failed to start.");
+// One worker per analysis run: a worker that failed (or never answers) is
+// terminated and the next run starts fresh, so a retry can never hang on a dead one.
+function startWorker() {
+  stopWorker();
+  const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
+  state.worker = worker;
+  const fail = (message) => {
+    if (state.worker !== worker) return;
+    stopWorker();
+    showAnalysisError(message);
   };
 
-  state.worker.onmessageerror = () => {
-    showAnalysisError("The analysis worker sent a message the page could not read.");
+  worker.onerror = (err) => {
+    fail((err && err.message) || "The analysis worker failed to start.");
   };
-
-  state.worker.onmessage = (e) => {
+  worker.onmessageerror = () => {
+    fail("The analysis worker sent a message the page could not read.");
+  };
+  worker.onmessage = (e) => {
+    if (state.worker !== worker) return;
+    clearWatchdog();
     const data = e.data;
     if (data.type === "progress") {
       updateProgress(data.percent, data.status);
     } else if (data.type === "complete") {
+      stopWorker();
       handleParseComplete(data);
     } else if (data.type === "error") {
-      showAnalysisError(data.message);
+      fail(data.message);
     }
   };
+  state.watchdog = setTimeout(
+    () => fail("The analysis worker did not respond."),
+    state.workerTimeoutMs
+  );
+  return worker;
+}
+
+function clearWatchdog() {
+  if (state.watchdog) clearTimeout(state.watchdog);
+  state.watchdog = null;
+}
+
+function stopWorker() {
+  clearWatchdog();
+  if (state.worker) state.worker.terminate();
+  state.worker = null;
 }
 
 function setInputsDisabled(disabled) {
@@ -242,7 +269,7 @@ function processText(text, fileName) {
   setInputsDisabled(true);
   document.getElementById("progress-section").classList.remove("hidden");
   document.getElementById("results-section").classList.add("hidden");
-  state.worker.postMessage({ action: "parse", text, fileName });
+  startWorker().postMessage({ action: "parse", text, fileName });
 }
 
 function updateProgress(percent, message) {

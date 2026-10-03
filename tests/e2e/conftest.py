@@ -21,6 +21,10 @@ DEMO_FILE = WEB_DIR / "demo-data" / "sample-23andme.txt"
 
 # Stand-in for the Tailwind CDN script until the CSS is vendored: defines the
 # global the inline config assigns to, and the one rule visibility checks need.
+# Limitation: it does not emulate translate-x-full, responsive or dark variants, so
+# drawer tests assert the class, not the on-screen position. Remove with the CDN
+# script when the compiled CSS is vendored (T12). Likewise _stub_external answers
+# every other external URL with an empty 200; narrow it then.
 _TAILWIND_STUB = (
     "window.tailwind = {};"
     "document.head.appendChild(Object.assign(document.createElement('style'),"

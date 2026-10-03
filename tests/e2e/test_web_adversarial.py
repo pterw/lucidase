@@ -5,7 +5,10 @@ Dropped on conversion because they encoded behaviour listed as wrong in
 findings.md: the hard-coded "ClinVar 2024-06" badge text (stale KB metadata,
 replaced by the KB manifest in later tasks), the exact empty-file result
 ("0 SNPs / 0.00%", where an empty file should be rejected, T3), and the
-APOE-in-Carrier-filter check (P0-007: category-derived classification).
+APOE-in-Carrier-filter check (P0-007: category-derived classification), and
+the multi-locus assortment section / "Mendel's 2nd law" card text (P1-026: the
+F5+F2 comparison is itself wrong, T8 rewrites it). Also not carried over: the
+printed-only pathogenic count and drawer phenotype text, which asserted nothing.
 """
 
 from __future__ import annotations
@@ -94,7 +97,8 @@ def test_kb_provenance_badge_visible(loaded_page):
 
 def test_xss_payloads_in_rsids_do_not_execute(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "xss-23andme.txt"))
-    _wait_outcome(loaded_page)
+    # A valid 23andMe file: results must render, an error would be a failure here.
+    expect(loaded_page.locator("#results-section")).to_be_visible(timeout=10000)
     executed = loaded_page.evaluate(
         "() => Boolean(window.__xss_rsid || window.__xss_img || window.__xss_gt)"
     )
@@ -141,6 +145,10 @@ def test_apoe_e3e4_upload_and_inspect(loaded_page):
     loaded_page.locator("#btn-inspect-apoe").click()
     loaded_page.wait_for_selector("#variant-drawer:not(.translate-x-full)", timeout=3000)
     assert loaded_page.locator("#drawer-gene").text_content() == "APOE"
+
+
+def test_typekit_stylesheet_linked(loaded_page):
+    assert loaded_page.locator("link[href*='use.typekit.net/cqu4tvx.css']").count() == 1
 
 
 def test_theme_toggle_round_trip(loaded_page):

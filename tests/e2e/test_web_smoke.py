@@ -21,20 +21,64 @@ def test_file_upload_renders_results(loaded_page):
     _assert_results_shown(loaded_page)
 
 
-@pytest.mark.allow_console_errors
-def test_worker_failure_is_visible(loaded_page):
-    loaded_page.route(
+FAILING_WORKER = "throw new Error('boom from worker');"
+SILENT_WORKER = "// loads fine but never answers"
+
+
+def _serve_worker(page, body):
+    page.route(
         "**/src/worker.js",
         lambda route: route.fulfill(
-            status=200,
-            content_type="application/javascript",
-            body="throw new Error('boom from worker');",
+            status=200, content_type="application/javascript", body=body
         ),
     )
-    loaded_page.reload(wait_until="networkidle")
-    loaded_page.locator("#btn-load-demo").click()
-    alert = loaded_page.locator("#analysis-error")
+
+
+@pytest.mark.allow_console_errors
+def test_worker_failure_is_visible(page):
+    _serve_worker(page, FAILING_WORKER)
+    page.goto(page.base_url, wait_until="networkidle")
+    alert = page.locator("#analysis-error")
+    # Causality: nothing is shown until the user starts an analysis.
+    expect(alert).to_be_hidden()
+    page.locator("#btn-load-demo").click()
     expect(alert).to_be_visible(timeout=10000)
     assert alert.get_attribute("role") == "alert"
     assert alert.inner_text().strip() != ""
-    expect(loaded_page.locator("#progress-section")).to_be_hidden()
+    expect(page.locator("#progress-section")).to_be_hidden()
+    expect(page.locator("#results-section")).to_be_hidden()
+
+
+@pytest.mark.allow_console_errors
+def test_retry_after_worker_failure_recovers(page):
+    _serve_worker(page, FAILING_WORKER)
+    page.goto(page.base_url, wait_until="networkidle")
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    page.unroute("**/src/worker.js")
+    page.locator("#btn-load-demo").click()
+    _assert_results_shown(page)
+    expect(page.locator("#analysis-error")).to_be_hidden()
+
+
+@pytest.mark.allow_console_errors
+def test_retry_with_still_failing_worker_shows_error_again(page):
+    _serve_worker(page, FAILING_WORKER)
+    page.goto(page.base_url, wait_until="networkidle")
+    for _ in range(2):
+        page.locator("#btn-load-demo").click()
+        expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+        expect(page.locator("#progress-section")).to_be_hidden()
+        # The alert is cleared at run start, so a visible alert is a fresh one.
+        page.wait_for_function(
+            "() => !document.getElementById('btn-load-demo').disabled", timeout=5000
+        )
+
+
+def test_silent_worker_times_out_visibly(page):
+    _serve_worker(page, SILENT_WORKER)
+    page.goto(page.base_url, wait_until="networkidle")
+    page.evaluate("window.__genomePulse.state.workerTimeoutMs = 500")
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#progress-section")).to_be_hidden()
