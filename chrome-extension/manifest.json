@@ -5,13 +5,11 @@
   "description": "Interactive Adobe Typekit typography switcher and design companion for Lucidase and clinical web applications.",
   "permissions": [
     "activeTab",
-    "scripting",
-    "storage"
+    "scripting"
   ],
   "host_permissions": [
     "http://localhost/*",
-    "http://127.0.0.1/*",
-    "https://*/*"
+    "http://127.0.0.1/*"
   ],
   "action": {
     "default_popup": "popup.html",

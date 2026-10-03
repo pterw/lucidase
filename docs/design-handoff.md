@@ -17,7 +17,7 @@ Single-page, client-only analysis of raw DNA files (23andMe, AncestryDNA, MyHeri
 | Stack | Static HTML + ES modules (no bundler); Tailwind 3.4.17 compiled to `src/vendor/tailwind.css`; daisyUI 4.12.10 vendored; app CSS `src/styles.css` |
 | **Load-bearing link order** | `daisyui` -> `src/styles.css` -> `vendor/tailwind.css` (I:12-17). Utilities must come last so they beat equal-specificity app rules. Do not reorder. Guarded by `tests/e2e/test_cascade.py` (dashed dropzone, accent borders, `text-[13px]` over `.font-serif`, `dark:` over `.glass-panel`). |
 | External hosts | Only Typekit (fonts), I:9. CSP `script-src 'self'`, `connect-src 'self'` (`test_csp.py`). No third-party script. |
-| task.md status | Its typography/brand sections (Gotham / Attribute Mono / Orpheus Pro / Neuzeit, "High-Tech - Clinical - Crisp", sharp corners) are **PROVISIONAL**, not an established identity. |
+| task.md status | Its typography/brand sections (Adobe Fonts kit gfe3vcu: sans Akzidenz-Grotesk Next Pro, serif Orpheus Pro, mono Input Mono, display Swiss 721 BT Condensed; "High-Tech - Clinical - Crisp", sharp corners) are **PROVISIONAL**, not an established identity. |
 | Test hook | `window.__lucidase` exposes `state`, `processText`, exports, `setTheme` (A:65-71). Tests read `state.records`, `negativeChecks`, `arrayGaps`, `insufficientEvidence`, `coverageSummary`. |
 
 ## Layout
@@ -47,14 +47,14 @@ Single-page, client-only analysis of raw DNA files (23andMe, AncestryDNA, MyHeri
 | Badge classes | `--badge-{pathogenic,carrier,pgx,risk,benign}-{bg,text,border}` -> classes `.badge-pathogenic/-carrier/-pgx/-risk/-benign` (S:164-192) |
 | Font vars | `--font-sans/-mono/-serif/-display`, `--editorial-size:14.5px`, `--mono-spacing:0em` - **defined only inside `[data-theme="dark"]`** (S:88-94) but consumed globally (S:106,115,120). Verify they resolve in light mode (`:root` does not define them). |
 
-### Typography (T:10-15; S:89-92) - Typekit kit `cqu4tvx`, provisional
+### Typography (T:10-15; S:89-92) - Typekit kit `gfe3vcu`, provisional (kit and mapping chosen by the owner, 2026-10-03)
 
 | Role | Family stack |
 |---|---|
-| sans (body) | gotham, nimbus-sans, system stack |
-| mono (`.font-mono` is `!important`, S:114) | attribute-mono, ballinger-mono, azo-mono, monospace |
-| serif (`.font-serif` `!important` + 14.5px, S:119) | orpheuspro, archer-pro, Georgia, serif |
-| display | neuzeit-grotesk-condensed, gotham, sans-serif (`.font-display` defined; no element uses it) |
+| sans (body) | akzidenz-grotesk-next-pro, system stack |
+| mono (`.font-mono` is `!important`, S:114) | input-mono, ui-monospace, monospace |
+| serif (`.font-serif` `!important` + 14.5px, S:119) | orpheuspro, Georgia, serif |
+| display | swiss-721-bt-condensed, akzidenz-grotesk-next-pro, sans-serif (`.font-display` defined; no element uses it) |
 
 Sizes in use: `text-[9px]`, `[10px]`, `[11px]`, `[13px]`, `text-xs`, `text-sm`, `text-lg`, `text-xl`, `text-2xl`. `body letter-spacing:-0.01em` (S:110).
 
@@ -226,7 +226,7 @@ Hidden when 0 findings (A:502-505). Badge `N Multi-Locus Finding(s)` (A:509). Ca
 | Phenotype | "Clinical Significance & Phenotype" + serif paragraph |
 | Segregation panel (A:866-957) | Mode badge (amber recessive / rose dominant / purple other; text from `MODEL_LABELS`, V:40-46). Mendelian genes show carrier prior, penetrance and risk vs unscreened / carrier partner (a genotype probability for a recessive gene, A:880-892). Every other model is relabelled for allele transmission ("Allele Transmission", "Allele Frequency (gnomAD)", "Child Inherits vs Unscreened Partner") and penetrance reads "Not applicable" (A:882-896, 934). With no `segregation` (not tested, no-call) every figure reads "Not available" (A:899-909) |
 | Offspring simulator | 4 buttons (`partner-sim-btn`, `grid-cols-4`). Labels `Unscreened / Carrier / Affected / Wild-Type` for Mendelian genes and `Unscreened / Heterozygous / Homozygous / Wild-Type` for every other model (A:960-961, 895-897). D: white / bordered; H: `hover:border-sky-500`; selected: `bg-sky-600 text-white shadow-sm`, swapped by `className` rewrite (A:942-946); F: browser default; X/L/E: NI; no `aria-pressed`. Inputs are the patient's alt-allele count, a partner model (wildtype 0, heterozygous 0.5, homozygous 1, unscreened = the KB gnomAD allele frequency) and the gene's inheritance model (A:911, 960, 977-981; contracts C5). `#drawer-partner-model-note` states which partner model produced the figures (I:540; A:971-975; V:342-350); with no allele frequency the unscreened model reads "Not available" (V:344-345). Output: three probability bars and a fourth line, worded by model (A:985-1030): disease wording only for Mendelian genes; every other model reads "chance a child inherits the allele" and "Clinical Penetrance: Not applicable". Resets to "Unscreened" each time the drawer opens (A:954-956) |
-| Biotools panel (A:1038-1104) | AlphaFold DB (UniProt chip, pLDDT chip toned by value: >=85 emerald, >=70 sky, else amber, null slate; status; domains; joints), Ensembl VEP (transcript chip, AlphaMissense, LOEUF with text band, V:114-118), ENCODE (TPM bars, floor of 100 TPM, A:1087). Every field absent from the KB insights reads "Not available" (muted). The old placeholder strings are gone and `tests/e2e/test_ui_honesty.py:25-37` bans them. The content is manually curated KB data |
+| Biotools panel (A:1038-1104) | AlphaFold DB (UniProt chip, pLDDT chip toned by value: >=85 emerald, >=70 sky, else amber, null slate; status; domains; joints), Ensembl VEP (transcript chip, AlphaMissense, LOEUF with text band, V:114-118), ENCODE (TPM bars, floor of 100 TPM, A:1087). Every field absent from the KB insights reads "Not available" (muted). The old placeholder strings are gone and `tests/e2e/test_ui_honesty.py:25-37` bans them. The canonical transcript, AlphaMissense and LOEUF are imported by the KB build pipeline (`machine_imported`); the remaining biotools content (AlphaFold, ENCODE) is manually curated KB data |
 | HPA | Tissue rows with level pill (High emerald / Medium amber / other sky, A:829-843); subcellular chips (A:849-857); each empty case reads "Not available" (A:845, 859). The tissue and subcellular values are manually curated |
 | Footer | "Open ClinVar Record ↗" (`<a target=_blank rel="noopener noreferrer">`, I:678). A link appears only for a locus whose accession is `machine_imported` (V:91, 98) and is hidden when there is none; a composite APOE row gets one link per component, labelled with its rsID (A:797-818). `#drawer-footer-tier` shows "Evidence Tier X" or "Evidence tier: Not available" for the open record (I:681; A:747; V:331-333) |
 
@@ -370,7 +370,7 @@ None. T7 (APOE card states), T8 (offspring simulator inputs, wording and multi-l
 Decisions the design-system author must take; no values are recommended here.
 
 1. **Identity**: is the brand (name treatment, emoji mark, "Clinical Variome" chip, tagline) established, and what stands in for the emoji icons and the 🧬 mark?
-2. **Typography**: does Typekit kit `cqu4tvx` (gotham, attribute-mono, orpheuspro, neuzeit) remain, given Typekit is the only external host in the CSP? Which roles (sans/mono/serif/display) exist, and should `.font-mono`/`.font-serif` keep `!important`? Should font variables live in `:root` rather than only `[data-theme="dark"]`?
+2. **Typography**: the owner chose Typekit kit `gfe3vcu` on 2026-10-03 (sans akzidenz-grotesk-next-pro, serif orpheuspro, mono input-mono, display swiss-721-bt-condensed; replaces the previous kit). Does it remain, given Typekit is the only external host in the CSP? Which roles (sans/mono/serif/display) exist, and should `.font-mono`/`.font-serif` keep `!important`? Should font variables live in `:root` rather than only `[data-theme="dark"]`?
 3. **Dark mode**: is `data-theme` + Tailwind `selector` the final mechanism? Should it follow `prefers-color-scheme`? Is the name "Dark HUD" kept? How is persistence handled when storage is blocked?
 4. **daisyUI role**: which daisyUI components (`btn`, `input`, `dropdown`, `menu`, `loading`, `btn-circle`) are in the system and which are overridden (forced 2px radius, utility colour overrides)? Which daisyUI theme applies (none is configured)?
 5. **Badge semantics**: what do the colour families mean, given today's reuse (amber = carrier, warning, State 3, Tier C, guardrail, "Medium"; rose/red = pathogenic, risk, conflicting, error; emerald = benign, tested WT, Tier B, privacy; sky = observed, Tier A, primary action, selected)? Are category, coverage state, evidence tier, severity and UI chrome one vocabulary or several?

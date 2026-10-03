@@ -18,6 +18,7 @@ import pytest
 
 from tools.build_canonical_kb import (
     DEFAULT_CURATION_PATH,
+    _check_imported_ranges,
     build_kb,
     load_curation,
     render_kb,
@@ -147,11 +148,15 @@ def test_unknown_evidence_is_null_never_a_placeholder(built):
         assert "pli" in gnomad and "loeuf" in gnomad
         for key in ("pli", "loeuf"):
             assert gnomad[key] is None or gnomad[key] > 0.0, (rsid, key)
-    for path, key, value in walk(built["loci"]):
-        if key in ("pli", "loeuf"):
-            assert value != 0.0
-        if path.endswith("/evidence") or "/evidence/" in path:
-            assert value not in ("", "N/A", "unknown", "Unknown"), (path, key)
+    for section in ("genes", "loci"):
+        for path, key, value in walk(built[section], f"/{section}"):
+            if key in ("pli", "loeuf"):
+                assert value != 0.0, path
+            if section == "loci" and (path.endswith("/evidence") or "/evidence/" in path):
+                assert value not in ("", "N/A", "unknown", "Unknown"), (path, key)
+            if section == "genes" and isinstance(value, str):
+                assert value.strip().lower() not in ("", "n/a", "none", "unknown"), (path, key)
+                assert not value.lower().startswith("n/a"), (path, key, value)
 
 
 def test_manually_curated_provenance_has_no_retrieval_time(built):
@@ -216,14 +221,14 @@ def test_apoe_component_roles(built):
         ("rs113993960", "2", "ΔF508 homozygote"),  # old key DD
         ("rs113993960", "1", "heterozygote"),  # old key DI
         ("rs1801133", "2", "677TT"),
-        ("rs4244285", "2", "Poor Metabolizer"),
+        ("rs4244285", "2", "Two CYP2C19*2 (rs4244285) alleles detected"),
         ("rs429358", "2", "ε4/ε4 homozygote"),
         ("rs7412", "2", "ε2/ε2"),
-        ("rs3918290", "2", "Complete Deficiency"),
-        ("rs3918290", "1", "Partial Deficiency"),
+        ("rs3918290", "2", "Two DPYD*2A (rs3918290) alleles detected"),
+        ("rs3918290", "1", "One DPYD*2A (rs3918290) allele detected"),
         ("rs4988235", "2", "Lactase persistent: Capable"),  # old key AA
         ("rs4988235", "1", "Tolerates dairy lactose well"),  # old key AG
-        ("rs4988235", "0", "Lactose non-persistent"),  # old key GG
+        ("rs4988235", "0", "No MCM6/LCT -13910T allele detected"),  # old key GG
         ("rs671", "2", "ALDH2*2 homozygote"),
         ("rs671", "1", "ALDH2*2 heterozygote"),
         ("rs1799963", "2", "G20210A homozygote"),
@@ -243,11 +248,70 @@ def test_count_zero_never_claims_normality(built):
         text = (zero["phenotype"] + " " + zero["significance"]).lower()
         assert "normal" not in text, rsid
         assert "wild-type" not in text and "wild type" not in text, rsid
-        if rsid != "rs4988235":  # a real trait statement (lactase non-persistence), not an absence claim
-            assert zero["category"] == "Not detected", rsid
-            assert zero["magnitude"] == 0
-            assert zero["phenotype"].startswith("No "), rsid
-            assert "allele detected at this position" in zero["phenotype"], rsid
+        assert zero["category"] == "Not detected", rsid
+        assert zero["magnitude"] == 0
+        assert zero["repute"] == "Neutral", rsid
+        assert zero["phenotype"].startswith("No "), rsid
+        assert "allele detected at this position" in zero["phenotype"], rsid
+
+
+def test_lactase_count_zero_is_an_absence_not_a_phenotype(built):
+    """S3b-C-2: no -13910T allele does not establish lactase non-persistence (other persistence variants exist)."""
+    zero = built["loci"]["rs4988235"]["interpretations"]["0"]
+    assert zero["phenotype"] == (
+        "No MCM6/LCT -13910T allele detected at this position. "
+        "Lactase persistence from other variants is not excluded."
+    )
+    assert (zero["category"], zero["magnitude"], zero["repute"]) == ("Not detected", 0, "Neutral")
+    assert "non-persistent" not in zero["phenotype"] and "Susceptible" not in zero["phenotype"]
+
+
+def test_cyp2c19_states_one_snp_observation_and_assigns_no_metabolizer(built):
+    """S5a-C-3: a single rs4244285 call cannot establish *1/*2 or *2/*2, so no metabolizer label is shown."""
+    interps = built["loci"]["rs4244285"]["interpretations"]
+    assert interps["1"]["phenotype"].startswith("One CYP2C19*2 (rs4244285) allele detected.")
+    assert interps["2"]["phenotype"].startswith("Two CYP2C19*2 (rs4244285) alleles detected.")
+    for count, interp in interps.items():
+        text = interp["phenotype"] + " " + (interp["drug_response"] or "")
+        assert not re.search(r"Metabolizer\s*\(|\*1/\*2|\*2/\*2", text), (count, text)
+        assert not re.search(r"(Intermediate|Poor|Normal|Rapid|Ultrarapid) Metabolizer", text), (count, text)
+    for count in ("1", "2"):
+        assert "star-allele diplotyping" in interps[count]["phenotype"], count
+    assert built["loci"]["rs4244285"]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
+
+
+def test_dpyd_states_one_snp_observation_and_assigns_no_deficiency_label(built):
+    """CLEANUP-1 item 1 (same rule as S5a-C-3): one rs3918290 call cannot establish DPD activity."""
+    interps = built["loci"]["rs3918290"]["interpretations"]
+    assert interps["1"]["phenotype"].startswith("One DPYD*2A (rs3918290) allele detected.")
+    assert interps["2"]["phenotype"].startswith("Two DPYD*2A (rs3918290) alleles detected.")
+    for count in ("1", "2"):
+        text = interps[count]["phenotype"] + " " + (interps[count]["drug_response"] or "")
+        assert "Deficiency" not in text, (count, text)
+        assert "other DPYD variants that this array does not test" in interps[count]["phenotype"], count
+
+
+def test_apoe_wording_labels_relative_and_absolute_risk_apart(built):
+    """S2-F1 review Minor: a relative multiple is never read as an absolute lifetime figure. No figure changes."""
+    dips = built["genes"]["APOE"]["diplotypes"]
+    assert "~12–15× relative risk (versus ε3/ε3)" in dips["e4/e4"]["phenotype"]
+    expected = {
+        "e3/e4": ("~3–4× relative risk (versus ε3/ε3)", "absolute lifetime risk ~25–35%"),
+        "e2/e4": ("relative risk ~1.5–2× versus ε3/ε3", "absolute lifetime risk ~15–20%"),
+        "e2/e3": ("~40–50% lower relative risk (versus ε3/ε3)", "absolute lifetime risk ~5–8%"),
+    }
+    for key, (relative, absolute) in expected.items():
+        phenotype = dips[key]["phenotype"]
+        assert relative in phenotype and absolute in phenotype, (key, phenotype)
+        assert "elevated risk" not in phenotype and "lifetime risk)" not in phenotype, key
+    # The figures themselves are untouched: they still sit in the caveats as written.
+    assert "Relative risk: 3–4× Increased Risk" in dips["e3/e4"]["caveats"]
+    assert "Lifetime risk: 25–35% lifetime Alzheimer's risk" in dips["e3/e4"]["caveats"]
+    assert "Relative risk: 1.5–2× Intermediate Risk" in dips["e2/e4"]["caveats"]
+    assert "Lifetime risk: 15–20% lifetime Alzheimer's risk" in dips["e2/e4"]["caveats"]
+    assert built["loci"]["rs429358"]["interpretations"]["2"]["phenotype"] == (
+        "APOE ε4/ε4 homozygote: ~12-15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease."
+    )
 
 
 def test_missing_interpretations_were_authored(built):
@@ -839,3 +903,53 @@ def test_drift_curated_clinvar_review_status_and_stars_must_equal_the_imported_o
     result = _drift(tmp_path, good_kb, curation, "rs671", mutate)
     assert result.returncode == 1
     assert "rs671" in result.stdout and "clinvar.review_status" in result.stdout and "clinvar.stars" in result.stdout
+
+
+IMPORTED_KEYS = ("alphamissense_class", "alphamissense_pathogenicity", "loeuf", "canonical_transcript")
+
+
+def test_no_gene_insight_carries_a_value_the_pipeline_imports(built):
+    for symbol, gene in built["genes"].items():
+        ensembl = (gene["insights"] or {}).get("ensembl", {})
+        assert not set(IMPORTED_KEYS) & set(ensembl), symbol
+
+
+@pytest.mark.parametrize("key,value", [("loeuf", 0.44), ("alphamissense_class", "likely_benign"),
+                                       ("alphamissense_pathogenicity", 0.1), ("canonical_transcript", "ENST1 (MANE Select)")])
+def test_qc_rejects_a_curated_copy_of_an_imported_value(curation, key, value):
+    errors = mutated(curation, lambda d: d["genes"]["HFE"]["insights"]["ensembl"].update({key: value}))
+    assert has_error(errors, "HFE") and has_error(errors, key)
+
+
+@pytest.mark.parametrize("text", ["N/A (3' UTR)", "n/a", "N/A", "None", "UNKNOWN", "none"])
+def test_qc_rejects_a_placeholder_insight_string(curation, text):
+    errors = mutated(curation, lambda d: d["genes"]["HFE"]["insights"]["ensembl"].update({"sift_prediction": text}))
+    assert has_error(errors, "HFE") and has_error(errors, "placeholder")
+
+
+@pytest.mark.parametrize("gnomad,fragment", [({"af": 1.5, "pli": None, "loeuf": None}, "af"),
+                                             ({"af": -0.1, "pli": None, "loeuf": None}, "af"),
+                                             ({"af": 0.1, "pli": -1.0, "loeuf": None}, "pli"),
+                                             ({"af": 0.1, "pli": None, "loeuf": -0.2}, "loeuf")])
+def test_imported_values_are_range_checked_after_the_overlay(gnomad, fragment):
+    errors = _check_imported_ranges("rs1", gnomad)
+    assert errors and fragment in errors[0]
+    assert _check_imported_ranges("rs1", {"af": 0.0, "pli": 0.9, "loeuf": 0.5}) == []
+    assert _check_imported_ranges("rs1", None) == []
+
+
+def test_overlay_runs_the_range_check_on_the_finished_evidence(monkeypatch, curation):
+    """S3-F1 Minor: _overlay_imported must call _check_imported_ranges, so an out-of-range import fails the build."""
+    import tools.build_canonical_kb as builder
+
+    seen = []
+
+    def fake_check(rsid, gnomad):
+        seen.append(rsid)
+        return [f"{rsid}: sentinel range error"]
+
+    monkeypatch.setattr(builder, "_check_imported_ranges", fake_check)
+    kb, errors = build_kb(copy.deepcopy(curation))
+    assert kb is None
+    assert "rs6025" in seen
+    assert any("sentinel range error" in e for e in errors), errors

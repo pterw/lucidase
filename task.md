@@ -27,22 +27,22 @@
   - **Promethease**: Explicitly avoid clunky, outdated web 1.0 styling, overwhelming walls of unformatted text, and confusing layouts.
   - **Toy / Gamified Apps**: Avoid overly cartoonish, bubbly, rounded consumer tropes that compromise clinical credibility.
 
-### Impeccable Typography Specification (Adobe Typekit `cqu4tvx`) (provisional)
-- **Kit Source**: `<link rel="stylesheet" href="https://use.typekit.net/cqu4tvx.css">`
-- **Primary Body & Interface**: **`gotham`** (400 Normal, 500 Medium, 200 Light)
-  - *Rationale*: Architectural rigor, geometric purity, and clinical confidence.
-  - *Fallbacks*: `'nimbus-sans'`, `-apple-system`, `BlinkMacSystemFont`, `sans-serif` (Strictly **NO Inter**).
-- **Genomic & Data Monospace**: **`attribute-mono`** (300 Light, 400 Regular)
-  - *Rationale*: Surgical clarity for rsIDs (`rs429358`), genotypes (`CT`, `0/1`), genomic coordinates (`chr19:45411941`), and latency benchmarks (`3 ms`).
-  - *Fallbacks*: `'ballinger-mono'`, `'azo-mono'`, `monospace` (Strictly **NO JetBrains Mono**).
-- **Humanist Editorial Serif**: **`orpheuspro`** (400 Normal, 400 Italic, 500 Normal)
-  - *Rationale*: Elegantly expresses clinical phenotype narratives, medical interpretations, and high-impact biological insights with humanistic editorial authority (Replaces any Instrument Serif).
-  - *Fallbacks*: `'archer-pro'`, `Georgia`, `serif`.
-- **Condensed Metric Display**: **`neuzeit-grotesk-condensed`** (900 Heavy)
-  - *Rationale*: High-density statistical callouts (e.g. `12–15×`, `99.8%`, `ACMG SF v3.2`).
+### Typography Specification (Adobe Typekit `gfe3vcu`, chosen by the owner 2026-10-03) (provisional)
+- **Kit Source**: `<link rel="stylesheet" href="https://use.typekit.net/gfe3vcu.css">`
+- **Sans (body & interface)**: **`akzidenz-grotesk-next-pro`** (400, 400 Italic, 700, 700 Italic)
+  - *Fallbacks*: `-apple-system`, `BlinkMacSystemFont`, `"Segoe UI"`, `Roboto`, `sans-serif` (Strictly **NO Inter**).
+- **Mono (genomic & data)**: **`input-mono`** (400, 400 Italic, 700, 700 Italic)
+  - *Use*: rsIDs (`rs429358`), genotypes (`CT`, `0/1`), genomic coordinates (`chr19:45411941`), and latency benchmarks (`3 ms`).
+  - *Fallbacks*: `ui-monospace`, `monospace` (Strictly **NO JetBrains Mono**).
+- **Serif (editorial areas)**: **`orpheuspro`** (400, 400 Italic, 700)
+  - *Use*: clinical phenotype narratives and medical interpretations (Replaces any Instrument Serif).
+  - *Fallbacks*: `Georgia`, `serif`.
+- **Display (condensed metric callouts)**: **`swiss-721-bt-condensed`** (400, 400 Italic, 700, 700 Italic)
+  - *Use*: high-density statistical callouts (e.g. `12–15×`, `99.8%`, `ACMG SF v3.2`).
+  - *Fallbacks*: `akzidenz-grotesk-next-pro`, `sans-serif`.
 
 ### Interactive Font Studio & Extension Companion
-- **Font Kit Studio (`tools/font-kit-studio/`)**: Standalone designer tooling and laboratory suite exposing all 27 foundry fonts from Typekit kit `cqu4tvx` (extracted out of the production clinical application).
+- **Font Kit Studio (`tools/font-kit-studio/`)**: Standalone designer tooling and laboratory suite exposing the four families of Typekit kit `gfe3vcu` (Akzidenz-Grotesk Next Pro, Orpheus Pro, Input Mono, Swiss 721 BT Condensed; ruling 15) (extracted out of the production clinical application).
   - Dynamically binds to `--font-sans`, `--font-serif`, `--font-mono`, `--font-display`, `--editorial-size`, `--mono-spacing`.
   - 4 1-click curated presets: *🧬 Impeccable Clinical*, *📰 Editorial Heavyweight*, *🔬 Swiss Bio Precision*, *⚡ Biotech Cyber HUD*.
   - Live fine-tuning sliders for narrative text size (12px–20px) and monospace letter spacing (-0.05em to +0.1em).
@@ -56,6 +56,6 @@
 3. **Compound Haplotype Intelligence**: Multi-SNP loci (specifically **APOE ε2/ε3/ε4 diplotypes**) must be synthesized into one dedicated clinical record, never fragmented or lost as isolated neutral SNPs. CYP450 star alleles are not called: single-SNP array data cannot support a star-allele diplotype, so the app shows the single interrogated SNP with a limitation notice and refuses a metabolizer assignment (provisional, like the rest of this section).
 4. **Uncompromising Zero-Knowledge Privacy**: Raw genomic data never leaves the browser. The interface must transparently affirm local-first processing at all times.
 5. **One Curated Knowledge Base, Honest Provenance**: All annotations come from one build-time knowledge base (`web/src/knowledge-base.json`, built from pinned upstream payloads plus labelled manual curation). There is no edge cache, no Redis and no live literature lookup: nothing about a user's variants is sent to any server, and every value shows where it came from or is shown as "not available".
-6. **Editorial Typography Hierarchy**: Use Gotham for authoritative human communication and Attribute Mono for raw biological blueprints.
+6. **Editorial Typography Hierarchy**: Use Akzidenz-Grotesk Next Pro for authoritative human communication and Input Mono for raw biological blueprints.
 
 

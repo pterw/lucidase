@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { validateKb } from "../src/core/kb.js";
 import { classify } from "../src/core/classify.js";
-import { assembleFindings, resolveApoe } from "../src/core/apoe.js";
+import { assembleFindings, e4CountForDiplotype, resolveApoe } from "../src/core/apoe.js";
 
 // The mini knowledge base is the one the shared classify vectors use (it has the rs429358 component only).
 const classifyVectors = JSON.parse(
@@ -96,4 +96,25 @@ test("resolveApoe does not mutate the knowledge base interpretation", () => {
   assert.equal(rec.diplotype, "e2/e4");
   assert.ok(rec.interpretation.caveats.some((c) => c.startsWith("phase unknown")));
   assert.equal(JSON.stringify(kb.genes.APOE.diplotypes["e2/e4"]), before);
+});
+
+test("the e4 count comes from a resolved diplotype, never from the rs429358 alt count", () => {
+  const kb = kbWithApoe();
+  const e4Count = (e4Alt, e2Alt) => {
+    const parsed = parse([
+      call("rs429358", 45411941, e4Alt === 2 ? ["C", "C"] : e4Alt === 1 ? ["T", "C"] : ["T", "T"]),
+      call("rs7412", 45412079, e2Alt === 2 ? ["T", "T"] : e2Alt === 1 ? ["C", "T"] : ["C", "C"]),
+    ]);
+    const { apoe } = assembleFindings(classify(parsed, kb).records, kb);
+    return e4CountForDiplotype(apoe.diplotype);
+  };
+  assert.equal(e4Count(2, 1), null, "e1/e4 (rs429358 alt count 2) is atypical: no e4 count");
+  assert.equal(e4Count(1, 2), null);
+  assert.equal(e4Count(1, 1), 1, "e2/e4");
+  assert.equal(e4Count(1, 0), 1, "e3/e4");
+  assert.equal(e4Count(2, 0), 2, "e4/e4");
+  assert.equal(e4Count(0, 0), 0, "e3/e3");
+  assert.equal(e4CountForDiplotype(null), null, "an unresolved diplotype has no e4 count");
+  assert.equal(e4CountForDiplotype("atypical"), null);
+  assert.equal(e4CountForDiplotype("e1/e4"), null);
 });

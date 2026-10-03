@@ -13,6 +13,9 @@ import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
 
 export const NOT_AVAILABLE = "Not available";
 export const NO_CLINVAR_STATUS = "No ClinVar review status";
+export const APOE_FIGURES_NOTE = "manually curated; source citation pending verification";
+
+const APOE_FIGURE_PREFIXES = ["Relative risk: ", "Lifetime risk: "];
 
 const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 
@@ -60,13 +63,15 @@ export function fmtPct(fraction) {
 }
 
 /**
- * Counts the variants tested per gene for this file: the distinct KB rsids among the listed records, leaving out
- * array gaps (a locus the array did not assay was not tested).
+ * Counts the variants tested per gene for this file: the distinct KB rsids among the listed records that gave an
+ * interpretable call (`altCount !== null`). Array gaps and unresolvable genotypes are left out: neither tested
+ * the locus (AGENTS.md 4.1).
  */
 export function testedVariantCounts(records) {
   const rsidsByGene = new Map();
   for (const r of records) {
     if (r.role === "apoe_component" || r.components || r.coverage_state === "not_tested_by_array") continue;
+    if (r.altCount === null || r.altCount === undefined) continue;
     if (!rsidsByGene.has(r.gene)) rsidsByGene.set(r.gene, new Set());
     rsidsByGene.get(r.gene).add(r.rsid);
   }
@@ -113,8 +118,7 @@ const joinExport = (parts, pick) => {
 
 function loeufText(value) {
   if (value === null) return null;
-  const band = value < 0.35 ? "Extremely Constrained" : value < 0.75 ? "Constrained" : "Tolerant";
-  return `LOEUF ${value.toFixed(2)} (${band})`;
+  return `gnomAD LOEUF ${value.toFixed(2)}`;
 }
 
 /** Gene drawer content from the knowledge base; an empty insights object counts as none. */
@@ -128,6 +132,17 @@ function insightsOf(gene) {
  * `testedCounts` the per-gene variant counts from `testedVariantCounts`. The record's own fields are kept (the
  * views and tests read `coverage_state`, `components`, ...); the display fields below are added.
  */
+/** The APOE card's accent key from a resolved diplotype (e4/e4, any other e4 carrier, any e2 carrier, e3/e3), else null. */
+function apoeAccentKey(diplotype) {
+  if (typeof diplotype !== "string" || diplotype === "atypical") return null;
+  const shown = displayDiplotype(diplotype);
+  if (shown === "ε4/ε4") return "e4e4";
+  if (shown.includes("ε4")) return "e4";
+  if (shown.includes("ε2")) return "e2";
+  if (shown === "ε3/ε3") return "e3e3";
+  return null;
+}
+
 export function toViewModel(record, genes, testedCounts = {}) {
   const state = STATE_TEXT[record.coverage_state];
   if (state === undefined) throw new Error(`unknown coverage state "${record.coverage_state}" on ${record.rsid}`);
@@ -153,12 +168,17 @@ export function toViewModel(record, genes, testedCounts = {}) {
   const magnitude = numberOrNull(interp && interp.magnitude);
   const repute = nonEmptyString(interp && interp.repute);
   const limitation = nonEmptyString(record.limitation);
-  const caveats = interp ? [...interp.caveats] : [];
+  let caveats = interp ? [...interp.caveats] : [];
   const insights = insightsOf(gene);
-  const ensembl = (insights && insights.ensembl) ?? {};
   const alphafold = (insights && insights.alphafold) ?? {};
   const significanceValue = nonEmptyString(interp && interp.significance);
-  const phenotype = interp ? nonEmptyString(interp.phenotype) : nonEmptyString(record.reason);
+  let phenotype = interp ? nonEmptyString(interp.phenotype) : nonEmptyString(record.reason);
+  if (isComposite && interp) {
+    // The APOE risk-ratio, lifetime-risk and prevalence figures carry no source in the KB (review S2a-C-3): label them
+    // wherever they appear, on the card and in both exports, until the owner decides to cite or remove them.
+    caveats = caveats.map((c) => (APOE_FIGURE_PREFIXES.some((p) => c.startsWith(p)) ? `${c} (${APOE_FIGURES_NOTE})` : c));
+    if (phenotype !== null) phenotype = `${phenotype} [Figures: ${APOE_FIGURES_NOTE}]`;
+  }
   const category = nonEmptyString(interp && interp.category);
   const genotype = nonEmptyString(record.genotype_display);
   const tier = isComposite
@@ -169,9 +189,9 @@ export function toViewModel(record, genes, testedCounts = {}) {
         : joinLabelled(evidenceParts, (p) => p.tier)
     : single.tier;
 
-  const amScore = numberOrNull(ensembl.alphamissense_pathogenicity ?? vep.alphamissense_score);
-  const amClass = nonEmptyString(ensembl.alphamissense_class ?? vep.alphamissense_class);
-  const loeuf = numberOrNull(ensembl.loeuf ?? gnomad.loeuf);
+  const amScore = numberOrNull(vep.alphamissense_score);
+  const amClass = nonEmptyString(vep.alphamissense_class);
+  const loeuf = numberOrNull(gnomad.loeuf);
 
   const vm = {
     ...record,
@@ -190,6 +210,9 @@ export function toViewModel(record, genes, testedCounts = {}) {
     tier,
     category,
     isCarrier: category === "Carrier",
+    apoeE4Accent: ["e4e4", "e4"].includes(apoeAccentKey(record.diplotype)),
+    // The Risk filter: Risk Factor rows plus APOE e3/e4 and e4/e4. Whether e2/e4 joins is an open owner decision.
+    riskFilter: category === "Risk Factor" || record.diplotype === "e3/e4" || record.diplotype === "e4/e4",
     significance: significanceValue ?? state.label,
     significanceValue,
     phenotype,
@@ -235,7 +258,7 @@ export function toViewModel(record, genes, testedCounts = {}) {
       status: nonEmptyString(alphafold.folding_status),
       domains: alphafold.domains ?? [],
       joints: nonEmptyString(alphafold.flexible_joints),
-      transcript: nonEmptyString(ensembl.canonical_transcript ?? vep.mane_select_ensembl),
+      transcript: nonEmptyString(vep.mane_select_ensembl),
       alphamissense:
         amClass !== null && amScore !== null
           ? `${amClass} (${amScore.toFixed(2)})`
@@ -282,6 +305,7 @@ export function apoeCardModel(apoe) {
   return {
     resolved,
     diplotype,
+    accent: resolved ? apoeAccentKey(apoe.diplotype) : null,
     stateLabel,
     title: resolved ? `APOE ${diplotype}` : `APOE: ${apoe.diplotype === null ? "no diplotype" : apoe.diplotype}`,
     rawLoci: apoe.components.map((c) => `${c.rsid}: ${c.genotype_display ?? NOT_AVAILABLE}`).join(" · "),
@@ -352,7 +376,12 @@ export function partnerModelNote(partnerModel, af) {
 // ---------------------------------------------------------------------------------------------------------------
 // Exports. Both serialisers read the same view models, so a value is the same in the table, drawer, CSV and Markdown.
 
-const csvText = (value) => `"${String(value).replace(/"/g, '""')}"`;
+/** A cell that a spreadsheet would read as a formula gets a leading quote (CSV injection, review S2a-C-1). */
+const FORMULA_START = /^\s*[=+\-@]|^[\t\r]/;
+const csvText = (value) => {
+  const text = String(value);
+  return `"${(FORMULA_START.test(text) ? `'${text}` : text).replace(/"/g, '""')}"`;
+};
 const csvCell = (value) => (value === null || value === undefined ? '""' : typeof value === "number" ? String(value) : csvText(value));
 
 const CSV_HEADERS = [
@@ -421,7 +450,16 @@ export function csvReport(viewModels, genes) {
 
 /** One Markdown table cell: missing is empty, pipes and line breaks cannot break the table. */
 const mdCell = (value) =>
-  value === null || value === undefined ? "" : String(value).replace(/\|/g, "/").replace(/\s*\n\s*/g, " ");
+  value === null || value === undefined
+    ? ""
+    : typeof value === "object"
+      ? value.escaped.replace(/\s*\n\s*/g, " ")
+      : String(value).replace(/\|/g, "/").replace(/\s*\n\s*/g, " ");
+
+/** A value derived from the uploaded file: Markdown and HTML metacharacters are escaped so it cannot become markup. */
+const MD_ESCAPES = { "\\": "\\\\", "|": "\\|", "<": "&lt;", ">": "&gt;", "&": "&amp;" };
+const mdFileText = (value) =>
+  value === null || value === undefined ? null : { escaped: String(value).replace(/[\\|<>&]/g, (ch) => MD_ESCAPES[ch]) };
 
 const mdRow = (cells) => `| ${cells.map(mdCell).join(" | ")} |\n`;
 const mdTable = (headers, rows) =>
@@ -462,7 +500,7 @@ export function markdownReport(data) {
     }
     if (apoe.caveat) md += `- **Caveat**: ${apoe.caveat}\n`;
     if (apoe.limitation) md += `- **Limitation**: ${apoe.limitation}\n`;
-    md += `- **Underlying Loci**: ${card.rawLoci}\n`;
+    md += `- **Underlying Loci**: ${mdFileText(card.rawLoci).escaped}\n`;
     if (card.resolved) md += `- **Clinical Guidance**: ${apoe.phenotype ?? NOT_AVAILABLE}\n`;
     md += `\n`;
   }
@@ -491,7 +529,7 @@ export function markdownReport(data) {
   md += mdTable(
     ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Category", "ClinVar", "Magnitude", "Limitation", "Phenotype / Guidance", "Missing fields"],
     unseen(data.records).map((r) => [
-      r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tierExport, r.category,
+      r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.coverage_state, r.tierExport, r.category,
       r.starsExportText, r.magnitude === null ? null : r.magnitude.toFixed(1),
       r.limitationTooltip, r.phenotype, r.missing_fields.join("; "),
     ])
@@ -503,7 +541,7 @@ export function markdownReport(data) {
     md += mdTable(
       ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Result", "Limitation", "Missing fields"],
       negatives.map((r) => [
-        r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tierExport,
+        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.coverage_state, r.tierExport,
         r.statement ?? r.phenotype, r.limitationTooltip, r.missing_fields.join("; "),
       ])
     );
@@ -524,7 +562,7 @@ export function markdownReport(data) {
     md += mdTable(
       ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Reason", "Limitation", "Missing fields"],
       insufficient.map((r) => [
-        r.exportId, r.gene, r.genotype, r.coordinates, r.coverage_state, r.tierExport, r.phenotype, r.limitationTooltip,
+        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.coverage_state, r.tierExport, r.phenotype, r.limitationTooltip,
         r.missing_fields.join("; "),
       ])
     );

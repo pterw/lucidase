@@ -1,27 +1,9 @@
 {
   "version": 2,
   "name": "genomepulse",
-  "builds": [
-    {
-      "src": "api/manifest.js",
-      "use": "@vercel/node",
-      "config": { "includeFiles": "src/knowledge-base.json" }
-    },
-    {
-      "src": "**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/manifest",
-      "dest": "/api/manifest.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
+  "functions": {
+    "api/manifest.js": { "includeFiles": "src/knowledge-base.json" }
+  },
   "headers": [
     {
       "source": "/(.*)",

@@ -115,8 +115,13 @@ records the current look as built.
 
 - Raw genotype data and rsIDs derived from a user's file never leave the
   browser. `connect-src 'self'` stays in the CSP. The only network calls
-  allowed are same-origin static assets.
-- No third-party script runs in the page. Styles are vendored, compiled CSS.
+  allowed are same-origin static assets, plus the font kit below.
+- Exception, owner ruling 15: every page loads the owner's Adobe Fonts kit, a
+  stylesheet and font files from `use.typekit.net` and `p.typekit.net`,
+  allowed by `style-src` and `font-src` only. The requests carry no user
+  data, but they do tell Adobe that a page was viewed. Tests stub them.
+- No third-party script runs in the page. Styles are vendored, compiled CSS,
+  apart from the font kit's stylesheet.
 
 ## 6. Testing rules
 

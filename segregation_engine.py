@@ -140,6 +140,27 @@ def patient_status(gene: dict, alt_count: int) -> dict:
     raise ValueError(f"Mendelian gene with unsupported model {inh['model']}")
 
 
+def carrier_prior(af: float | None) -> dict | None:
+    """Heterozygote frequency 2q(1-q) and its "1 in N" rounding (half up, as the web core's Math.round).
+    None when there is no usable frequency or it is zero."""
+    if isinstance(af, bool) or not isinstance(af, (int, float)) or not math.isfinite(af) or af < 0 or af > 1:
+        return None
+    frequency = 2 * af * (1 - af)
+    if frequency <= 0:
+        return None
+    return {"frequency": frequency, "oneIn": math.floor(1 / frequency + 0.5)}
+
+
+def penetrance_adjusted_affected(outcome: dict, penetrance: float | None) -> float | None:
+    """The affected probability times the stated penetrance; None when the outcome is unavailable or no penetrance is stated."""
+    affected = outcome.get("affected")
+    if not outcome.get("available") or isinstance(affected, bool) or not isinstance(affected, (int, float)):
+        return None
+    if isinstance(penetrance, bool) or not isinstance(penetrance, (int, float)):
+        return None
+    return affected * penetrance
+
+
 def describe_segregation(gene_name: str, gene: dict, alt_count: int, af: float | None, allele: str) -> dict:
     """Per-record inheritance summary: the inputs a view needs to rerun the scenarios."""
     inh = _inheritance(gene)
@@ -154,6 +175,7 @@ def describe_segregation(gene_name: str, gene: dict, alt_count: int, af: float |
         "altCount": alt_count,
         "af": af,
         "allele": allele,
+        "carrierPrior": carrier_prior(af),
         **patient_status(gene, alt_count),
     }
 

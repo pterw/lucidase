@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, wait_drawer_open
+from conftest import DEMO_FILE, WEB_DIR, goto_ready, wait_drawer_closed, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -47,7 +47,7 @@ def _violations(text: str, banned=PLACEHOLDERS) -> list[str]:
 
 def _analyse(page, path):
     page.set_input_files("#file-input", str(path))
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
 
 
 def _sparse_file(tmp_path):
@@ -60,7 +60,7 @@ def _sparse_file(tmp_path):
 
 
 def _export(page, fn):
-    with page.expect_download(timeout=5000) as info:
+    with page.expect_download() as info:
         page.evaluate(f"() => window.__lucidase.{fn}()")
     return Path(info.value.path()).read_text(encoding="utf-8")
 
@@ -68,14 +68,14 @@ def _export(page, fn):
 def test_product_name_is_lucidase_everywhere_the_user_sees_it(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     assert page.locator('[data-design-id="brand.wordmark"]').inner_text().strip() == "Lucidase"
     assert "Lucidase" in page.locator("footer").inner_text()
     assert "genomepulse" not in page.locator("body").inner_text().lower().replace(" ", "")
     names = []
     texts = []
     for fn in ("exportMarkdownReport", "exportCsvReport"):
-        with page.expect_download(timeout=5000) as info:
+        with page.expect_download() as info:
             page.evaluate(f"() => window.__lucidase.{fn}()")
         names.append(info.value.suggested_filename)
         texts.append(Path(info.value.path()).read_text(encoding="utf-8"))
@@ -98,7 +98,7 @@ def _screens(page) -> str:
             wait_drawer_open(page)
             chunks.append(page.locator("#variant-drawer").inner_text())
             page.locator("#btn-close-drawer").click()
-            page.wait_for_timeout(50)
+            wait_drawer_closed(page)
     page.locator("[data-filter='all']").click()
     return "\n".join(chunks)
 
@@ -116,7 +116,7 @@ def _check_run(page, label):
 def test_demo_renders_honestly_everywhere(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     _screens_text, markdown, csv_text = _check_run(page, "demo")
     rows = list(csv.DictReader(csv_text.splitlines()))
     assert any(r["rsID"] == "rs429358;rs7412" and r["Position"] == "45411941;45412079" for r in rows)
@@ -146,7 +146,7 @@ def test_sparse_file_renders_honestly_everywhere(loaded_page, tmp_path):
 def test_apoe_drawer_labels_each_component_evidence_by_rsid(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     kb = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["loci"]
     page.locator("#btn-inspect-apoe").click()
     wait_drawer_open(page)
@@ -193,7 +193,7 @@ def test_a_kb_that_fails_validation_makes_no_page_claims(page):
     )
     errors: list[str] = []
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
     badge = page.locator("#kb-provenance-badge")
     assert MANIFEST["release"] not in badge.inner_text()
@@ -213,9 +213,9 @@ def test_kb_text_is_escaped_where_it_reaches_innerhtml(page):
         "**/knowledge-base.json",
         lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(kb)),
     )
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')"))
     assert payload in row.inner_text(), "the phenotype shows literally in the table row"
     row.click()
@@ -228,7 +228,7 @@ def test_kb_text_is_escaped_where_it_reaches_innerhtml(page):
 def test_cyp2c19_row_carries_the_star_allele_limitation(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs4244285')"))
     badge = row.locator("[data-role='limitation']")
     expect(badge).to_be_visible()
@@ -276,7 +276,7 @@ def test_static_claims_come_from_the_kb_manifest(loaded_page):
 def test_drawer_footer_shows_the_open_records_tier(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(page)
     tier = page.locator("#drawer-tier-badge").text_content().strip()
@@ -287,7 +287,7 @@ def test_drawer_footer_shows_the_open_records_tier(loaded_page):
 def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     page.locator("#btn-inspect-apoe").click()
     wait_drawer_open(page)
     assert page.locator("#drawer-rsid").inner_text().strip() == "APOE (rs429358 + rs7412)"
@@ -299,7 +299,7 @@ def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
 def test_ar_drawer_labels_the_two_affected_figures_and_states_the_partner_model(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     page.locator("button.btn-inspect-gene[data-gene='HFE']").first.click()
     wait_drawer_open(page)
     first = page.locator("#sim-p-affected").locator("xpath=preceding-sibling::span").inner_text()
@@ -326,7 +326,7 @@ def test_filereader_failure_uses_the_analysis_error_alert(loaded_page):
     )
     page.set_input_files("#file-input", str(WILDTYPE))
     alert = page.locator("#analysis-error")
-    expect(alert).to_be_visible(timeout=5000)
+    expect(alert).to_be_visible()
     assert "Failed to read file" in page.locator("#analysis-error-detail").inner_text()
     expect(page.locator("#results-section")).to_be_hidden()
     assert dialogs == [], f"a blocking alert() was used: {dialogs}"
@@ -340,7 +340,7 @@ def test_page_claims_say_not_available_when_the_kb_cannot_load(page):
         "**/knowledge-base.json",
         lambda route: route.fulfill(status=500, content_type="application/json", body="{}"),
     )
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
     assert "Not available" in page.locator("#hero-scope").inner_text()
     assert not _violations(page.locator("body").inner_text(), STATIC_CLAIMS)

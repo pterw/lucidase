@@ -1,0 +1,1443 @@
+[
+  {
+    "id": "valid-minimal-kb",
+    "description": "A one-gene, one-locus KB with every required field has no problems",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": []
+    }
+  },
+  {
+    "id": "not-an-object",
+    "description": "A KB that is not an object is rejected with the single object problem",
+    "input": {
+      "kb": 5
+    },
+    "expected": {
+      "problems": [
+        "knowledge base is not an object"
+      ]
+    }
+  },
+  {
+    "id": "schema-version-and-guardrail",
+    "description": "schema_version must be 2 and the manifest needs a non-empty guardrail",
+    "input": {
+      "kb": {
+        "schema_version": 1,
+        "manifest": {
+          "release": "test",
+          "guardrail": ""
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "schema_version: expected 2, got 1",
+        "manifest.guardrail: required non-empty string"
+      ]
+    }
+  },
+  {
+    "id": "schema-version-true-is-not-2",
+    "description": "A boolean is never accepted as the schema version",
+    "input": {
+      "kb": {
+        "schema_version": true,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "schema_version: expected 2, got true"
+      ]
+    }
+  },
+  {
+    "id": "genes-and-loci-required",
+    "description": "A KB without genes and loci reports both, and nothing else",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes: required object",
+        "loci: required object"
+      ]
+    }
+  },
+  {
+    "id": "ref-equals-alt",
+    "description": "A locus whose ref and alt are identical is invalid",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285: ref and alt are identical"
+      ]
+    }
+  },
+  {
+    "id": "ref-must-be-acgt",
+    "description": "ref and alt are ACGT sequences; N is not an allele",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "N",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285.ref: required ACGT sequence"
+      ]
+    }
+  },
+  {
+    "id": "key-mismatch-and-unknown-gene",
+    "description": "A locus's rsid must equal its key, and its gene must exist in genes",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs1",
+            "gene": "NOPE",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285.rsid: \"rs1\" does not match its key",
+        "loci.rs4244285.gene: unknown gene \"NOPE\""
+      ]
+    }
+  },
+  {
+    "id": "non-clinvar-tier-needs-rationale",
+    "description": "A curated tier without a rationale and a citation is invalid",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": null,
+            "tier_citation": "",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285.tier_rationale: required unless tier_source is clinvar_review",
+        "loci.rs4244285.tier_citation: required unless tier_source is clinvar_review"
+      ]
+    }
+  },
+  {
+    "id": "per-sample-field-in-the-kb",
+    "description": "The KB never carries a per-sample field, wherever it sits",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard",
+            "coverage_state": "supported_and_observed"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "kb.loci.rs4244285.coverage_state: per-sample field must not appear in the knowledge base"
+      ]
+    }
+  },
+  {
+    "id": "duplicate-position-in-one-build",
+    "description": "Two loci at one chrom:pos of one build cannot both be matched by position",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs2": {
+            "rsid": "rs2",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94782859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "duplicate position 10:96541616 in GRCh37: rs4244285 and rs2"
+      ]
+    }
+  },
+  {
+    "id": "bad-interpretation-and-sufficiency",
+    "description": "A non-numeric magnitude, an interpretation key beyond 0-2 and an unknown sufficiency are all reported",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": "high",
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "3": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "maybe",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285.interpretations.1.magnitude: required number",
+        "loci.rs4244285.interpretations: unexpected keys 3",
+        "loci.rs4244285.evidence_sufficiency: must be one of sufficient, insufficient"
+      ]
+    }
+  },
+  {
+    "id": "allele-codes-must-map-to-ref-or-alt",
+    "description": "allele_codes maps D and I to ref or alt, nothing else",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": {
+              "D": "ref",
+              "I": "other"
+            },
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285.allele_codes: must map D and I to \"ref\" or \"alt\""
+      ]
+    }
+  },
+  {
+    "id": "position-must-be-positive",
+    "description": "A genomic position of 0 is invalid",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 0,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "loci.rs4244285.pos_grch37: required positive integer"
+      ]
+    }
+  },
+  {
+    "id": "diplotypes-must-be-complete",
+    "description": "A gene with diplotypes must hold exactly the six APOE diplotypes",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null,
+            "diplotypes": {}
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes.CYP2C19.diplotypes: must hold exactly e2/e2, e2/e3, e2/e4, e3/e3, e3/e4, e4/e4"
+      ]
+    }
+  },
+  {
+    "id": "gene-model-and-acmg-flag",
+    "description": "The inheritance model is one of five, and acmg_sf is a boolean",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "recessive",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": "no",
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes.CYP2C19.inheritance.model: must be one of autosomal_recessive, autosomal_dominant, risk_factor, pharmacogenomic, trait",
+        "genes.CYP2C19.acmg_sf: required boolean"
+      ]
+    }
+  }
+]

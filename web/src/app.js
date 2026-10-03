@@ -10,7 +10,7 @@
  * through escapeHtml.
  */
 
-import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
+import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "./core/inheritance.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
 import {
   NOT_AVAILABLE,
@@ -52,9 +52,18 @@ const state = {
   filterCategory: "all",
   searchQuery: "",
   sortBy: "magnitude",
-  // Not a clinical field: a missing stored preference means the light theme.
-  theme: localStorage.getItem("lucidase-theme") || "light"
+  // Not a clinical field: a missing or unreadable stored preference means the light theme.
+  theme: readStoredTheme()
 };
+
+// localStorage throws when site data is blocked; the theme is not a clinical field, so that means light.
+function readStoredTheme() {
+  try {
+    return localStorage.getItem("lucidase-theme") || "light";
+  } catch {
+    return "light";
+  }
+}
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
 function initApp() {
@@ -90,7 +99,11 @@ function initTheme() {
 
 function setTheme(theme) {
   state.theme = theme;
-  localStorage.setItem("lucidase-theme", theme);
+  try {
+    localStorage.setItem("lucidase-theme", theme);
+  } catch {
+    // Blocked or full storage: the theme still applies for this session.
+  }
   document.documentElement.setAttribute("data-theme", theme);
 
   const icon = document.getElementById("theme-toggle-icon");
@@ -151,10 +164,15 @@ async function loadManifest() {
 
 // One worker per analysis run: a worker that failed (or never answers) is
 // terminated and the next run starts fresh, so a retry can never hang on a dead one.
-function startWorker() {
+// A worker whose module graph fails to load (a dropped request, a machine out of socket buffers)
+// raises an error event with no message before it has answered anything. That is a transient start
+// failure, so the run starts one fresh worker with the same job; a worker that throws, or fails
+// twice, takes the error path.
+function startWorker(job, canRetry = true) {
   stopWorker();
   const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
   state.worker = worker;
+  let answered = false;
   const fail = (message) => {
     if (state.worker !== worker) return;
     stopWorker();
@@ -162,6 +180,16 @@ function startWorker() {
   };
 
   worker.onerror = (err) => {
+    if (canRetry && !answered && state.worker === worker && !(err && err.message)) {
+      try {
+        startWorker(job, false).postMessage(job);
+        return;
+      } catch (retryErr) {
+        stopWorker();
+        showAnalysisError((retryErr && retryErr.message) || "The analysis worker failed to start.");
+        return;
+      }
+    }
     fail((err && err.message) || "The analysis worker failed to start.");
   };
   worker.onmessageerror = () => {
@@ -169,6 +197,7 @@ function startWorker() {
   };
   worker.onmessage = (e) => {
     if (state.worker !== worker) return;
+    answered = true;
     clearWatchdog();
     const data = e.data;
     if (data.type === "progress") {
@@ -219,6 +248,7 @@ function setInputsDisabled(disabled) {
 
 // The one error path: every failure (worker, KB, file read, demo fetch) shows the #analysis-error alert and no results.
 function showAnalysisError(message) {
+  closeDrawer();
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("results-section").classList.add("hidden");
   const box = document.getElementById("analysis-error");
@@ -346,12 +376,21 @@ function handleFileSelected(file) {
   reader.readAsText(file);
 }
 
+// Both entry points (file and demo) start here, so a synchronous start failure (a throwing
+// Worker constructor or postMessage) takes the one error path instead of leaving inputs disabled.
 function processText(text, fileName) {
-  document.getElementById("analysis-error").classList.add("hidden");
-  setInputsDisabled(true);
-  document.getElementById("progress-section").classList.remove("hidden");
-  document.getElementById("results-section").classList.add("hidden");
-  startWorker().postMessage({ action: "parse", text, fileName });
+  try {
+    closeDrawer();
+    document.getElementById("analysis-error").classList.add("hidden");
+    setInputsDisabled(true);
+    document.getElementById("progress-section").classList.remove("hidden");
+    document.getElementById("results-section").classList.add("hidden");
+    const job = { action: "parse", text, fileName };
+    startWorker(job).postMessage(job);
+  } catch (err) {
+    stopWorker();
+    showAnalysisError((err && err.message) || err);
+  }
 }
 
 function updateProgress(percent, message) {
@@ -438,6 +477,12 @@ function renderSummaryCards() {
   set("count-state-insufficient", cov.insufficient_evidence_count);
 }
 
+const APOE_ACCENTS = {
+  e4e4: { border: "border-rose-500", badge: "badge-pathogenic" },
+  e4: { border: "border-amber-500", badge: "badge-carrier" },
+  e2: { border: "border-purple-500", badge: "badge-pgx" },
+  e3e3: { border: "border-emerald-500", badge: "badge-benign" }
+};
 const APOE_NEUTRAL_BADGE = "bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
 
 function renderApoeCard() {
@@ -470,12 +515,7 @@ function renderApoeCard() {
   setValue(hpaEl, model.hpaSummary);
 
   // Visual accents depending on risk profile (existing classes only)
-  const diplotype = model.diplotype ?? "";
-  let accent = null;
-  if (diplotype === "ε4/ε4") accent = { border: "border-rose-500", badge: "badge-pathogenic" };
-  else if (diplotype.includes("ε4")) accent = { border: "border-amber-500", badge: "badge-carrier" };
-  else if (diplotype.includes("ε2")) accent = { border: "border-purple-500", badge: "badge-pgx" };
-  else if (diplotype === "ε3/ε3") accent = { border: "border-emerald-500", badge: "badge-benign" };
+  const accent = APOE_ACCENTS[model.accent] ?? null;
 
   if (accent) {
     card.className = `glass-panel p-6 border-l-4 ${accent.border} transition-all duration-200 bg-white dark:bg-slate-900/60`;
@@ -592,6 +632,20 @@ const STATE_BADGE_CLASS = {
   insufficient_evidence: "bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
 };
 
+// The one neutral (slate) look: any category, tier or composite label the page has no explicit style for.
+const NEUTRAL_BADGE_COLOURS = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
+
+// Categories with an explicit style. A Carrier flag on the row also gets the carrier style. Everything else
+// (Trait, Not detected, a category added later) is neutral, never the benign (green) look.
+const CATEGORY_BADGE_CLASS = {
+  Pathogenic: "badge-pathogenic",
+  Carrier: "badge-carrier",
+  Pharmacogenomics: "badge-pgx",
+  "Risk Factor": "badge-risk"
+};
+const categoryBadgeClass = (r) =>
+  CATEGORY_BADGE_CLASS[r.category] ?? (r.isCarrier ? CATEGORY_BADGE_CLASS.Carrier : `border ${NEUTRAL_BADGE_COLOURS}`);
+
 const TIER_BADGE_CLASS = {
   "Tier A": "bg-sky-100 text-sky-800 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700",
   "Tier B": "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700",
@@ -617,7 +671,7 @@ function renderVariantsTable() {
     if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
     if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
     if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
-    if (state.filterCategory === "risk" && (r.category !== "Risk Factor" && !(r.diplotype === "e3/e4" || r.diplotype === "e4/e4"))) return false;
+    if (state.filterCategory === "risk" && !r.riskFilter) return false;
     if (state.filterCategory === "acmg" && !r.acmg_actionable) return false;
 
     // Search query
@@ -655,18 +709,23 @@ function renderVariantsTable() {
   filtered.forEach(r => {
     const tr = document.createElement("tr");
     tr.className = "cursor-pointer border-b border-slate-200 dark:border-slate-800/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40";
-    tr.onclick = () => openDrawer(r);
+    tr.tabIndex = 0;
+    tr.setAttribute("aria-label", `${r.gene} ${r.id}`);
+    tr.onclick = () => openDrawer(r, tr);
+    tr.onkeydown = (event) => {
+      if (event.target !== tr) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); // Space must open the drawer, not scroll the page
+        openDrawer(r, tr);
+      }
+    };
 
-    let categoryClass = "badge-benign";
-    if (r.category === "Pathogenic") categoryClass = "badge-pathogenic";
-    else if (r.category === "Carrier" || r.isCarrier) categoryClass = "badge-carrier";
-    else if (r.category === "Pharmacogenomics") categoryClass = "badge-pgx";
-    else if (r.category === "Risk Factor") categoryClass = "badge-risk";
+    const categoryClass = categoryBadgeClass(r);
 
     const stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${STATE_BADGE_CLASS[r.coverage_state]}">${escapeHtml(r.stateBadge)}</span>`;
     const tierBadge = r.tier === null
       ? `<span class="mr-1.5">${naHtml()}</span>`
-      : `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono ${TIER_BADGE_CLASS[r.tier] ?? TIER_BADGE_CLASS["Tier D"]} mr-1.5">${escapeHtml(r.tier)}</span>`;
+      : `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono ${TIER_BADGE_CLASS[r.tier] ?? `border ${NEUTRAL_BADGE_COLOURS}`} mr-1.5">${escapeHtml(r.tier)}</span>`;
     const categoryBadge = r.category === null
       ? naHtml()
       : `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${categoryClass}">${escapeHtml(r.category)}</span>`;
@@ -710,7 +769,7 @@ const TIER_DRAWER_CLASS = {
   "Tier B": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30",
   "Tier C": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30"
 };
-const TIER_DRAWER_NEUTRAL = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
+const TIER_DRAWER_NEUTRAL = `px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono ${NEUTRAL_BADGE_COLOURS}`;
 
 const COVERAGE_DRAWER_CLASS = {
   supported_and_observed: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30",
@@ -719,8 +778,12 @@ const COVERAGE_DRAWER_CLASS = {
   insufficient_evidence: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/30"
 };
 
-function openDrawer(record) {
+// The element that opened the drawer; closeDrawer returns focus to it.
+let drawerOpener = null;
+
+function openDrawer(record, opener = document.activeElement) {
   state.selectedVariant = record;
+  drawerOpener = opener instanceof HTMLElement && opener !== document.body ? opener : null;
   const drawer = document.getElementById("variant-drawer");
   if (!drawer) return;
 
@@ -925,8 +988,8 @@ function renderDrawerSegregation(record) {
   if (seg.af === null) {
     setValue(priorEl, null);
   } else if (mendelian) {
-    const carrierFreq = 2 * seg.af * (1 - seg.af);
-    setValue(priorEl, carrierFreq > 0 ? `1 in ${Math.round(1 / carrierFreq)} (${fmtPct(carrierFreq)})` : null);
+    const prior = seg.carrierPrior;
+    setValue(priorEl, prior ? `1 in ${prior.oneIn} (${fmtPct(prior.frequency)})` : null);
   } else {
     priorEl.textContent = fmtPct(seg.af);
   }
@@ -1005,7 +1068,8 @@ function renderSimulator(out, seg) {
     rows[1].value = out.carrier;
     rows[2].value = out.p0;
     effectiveLabel = "Affected Probability (adjusted for stated penetrance):";
-    effective = seg.penetrance === null ? null : fmtPct(out.affected * seg.penetrance);
+    const adjusted = penetranceAdjustedAffected(out, seg.penetrance);
+    effective = adjusted === null ? null : fmtPct(adjusted);
   } else if (out) {
     rows[0] = { id: "affected", label: "Affected Probability (penetrance-adjusted):", value: out.affected };
     rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.p1 };
@@ -1107,6 +1171,10 @@ function renderDrawerBiotools(record) {
 function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
   if (drawer) drawer.classList.add("translate-x-full");
+  state.selectedVariant = null;
+  // Return focus to whatever opened the drawer (a table row, or a button), if it is still on the page.
+  if (drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
+  drawerOpener = null;
 }
 
 /** Every row the file produced, once each: observed findings first, then wild-type, gaps and insufficient evidence. */

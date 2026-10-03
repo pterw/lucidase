@@ -1,0 +1,78 @@
+[
+  {
+    "id": "components-agree-show-the-shared-tier",
+    "description": "Both APOE components carry the same tier: the row shows it unlabelled.",
+    "input": {
+      "components": [
+        {
+          "rsid": "rs429358",
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs7412",
+          "evidence_tier": "Tier A"
+        }
+      ]
+    },
+    "expected": {
+      "tier": "Tier A"
+    }
+  },
+  {
+    "id": "components-disagree-show-a-labelled-join",
+    "description": "The components differ: the row shows each tier under its rsID, never None and never one component's tier.",
+    "input": {
+      "components": [
+        {
+          "rsid": "rs429358",
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs7412",
+          "evidence_tier": "Tier C"
+        }
+      ]
+    },
+    "expected": {
+      "tier": "rs429358: Tier A \u00b7 rs7412: Tier C"
+    }
+  },
+  {
+    "id": "a-missing-component-tier-reads-not-available-in-the-join",
+    "description": "One component has no tier: the join names it Not available.",
+    "input": {
+      "components": [
+        {
+          "rsid": "rs429358",
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs7412",
+          "evidence_tier": null
+        }
+      ]
+    },
+    "expected": {
+      "tier": "rs429358: Tier A \u00b7 rs7412: Not available"
+    }
+  },
+  {
+    "id": "no-component-has-a-tier",
+    "description": "No component has a tier: the row has none.",
+    "input": {
+      "components": [
+        {
+          "rsid": "rs429358",
+          "evidence_tier": null
+        },
+        {
+          "rsid": "rs7412",
+          "evidence_tier": null
+        }
+      ]
+    },
+    "expected": {
+      "tier": null
+    }
+  }
+]

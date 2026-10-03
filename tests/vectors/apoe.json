@@ -2040,5 +2040,335 @@
       "coverage_state": "insufficient_evidence",
       "reason": "rs7412: genotype not interpretable"
     }
+  },
+  {
+    "id": "e2-e4-insufficient-rs429358-component",
+    "description": "One insufficient component makes the APOE row insufficient_evidence, with the shared reason; the diplotype is still reported (rs429358 insufficient)",
+    "input": {
+      "kb": {
+        "genes": {
+          "APOE": {
+            "acmg_sf": false,
+            "diplotypes": {
+              "e2/e2": {
+                "category": "Fixture",
+                "significance": "fixture e2/e2",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e2/e2",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e2/e2"
+                ]
+              },
+              "e2/e3": {
+                "category": "Fixture",
+                "significance": "fixture e2/e3",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e2/e3",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e2/e3"
+                ]
+              },
+              "e2/e4": {
+                "category": "Fixture",
+                "significance": "fixture e2/e4",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e2/e4",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e2/e4"
+                ]
+              },
+              "e3/e3": {
+                "category": "Fixture",
+                "significance": "fixture e3/e3",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e3/e3",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e3/e3"
+                ]
+              },
+              "e3/e4": {
+                "category": "Fixture",
+                "significance": "fixture e3/e4",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e3/e4",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e3/e4"
+                ]
+              },
+              "e4/e4": {
+                "category": "Fixture",
+                "significance": "fixture e4/e4",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e4/e4",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e4/e4"
+                ]
+              }
+            }
+          }
+        },
+        "loci": {
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "evidence": {
+              "clinvar": {
+                "accession": "VCV000000001",
+                "review_status": "fixture",
+                "stars": 2,
+                "significance": "fixture",
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              },
+              "gnomad": {
+                "af": 0.25,
+                "pli": null,
+                "loeuf": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null
+          }
+        }
+      },
+      "components": [
+        {
+          "rsid": "rs429358",
+          "pos": 45411941,
+          "genotype_display": "T/C",
+          "altCount": 1,
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "reason": null,
+          "evidence_sufficiency": "insufficient"
+        },
+        {
+          "rsid": "rs7412",
+          "pos": 45412079,
+          "genotype_display": "C/T",
+          "altCount": 1,
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "reason": null,
+          "evidence_sufficiency": "sufficient"
+        }
+      ]
+    },
+    "expected": {
+      "diplotype": "e2/e4",
+      "coverage_state": "insufficient_evidence",
+      "sample_observation": "variant_present",
+      "reason": "locus evidence is insufficient (see the evidence tier rationale)",
+      "interpretation": {
+        "significance": "fixture e2/e4"
+      },
+      "evidence": {
+        "clinvar": {
+          "stars": 2
+        },
+        "gnomad": {
+          "af": 0.25
+        }
+      },
+      "caveats_include": [
+        "phase unknown: e1/e3 is the rare alternative"
+      ]
+    }
+  },
+  {
+    "id": "e2-e4-insufficient-rs7412-component",
+    "description": "Same, with the other component insufficient (mixed sufficiency is not 'sufficient')",
+    "input": {
+      "kb": {
+        "genes": {
+          "APOE": {
+            "acmg_sf": false,
+            "diplotypes": {
+              "e2/e2": {
+                "category": "Fixture",
+                "significance": "fixture e2/e2",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e2/e2",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e2/e2"
+                ]
+              },
+              "e2/e3": {
+                "category": "Fixture",
+                "significance": "fixture e2/e3",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e2/e3",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e2/e3"
+                ]
+              },
+              "e2/e4": {
+                "category": "Fixture",
+                "significance": "fixture e2/e4",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e2/e4",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e2/e4"
+                ]
+              },
+              "e3/e3": {
+                "category": "Fixture",
+                "significance": "fixture e3/e3",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e3/e3",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e3/e3"
+                ]
+              },
+              "e3/e4": {
+                "category": "Fixture",
+                "significance": "fixture e3/e4",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e3/e4",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e3/e4"
+                ]
+              },
+              "e4/e4": {
+                "category": "Fixture",
+                "significance": "fixture e4/e4",
+                "magnitude": 1.5,
+                "repute": "Neutral",
+                "phenotype": "fixture text for APOE e4/e4",
+                "drug_response": null,
+                "caveats": [
+                  "fixture caveat e4/e4"
+                ]
+              }
+            }
+          }
+        },
+        "loci": {
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "evidence": {
+              "clinvar": {
+                "accession": "VCV000000001",
+                "review_status": "fixture",
+                "stars": 2,
+                "significance": "fixture",
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              },
+              "gnomad": {
+                "af": 0.25,
+                "pli": null,
+                "loeuf": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null
+          }
+        }
+      },
+      "components": [
+        {
+          "rsid": "rs429358",
+          "pos": 45411941,
+          "genotype_display": "T/C",
+          "altCount": 1,
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "reason": null,
+          "evidence_sufficiency": "sufficient"
+        },
+        {
+          "rsid": "rs7412",
+          "pos": 45412079,
+          "genotype_display": "C/T",
+          "altCount": 1,
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "reason": null,
+          "evidence_sufficiency": "insufficient"
+        }
+      ]
+    },
+    "expected": {
+      "diplotype": "e2/e4",
+      "coverage_state": "insufficient_evidence",
+      "sample_observation": "variant_present",
+      "reason": "locus evidence is insufficient (see the evidence tier rationale)",
+      "interpretation": {
+        "significance": "fixture e2/e4"
+      },
+      "evidence": {
+        "clinvar": {
+          "stars": 2
+        },
+        "gnomad": {
+          "af": 0.25
+        }
+      },
+      "caveats_include": [
+        "phase unknown: e1/e3 is the rare alternative"
+      ]
+    }
   }
 ]

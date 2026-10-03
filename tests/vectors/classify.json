@@ -1371,7 +1371,8 @@
           "coverage_state": "insufficient_evidence",
           "sample_observation": "wild_type",
           "altCount": 0,
-          "interpretation_key": "0"
+          "interpretation_key": "0",
+          "reason": "locus evidence is insufficient (see the evidence tier rationale)"
         }
       },
       "summary": {
@@ -1720,7 +1721,8 @@
           "coverage_state": "insufficient_evidence",
           "sample_observation": "variant_present",
           "altCount": 1,
-          "interpretation_key": "1"
+          "interpretation_key": "1",
+          "reason": "locus evidence is insufficient (see the evidence tier rationale)"
         }
       }
     }
@@ -2748,7 +2750,8 @@
           "coverage_state": "not_tested_by_array",
           "sample_observation": "call_unavailable",
           "altCount": null,
-          "genotype_display": null
+          "genotype_display": null,
+          "reason": "no-call at this locus"
         }
       }
     }

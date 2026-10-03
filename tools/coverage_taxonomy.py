@@ -40,7 +40,7 @@ NOT_ASSAYED_REASON: Final[str] = "locus not assayed on this array"
 NO_CALL_REASON: Final[str] = "no-call at this locus"
 VCF_ABSENT_REASON: Final[str] = "absent from VCF (variants-only VCFs omit reference calls)"
 NOT_INTERPRETABLE_REASON: Final[str] = "genotype not interpretable"
-INSUFFICIENT_LOCUS_REASON: Final[str] = "locus evidence is insufficient"
+INSUFFICIENT_LOCUS_REASON: Final[str] = "locus evidence is insufficient (see the evidence tier rationale)"
 
 
 class EvidenceSufficiency(str, Enum):
