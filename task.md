@@ -42,7 +42,7 @@
   - *Fallbacks*: `akzidenz-grotesk-next-pro`, `sans-serif`.
 
 ### Interactive Font Studio & Extension Companion
-- **Font Kit Studio (`tools/font-kit-studio/`)**: Standalone designer tooling and laboratory suite exposing all 27 foundry fonts from Typekit kit `gfe3vcu` (extracted out of the production clinical application).
+- **Font Kit Studio (`tools/font-kit-studio/`)**: Standalone designer tooling and laboratory suite exposing the four families of Typekit kit `gfe3vcu` (Akzidenz-Grotesk Next Pro, Orpheus Pro, Input Mono, Swiss 721 BT Condensed; ruling 15) (extracted out of the production clinical application).
   - Dynamically binds to `--font-sans`, `--font-serif`, `--font-mono`, `--font-display`, `--editorial-size`, `--mono-spacing`.
   - 4 1-click curated presets: *🧬 Impeccable Clinical*, *📰 Editorial Heavyweight*, *🔬 Swiss Bio Precision*, *⚡ Biotech Cyber HUD*.
   - Live fine-tuning sliders for narrative text size (12px–20px) and monospace letter spacing (-0.05em to +0.1em).

@@ -140,6 +140,18 @@ const HANDLERS = {
     assertClose({ statements }, vector.expected, vector.id);
   },
 
+  // input: { components: [{ rsid, evidence_tier }] }, the APOE row's components; expected: { tier }, the row's tier text
+  // (the shared tier, a labelled join when they differ, or null). The text comes from the view model.
+  "composite_tier.json": async (vector) => {
+    const { toViewModel } = await import("../src/view-model.js");
+    const components = vector.input.components.map((c) => ({ ...c, chrom: "19", pos: 1, evidence: {} }));
+    const record = {
+      rsid: "APOE-STATUS", gene: "APOE", chrom: "19", pos: 1, coverage_state: "supported_and_observed",
+      sample_observation: "variant_present", interpretation: null, evidence: {}, components,
+    };
+    assertClose({ tier: toViewModel(record, {}).tier }, vector.expected, vector.id);
+  },
+
   // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4" | "describe_segregation", ... }. Numbers compare within
   // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
   // lower-cased JSON of the result (scenario, multi_locus, compound).

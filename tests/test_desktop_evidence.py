@@ -82,11 +82,11 @@ class ApoeEvidencePerComponent(Fixture):
         self.assertEqual(tiers, {"Tier A"})
         self.assertEqual(self.apoe.evidence_tier, "Tier A")
 
-    def test_row_tier_is_none_when_the_components_disagree(self):
+    def test_row_tier_is_the_labelled_join_when_the_components_disagree(self):
         with mock.patch.dict(self.kb.loci["rs7412"], {"evidence_tier": "Tier C"}):
             apoe = self.row(self.report(self.het("rs429358"), self.wild_type("rs7412")), "APOE")
         self.assertEqual([c["evidence_tier"] for c in apoe.component_evidence], ["Tier A", "Tier C"])
-        self.assertIsNone(apoe.evidence_tier)
+        self.assertEqual(apoe.evidence_tier, "rs429358: Tier A · rs7412: Tier C")
 
     def test_each_component_carries_its_own_evidence(self):
         got = {c["rsid"]: c for c in self.apoe.component_evidence}

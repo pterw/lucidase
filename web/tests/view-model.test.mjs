@@ -404,6 +404,15 @@ test("a hostile genotype is neutralised in the CSV and the Markdown", () => {
   assert.equal(markdownRows(md, "Observed").rs6025.Genotype, "&lt;DEL&gt;/a|b&amp;c", "the pipe did not move any cell");
 });
 
+test("a backslash before a pipe is escaped too, so it cannot cancel the pipe's escape (S2-F1 Minor)", () => {
+  const a = analyse(DEMO);
+  const rec = structuredClone(a.byRsid.rs6025);
+  rec.genotype_display = "a\\|b";
+  const md = markdownReport(reportData(a, { records: [toViewModel(rec, a.kb.genes)], negativeChecks: [], arrayGaps: [], insufficientEvidence: [] }));
+  const row = md.split("\n").find((l) => l.startsWith("| rs6025 "));
+  assert.ok(row.includes("a\\\\\\|b"), row);
+});
+
 test("the tested-variant count leaves out a sibling locus whose genotype is not interpretable", () => {
   // rs1799945 TT is neither ref/alt nor a strand flip of them: insufficient evidence, no altCount.
   const a = analyse(

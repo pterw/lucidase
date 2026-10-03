@@ -457,9 +457,9 @@ const mdCell = (value) =>
       : String(value).replace(/\|/g, "/").replace(/\s*\n\s*/g, " ");
 
 /** A value derived from the uploaded file: Markdown and HTML metacharacters are escaped so it cannot become markup. */
-const MD_ESCAPES = { "|": "\\|", "<": "&lt;", ">": "&gt;", "&": "&amp;" };
+const MD_ESCAPES = { "\\": "\\\\", "|": "\\|", "<": "&lt;", ">": "&gt;", "&": "&amp;" };
 const mdFileText = (value) =>
-  value === null || value === undefined ? null : { escaped: String(value).replace(/[|<>&]/g, (ch) => MD_ESCAPES[ch]) };
+  value === null || value === undefined ? null : { escaped: String(value).replace(/[\\|<>&]/g, (ch) => MD_ESCAPES[ch]) };
 
 const mdRow = (cells) => `| ${cells.map(mdCell).join(" | ")} |\n`;
 const mdTable = (headers, rows) =>

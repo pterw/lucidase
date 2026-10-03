@@ -8,7 +8,7 @@
  * no diplotype, never wild-type and never "presumed e3". Interpretation text, stars, allele frequency and
  * magnitude come from the knowledge base; nothing clinical is typed here.
  */
-import { COVERAGE_STATES, EVIDENCE_SUFFICIENCY, SAMPLE_OBSERVATION, summarizeCoverage } from "./coverage.js";
+import { COVERAGE_STATES, EVIDENCE_SUFFICIENCY, REASONS, SAMPLE_OBSERVATION, summarizeCoverage } from "./coverage.js";
 
 export const APOE_E4_RSID = "rs429358";
 export const APOE_E2_RSID = "rs7412";
@@ -141,7 +141,7 @@ export function resolveApoe(componentRecords, kb) {
     genotype_display: `${displayDiplotype(diplotype)} (${componentSummary(components)})`,
     coverage_state,
     sample_observation: observation,
-    reason: sufficient ? null : "locus evidence is insufficient (see the evidence tier rationale)",
+    reason: sufficient ? null : REASONS.INSUFFICIENT_EVIDENCE,
     interpretation_key: diplotype,
     interpretation: { ...kbInterp, caveats: caveat ? [...kbInterp.caveats, caveat] : [...kbInterp.caveats] },
     diplotype,

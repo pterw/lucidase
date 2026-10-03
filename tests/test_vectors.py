@@ -200,6 +200,13 @@ def _run_statements(vector):
     _assert_close(result, vector["expected"], vector["id"])
 
 
+def _run_composite_tier(vector):
+    from variant_annotator import composite_tier
+
+    result = {"tier": composite_tier(copy.deepcopy(vector["input"]["components"]))}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
 AREAS = {
     "parse": _run_parse,
     "alleles": _run_alleles,
@@ -210,6 +217,7 @@ AREAS = {
     "kb": _run_kb,
     "assemble": _run_assemble,
     "statements": _run_statements,
+    "composite_tier": _run_composite_tier,
 }
 
 

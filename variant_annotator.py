@@ -772,10 +772,15 @@ def _component_evidence(rec: dict) -> dict:
     }
 
 
-def _shared_tier(components: list[dict]) -> Optional[str]:
-    """The APOE row's tier, by the web rule: the components' tier when they all agree, else None."""
+def composite_tier(components: list[dict]) -> Optional[str]:
+    """The APOE row's tier, by the web rule (view-model.js): None when no component has one, the shared tier when they
+    all agree, else the labelled join "rs429358: Tier A · rs7412: Tier C" (a component without one reads "Not available")."""
     tiers = [c["evidence_tier"] for c in components]
-    return tiers[0] if tiers and all(t == tiers[0] for t in tiers) else None
+    if all(t is None for t in tiers):
+        return None
+    if all(t == tiers[0] for t in tiers):
+        return tiers[0]
+    return " · ".join(f"{c['rsid']}: {c['evidence_tier'] if c['evidence_tier'] is not None else 'Not available'}" for c in components)
 
 
 def _to_annotation(rec: dict, kb: KnowledgeBase, build: str, tested: dict[str, int]) -> AnnotationRecord:
@@ -816,8 +821,8 @@ def _to_annotation(rec: dict, kb: KnowledgeBase, build: str, tested: dict[str, i
         repute=repute,
         drug_response=drug,
         caveats=caveats,
-        # The APOE row has no evidence of its own (contracts C4): its tier is the components' shared tier, else None.
-        evidence_tier=_shared_tier(components_evidence) if composite else rec["evidence_tier"],
+        # The APOE row has no evidence of its own (contracts C4): its tier is composite_tier (shared tier, else the labelled join).
+        evidence_tier=composite_tier(components_evidence) if composite else rec["evidence_tier"],
         # Locus-level ClinVar stars are shown only next to an interpreted genotype, never beside "not tested".
         review_stars=None if composite else (clinvar.get("stars") if interp is not None else None),
         gnomad_af=None if composite else gnomad.get("af"),

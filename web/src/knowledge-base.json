@@ -1302,18 +1302,18 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "5-Fluorouracil / Capecitabine: Intermediate (Reduce dose ≥50%)",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
           "magnitude": 5,
-          "phenotype": "DPYD Partial Deficiency (*2A heterozygote): High risk of life-threatening neutropenia and mucositis. CPIC mandates ≥50% dose reduction.",
+          "phenotype": "One DPYD*2A (rs3918290) allele detected. This variant is associated with a high risk of life-threatening neutropenia and mucositis on fluoropyrimidines, and CPIC recommends a ≥50% dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "5-Fluorouracil / Capecitabine: Complete Deficiency (Contraindicated)",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends avoiding standard dosing (alternative therapy)",
           "magnitude": 6.5,
-          "phenotype": "DPYD Complete Deficiency (*2A/*2A): Fatal toxicity with standard 5-FU/capecitabine chemotherapy. Alternate therapy required.",
+          "phenotype": "Two DPYD*2A (rs3918290) alleles detected. Two copies of this variant are associated with severe, potentially fatal toxicity with standard 5-FU/capecitabine dosing, and CPIC recommends an alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
           "repute": "Bad",
           "significance": "Drug Response (Critical)"
         }
@@ -2390,7 +2390,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "4c62444e520332f68e418ecf600637ed1e59e612a24ac83ab5520427880ae936"
+    "sha256": "8d5c5ec7903b6c74bbeb230b3068c019e5c32255697c135be5574c9bab164a0b"
   },
   "schema_version": 2
 }

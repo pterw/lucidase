@@ -6,17 +6,14 @@ A dedicated Chrome Extension (Manifest V3) that loads your Adobe Typekit typogra
 
 ## Features
 
-- **27 Curated Foundry Fonts**: Instantly switch between Gotham, Orpheus Pro, Attribute Mono, Neuzeit Grotesk, Mencken Std, Archer Pro, Obviously, and more.
+- **Four Kit Families**: Typekit kit `gfe3vcu` exposes Akzidenz-Grotesk Next Pro (sans), Orpheus Pro (serif), Input Mono (monospace) and Swiss 721 BT Condensed (display), plus a system fallback per role.
 - **Role-Based Mapping**:
   - `1. Primary UI Sans` (`--font-sans`)
   - `2. Editorial & Clinical Narrative` (`--font-serif`)
   - `3. Monospace & Genomic Figures` (`--font-mono`)
   - `4. Display & Bold Multipliers` (`--font-display`)
 - **1-Click Presets**:
-  - 🧬 **Impeccable Clinical**: Gotham + Orpheus Pro + Attribute Mono + Neuzeit Condensed
-  - 📰 **Editorial Heavyweight**: Basic Sans + Mencken Std + Ballinger Mono + Obviously
-  - 🔬 **Swiss Bio Precision**: Nimbus Sans + Archer Pro + Dico Mono + Neuzeit Extra Cond
-  - ⚡ **Biotech Cyber HUD**: Century Gothic + Corporate A + Azo Mono + Dystopian
+  - Every preset button applies the four kit families above, since the kit exposes one family per role.
 - **Zero Configuration**: Connects automatically to `http://localhost:8000/` or any web page.
 
 ---

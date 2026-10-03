@@ -1305,8 +1305,8 @@
           "significance": "Drug Response",
           "magnitude": 5,
           "repute": "Bad",
-          "phenotype": "DPYD Partial Deficiency (*2A heterozygote): High risk of life-threatening neutropenia and mucositis. CPIC mandates ≥50% dose reduction.",
-          "drug_response": "5-Fluorouracil / Capecitabine: Intermediate (Reduce dose ≥50%)",
+          "phenotype": "One DPYD*2A (rs3918290) allele detected. This variant is associated with a high risk of life-threatening neutropenia and mucositis on fluoropyrimidines, and CPIC recommends a ≥50% dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
           "caveats": []
         },
         "2": {
@@ -1314,8 +1314,8 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 6.5,
           "repute": "Bad",
-          "phenotype": "DPYD Complete Deficiency (*2A/*2A): Fatal toxicity with standard 5-FU/capecitabine chemotherapy. Alternate therapy required.",
-          "drug_response": "5-Fluorouracil / Capecitabine: Complete Deficiency (Contraindicated)",
+          "phenotype": "Two DPYD*2A (rs3918290) alleles detected. Two copies of this variant are associated with severe, potentially fatal toxicity with standard 5-FU/capecitabine dosing, and CPIC recommends an alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends avoiding standard dosing (alternative therapy)",
           "caveats": []
         }
       },

@@ -224,8 +224,8 @@ def test_apoe_component_roles(built):
         ("rs4244285", "2", "Two CYP2C19*2 (rs4244285) alleles detected"),
         ("rs429358", "2", "ε4/ε4 homozygote"),
         ("rs7412", "2", "ε2/ε2"),
-        ("rs3918290", "2", "Complete Deficiency"),
-        ("rs3918290", "1", "Partial Deficiency"),
+        ("rs3918290", "2", "Two DPYD*2A (rs3918290) alleles detected"),
+        ("rs3918290", "1", "One DPYD*2A (rs3918290) allele detected"),
         ("rs4988235", "2", "Lactase persistent: Capable"),  # old key AA
         ("rs4988235", "1", "Tolerates dairy lactose well"),  # old key AG
         ("rs4988235", "0", "No MCM6/LCT -13910T allele detected"),  # old key GG
@@ -278,6 +278,17 @@ def test_cyp2c19_states_one_snp_observation_and_assigns_no_metabolizer(built):
     for count in ("1", "2"):
         assert "star-allele diplotyping" in interps[count]["phenotype"], count
     assert built["loci"]["rs4244285"]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
+
+
+def test_dpyd_states_one_snp_observation_and_assigns_no_deficiency_label(built):
+    """CLEANUP-1 item 1 (same rule as S5a-C-3): one rs3918290 call cannot establish DPD activity."""
+    interps = built["loci"]["rs3918290"]["interpretations"]
+    assert interps["1"]["phenotype"].startswith("One DPYD*2A (rs3918290) allele detected.")
+    assert interps["2"]["phenotype"].startswith("Two DPYD*2A (rs3918290) alleles detected.")
+    for count in ("1", "2"):
+        text = interps[count]["phenotype"] + " " + (interps[count]["drug_response"] or "")
+        assert "Deficiency" not in text, (count, text)
+        assert "other DPYD variants that this array does not test" in interps[count]["phenotype"], count
 
 
 def test_apoe_wording_labels_relative_and_absolute_risk_apart(built):
@@ -925,3 +936,20 @@ def test_imported_values_are_range_checked_after_the_overlay(gnomad, fragment):
     assert errors and fragment in errors[0]
     assert _check_imported_ranges("rs1", {"af": 0.0, "pli": 0.9, "loeuf": 0.5}) == []
     assert _check_imported_ranges("rs1", None) == []
+
+
+def test_overlay_runs_the_range_check_on_the_finished_evidence(monkeypatch, curation):
+    """S3-F1 Minor: _overlay_imported must call _check_imported_ranges, so an out-of-range import fails the build."""
+    import tools.build_canonical_kb as builder
+
+    seen = []
+
+    def fake_check(rsid, gnomad):
+        seen.append(rsid)
+        return [f"{rsid}: sentinel range error"]
+
+    monkeypatch.setattr(builder, "_check_imported_ranges", fake_check)
+    kb, errors = build_kb(copy.deepcopy(curation))
+    assert kb is None
+    assert "rs6025" in seen
+    assert any("sentinel range error" in e for e in errors), errors
