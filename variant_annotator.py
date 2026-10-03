@@ -1,31 +1,58 @@
 """
-Variant Annotator: Multi-Source Clinical & Proteomic Knowledge Engine
+Variant Annotator: pipeline knowledge base, same rules as the web app
 =====================================================================
-Enriches genomic variant calls with:
-1. ClinVar Database (clinvar-database):
-   - Pathogenicity (Pathogenic, Likely Pathogenic, VUS, Benign)
-   - Review confidence star rating (0 to 4 stars)
-   - Associated clinical phenotypes and MedGen/OMIM conditions
-   - ACMG Secondary Findings v3.2 actionable gene flags (81 genes)
-2. Human Protein Atlas (human-protein-atlas-database):
-   - Semi-quantitative tissue protein expression (IHC: High, Medium, Low)
-   - Subcellular localization (Nucleus, Cytoplasm, Plasma Membrane, Mitochondria)
-3. gnomAD Database (gnomad-database):
-   - Continental allele frequencies (AFR, AMR, EAS, NFE, SAS, FIN)
-   - Gene constraint metrics (pLI, LOEUF)
-4. Pharmacogenomics (CPIC guidelines):
-   - High-impact drug response phenotypes (Warfarin, Clopidogrel, Statins, Codeine)
+The desktop annotator reads the SAME knowledge base as the web app,
+`web/src/knowledge-base.json` (schema v2, written only by tools/build_canonical_kb.py),
+and applies the same rules. The shared vectors in tests/vectors/*.json are the spec
+(tests/test_vectors.py runs them); this module matches the spec, not the web code line
+by line:
+
+- `load_knowledge_base` / `validate_kb`: schema_version 2 and the required fields, fail fast
+  (`KbSchemaError`). Nothing clinical is defaulted.
+- `resolve_alt_count` (contract C3): build-independent plus-strand alleles, strand
+  complementing only for single-base non-palindromic sites, haploid only on X/Y/MT.
+- `classify` (contract C4): one record per KB locus, always, with a per-sample coverage
+  state computed at analysis time through `tools.coverage_taxonomy.derive_coverage_state`.
+  Absence of a finding is never reported as absence of risk.
+- `resolve_apoe`: the single APOE row built from rs429358 and rs7412 alt counts. Its
+  `rsid` "APOE-STATUS" is an internal row id, not an rsid. Atypical combinations are
+  `diplotype: "atypical"` with no interpretation, and an unresolved one is `None`.
+- Inheritance (contract C5) lives in `segregation_engine.py`.
+
+`VariantAnnotator.__init__` touches nothing on disk: the knowledge base is loaded on first
+use, from the repo's `web/src/knowledge-base.json` unless a path (or a loaded KB) is passed.
+The biotools orchestrator, which contacts external services, is only created when
+`enrich_record_with_biotools` is called.
 """
 
 from __future__ import annotations
 
+import copy
 import json
+import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Optional
 
-from genomic_parser import VariantCall
-from segregation_engine import SegregationEngine, SegregationReport, MultiLocusSegregation
-from biotools_orchestrator import BiotoolsOrchestrator, BiotoolsEnrichmentResult
+from genomic_parser import ParseResult
+from segregation_engine import (
+    PARTNER_MODELS,
+    describe_segregation,
+    detect_compound_heterozygosity,
+    detect_multi_locus,
+    gene_outcome,
+    offspring_distribution,
+)
+from tools.coverage_taxonomy import (
+    NO_CALL_REASON,
+    NOT_ASSAYED_REASON,
+    VCF_ABSENT_REASON,
+    CoverageState,
+    EvidenceSufficiency,
+    derive_coverage_state,
+)
+
+DEFAULT_KB_PATH = Path(__file__).resolve().parent / "web" / "src" / "knowledge-base.json"
 
 # ===========================================================================
 # ACMG SF v3.2 Actionable Gene List (81 Genes)
@@ -42,34 +69,613 @@ ACMG_SF_GENES = {
     "TNNI3", "TNNT2", "TP53", "TPM1", "TRDN", "TSC1", "TSC2", "TTN", "VHL", "WT1",
 }
 
+# ===========================================================================
+# Knowledge base loading and validation (contract C2, schema v2)
+# ===========================================================================
+class KbSchemaError(ValueError):
+    """The knowledge base does not match schema v2. `problems` lists every problem found."""
+
+    def __init__(self, problems: list[str]):
+        self.problems = problems
+        plural = "" if len(problems) == 1 else "s"
+        super().__init__(f"Invalid knowledge base ({len(problems)} problem{plural}):\n- " + "\n- ".join(problems))
+
+
+_TIERS = ("Tier A", "Tier B", "Tier C", "Tier D")
+_TIER_SOURCES = ("clinvar_review", "cpic_level", "curated")
+_SUFFICIENCY = ("sufficient", "insufficient")
+_ROLES = ("standard", "apoe_component")
+_MODELS = ("autosomal_recessive", "autosomal_dominant", "risk_factor", "pharmacogenomic", "trait")
+_DIPLOTYPES = ("e2/e2", "e2/e3", "e2/e4", "e3/e3", "e3/e4", "e4/e4")
+_PER_SAMPLE_FIELDS = ("coverage_state", "sample_observation", "assay_coverage")
+_BUILD_FIELDS = {"GRCh37": "pos_grch37", "GRCh38": "pos_grch38"}
+
+
+def _is_str(v: Any) -> bool:
+    return isinstance(v, str) and len(v) > 0
+
+
+def _is_num(v: Any) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and abs(v) != float("inf")
+
+
+def _check_interp(interp: Any, path: str, problems: list[str]) -> None:
+    if not isinstance(interp, dict):
+        problems.append(f"{path}: missing or not an object")
+        return
+    for k in ("category", "significance", "repute", "phenotype"):
+        if not _is_str(interp.get(k)):
+            problems.append(f"{path}.{k}: required non-empty string")
+    if not _is_num(interp.get("magnitude")):
+        problems.append(f"{path}.magnitude: required number")
+    if "drug_response" not in interp or not (interp["drug_response"] is None or isinstance(interp["drug_response"], str)):
+        problems.append(f"{path}.drug_response: required string or null")
+    caveats = interp.get("caveats")
+    if not isinstance(caveats, list) or not all(isinstance(c, str) for c in caveats):
+        problems.append(f"{path}.caveats: required array of strings")
+
+
+def _check_locus(key: str, locus: Any, genes: dict, problems: list[str]) -> None:
+    p = f"loci.{key}"
+    if not isinstance(locus, dict):
+        problems.append(f"{p}: not an object")
+        return
+    if locus.get("rsid") != key:
+        problems.append(f'{p}.rsid: "{locus.get("rsid")}" does not match its key')
+    if not _is_str(locus.get("gene")):
+        problems.append(f"{p}.gene: required")
+    elif locus["gene"] not in genes:
+        problems.append(f'{p}.gene: unknown gene "{locus["gene"]}"')
+    if not _is_str(locus.get("chrom")):
+        problems.append(f"{p}.chrom: required string")
+    for f in _BUILD_FIELDS.values():
+        v = locus.get(f)
+        if isinstance(v, bool) or not isinstance(v, int) or v <= 0:
+            problems.append(f"{p}.{f}: required positive integer")
+    for f in ("ref", "alt"):
+        v = locus.get(f)
+        if not isinstance(v, str) or not re.fullmatch(r"[ACGT]+", v):
+            problems.append(f"{p}.{f}: required ACGT sequence")
+    if locus.get("ref") == locus.get("alt"):
+        problems.append(f"{p}: ref and alt are identical")
+
+    if "allele_codes" not in locus:
+        problems.append(f"{p}.allele_codes: required (null or {{D, I}})")
+    elif locus["allele_codes"] is not None:
+        c = locus["allele_codes"]
+        ok = isinstance(c, dict) and sorted(c) == ["D", "I"] and all(c[k] in ("ref", "alt") for k in ("D", "I"))
+        if not ok:
+            problems.append(f'{p}.allele_codes: must map D and I to "ref" or "alt"')
+
+    interps = locus.get("interpretations")
+    if not isinstance(interps, dict):
+        problems.append(f"{p}.interpretations: required object")
+    else:
+        for k in ("0", "1", "2"):
+            _check_interp(interps.get(k), f"{p}.interpretations.{k}", problems)
+        extra = [k for k in interps if k not in ("0", "1", "2")]
+        if extra:
+            problems.append(f"{p}.interpretations: unexpected keys {', '.join(extra)}")
+
+    if not isinstance(locus.get("evidence"), dict):
+        problems.append(f"{p}.evidence: required object")
+    if locus.get("evidence_tier") not in _TIERS:
+        problems.append(f"{p}.evidence_tier: must be one of {', '.join(_TIERS)}")
+    if locus.get("tier_source") not in _TIER_SOURCES:
+        problems.append(f"{p}.tier_source: must be one of {', '.join(_TIER_SOURCES)}")
+    if locus.get("tier_source") != "clinvar_review":
+        if not _is_str(locus.get("tier_rationale")):
+            problems.append(f"{p}.tier_rationale: required unless tier_source is clinvar_review")
+        if not _is_str(locus.get("tier_citation")):
+            problems.append(f"{p}.tier_citation: required unless tier_source is clinvar_review")
+    if locus.get("evidence_sufficiency") not in _SUFFICIENCY:
+        problems.append(f"{p}.evidence_sufficiency: must be one of {', '.join(_SUFFICIENCY)}")
+    if "limitation" not in locus or not (locus["limitation"] is None or _is_str(locus["limitation"])):
+        problems.append(f"{p}.limitation: required string or null")
+    if locus.get("role") not in _ROLES:
+        problems.append(f"{p}.role: must be one of {', '.join(_ROLES)}")
+
+
+def _check_gene(symbol: str, gene: Any, problems: list[str]) -> None:
+    p = f"genes.{symbol}"
+    if not isinstance(gene, dict):
+        problems.append(f"{p}: not an object")
+        return
+    inh = gene.get("inheritance")
+    if not isinstance(inh, dict):
+        problems.append(f"{p}.inheritance: required object")
+    else:
+        if inh.get("model") not in _MODELS:
+            problems.append(f"{p}.inheritance.model: must be one of {', '.join(_MODELS)}")
+        if not isinstance(inh.get("mendelian_disease"), bool):
+            problems.append(f"{p}.inheritance.mendelian_disease: required boolean")
+        for k in ("disease", "omim", "penetrance"):
+            if k not in inh:
+                problems.append(f"{p}.inheritance.{k}: required (null allowed)")
+    if not isinstance(gene.get("acmg_sf"), bool):
+        problems.append(f"{p}.acmg_sf: required boolean")
+    if "insights" not in gene or not (gene["insights"] is None or isinstance(gene["insights"], dict)):
+        problems.append(f"{p}.insights: required object or null")
+    if "diplotypes" in gene:
+        d = gene["diplotypes"]
+        if not isinstance(d, dict) or sorted(d) != sorted(_DIPLOTYPES):
+            problems.append(f"{p}.diplotypes: must hold exactly {', '.join(_DIPLOTYPES)}")
+        else:
+            for name in _DIPLOTYPES:
+                _check_interp(d[name], f"{p}.diplotypes.{name}", problems)
+
+
+def _scan_per_sample(node: Any, path: str, problems: list[str]) -> None:
+    """The KB holds no per-sample field anywhere (C2)."""
+    if isinstance(node, list):
+        for i, v in enumerate(node):
+            _scan_per_sample(v, f"{path}[{i}]", problems)
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            if k in _PER_SAMPLE_FIELDS:
+                problems.append(f"{path}.{k}: per-sample field must not appear in the knowledge base")
+            _scan_per_sample(v, f"{path}.{k}", problems)
+
+
+@dataclass
+class KnowledgeBase:
+    """A validated, indexed copy of the pipeline knowledge base."""
+
+    manifest: dict
+    genes: dict[str, dict]
+    loci: dict[str, dict]
+    loci_list: list[dict]
+    by_position: dict[str, dict[str, str]]
+
+
+def validate_kb(data: Any) -> KnowledgeBase:
+    """Validate a parsed KB (schema v2) and return an indexed deep copy. Raises KbSchemaError
+    listing every problem. The input is not modified."""
+    problems: list[str] = []
+    if not isinstance(data, dict):
+        raise KbSchemaError(["knowledge base is not an object"])
+
+    if data.get("schema_version") != 2 or isinstance(data.get("schema_version"), bool):
+        problems.append(f"schema_version: expected 2, got {json.dumps(data.get('schema_version'))}")
+    manifest = data.get("manifest")
+    if not isinstance(manifest, dict):
+        problems.append("manifest: required object")
+    elif not _is_str(manifest.get("guardrail")):
+        problems.append("manifest.guardrail: required non-empty string")
+    genes, loci = data.get("genes"), data.get("loci")
+    if not isinstance(genes, dict):
+        problems.append("genes: required object")
+    if not isinstance(loci, dict):
+        problems.append("loci: required object")
+
+    if isinstance(genes, dict) and isinstance(loci, dict):
+        for symbol, gene in genes.items():
+            _check_gene(symbol, gene, problems)
+        for key, locus in loci.items():
+            _check_locus(key, locus, genes, problems)
+        for build, field_name in _BUILD_FIELDS.items():
+            seen: dict[str, str] = {}
+            for key, locus in loci.items():
+                if not isinstance(locus, dict) or not isinstance(locus.get(field_name), int):
+                    continue
+                pos = f"{locus.get('chrom')}:{locus[field_name]}"
+                if pos in seen:
+                    problems.append(f"duplicate position {pos} in {build}: {seen[pos]} and {key}")
+                else:
+                    seen[pos] = key
+    _scan_per_sample(data, "kb", problems)
+    if problems:
+        raise KbSchemaError(problems)
+
+    kb = copy.deepcopy(data)
+    by_position: dict[str, dict[str, str]] = {build: {} for build in _BUILD_FIELDS}
+    for locus in kb["loci"].values():
+        for build, field_name in _BUILD_FIELDS.items():
+            by_position[build][f"{locus['chrom']}:{locus[field_name]}"] = locus["rsid"]
+    return KnowledgeBase(kb["manifest"], kb["genes"], kb["loci"], list(kb["loci"].values()), by_position)
+
+
+def load_knowledge_base(path: str | Path | None = None) -> KnowledgeBase:
+    """Read and validate the knowledge base (default: web/src/knowledge-base.json in the repo)."""
+    target = Path(path) if path is not None else DEFAULT_KB_PATH
+    try:
+        data = json.loads(target.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as err:
+        raise KbSchemaError([f"{target}: not valid JSON ({err})"]) from err
+    return validate_kb(data)
+
+
+# ===========================================================================
+# Allele resolution (contract C3)
+# ===========================================================================
+_COMPLEMENT = {"A": "T", "T": "A", "C": "G", "G": "C"}
+_HAPLOID_CHROMS = {"X", "Y", "MT"}
+
+
+def _is_base(s: Any) -> bool:
+    return isinstance(s, str) and s in _COMPLEMENT
+
+
+def is_palindromic(ref: str, alt: str) -> bool:
+    """A site is palindromic when ref and alt are single bases that complement each other (A/T, C/G)."""
+    return _is_base(ref) and _is_base(alt) and _COMPLEMENT[ref] == alt
+
+
+def _count_alts(alleles: list[str], ref: str, alt: str) -> Optional[int]:
+    n = 0
+    for a in alleles:
+        if a == alt:
+            n += 1
+        elif a != ref:
+            return None
+    return n
+
+
+def resolve_alt_count(locus: dict, alleles: list[str] | None, assay: str) -> dict:
+    """locus: {ref, alt, allele_codes, chrom}; alleles: list of tokens or None; assay: "array" | "vcf".
+    VCF alleles are plus-strand by definition, so only a non-VCF assay may strand-complement.
+
+    Returns {"ok": True, "altCount": 0|1|2, "strandFlipped": bool} or
+    {"ok": False, "reason": "no_call" | "unresolvable"}. "palindromic_ambiguous" is in the
+    contract's reason set but never produced: a palindromic site's complement is the same
+    pair, so an unmatched call there is simply "unresolvable".
+    """
+    if not isinstance(alleles, list) or not alleles:
+        return {"ok": False, "reason": "no_call"}
+    ref, alt, codes, chrom = locus["ref"], locus["alt"], locus.get("allele_codes"), locus.get("chrom")
+
+    called = []
+    for a in alleles:
+        if a in ("D", "I") and codes and codes.get(a) in ("ref", "alt"):
+            called.append(ref if codes[a] == "ref" else alt)
+        else:
+            called.append(a)
+    if len(called) == 1:  # haploid counts as two copies only where the chromosome is haploid
+        if chrom not in _HAPLOID_CHROMS:
+            return {"ok": False, "reason": "unresolvable"}
+        called = [called[0], called[0]]
+    if len(called) != 2:
+        return {"ok": False, "reason": "unresolvable"}
+
+    direct = _count_alts(called, ref, alt)
+    if direct is not None:
+        return {"ok": True, "altCount": direct, "strandFlipped": False}
+    # Only an array may complement; a VCF's alleles are plus-strand, so a foreign alt stays unresolvable.
+    can_complement = assay != "vcf" and _is_base(ref) and _is_base(alt) and not is_palindromic(ref, alt)
+    if can_complement and all(_is_base(a) for a in called):
+        flipped = _count_alts([_COMPLEMENT[a] for a in called], ref, alt)
+        if flipped is not None:
+            return {"ok": True, "altCount": flipped, "strandFlipped": True}
+    return {"ok": False, "reason": "unresolvable"}
+
+
+# ===========================================================================
+# Classification and coverage (contract C4)
+# ===========================================================================
+OBSERVATION_VARIANT_PRESENT = "variant_present"
+OBSERVATION_WILD_TYPE = "wild_type"
+OBSERVATION_CALL_UNAVAILABLE = "call_unavailable"
+
+_SUMMARY_STATES = (
+    CoverageState.SUPPORTED_AND_OBSERVED,
+    CoverageState.SUPPORTED_NOT_OBSERVED,
+    CoverageState.NOT_TESTED_BY_ARRAY,
+    CoverageState.INSUFFICIENT_EVIDENCE,
+)
+
+
+def _sample_observation(variant_present: Optional[bool]) -> str:
+    if variant_present is None:
+        return OBSERVATION_CALL_UNAVAILABLE
+    return OBSERVATION_VARIANT_PRESENT if variant_present else OBSERVATION_WILD_TYPE
+
+
+def _derive_state(assay: str, call, resolution: Optional[dict], sufficiency: str) -> dict:
+    """{coverage_state, sample_observation, reason} through the shared C4 rule."""
+    suff = EvidenceSufficiency(sufficiency)
+    if call is None:
+        ev = derive_coverage_state(suff, assayed=False, assay=assay)
+        reason = VCF_ABSENT_REASON if assay == "vcf" else NOT_ASSAYED_REASON
+    elif call.alleles is None or (resolution is not None and not resolution["ok"] and resolution["reason"] == "no_call"):
+        ev = derive_coverage_state(suff, assayed=False, assay=assay)
+        reason = NO_CALL_REASON
+    elif resolution is None or not resolution["ok"]:
+        ev = derive_coverage_state(suff, resolvable=False)
+        reason = ev.reason
+    else:
+        ev = derive_coverage_state(suff, alt_count=resolution["altCount"])
+        reason = ev.reason
+    return {
+        "coverage_state": ev.state.value,
+        "sample_observation": _sample_observation(ev.variant_present),
+        "reason": reason,
+    }
+
+
+def summarize_coverage(records: list[dict], outside_count: int = 0) -> dict:
+    """Counts each record in exactly one state. `outside_count` is the number of file markers
+    that match no KB locus (a per-file figure). An unknown state raises rather than being dropped."""
+    counts = {s.value: 0 for s in _SUMMARY_STATES}
+    for r in records:
+        if r["coverage_state"] not in counts:
+            raise ValueError(f"unknown coverage state {r['coverage_state']!r} on {r['rsid']}")
+        counts[r["coverage_state"]] += 1
+    return {
+        "supported_and_observed_count": counts["supported_and_observed"],
+        "supported_not_observed_count": counts["supported_not_observed"],
+        "not_tested_by_array_count": counts["not_tested_by_array"],
+        "insufficient_evidence_count": counts["insufficient_evidence"],
+        "outside_coverage_count": outside_count,
+        "total_loci": len(records),
+    }
+
+
+def _match_calls(parse: ParseResult, kb: KnowledgeBase) -> tuple[dict[str, list], int]:
+    """Calls matched to KB loci. A call whose rsID is a KB key matches that locus and is never re-matched
+    by position. Any other call (no rsID, or an rsID the KB lacks) matches by chrom:pos for the file's build."""
+    by_rsid: dict[str, list] = {}
+    matched = 0
+    positions = kb.by_position.get(parse.build)
+    for call in parse.calls:
+        rsid = None
+        if call.rsid is not None and call.rsid in kb.loci:
+            rsid = call.rsid
+        elif positions is not None and call.pos is not None:
+            rsid = positions.get(f"{call.chrom}:{call.pos}")
+        if rsid is None:
+            continue
+        matched += 1
+        by_rsid.setdefault(rsid, []).append(call)
+    return by_rsid, matched
+
+
+def _same_alleles(a, b) -> bool:
+    if a.alleles is None or b.alleles is None:
+        return a.alleles is None and b.alleles is None
+    return sorted(a.alleles) == sorted(b.alleles)
+
+
+_POSITION_FIELD = {"GRCh37": "pos_grch37", "GRCh38": "pos_grch38"}
+
+
+def classify(parse: ParseResult, kb: KnowledgeBase) -> dict:
+    """One record per KB locus, always, so absence is never silent. Returns
+    {"records": [...] in KB order, "summary": coverage counts}."""
+    by_rsid, matched = _match_calls(parse, kb)
+    pos_field = _POSITION_FIELD.get(parse.build)
+
+    records = []
+    for locus in kb.loci_list:
+        calls = by_rsid.get(locus["rsid"], [])
+        call = calls[0] if calls else None
+        conflicting = call is not None and any(not _same_alleles(c, call) for c in calls)
+
+        resolution = None
+        if call is not None and call.alleles is not None:
+            # Two calls for one locus that disagree are never guessed between.
+            if conflicting:
+                resolution = {"ok": False, "reason": "unresolvable"}
+            else:
+                resolution = resolve_alt_count(locus, call.alleles, parse.assay)
+        state = _derive_state(parse.assay, call, resolution, locus["evidence_sufficiency"])
+
+        resolved = resolution is not None and resolution["ok"]
+        alt_count = resolution["altCount"] if resolved else None
+        if pos_field:
+            pos = locus[pos_field]
+        else:
+            pos = call.pos if call is not None and call.pos is not None else None
+        records.append({
+            "rsid": locus["rsid"],
+            "gene": locus["gene"],
+            "chrom": locus["chrom"],
+            "pos": pos,
+            "genotype_display": "/".join(call.alleles) if call is not None and call.alleles is not None else None,
+            "altCount": alt_count,
+            "strandFlipped": resolution["strandFlipped"] if resolved else None,
+            **state,
+            "interpretation_key": None if alt_count is None else str(alt_count),
+            "interpretation": None if alt_count is None else locus["interpretations"][str(alt_count)],
+            "evidence": locus["evidence"],
+            "evidence_tier": locus["evidence_tier"],
+            "tier_source": locus["tier_source"],
+            "tier_rationale": locus["tier_rationale"],
+            "tier_citation": locus["tier_citation"],
+            "evidence_sufficiency": locus["evidence_sufficiency"],
+            "limitation": locus["limitation"],
+            "acmg_sf": kb.genes[locus["gene"]]["acmg_sf"],
+            "role": locus["role"],
+            # APOE components feed the combined APOE finding; views must not list them on their own.
+            "standalone": locus["role"] != "apoe_component",
+        })
+    outside = max(0, len(parse.calls) - matched)
+    return {"records": records, "summary": summarize_coverage(records, outside)}
+
+
+# ===========================================================================
+# APOE (single row from rs429358 + rs7412)
+# ===========================================================================
+APOE_E4_RSID = "rs429358"
+APOE_E2_RSID = "rs7412"
+APOE_ROW_ID = "APOE-STATUS"  # internal row id, not an rsid
+
+ATYPICAL = "atypical"
+ATYPICAL_REASON = "requires an e1-type haplotype; cannot be resolved from genotype array data"
+PHASE_CAVEAT = "phase unknown: e1/e3 is the rare alternative"
+
+# (rs429358 alt count = e4 copies, rs7412 alt count = e2 copies) -> diplotype
+_DIPLOTYPE_BY_COUNTS = {
+    (0, 0): "e3/e3",
+    (1, 0): "e3/e4",
+    (2, 0): "e4/e4",
+    (0, 1): "e2/e3",
+    (0, 2): "e2/e2",
+    (1, 1): "e2/e4",
+    (2, 1): ATYPICAL,
+    (1, 2): ATYPICAL,
+    (2, 2): ATYPICAL,
+}
+
+
+def display_diplotype(diplotype: str) -> str:
+    """"e3/e4" gives "ε3/ε4"."""
+    return diplotype.replace("e", "ε")
+
+
+def _component_summary(components: list[dict]) -> str:
+    return ", ".join(f"{c['rsid']}:{c['genotype_display'] if c.get('genotype_display') is not None else '--'}" for c in components)
+
+
+def resolve_apoe(component_records: list[dict], kb: Any) -> dict:
+    """Builds the single APOE finding from the two classified component records (any order).
+    `kb` needs `.genes` and `.loci`. A diplotype is asserted only when both components resolve:
+    a missing, no-call or unresolvable component gives `diplotype: None`, never wild-type and
+    never "presumed e3". Interpretation text comes from the KB; nothing clinical is typed here."""
+    e4 = next((r for r in component_records if r["rsid"] == APOE_E4_RSID), None)
+    e2 = next((r for r in component_records if r["rsid"] == APOE_E2_RSID), None)
+    if e4 is None or e2 is None:
+        raise ValueError(f"APOE needs both component records ({APOE_E4_RSID}, {APOE_E2_RSID})")
+    gene = kb.genes.get("APOE")
+    base = kb.loci.get(APOE_E4_RSID)
+    if not gene or "diplotypes" not in gene or not base:
+        raise ValueError("The knowledge base has no APOE gene diplotypes or rs429358 locus, so APOE cannot be assembled.")
+    components = [e4, e2]
+
+    common = {
+        "rsid": APOE_ROW_ID,
+        "gene": "APOE",
+        "chrom": base["chrom"],
+        "pos": e4.get("pos"),
+        "altCount": None,
+        "strandFlipped": None,
+        "evidence": base["evidence"],
+        "evidence_tier": base["evidence_tier"],
+        "tier_source": base["tier_source"],
+        "tier_rationale": base["tier_rationale"],
+        "tier_citation": base["tier_citation"],
+        "evidence_sufficiency": base["evidence_sufficiency"],
+        "limitation": base["limitation"],
+        "acmg_sf": gene["acmg_sf"],
+        "role": "standard",
+        "standalone": True,
+        "components": components,
+    }
+
+    def unresolved(state: str, reason: str, observation: str, diplotype: Optional[str]) -> dict:
+        return {
+            **common,
+            "genotype_display": _component_summary(components),
+            "coverage_state": state,
+            "sample_observation": observation,
+            "reason": reason,
+            "interpretation_key": None,
+            "interpretation": None,
+            "diplotype": diplotype,
+            "caveat": None,
+        }
+
+    # A component with no allele count means no diplotype. An unresolvable genotype outranks a missing one.
+    missing = [c for c in components if c["altCount"] is None]
+    if missing:
+        insufficient = CoverageState.INSUFFICIENT_EVIDENCE.value
+        state = insufficient if any(c["coverage_state"] == insufficient for c in missing) else CoverageState.NOT_TESTED_BY_ARRAY.value
+        reason = "; ".join(f"{c['rsid']}: {c['reason']}" for c in missing if c["coverage_state"] == state)
+        return unresolved(state, reason, OBSERVATION_CALL_UNAVAILABLE, None)
+
+    key = (e4["altCount"], e2["altCount"])
+    diplotype = _DIPLOTYPE_BY_COUNTS.get(key)
+    if diplotype is None:
+        raise ValueError(f"APOE: impossible allele counts {key}")
+    if diplotype == ATYPICAL:
+        return unresolved(
+            CoverageState.INSUFFICIENT_EVIDENCE.value, ATYPICAL_REASON, OBSERVATION_VARIANT_PRESENT, ATYPICAL
+        )
+
+    kb_interp = gene["diplotypes"].get(diplotype)
+    if not kb_interp:
+        raise ValueError(f"The knowledge base has no APOE {diplotype} interpretation.")
+    caveat = PHASE_CAVEAT if diplotype == "e2/e4" else None
+    wild_type = diplotype == "e3/e3"
+    sufficient = all(c["evidence_sufficiency"] == "sufficient" for c in components)
+    if not sufficient:
+        state = CoverageState.INSUFFICIENT_EVIDENCE.value
+    elif wild_type:
+        state = CoverageState.SUPPORTED_NOT_OBSERVED.value
+    else:
+        state = CoverageState.SUPPORTED_AND_OBSERVED.value
+    return {
+        **common,
+        "genotype_display": f"{display_diplotype(diplotype)} ({_component_summary(components)})",
+        "coverage_state": state,
+        "sample_observation": OBSERVATION_WILD_TYPE if wild_type else OBSERVATION_VARIANT_PRESENT,
+        "reason": None if sufficient else "locus evidence is insufficient",
+        "interpretation_key": diplotype,
+        "interpretation": {**kb_interp, "caveats": [*kb_interp["caveats"], *([caveat] if caveat else [])]},
+        "diplotype": diplotype,
+        "caveat": caveat,
+    }
+
+
+def assemble_findings(records: list[dict], kb: Any, outside_count: int = 0) -> dict:
+    """Replaces the two APOE component records with the one APOE finding. Returns
+    {"listed", "apoe", "summary"}: `listed` is every standalone record plus the APOE finding
+    (or the unchanged standalone records when the KB has no APOE components), and `summary`
+    counts each listed record once."""
+    standalone = [r for r in records if r["standalone"]]
+    components = [r for r in records if r["role"] == "apoe_component"]
+    apoe = resolve_apoe(components, kb) if components else None
+    listed = [*standalone, apoe] if apoe else standalone
+    return {"listed": listed, "apoe": apoe, "summary": summarize_coverage(listed, outside_count)}
+
+
+# ===========================================================================
+# Desktop view of the findings
+# ===========================================================================
+_STATE_LABEL = {
+    "not_tested_by_array": "Not tested by this file",
+    "insufficient_evidence": "Insufficient evidence",
+    "supported_not_observed": "Not detected",
+    "supported_and_observed": "Detected",
+}
+_REPORTED_CATEGORIES = ("Pathogenic", "Carrier", "Pharmacogenomics", "Risk Factor", "Trait")
+
 
 @dataclass
 class AnnotationRecord:
-    """Enriched clinical and biological annotation for a specific genotype."""
-    rsid: str
+    """One finding row for the desktop views, built from a classified record (never a guess).
+
+    `genotype` is the alleles as read, e.g. "A/G"; for APOE it is the diplotype plus the two
+    component genotypes. Values the KB does not hold are None, not 0.
+    """
+
+    rsid: str  # "APOE-STATUS" is an internal row id for the combined APOE finding
     gene: str
     genotype: str
-    call: VariantCall
-    clinical_significance: str = "Uncertain / Benign"
-    review_stars: int = 0
-    phenotype: str = ""
-    category: str = "Trait / Research"  # Pathogenic, Carrier, Pharmacogenomics, Trait, Risk Factor
-    magnitude: float = 1.0  # Promethease-style magnitude (0.0 to 10.0 scale)
-    repute: str = "Neutral"  # Good, Bad, Neutral
-    hpa_tissues: dict[str, str] = field(default_factory=dict)
-    hpa_subcellular: list[str] = field(default_factory=list)
-    gnomad_af: float = 0.0
-    gnomad_pli: float = 0.0
-    drug_response: str = ""
-    notes: str = ""
-    acmg_actionable: bool = False
-    # Mendelian Independent Segregation & Transmission
-    inheritance_mode: str = "Complex / Unknown"
-    is_carrier: bool = False
-    partner_carrier_prior: float = 0.0
-    offspring_recurrence_risk: float = 0.0
-    segregation_notes: str = ""
-    # Biotools Live Deep Insights
+    chrom: str
+    pos: Optional[int]
+    build: str
+    coverage_state: str
+    sample_observation: str
+    reason: Optional[str]
+    alt_count: Optional[int]
+    category: str
+    clinical_significance: str
+    phenotype: str
+    magnitude: Optional[float]
+    repute: str
+    drug_response: str
+    caveats: list[str]
+    evidence_tier: str
+    review_stars: Optional[int]
+    gnomad_af: Optional[float]
+    gnomad_pli: Optional[float]
+    hpa_tissues: dict[str, str]
+    hpa_subcellular: list[str]
+    limitation: Optional[str]
+    acmg_actionable: bool
+    segregation: Optional[dict]
+    raw: dict
+    # Biotools live insights (filled only by enrich_record_with_biotools)
     vep_consequence: str = ""
     vep_sift: str = ""
     vep_alphamissense_class: str = ""
@@ -80,828 +686,178 @@ class AnnotationRecord:
     encode_tissues: dict[str, float] = field(default_factory=dict)
     alphagenome_status: str = "Ready / Key Needed"
 
+    @property
+    def variant_present(self) -> bool:
+        return self.sample_observation == OBSERVATION_VARIANT_PRESENT
 
-# ===========================================================================
-# Built-in High-Impact Knowledge Base (ClinVar, HPA, CPIC, gnomAD)
-# ===========================================================================
-CURATED_KB: dict[str, dict[str, Any]] = {
-    # ---- APOE: Alzheimer's & Cardiovascular ----
-    "rs429358": {
-        "gene": "APOE",
-        "name": "APOE-e4 determinant (Cys130Arg)",
-        "acmg": False,
-        "gnomad_af": 0.15,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "cerebral cortex": "Medium", "plasma": "High"},
-            "subcellular": ["Secreted", "Endoplasmic reticulum"],
-        },
-        "alleles": {
-            "CC": {
-                "significance": "Risk Factor",
-                "stars": 3,
-                "magnitude": 5.0,
-                "repute": "Bad",
-                "phenotype": "APOE e4/e4 homozygote: ~12-15x elevated risk for late-onset Alzheimer's disease.",
-                "category": "Risk Factor",
-            },
-            "CT": {
-                "significance": "Risk Factor",
-                "stars": 3,
-                "magnitude": 3.5,
-                "repute": "Bad",
-                "phenotype": "APOE e4 carrier (e3/e4 or e2/e4): ~3-4x increased risk for late-onset Alzheimer's disease.",
-                "category": "Risk Factor",
-            },
-            "TT": {
-                "significance": "Common / Benign",
-                "stars": 3,
-                "magnitude": 1.0,
-                "repute": "Good",
-                "phenotype": "Non-e4 carrier at rs429358 (e3 or e2 allele). Average or baseline Alzheimer's risk.",
-                "category": "Trait",
-            },
-        },
-    },
-    "rs7412": {
-        "gene": "APOE",
-        "name": "APOE-e2 determinant (Arg176Cys)",
-        "acmg": False,
-        "gnomad_af": 0.08,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "cerebral cortex": "Medium"},
-            "subcellular": ["Secreted"],
-        },
-        "alleles": {
-            "TT": {
-                "significance": "Protective / Benign",
-                "stars": 3,
-                "magnitude": 2.5,
-                "repute": "Good",
-                "phenotype": "APOE e2/e2: Protective against Alzheimer's disease; rare association with Type III hyperlipoproteinemia.",
-                "category": "Trait",
-            },
-            "CT": {
-                "significance": "Protective / Benign",
-                "stars": 3,
-                "magnitude": 2.0,
-                "repute": "Good",
-                "phenotype": "APOE e2 carrier: Moderate protective effect against Alzheimer's disease.",
-                "category": "Trait",
-            },
-            "CC": {
-                "significance": "Common / Benign",
-                "stars": 3,
-                "magnitude": 1.0,
-                "repute": "Neutral",
-                "phenotype": "Common allele (encodes normal Arg176).",
-                "category": "Trait",
-            },
-        },
-    },
 
-    # ---- HFE: Hereditary Hemochromatosis ----
-    "rs1800562": {
-        "gene": "HFE",
-        "name": "HFE C282Y",
-        "acmg": True,
-        "gnomad_af": 0.06,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "duodenum": "High", "spleen": "Medium"},
-            "subcellular": ["Plasma membrane", "Endoplasmic reticulum"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Pathogenic",
-                "stars": 4,
-                "magnitude": 4.5,
-                "repute": "Bad",
-                "phenotype": "Hereditary Hemochromatosis Type 1 (C282Y homozygote). High risk of iron overload; regular ferritin monitoring advised.",
-                "category": "Pathogenic",
-            },
-            "AG": {
-                "significance": "Pathogenic (Carrier)",
-                "stars": 4,
-                "magnitude": 2.0,
-                "repute": "Neutral",
-                "phenotype": "Carrier for Hereditary Hemochromatosis (C282Y heterozygote). Low individual risk unless compound heterozygous with H63D.",
-                "category": "Carrier",
-            },
-            "GG": {
-                "significance": "Benign",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal wild-type HFE C282 allele.",
-                "category": "Benign",
-            },
-        },
-    },
-    "rs1799945": {
-        "gene": "HFE",
-        "name": "HFE H63D",
-        "acmg": True,
-        "gnomad_af": 0.14,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "duodenum": "High"},
-            "subcellular": ["Plasma membrane"],
-        },
-        "alleles": {
-            "GG": {
-                "significance": "Risk Factor",
-                "stars": 3,
-                "magnitude": 2.0,
-                "repute": "Neutral",
-                "phenotype": "H63D homozygote: mild modifier for iron absorption; rarely causes clinical hemochromatosis alone.",
-                "category": "Risk Factor",
-            },
-            "CG": {
-                "significance": "Risk Factor (Carrier)",
-                "stars": 3,
-                "magnitude": 1.5,
-                "repute": "Neutral",
-                "phenotype": "H63D carrier: common variant with minimal clinical significance unless paired with C282Y.",
-                "category": "Carrier",
-            },
-            "CC": {
-                "significance": "Benign",
-                "stars": 3,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal wild-type HFE H63 allele.",
-                "category": "Benign",
-            },
-        },
-    },
+@dataclass
+class AnnotationReport:
+    """Everything the desktop shows for one parsed file."""
 
-    # ---- Factor V Leiden & Prothrombin: Thrombophilia ----
-    "rs6025": {
-        "gene": "F5",
-        "name": "Factor V Leiden (R506Q)",
-        "acmg": False,
-        "gnomad_af": 0.03,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "plasma": "High"},
-            "subcellular": ["Secreted"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Pathogenic",
-                "stars": 4,
-                "magnitude": 5.0,
-                "repute": "Bad",
-                "phenotype": "Factor V Leiden homozygote: 50-80x increased lifetime risk of deep vein thrombosis (DVT) and pulmonary embolism.",
-                "category": "Pathogenic",
-            },
-            "AG": {
-                "significance": "Pathogenic",
-                "stars": 4,
-                "magnitude": 3.0,
-                "repute": "Bad",
-                "phenotype": "Factor V Leiden heterozygote: 4-8x increased risk of venous thromboembolism. Caution with oral contraceptives or prolonged immobility.",
-                "category": "Risk Factor",
-            },
-            "GG": {
-                "significance": "Benign",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal wild-type Factor V.",
-                "category": "Benign",
-            },
-        },
-    },
-    "rs1799963": {
-        "gene": "F2",
-        "name": "Prothrombin G20210A",
-        "acmg": False,
-        "gnomad_af": 0.02,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "plasma": "High"},
-            "subcellular": ["Secreted"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Pathogenic",
-                "stars": 4,
-                "magnitude": 4.5,
-                "repute": "Bad",
-                "phenotype": "Prothrombin G20210A homozygote: markedly elevated prothrombin levels and substantial thrombophilia risk.",
-                "category": "Pathogenic",
-            },
-            "AG": {
-                "significance": "Pathogenic",
-                "stars": 4,
-                "magnitude": 2.8,
-                "repute": "Bad",
-                "phenotype": "Prothrombin G20210A heterozygote: ~2-3x increased risk of venous thrombosis.",
-                "category": "Risk Factor",
-            },
-            "GG": {
-                "significance": "Benign",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal wild-type Prothrombin.",
-                "category": "Benign",
-            },
-        },
-    },
+    build: str
+    kb_release: str
+    records: list[AnnotationRecord]
+    coverage: dict
+    compound_heterozygote_findings: list[dict]
+    multi_locus_findings: list[dict]
 
-    # ---- Pharmacogenomics: CYP2C19 (Plavix / Clopidogrel) ----
-    "rs4244285": {
-        "gene": "CYP2C19",
-        "name": "CYP2C19*2 (Loss of Function)",
-        "acmg": False,
-        "gnomad_af": 0.15,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "duodenum": "Medium"},
-            "subcellular": ["Endoplasmic reticulum membrane"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Drug Response",
-                "stars": 4,
-                "magnitude": 4.0,
-                "repute": "Bad",
-                "phenotype": "CYP2C19 Poor Metabolizer (*2/*2): Significantly impaired clopidogrel (Plavix) activation; alternative antiplatelet (ticagrelor/prasugrel) strongly indicated by CPIC.",
-                "category": "Pharmacogenomics",
-                "drug": "Clopidogrel, Omeprazole, Escitalopram",
-            },
-            "AG": {
-                "significance": "Drug Response",
-                "stars": 4,
-                "magnitude": 2.5,
-                "repute": "Neutral",
-                "phenotype": "CYP2C19 Intermediate Metabolizer (*1/*2): Reduced clopidogrel activation; CPIC recommends alternative agent for acute coronary syndrome.",
-                "category": "Pharmacogenomics",
-                "drug": "Clopidogrel",
-            },
-            "GG": {
-                "significance": "Normal Response",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "CYP2C19 Normal Metabolizer (*1/*1): Standard clopidogrel dosing effective.",
-                "category": "Pharmacogenomics",
-                "drug": "Clopidogrel",
-            },
-        },
-    },
 
-    # ---- Pharmacogenomics: VKORC1 (Warfarin Sensitivity) ----
-    "rs9923231": {
-        "gene": "VKORC1",
-        "name": "VKORC1 -1639G>A (Warfarin Sensitivity)",
-        "acmg": False,
-        "gnomad_af": 0.39,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "placenta": "Medium"},
-            "subcellular": ["Endoplasmic reticulum membrane"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Drug Response",
-                "stars": 4,
-                "magnitude": 3.5,
-                "repute": "Neutral",
-                "phenotype": "High Warfarin sensitivity: Requires significantly reduced starting dose to avoid bleeding complications (CPIC Level A guideline).",
-                "category": "Pharmacogenomics",
-                "drug": "Warfarin",
-            },
-            "AG": {
-                "significance": "Drug Response",
-                "stars": 4,
-                "magnitude": 2.0,
-                "repute": "Neutral",
-                "phenotype": "Intermediate Warfarin sensitivity: Moderate dose reduction typically required.",
-                "category": "Pharmacogenomics",
-                "drug": "Warfarin",
-            },
-            "GG": {
-                "significance": "Normal Response",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal Warfarin dose requirement.",
-                "category": "Pharmacogenomics",
-                "drug": "Warfarin",
-            },
-        },
-    },
+def _segregation(rec: dict, kb: KnowledgeBase) -> Optional[dict]:
+    """Inheritance inputs and outcomes per partner model. Genotype-aware: it uses the alt count."""
+    gene_name = rec["gene"]
+    gene = kb.genes[gene_name]
+    gnomad = (rec["evidence"].get("gnomad") or {})
+    af = gnomad.get("af")
+    if rec["rsid"] == APOE_ROW_ID:
+        # APOE transmits e4 by its e4 copy count (rs429358), so e4/e4 transmits e4 with probability 1.
+        if rec.get("diplotype") in (None, ATYPICAL):
+            return None
+        e4_count = rec["components"][0]["altCount"]
+        alt_count, allele = e4_count, "e4"
+    else:
+        if rec["altCount"] is None:
+            return None
+        alt_count = rec["altCount"]
+        allele = kb.loci[rec["rsid"]]["alt"]
+    out = describe_segregation(gene_name, gene, alt_count, af, allele)
+    out["scenarios"] = {
+        m: gene_outcome(gene, offspring_distribution(alt_count, m, af), allele) for m in PARTNER_MODELS
+    }
+    if rec["rsid"] == APOE_ROW_ID:
+        out["e4_carrier"] = alt_count > 0
+    return out
 
-    # ---- Pharmacogenomics: SLCO1B1 (Statin Myopathy) ----
-    "rs4149056": {
-        "gene": "SLCO1B1",
-        "name": "SLCO1B1*5 (Statin-Induced Myopathy)",
-        "acmg": False,
-        "gnomad_af": 0.15,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High"},
-            "subcellular": ["Plasma membrane"],
-        },
-        "alleles": {
-            "CC": {
-                "significance": "Drug Response",
-                "stars": 4,
-                "magnitude": 4.0,
-                "repute": "Bad",
-                "phenotype": "Poor SLCO1B1 transport function: 17x elevated risk of simvastatin-induced skeletal myopathy / rhabdomyolysis. CPIC recommends rosuvastatin or lower dose.",
-                "category": "Pharmacogenomics",
-                "drug": "Simvastatin, Atorvastatin",
-            },
-            "CT": {
-                "significance": "Drug Response",
-                "stars": 4,
-                "magnitude": 2.5,
-                "repute": "Neutral",
-                "phenotype": "Intermediate SLCO1B1 function: 4.5x elevated risk of simvastatin-induced myopathy.",
-                "category": "Pharmacogenomics",
-                "drug": "Simvastatin",
-            },
-            "TT": {
-                "significance": "Normal Response",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal SLCO1B1 transporter function: Standard statin tolerance.",
-                "category": "Pharmacogenomics",
-                "drug": "Statins",
-            },
-        },
-    },
 
-    # ---- MTHFR: Folate & Homocysteine ----
-    "rs1801133": {
-        "gene": "MTHFR",
-        "name": "MTHFR C677T (Ala222Val)",
-        "acmg": False,
-        "gnomad_af": 0.32,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "kidney": "Medium", "brain": "Medium"},
-            "subcellular": ["Cytoplasm"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Risk Factor",
-                "stars": 3,
-                "magnitude": 2.5,
-                "repute": "Neutral",
-                "phenotype": "MTHFR 677TT homozygote (~30% normal enzyme activity): Mild predisposition to elevated plasma homocysteine if folate intake is inadequate.",
-                "category": "Risk Factor",
-            },
-            "AG": {
-                "significance": "Trait",
-                "stars": 3,
-                "magnitude": 1.0,
-                "repute": "Neutral",
-                "phenotype": "MTHFR 677CT heterozygote (~65% normal enzyme activity): Generally benign with normal dietary folate.",
-                "category": "Trait",
-            },
-            "GG": {
-                "significance": "Benign",
-                "stars": 3,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal MTHFR 677CC wild-type activity.",
-                "category": "Benign",
-            },
-        },
-    },
-
-    # ---- LCT: Lactase Persistence ----
-    "rs4988235": {
-        "gene": "MCM6 / LCT",
-        "name": "Lactase Persistence C/T-13910",
-        "acmg": False,
-        "gnomad_af": 0.50,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"small intestine": "High", "duodenum": "High"},
-            "subcellular": ["Brush border membrane"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Trait",
-                "stars": 3,
-                "magnitude": 1.0,
-                "repute": "Good",
-                "phenotype": "Lactase persistent: Capable of digesting dairy lactose normally in adulthood.",
-                "category": "Trait",
-            },
-            "AG": {
-                "significance": "Trait",
-                "stars": 3,
-                "magnitude": 1.0,
-                "repute": "Good",
-                "phenotype": "Lactase persistent (carrier): Normal adult dairy lactose tolerance.",
-                "category": "Trait",
-            },
-            "GG": {
-                "significance": "Trait",
-                "stars": 3,
-                "magnitude": 1.2,
-                "repute": "Neutral",
-                "phenotype": "Lactase non-persistent: Predisposition to adult lactose intolerance / dairy sensitivity.",
-                "category": "Trait",
-            },
-        },
-    },
-
-    # ---- ALDH2: Alcohol Flush Reaction ----
-    "rs671": {
-        "gene": "ALDH2",
-        "name": "ALDH2*2 Glu504Lys (Alcohol Flush)",
-        "acmg": False,
-        "gnomad_af": 0.05,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"liver": "High", "kidney": "High", "heart": "Medium"},
-            "subcellular": ["Mitochondria"],
-        },
-        "alleles": {
-            "AA": {
-                "significance": "Trait / Risk",
-                "stars": 4,
-                "magnitude": 3.0,
-                "repute": "Bad",
-                "phenotype": "ALDH2 inactive homozygote: Severe facial flushing, nausea, and tachycardia with alcohol ingestion. Strong protection against alcoholism.",
-                "category": "Trait",
-            },
-            "AG": {
-                "significance": "Trait / Risk",
-                "stars": 4,
-                "magnitude": 2.0,
-                "repute": "Neutral",
-                "phenotype": "ALDH2*2 carrier: Moderate facial flushing and acetaldehyde buildup upon alcohol consumption.",
-                "category": "Trait",
-            },
-            "GG": {
-                "significance": "Benign",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal ALDH2 wild-type activity.",
-                "category": "Benign",
-            },
-        },
-    },
-
-    # ---- CFTR: Cystic Fibrosis deltaF508 ----
-    "rs113993960": {
-        "gene": "CFTR",
-        "name": "CFTR p.Phe508del (deltaF508)",
-        "acmg": False,
-        "gnomad_af": 0.015,
-        "gnomad_pli": 0.0,
-        "hpa": {
-            "tissues": {"pancreas": "High", "lung": "High", "duodenum": "High"},
-            "subcellular": ["Plasma membrane", "Apical membrane"],
-        },
-        "alleles": {
-            "DD": {
-                "significance": "Pathogenic",
-                "stars": 4,
-                "magnitude": 5.0,
-                "repute": "Bad",
-                "phenotype": "Cystic Fibrosis homozygote (F508del/F508del): Severe classical cystic fibrosis.",
-                "category": "Pathogenic",
-            },
-            "DI": {
-                "significance": "Pathogenic (Carrier)",
-                "stars": 4,
-                "magnitude": 3.0,
-                "repute": "Neutral",
-                "phenotype": "Cystic Fibrosis Carrier (deltaF508 heterozygote). Asymptomatic carrier; 1 in 4 risk with carrier partner.",
-                "category": "Carrier",
-            },
-            "II": {
-                "significance": "Benign",
-                "stars": 4,
-                "magnitude": 0.0,
-                "repute": "Good",
-                "phenotype": "Normal wild-type CFTR.",
-                "category": "Benign",
-            },
-        },
-    },
-}
+def _to_annotation(rec: dict, kb: KnowledgeBase, build: str) -> AnnotationRecord:
+    interp = rec["interpretation"]
+    evidence = rec["evidence"]
+    clinvar = evidence.get("clinvar") or {}
+    gnomad = evidence.get("gnomad") or {}
+    hpa = evidence.get("hpa") or {}
+    state = rec["coverage_state"]
+    if interp is not None:
+        category, significance, phenotype = interp["category"], interp["significance"], interp["phenotype"]
+        magnitude, repute = interp["magnitude"], interp["repute"]
+        drug, caveats = interp.get("drug_response") or "", list(interp["caveats"])
+    else:
+        category, significance = "Not available", _STATE_LABEL[state]
+        phenotype = rec["reason"] or ""
+        magnitude, repute, drug, caveats = None, "", "", []
+    genotype = rec["genotype_display"] if rec["genotype_display"] is not None else "not tested"
+    if rec["rsid"] == APOE_ROW_ID and rec.get("diplotype") == ATYPICAL:
+        genotype = f"atypical ({_component_summary(rec['components'])})"
+    return AnnotationRecord(
+        rsid=rec["rsid"],
+        gene=rec["gene"],
+        genotype=genotype,
+        chrom=rec["chrom"],
+        pos=rec["pos"],
+        build=build,
+        coverage_state=state,
+        sample_observation=rec["sample_observation"],
+        reason=rec["reason"],
+        alt_count=rec["altCount"],
+        category=category,
+        clinical_significance=significance,
+        phenotype=phenotype,
+        magnitude=magnitude,
+        repute=repute,
+        drug_response=drug,
+        caveats=caveats,
+        evidence_tier=rec["evidence_tier"],
+        # Locus-level ClinVar stars are shown only next to an interpreted genotype, never beside "not tested".
+        review_stars=clinvar.get("stars") if interp is not None else None,
+        gnomad_af=gnomad.get("af"),
+        gnomad_pli=gnomad.get("pli"),
+        hpa_tissues=dict(hpa.get("tissues") or {}),
+        hpa_subcellular=list(hpa.get("subcellular") or []),
+        limitation=rec["limitation"],
+        acmg_actionable=bool(rec["acmg_sf"]),
+        segregation=_segregation(rec, kb),
+        raw=rec,
+    )
 
 
 class VariantAnnotator:
-    """Enriches parsed VariantCalls with clinical, proteomic, and population annotations."""
+    """Classifies a parsed file against the pipeline KB and builds the desktop findings.
 
-    def __init__(self, custom_kb: dict[str, Any] | None = None):
-        self.kb = dict(CURATED_KB)
-        if custom_kb:
-            self.kb.update(custom_kb)
-        self.segregation_engine = SegregationEngine()
-        self.biotools = BiotoolsOrchestrator()
+    Construction does no I/O: the KB is loaded on first use (from `kb_path`, else the repo's
+    web/src/knowledge-base.json) unless an already validated `kb` is passed.
+    """
 
-    def annotate_call(self, call: VariantCall) -> AnnotationRecord | None:
-        """Annotate a single VariantCall using the curated database and segregation engine."""
-        entry = self.kb.get(call.rsid)
-        if not entry:
-            return None
+    def __init__(self, kb_path: str | Path | None = None, kb: KnowledgeBase | None = None):
+        self._kb_path = kb_path
+        self._kb = kb
+        self._biotools = None
 
-        gene = entry.get("gene", "Unknown")
-        alleles_map = entry.get("alleles", {})
-        hpa_data = entry.get("hpa", {})
+    @property
+    def kb(self) -> KnowledgeBase:
+        if self._kb is None:
+            self._kb = load_knowledge_base(self._kb_path)
+        return self._kb
 
-        # Match exact genotype or reversed allele order
-        allele_info = alleles_map.get(call.genotype)
-        if not allele_info and len(call.genotype) == 2:
-            rev_gt = call.genotype[1] + call.genotype[0]
-            allele_info = alleles_map.get(rev_gt)
+    @property
+    def biotools(self):
+        """The biotools orchestrator, created on first use. It contacts external services."""
+        if self._biotools is None:
+            from biotools_orchestrator import BiotoolsOrchestrator
 
-        # Watson-Crick reverse complement lookup for minus-strand genotyping calls
-        if not allele_info and len(call.genotype) == 2:
-            comp_map = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
-            comp_gt = "".join(comp_map.get(b, b) for b in call.genotype)
-            allele_info = alleles_map.get(comp_gt)
-            if not allele_info:
-                allele_info = alleles_map.get(comp_gt[1] + comp_gt[0])
+            self._biotools = BiotoolsOrchestrator()
+        return self._biotools
 
-        if not allele_info:
-            # Fallback for alleles not explicitly cataloged
-            seg = self.segregation_engine.analyze_variant_segregation(call, gene, "Research", "Unannotated Allele")
-            return AnnotationRecord(
-                rsid=call.rsid,
-                gene=gene,
-                genotype=call.genotype,
-                call=call,
-                clinical_significance="Unannotated Allele",
-                review_stars=entry.get("default_stars", 1),
-                phenotype=f"Observed genotype: {call.genotype} at {entry.get('name', call.rsid)}",
-                category="Research",
-                magnitude=1.0,
-                repute="Neutral",
-                hpa_tissues=hpa_data.get("tissues", {}),
-                hpa_subcellular=hpa_data.get("subcellular", []),
-                gnomad_af=entry.get("gnomad_af", 0.0),
-                gnomad_pli=entry.get("gnomad_pli", 0.0),
-                acmg_actionable=bool(gene in ACMG_SF_GENES or entry.get("acmg")),
-                inheritance_mode=seg.mode_of_inheritance,
-                is_carrier=seg.is_carrier,
-                partner_carrier_prior=seg.partner_carrier_prior,
-                offspring_recurrence_risk=seg.offspring_risk_unscreened_partner,
-                segregation_notes=seg.segregation_notes,
-            )
-
-        cat = allele_info.get("category", "Trait")
-        sig = allele_info.get("significance", "Uncertain")
-        seg = self.segregation_engine.analyze_variant_segregation(call, gene, cat, sig)
-
-        return AnnotationRecord(
-            rsid=call.rsid,
-            gene=gene,
-            genotype=call.genotype,
-            call=call,
-            clinical_significance=sig,
-            review_stars=allele_info.get("stars", 1),
-            phenotype=allele_info.get("phenotype", ""),
-            category=cat,
-            magnitude=allele_info.get("magnitude", 1.0),
-            repute=allele_info.get("repute", "Neutral"),
-            hpa_tissues=hpa_data.get("tissues", {}),
-            hpa_subcellular=hpa_data.get("subcellular", []),
-            gnomad_af=entry.get("gnomad_af", 0.0),
-            gnomad_pli=entry.get("gnomad_pli", 0.0),
-            drug_response=allele_info.get("drug", ""),
-            notes=entry.get("name", ""),
-            acmg_actionable=bool(gene in ACMG_SF_GENES or entry.get("acmg")),
-            inheritance_mode=seg.mode_of_inheritance,
-            is_carrier=seg.is_carrier,
-            partner_carrier_prior=seg.partner_carrier_prior,
-            offspring_recurrence_risk=seg.offspring_risk_carrier_partner if seg.is_carrier else seg.offspring_risk_unscreened_partner,
-            segregation_notes=seg.segregation_notes,
+    def annotate_genome(self, parse: ParseResult) -> AnnotationReport:
+        """One finding per KB locus (APOE as one row), with coverage, inheritance and the
+        compound / multi-locus findings. Findings with a variant present come first, by magnitude."""
+        kb = self.kb
+        classified = classify(parse, kb)
+        assembled = assemble_findings(classified["records"], kb, classified["summary"]["outside_coverage_count"])
+        listed = assembled["listed"]
+        rows = [_to_annotation(r, kb, parse.build) for r in listed]
+        rows.sort(key=lambda a: (not a.variant_present, -(a.magnitude or 0.0)))
+        return AnnotationReport(
+            build=parse.build,
+            kb_release=str(kb.manifest.get("release", "unknown")),
+            records=rows,
+            coverage=assembled["summary"],
+            compound_heterozygote_findings=detect_compound_heterozygosity(listed, kb.genes),
+            multi_locus_findings=detect_multi_locus(listed, kb.genes),
         )
 
-    def resolve_apoe_diplotype(
-        self, variants: dict[str, VariantCall]
-    ) -> tuple[AnnotationRecord | None, dict[str, Any] | None]:
-        """
-        Synthesize the compound APOE diplotype (epsilon 2/3/4) from rs429358 and rs7412.
-        Normalizes forward/reverse strand calls and assigns definitive clinical risk.
-        """
-        call_429 = variants.get("rs429358")
-        call_741 = variants.get("rs7412")
-
-        if not call_429 and not call_741:
-            return None, None
-
-        def norm_429(gt: str) -> str:
-            # Forward: T (ref/e3), C (alt/e4). Reverse: A (ref/e3), G (alt/e4)
-            gt = gt.upper()
-            if gt in ("TT", "AA"):
-                return "TT"
-            elif gt in ("CT", "TC", "AG", "GA"):
-                return "CT"
-            elif gt in ("CC", "GG"):
-                return "CC"
-            return gt
-
-        def norm_741(gt: str) -> str:
-            # Forward: C (ref/e3), T (alt/e2). Reverse: G (ref/e3), A (alt/e2)
-            gt = gt.upper()
-            if gt in ("CC", "GG"):
-                return "CC"
-            elif gt in ("CT", "TC", "AG", "GA"):
-                return "CT"
-            elif gt in ("TT", "AA"):
-                return "TT"
-            return gt
-
-        gt_429 = norm_429(call_429.genotype) if call_429 and call_429.zygosity != "nocall" else None
-        gt_741 = norm_741(call_741.genotype) if call_741 and call_741.zygosity != "nocall" else None
-
-        if not gt_429 and not gt_741:
-            return None, None
-
-        diplotype = ""
-        label = ""
-        phenotype = ""
-        category = "Carrier"
-        significance = ""
-        magnitude = 1.0
-        repute = "Neutral"
-        risk_ratio = ""
-        lifetime_risk = ""
-
-        if gt_429 == "TT" and gt_741 == "CC":
-            diplotype = "ε3/ε3"
-            label = "APOE ε3/ε3 (Normal Baseline)"
-            category = "Carrier"  # Accessible in Carrier tab & All
-            significance = "Normal / Baseline"
-            magnitude = 1.5
-            repute = "Good"
-            risk_ratio = "1.0× (Average Population Baseline)"
-            lifetime_risk = "10–15% lifetime Alzheimer's risk"
-            phenotype = (
-                "APOE ε3/ε3: The most common human genotype (~60–65% population frequency). "
-                "Represents the normal population baseline for late-onset Alzheimer's disease "
-                "risk and standard lipid metabolism."
-            )
-        elif gt_429 == "CT" and gt_741 == "CC":
-            diplotype = "ε3/ε4"
-            label = "APOE ε3/ε4 Carrier"
-            category = "Carrier"
-            significance = "Risk Factor / Carrier"
-            magnitude = 4.2
-            repute = "Bad"
-            risk_ratio = "3–4× Increased Risk"
-            lifetime_risk = "25–35% lifetime Alzheimer's risk"
-            phenotype = (
-                "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring ~3–4× elevated risk "
-                "for late-onset Alzheimer's disease (~20–25% population prevalence; ~25–35% lifetime risk). "
-                "Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are "
-                "protective modulators."
-            )
-        elif gt_429 == "CC" and gt_741 == "CC":
-            diplotype = "ε4/ε4"
-            label = "APOE ε4/ε4 Homozygote"
-            category = "Risk Factor"
-            significance = "High Risk Factor"
-            magnitude = 6.0
-            repute = "Bad"
-            risk_ratio = "12–15× Markedly Elevated Risk"
-            lifetime_risk = "50–65% lifetime Alzheimer's risk"
-            phenotype = (
-                "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). "
-                "Associated with ~12–15× increased lifetime risk of late-onset Alzheimer's disease and "
-                "higher LDL-cholesterol/atherosclerosis susceptibility."
-            )
-        elif gt_429 == "TT" and gt_741 == "CT":
-            diplotype = "ε2/ε3"
-            label = "APOE ε2/ε3 Carrier"
-            category = "Carrier"
-            significance = "Protective / Carrier"
-            magnitude = 2.2
-            repute = "Good"
-            risk_ratio = "0.6× (Protective Effect)"
-            lifetime_risk = "5–8% lifetime Alzheimer's risk"
-            phenotype = (
-                "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele "
-                "(~10–15% population prevalence). Associated with ~40–50% lower lifetime risk of "
-                "Alzheimer's disease and lower circulating LDL-cholesterol."
-            )
-        elif gt_429 == "TT" and gt_741 == "TT":
-            diplotype = "ε2/ε2"
-            label = "APOE ε2/ε2 Homozygote"
-            category = "Carrier"
-            significance = "Protective AD / Lipid Risk"
-            magnitude = 3.5
-            repute = "Bad"
-            risk_ratio = "Protective AD / Type III HLP Risk"
-            lifetime_risk = "<5% AD risk; Monitor blood lipid panels"
-            phenotype = (
-                "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated "
-                "with genetic predisposition to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; "
-                "requires secondary metabolic triggers like obesity or diabetes for clinical expression)."
-            )
-        elif gt_429 == "CT" and gt_741 == "CT":
-            diplotype = "ε2/ε4"
-            label = "APOE ε2/ε4 Double Heterozygote"
-            category = "Carrier"
-            significance = "Risk Factor / Carrier"
-            magnitude = 3.2
-            repute = "Bad"
-            risk_ratio = "1.5–2× Intermediate Risk"
-            lifetime_risk = "15–20% lifetime Alzheimer's risk"
-            phenotype = (
-                "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 "
-                "allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 "
-                "and ε3/ε4, as the ε2 allele partially mitigates ε4 risk."
-            )
-        elif not gt_429 or not gt_741:
-            diplotype = "Indeterminate"
-            label = "APOE Indeterminate (Missing rs429358 or rs7412)"
-            category = "Trait"
-            significance = "Incomplete Loci"
-            magnitude = 1.0
-            repute = "Neutral"
-            risk_ratio = "Unknown"
-            lifetime_risk = "Cannot determine without both loci"
-            phenotype = (
-                "Both rs429358 (codon 112) and rs7412 (codon 158) must be genotyped to determine an APOE diplotype. "
-                "A single locus cannot distinguish ε3 from ε2 or ε4 without unsupported population assumptions."
-            )
-        else:
-            diplotype = "Indeterminate"
-            label = f"APOE ({gt_429 or '?'}/{gt_741 or '?'})"
-            category = "Carrier"
-            significance = "Uncertain"
-            magnitude = 1.0
-            repute = "Neutral"
-            risk_ratio = "Uncertain"
-            lifetime_risk = "Average population risk"
-            phenotype = f"Atypical APOE combination: rs429358={gt_429}, rs7412={gt_741}."
-
-        raw_calls_str = f"rs429358:{call_429.genotype if call_429 else '--'}, rs7412:{call_741.genotype if call_741 else '--'}"
-        dummy_call = VariantCall(
-            rsid="APOE-STATUS",
-            chrom="19",
-            pos=45411941,
-            genotype=diplotype,
-            zygosity="het" if "Carrier" in label or "Heterozygote" in label else "hom",
-        )
-
-        apoe_info = {
-            "diplotype": diplotype,
-            "label": label,
-            "risk_ratio": risk_ratio,
-            "lifetime_risk": lifetime_risk,
-            "phenotype": phenotype,
-            "repute": repute,
-            "magnitude": magnitude,
-            "category": category,
-            "rs429358": call_429.genotype if call_429 else None,
-            "rs7412": call_741.genotype if call_741 else None,
-            "raw_summary": raw_calls_str,
+    def summarize_annotations(self, report: AnnotationReport) -> dict[str, Any]:
+        """Counts of variants PRESENT by category, plus the coverage counts. A locus that was not
+        tested, or whose genotype could not be read, is counted under coverage, never as clear."""
+        categories: dict[str, list[AnnotationRecord]] = {c: [] for c in _REPORTED_CATEGORIES}
+        for r in report.records:
+            if r.variant_present and r.category in categories:
+                categories[r.category].append(r)
+        acmg = [
+            r for r in report.records
+            if r.variant_present and r.acmg_actionable and r.category in ("Pathogenic", "Risk Factor", "Carrier")
+        ]
+        carriers = [r for r in report.records if r.segregation and r.segregation.get("is_carrier")]
+        return {
+            "total_loci": len(report.records),
+            "pathogenic_count": len(categories["Pathogenic"]),
+            "carrier_count": len(categories["Carrier"]),
+            "pgx_count": len(categories["Pharmacogenomics"]),
+            "risk_factor_count": len(categories["Risk Factor"]),
+            "acmg_actionable_findings": len(acmg),
+            "categories": categories,
+            "acmg_findings": acmg,
+            "carrier_findings": carriers,
+            "coverage": report.coverage,
+            "compound_heterozygote_findings": report.compound_heterozygote_findings,
+            "multi_locus_findings": report.multi_locus_findings,
         }
 
-        record = AnnotationRecord(
-            rsid="APOE-STATUS",
-            gene="APOE",
-            genotype=f"{diplotype} ({raw_calls_str})",
-            call=dummy_call,
-            clinical_significance=significance,
-            review_stars=4,
-            phenotype=phenotype,
-            category=category,
-            magnitude=magnitude,
-            repute=repute,
-            hpa_tissues={"liver": "High", "cerebral cortex": "Medium", "plasma": "High"},
-            hpa_subcellular=["Secreted", "Endoplasmic reticulum"],
-            gnomad_af=0.15,
-            gnomad_pli=0.0,
-            acmg_actionable=False,
-            notes=label,
-            inheritance_mode="Co-Dominant Complex Alleles (ε2/ε3/ε4)",
-            is_carrier=bool("Carrier" in label or "Heterozygote" in label),
-            partner_carrier_prior=0.25,
-            offspring_recurrence_risk=0.50 if "Carrier" in label or "Heterozygote" in label else 0.0,
-            segregation_notes=(
-                "APOE Haplotype Segregation: rs429358 and rs7412 reside on chromosome 19q13.32 in tight linkage disequilibrium. "
-                "They do not segregate independently, but transmit as discrete ε2, ε3, or ε4 maternal and paternal haplotypes."
-            ),
-        )
-
-        return record, apoe_info
-
     def enrich_record_with_biotools(self, record: AnnotationRecord) -> AnnotationRecord:
-        """Deeply enrich an AnnotationRecord with live data from ClinVar, Ensembl, AlphaFold, and ENCODE."""
-        if record.rsid == "APOE-STATUS":
-            # Query gene-level AlphaFold and ENCODE for APOE
+        """Enrich a record with live data from ClinVar, Ensembl, AlphaFold and ENCODE.
+
+        This SENDS the rsID (and gene symbol) to external services; the web app never does.
+        """
+        if record.rsid == APOE_ROW_ID:
+            # Gene-level AlphaFold and ENCODE for APOE; "APOE-STATUS" is not an rsid, so it is never sent.
             af = self.biotools.analyze_alphafold_structure("APOE")
             if "uniprot_id" in af:
                 record.alphafold_plddt = af.get("global_plddt")
@@ -915,11 +871,9 @@ class VariantAnnotator:
             rsid=record.rsid,
             gene=record.gene,
             genotype=record.genotype,
-            chrom=str(record.call.chrom),
-            pos=record.call.pos,
+            chrom=str(record.chrom),
+            pos=record.pos,
         )
-
-        # Update record with biotools insights
         if enriched.vep_consequence:
             record.vep_consequence = enriched.vep_consequence
         if enriched.vep_sift:
@@ -937,109 +891,4 @@ class VariantAnnotator:
         if enriched.encode_top_tissues:
             record.encode_tissues = enriched.encode_top_tissues
         record.alphagenome_status = enriched.alphagenome_status
-
         return record
-
-    def annotate_genome(
-        self, variants: dict[str, VariantCall]
-    ) -> list[AnnotationRecord]:
-        """Scan full genome dictionary and return sorted list of matched clinical annotations."""
-        records: list[AnnotationRecord] = []
-        for rsid, call in variants.items():
-            if rsid in self.kb and call.zygosity != "nocall":
-                rec = self.annotate_call(call)
-                if rec:
-                    records.append(rec)
-
-        # Synthesize compound APOE Diplotype
-        apoe_rec, _ = self.resolve_apoe_diplotype(variants)
-        if apoe_rec:
-            records.append(apoe_rec)
-
-        # Sort: Highest clinical magnitude & review stars first
-        records.sort(key=lambda r: (r.magnitude, r.review_stars), reverse=True)
-        return records
-
-    def summarize_annotations(
-        self, records: list[AnnotationRecord], variants: dict[str, VariantCall] | None = None
-    ) -> dict[str, Any]:
-        """Produce structured categorized summary with segregation and compound findings for UI and reporting."""
-        categories = {
-            "Pathogenic": [],
-            "Carrier": [],
-            "Pharmacogenomics": [],
-            "Risk Factor": [],
-            "Trait": [],
-            "Benign": [],
-        }
-
-        acmg_findings = []
-        carrier_findings = []
-        dominant_findings = []
-        recessive_findings = []
-
-        for r in records:
-            cat = r.category if r.category in categories else "Trait"
-            categories[cat].append(r)
-            if r.acmg_actionable and r.category in ("Pathogenic", "Risk Factor", "Carrier"):
-                acmg_findings.append(r)
-            if r.is_carrier:
-                carrier_findings.append({
-                    "rsid": r.rsid,
-                    "gene": r.gene,
-                    "genotype": r.genotype,
-                    "condition": r.phenotype,
-                    "recurrence_risk_unscreened": r.offspring_recurrence_risk,
-                    "partner_prior": r.partner_carrier_prior,
-                })
-            if "Dominant" in r.inheritance_mode:
-                dominant_findings.append(r)
-            elif "Recessive" in r.inheritance_mode:
-                recessive_findings.append(r)
-
-        # Evaluate Compound Heterozygosity and Independent Assortment
-        compound_hits = []
-        assortment_hits = []
-        if variants:
-            compound_hits = self.segregation_engine.detect_compound_heterozygosity(variants)
-
-        seg_reports = [
-            self.segregation_engine.analyze_variant_segregation(
-                r.call, r.gene, r.category, r.clinical_significance
-            )
-            for r in records
-            if r.rsid != "APOE-STATUS" and r.call
-        ]
-        if seg_reports:
-            multi_seg = self.segregation_engine.evaluate_independent_assortment(seg_reports)
-            assortment_hits = [
-                {
-                    "loci": s.loci,
-                    "genes": s.genes,
-                    "chromosomes": s.chromosomes,
-                    "independent_prob": s.independent_transmission_prob,
-                    "description": s.combined_clinical_impact,
-                    "recommendation": s.recommendation,
-                }
-                for s in multi_seg
-            ]
-
-        return {
-            "total_annotated": len(records),
-            "pathogenic_count": len(categories["Pathogenic"]),
-            "carrier_count": len(categories["Carrier"]),
-            "pgx_count": len(categories["Pharmacogenomics"]),
-            "risk_factor_count": len(categories["Risk Factor"]),
-            "acmg_actionable_findings": len(acmg_findings),
-            "categories": categories,
-            "acmg_findings": acmg_findings,
-            "carrier_findings": carrier_findings,
-            "compound_heterozygote_findings": compound_hits,
-            "independent_assortment_findings": assortment_hits,
-            "segregation_summary": {
-                "autosomal_recessive_carriers": len(carrier_findings),
-                "autosomal_dominant_loci": len(dominant_findings),
-                "compound_heterozygotes_detected": len(compound_hits),
-                "multi_locus_independent_pairs": len(assortment_hits),
-            },
-        }

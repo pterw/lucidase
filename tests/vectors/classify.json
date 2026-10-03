@@ -1,0 +1,5869 @@
+[
+  {
+    "id": "pgx-wildtype-not-observed",
+    "description": "Wild-type at a PGx locus is supported-not-observed, never an observed finding (P0-007)",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "G",
+              "G"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "supported_not_observed",
+          "sample_observation": "wild_type",
+          "altCount": 0,
+          "interpretation_key": "0",
+          "genotype_display": "G/G"
+        }
+      }
+    }
+  },
+  {
+    "id": "pgx-het-observed",
+    "description": "One alt allele at a sufficient-evidence PGx locus is supported-and-observed",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "G",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "altCount": 1,
+          "interpretation_key": "1",
+          "interpretation": {
+            "category": "Pharmacogenomics"
+          },
+          "limitation": "Single-variant test."
+        }
+      }
+    }
+  },
+  {
+    "id": "mthfr-het-observed",
+    "description": "MTHFR het (alt count 1, category Trait, magnitude 1) with sufficient evidence is observed and variant_present (P0-007)",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs1801133",
+            "chrom": "1",
+            "pos": 11856378,
+            "alleles": [
+              "A",
+              "G"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs1801133": {
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "altCount": 1,
+          "interpretation_key": "1",
+          "interpretation": {
+            "category": "Trait",
+            "magnitude": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "insufficient-wildtype-not-double-counted",
+    "description": "An insufficient-evidence locus with alt count 0 is insufficient_evidence with wild_type, counted once",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs1799945",
+            "chrom": "6",
+            "pos": 26091179,
+            "alleles": [
+              "C",
+              "C"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs1799945": {
+          "coverage_state": "insufficient_evidence",
+          "sample_observation": "wild_type",
+          "altCount": 0,
+          "interpretation_key": "0"
+        }
+      },
+      "summary": {
+        "insufficient_evidence_count": 1,
+        "supported_not_observed_count": 0,
+        "supported_and_observed_count": 0,
+        "not_tested_by_array_count": 3,
+        "total_loci": 4
+      }
+    }
+  },
+  {
+    "id": "insufficient-het-variant-present",
+    "description": "An insufficient-evidence locus with an alt allele is still insufficient_evidence, and the variant presence is reported",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs1799945",
+            "chrom": "6",
+            "pos": 26091179,
+            "alleles": [
+              "C",
+              "G"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs1799945": {
+          "coverage_state": "insufficient_evidence",
+          "sample_observation": "variant_present",
+          "altCount": 1,
+          "interpretation_key": "1"
+        }
+      }
+    }
+  },
+  {
+    "id": "not-assayed-array",
+    "description": "A locus absent from the array file is not_tested_by_array with call_unavailable",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs9999999",
+            "chrom": "2",
+            "pos": 1000,
+            "alleles": [
+              "A",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "not_tested_by_array",
+          "sample_observation": "call_unavailable",
+          "altCount": null,
+          "interpretation": null,
+          "genotype_display": null,
+          "reason": "locus not assayed on this array"
+        }
+      },
+      "summary": {
+        "not_tested_by_array_count": 4,
+        "outside_coverage_count": 1
+      }
+    }
+  },
+  {
+    "id": "not-assayed-vcf",
+    "description": "A locus absent from a VCF carries the VCF reason",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "vcf",
+        "build": "GRCh37",
+        "assay": "vcf",
+        "calls": [
+          {
+            "rsid": "rs9999999",
+            "chrom": "2",
+            "pos": 1000,
+            "alleles": [
+              "A",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "not_tested_by_array",
+          "sample_observation": "call_unavailable",
+          "reason": "absent from VCF (variants-only VCFs omit reference calls)"
+        }
+      }
+    }
+  },
+  {
+    "id": "no-call",
+    "description": "A no-call at a KB locus is not_tested_by_array",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": null
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 0,
+          "no_calls": 1,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "not_tested_by_array",
+          "sample_observation": "call_unavailable",
+          "altCount": null,
+          "genotype_display": null
+        }
+      }
+    }
+  },
+  {
+    "id": "unresolvable-genotype",
+    "description": "AT at a G/A site cannot be interpreted: insufficient_evidence with the stated reason",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "A",
+              "T"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "insufficient_evidence",
+          "sample_observation": "call_unavailable",
+          "reason": "genotype not interpretable",
+          "altCount": null,
+          "interpretation": null,
+          "genotype_display": "A/T"
+        }
+      }
+    }
+  },
+  {
+    "id": "strand-flipped",
+    "description": "A minus-strand array call is complemented once and flagged",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "C",
+              "T"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "supported_and_observed",
+          "altCount": 1,
+          "strandFlipped": true,
+          "genotype_display": "C/T"
+        }
+      }
+    }
+  },
+  {
+    "id": "vcf-position-match-grch38",
+    "description": "A VCF call with no rsID matches by chrom:pos for the file's build (GRCh38)",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "vcf",
+        "build": "GRCh38",
+        "assay": "vcf",
+        "calls": [
+          {
+            "rsid": null,
+            "chrom": "10",
+            "pos": 94781859,
+            "alleles": [
+              "G",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "supported_and_observed",
+          "altCount": 1,
+          "pos": 94781859
+        }
+      }
+    }
+  },
+  {
+    "id": "vcf-position-wrong-build",
+    "description": "GRCh37 coordinates in a GRCh38 file do not match",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "vcf",
+        "build": "GRCh38",
+        "assay": "vcf",
+        "calls": [
+          {
+            "rsid": null,
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "G",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "not_tested_by_array",
+          "reason": "absent from VCF (variants-only VCFs omit reference calls)"
+        }
+      },
+      "summary": {
+        "outside_coverage_count": 1
+      }
+    }
+  },
+  {
+    "id": "apoe-component-not-standalone",
+    "description": "An APOE component is classified but marked so the UI does not list it as a standalone finding",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs429358",
+            "chrom": "19",
+            "pos": 45411941,
+            "alleles": [
+              "T",
+              "C"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs429358": {
+          "coverage_state": "supported_and_observed",
+          "role": "apoe_component",
+          "standalone": false
+        },
+        "rs4244285": {
+          "standalone": true
+        }
+      }
+    }
+  },
+  {
+    "id": "summary-counts-each-locus-once",
+    "description": "Every KB locus is counted in exactly one state",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "G",
+              "A"
+            ]
+          },
+          {
+            "rsid": "rs1801133",
+            "chrom": "1",
+            "pos": 11856378,
+            "alleles": [
+              "G",
+              "G"
+            ]
+          },
+          {
+            "rsid": "rs1799945",
+            "chrom": "6",
+            "pos": 26091179,
+            "alleles": [
+              "C",
+              "C"
+            ]
+          },
+          {
+            "rsid": "rs429358",
+            "chrom": "19",
+            "pos": 45411941,
+            "alleles": null
+          }
+        ],
+        "stats": {
+          "total_lines": 4,
+          "data_rows": 4,
+          "called": 3,
+          "no_calls": 1,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {},
+      "summary": {
+        "supported_and_observed_count": 1,
+        "supported_not_observed_count": 1,
+        "insufficient_evidence_count": 1,
+        "not_tested_by_array_count": 1,
+        "outside_coverage_count": 0,
+        "total_loci": 4
+      }
+    }
+  },
+  {
+    "id": "conflicting-duplicate-calls",
+    "description": "Two calls for one locus that disagree are not guessed between: insufficient_evidence",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "23andme",
+        "build": "GRCh37",
+        "assay": "array",
+        "calls": [
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "G",
+              "G"
+            ]
+          },
+          {
+            "rsid": "rs4244285",
+            "chrom": "10",
+            "pos": 96541616,
+            "alleles": [
+              "A",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 2,
+          "data_rows": 2,
+          "called": 2,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "insufficient_evidence",
+          "reason": "genotype not interpretable"
+        }
+      }
+    }
+  },
+  {
+    "id": "vcf-unknown-rsid-position-match",
+    "description": "A VCF row with an rsID the KB lacks, at a KB locus's GRCh38 position, matches by position and resolves (P1-033)",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "vcf",
+        "build": "GRCh38",
+        "assay": "vcf",
+        "calls": [
+          {
+            "rsid": "rs999999999",
+            "chrom": "10",
+            "pos": 94781859,
+            "alleles": [
+              "G",
+              "A"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "supported_and_observed",
+          "altCount": 1,
+          "pos": 94781859
+        }
+      }
+    }
+  },
+  {
+    "id": "vcf-unknown-rsid-foreign-alt",
+    "description": "The same position-matched row with a non-KB alt is unresolvable, never complemented (P0-009, P1-033)",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "MTHFR": {
+            "inheritance": {
+              "model": "trait",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          },
+          "HFE": {
+            "inheritance": {
+              "model": "autosomal_recessive",
+              "mendelian_disease": true,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": true,
+            "insights": null
+          },
+          "APOE": {
+            "inheritance": {
+              "model": "risk_factor",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          },
+          "rs1801133": {
+            "rsid": "rs1801133",
+            "gene": "MTHFR",
+            "chrom": "1",
+            "pos_grch37": 11856378,
+            "pos_grch38": 11796321,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "MTHFR 677CT heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Trait",
+                "significance": "Trait",
+                "magnitude": 2,
+                "repute": "Bad",
+                "phenotype": "MTHFR 677TT homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs1799945": {
+            "rsid": "rs1799945",
+            "gene": "HFE",
+            "chrom": "6",
+            "pos_grch37": 26091179,
+            "pos_grch38": 26090951,
+            "ref": "C",
+            "alt": "G",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Risk Factor (Carrier)",
+                "magnitude": 1,
+                "repute": "Good",
+                "phenotype": "H63D heterozygote.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "Risk Factor",
+                "magnitude": 2.5,
+                "repute": "Bad",
+                "phenotype": "H63D homozygote.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier D",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "insufficient",
+            "limitation": null,
+            "role": "standard"
+          },
+          "rs429358": {
+            "rsid": "rs429358",
+            "gene": "APOE",
+            "chrom": "19",
+            "pos_grch37": 45411941,
+            "pos_grch38": 44908684,
+            "ref": "T",
+            "alt": "C",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Carrier",
+                "significance": "Carrier / Risk Factor",
+                "magnitude": 3.8,
+                "repute": "Bad",
+                "phenotype": "One C allele at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Risk Factor",
+                "significance": "High Risk Factor",
+                "magnitude": 5,
+                "repute": "Bad",
+                "phenotype": "Two C alleles at rs429358.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": null,
+            "role": "apoe_component"
+          }
+        }
+      },
+      "parse": {
+        "format": "vcf",
+        "build": "GRCh38",
+        "assay": "vcf",
+        "calls": [
+          {
+            "rsid": "rs999999999",
+            "chrom": "10",
+            "pos": 94781859,
+            "alleles": [
+              "C",
+              "C"
+            ]
+          }
+        ],
+        "stats": {
+          "total_lines": 1,
+          "data_rows": 1,
+          "called": 1,
+          "no_calls": 0,
+          "skipped_malformed": 0
+        }
+      }
+    },
+    "expected": {
+      "records": {
+        "rs4244285": {
+          "coverage_state": "insufficient_evidence",
+          "altCount": null,
+          "strandFlipped": null,
+          "reason": "genotype not interpretable"
+        }
+      }
+    }
+  }
+]

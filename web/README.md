@@ -1,6 +1,8 @@
-# GenomePulse — Zero-Knowledge Clinical Variome Explorer
+# Lucidase — Zero-Knowledge Clinical Variome Explorer
 
-A modern, privacy-first consumer genomics analysis platform supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files.
+See the [root README](../README.md) for an overview of Lucidase.
+
+A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 14 curated loci in 12 genes, in the browser, and nothing else.
 
 ---
 
@@ -10,61 +12,73 @@ A modern, privacy-first consumer genomics analysis platform supporting **23andMe
 
 | Stage | Where it runs | What is transmitted |
 |:---|:---|:---|
-| File parsing (23andMe / VCF) | Browser Web Worker | Nothing |
-| Variant classification & segregation | Browser (JS knowledge base) | Nothing |
-| Compound heterozygote detection | Browser | Nothing |
-| Redis enrichment (optional) | Vercel `/api/enrich` serverless | **rsID identifiers only** (~150–500 variant IDs, ~2 KB) |
+| File parsing (23andMe / AncestryDNA / MyHeritage / VCF) | Browser Web Worker | Nothing |
+| Variant classification | Browser Web Worker, against the bundled knowledge base | Nothing |
+| APOE diplotype, inheritance and multi-locus figures | Browser | Nothing |
+| Exports (Markdown / CSV) | Browser (a downloaded Blob) | Nothing |
 
-The `/api/enrich` endpoint receives only rsID identifiers — not genotypes, not personal data. It returns cached clinical annotations from the embedded knowledge base or Upstash Redis.
+There is no enrichment endpoint, no cache and no Redis. The page makes no network request that carries variant data: the CSP is `connect-src 'self'`, and the only same-origin fetch is the demo file.
 
-> **Note on enrichment data:** When Upstash Redis is not configured or a variant is not yet cached, the endpoint returns an **offline embedded knowledge-base stub** labelled `evidence_tier: embedded_kb_fallback`. This is not a live query to ClinVar, Ensembl, or AlphaFold. Verified live-source data requires wiring a live enrichment step into the cache-miss path of `api/enrich.js`.
+The one server function is `GET /api/manifest` (`web/api/manifest.js`, Vercel only). It accepts no input and returns a static manifest of the shipped knowledge base: its release, locus count and sha256. Every value is read from `src/knowledge-base.json` at request time, so the manifest cannot drift from the file the app loads. CORS is same-origin; set `ALLOWED_ORIGIN` in Vercel env vars for a custom domain.
 
 ---
 
-## 🧬 Genomic Pipeline
+## 🧬 Knowledge base and pipeline
+
+All curated genomic knowledge lives in **one file**, `web/src/knowledge-base.json`. The page loads it with a JSON module import and validates it against the schema on load (`src/core/kb.js`). No second copy of the data exists in JS or Python source.
+
+The file is built, never hand-edited, by `tools/build_canonical_kb.py` from:
+
+- `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights);
+- the pinned upstream payloads in `tools/fixtures/upstream/real/` (ClinVar, dbSNP, Ensembl VEP, gnomAD), captured once by `tools/fetch_upstream.py` and read only through `tools/source_adapters.py`.
+
+Imported values carry provenance `machine_imported` with the capture's real retrieval date and URL. Hand-entered values are labelled `manually_curated`. The build is deterministic: the same inputs give byte-identical JSON.
 
 ```
-User uploads 23andMe / VCF file
+User opens a file
        │
        ▼
  [Web Worker — browser only]
- ├─ File format detection (23andMe v3-v5, AncestryDNA, MyHeritage, VCF 4.2)
- ├─ SNP line parsing (~700K–1M variants)
- ├─ Genotype normalization (strand flip, GT parsing)
- └─ Variant classification against embedded knowledge base
+ ├─ Format and build detection (core/parse.js)
+ ├─ Allele resolution against the locus ref/alt, fail closed (core/alleles.js)
+ ├─ Classification by alt-allele count, coverage state per locus (core/classify.js)
+ ├─ APOE diplotype from rs429358 + rs7412 (core/apoe.js)
+ └─ Inheritance, compound heterozygosity, multi-locus (core/inheritance.js)
        │
        ▼
- [Main Thread — browser only]
- ├─ APOE ε diplotype synthesis (rs429358 × rs7412)
- ├─ Compound heterozygote detection (HFE C282Y/H63D, CFTR multi-locus)
- ├─ Mendelian segregation reports (Hardy-Weinberg, carrier prior, offspring risk)
- ├─ Independent assortment multi-locus joint probability (Mendel's 2nd Law)
- └─ Pedigree partner scenario simulation
-       │
-       ▼ (optional, rsIDs only)
- [Vercel /api/enrich — serverless]
- ├─ Upstash Redis MGET (~3 ms cache hit)
- └─ Embedded KB fallback stub (evidence_tier: embedded_kb_fallback)
-       │
-       ▼
- UI: variant table, drawer inspection, biotools panel, export (Markdown / CSV)
+ [Main thread — browser only]
+ └─ One view model per record feeds the table, drawer, Markdown and CSV (view-model.js)
 ```
+
+### Coverage taxonomy
+
+Each curated locus lands in exactly one state per sample:
+
+| State | Meaning |
+|:---|:---|
+| Supported & observed | The variant allele is present among the variants tested. |
+| Supported, not observed | "<allele> not detected (N variant(s) tested in <gene>)". Never worded as "normal" or as absence of risk. |
+| Not tested by array | The locus is absent from the file, or the call is a no-call. A variants-only VCF reads "absent from VCF (variants-only VCFs omit reference calls)". |
+| Outside coverage | Markers in the file that the knowledge base does not curate. Counted only. |
+| Insufficient evidence | A conflicting or weak locus, or a genotype that cannot be resolved against ref/alt. Fail-closed results land here, never as wild-type. |
+
+Absence of a finding is never reported as absence of risk.
 
 ---
 
-## 🔒 Security Headers (Vercel)
+## 🔒 Security Headers (Vercel and Docker)
 
-All responses include:
+`vercel.json` and `Dockerfile` carry the same CSP, and a test enforces that:
 
 | Header | Value |
 |:---|:---|
-| `Content-Security-Policy` | Scripts: self + Tailwind CDN; Fonts: Typekit; No frames |
+| `Content-Security-Policy` | Scripts: self only. Styles: self, inline, Typekit. Fonts: self, Typekit. `connect-src 'self'`. No frames, no objects |
 | `X-Frame-Options` | `DENY` |
 | `X-Content-Type-Options` | `nosniff` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `Permissions-Policy` | Camera, microphone, geolocation all denied |
 
-CORS on `/api/enrich` defaults to **same-origin** (no wildcard). Set `ALLOWED_ORIGIN` in Vercel env vars if your frontend is on a custom domain.
+Typekit (fonts) is the only external host. daisyUI and the compiled Tailwind CSS are vendored in `src/vendor/`.
 
 ---
 
@@ -72,20 +86,19 @@ CORS on `/api/enrich` defaults to **same-origin** (no wildcard). Set `ALLOWED_OR
 
 ### 1. Vercel (Recommended)
 
-1. Push repository to GitHub.
+1. Push the repository to GitHub.
 2. Import into [Vercel](https://vercel.com), set **Root Directory** to `web/`.
-3. *(Optional)* Add Upstash Redis env vars in Project Settings → Environment Variables:
-   - `UPSTASH_REDIS_REST_URL` — `https://...upstash.io`
-   - `UPSTASH_REDIS_REST_TOKEN` — `A...`
-   - `ALLOWED_ORIGIN` — your custom domain (e.g. `https://genomepulse.example.com`) if not on `.vercel.app`
-4. Click **Deploy**.
+3. *(Optional)* Set `ALLOWED_ORIGIN` in Project Settings → Environment Variables to your custom domain.
+4. Click **Deploy**. `vercel.json` includes `src/knowledge-base.json` with the manifest function.
 
 ### 2. Docker & Docker Compose
 
 ```bash
-docker compose up -d   # Web: http://localhost:8080  Redis: localhost:6379
+docker compose up -d   # Web: http://localhost:8080
 docker compose down
 ```
+
+The container is a static nginx image. `/api/manifest` is a Vercel function and is not served by it.
 
 ### 3. Local Development
 
@@ -97,23 +110,79 @@ python -m http.server 8000
 
 ---
 
+## 🧪 Gates, rebuilds
+
+Run these from the repository root before every commit (`AGENTS.md` section 7):
+
+```
+python -m pytest tests -q -p no:cacheprovider --ignore=tests/e2e
+node --test --test-reporter=spec "web/tests/**/*.test.mjs"
+python -m pytest tests/e2e -q -p no:cacheprovider
+python tools/build_canonical_kb.py --verify-only
+python tools/check_vendored_css.py
+```
+
+The end-to-end tests serve `web/` themselves on an ephemeral port with Playwright's bundled Chromium. Tests never use the network.
+
+**Rebuild the knowledge base** after editing `tools/curation/kb_curation.json`:
+
+```
+python tools/build_canonical_kb.py                 # validate and write web/src/knowledge-base.json
+python tools/build_canonical_kb.py --verify-only   # rebuild in memory; exit 1 on any difference or QC error
+```
+
+**Rebuild the vendored CSS** after adding or removing any Tailwind class in `index.html` or `src/**/*.js`. The Tailwind standalone CLI v3.4.17 is not committed; see `src/vendor/README.md` for where to put it:
+
+```
+bin/tailwindcss.exe -c web/tailwind.config.js -i web/src/tailwind.input.css -o web/src/vendor/tailwind.css --minify
+python tools/check_vendored_css.py
+```
+
+---
+
 ## 📊 File Format Support
 
 | Format | Auto-Detection | Allele Merging | Genome Builds |
 |:---|:---|:---|:---|
-| **23andMe** (v3, v4, v5) | `# rsid chromosome position genotype` | Native | GRCh37, GRCh38 |
-| **AncestryDNA** | `# rsid chromosome position allele1 allele2` | Automatic | GRCh37 |
-| **MyHeritage** | `"RSID","CHROMOSOME","POSITION","RESULT"` | CSV unquoting | GRCh37 |
-| **VCF 4.2** | `##fileformat=VCFv4.2` | GT parsing (`0/1`, `1/1`) | GRCh37, GRCh38 |
+| **23andMe** (v3, v4, v5) | `# rsid chromosome position genotype` | Native | Read from the header comment |
+| **AncestryDNA** | `# rsid chromosome position allele1 allele2` | Automatic | Read from the header comment |
+| **MyHeritage** | `"RSID","CHROMOSOME","POSITION","RESULT"` | CSV unquoting | Read from the header comment |
+| **VCF 4.2** | `##fileformat=VCFv4.2` | GT parsing (`0/1`, `1/1`) | Read from `##reference` and `##contig` |
+
+An unrecognised format is rejected with a visible error. The parser never guesses.
 
 ---
 
-## 🎨 Developer Tooling: Font Kit Studio
+## ⚠️ Known limitations
+
+These all fail closed, with a visible error or an explicit state:
+
+- A MyHeritage file that lacks its "MyHeritage" comment and has a trailing-comma or extra-column header is rejected.
+- A headerless 23andMe file with no header signal is rejected.
+- An array file with no build comment reports build "unknown", so matching without rsIDs is unavailable.
+- A variant absent from a variants-only VCF is "not tested", not reference.
+- Only the 14 curated loci (12 genes) are interpreted.
+- Evidence tiers for genes not tiered by ClinVar, and their citations, are manually curated from guideline and paper names: the CPIC levels and the curated tiers for APOE, F5, F2, MTHFR, LCT/MCM6 and ALDH2. They are pending verification against the primary sources.
+- Human Protein Atlas tissue and subcellular values are manually curated.
+- Multi-locus findings cover only `risk_factor` genes on different chromosomes (F5 and F2 today). This scope was set by the owner and is pinned by test vectors.
+- The APOE row is one record built from rs429358 and rs7412. Its internal row id `APOE-STATUS` is never shown as an rsID.
+
+---
+
+---
+
+## 🎨 Visual design is provisional
+
+Visual design and brand identity have not been established, and the design system that will own them is not yet authored. Styling is provisional. Styling lives in `tailwind.config.js`, `src/tailwind.input.css` (the `@tailwind` directives), `src/styles.css` (theme CSS variables, badge classes, glass panels, typography overrides) and the vendored daisyUI. The future design system will own all of them. See [`../docs/design-handoff.md`](../docs/design-handoff.md) for the current look as built.
+
+---
+
+## 🛠️ Developer Tooling: Font Kit Studio
 
 Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studio/` and is **not bundled** in the production clinical app.
 
 - **Standalone Workbench:** Open `tools/font-kit-studio/font_kit_studio_v0.1.1.html` directly in your browser.
-- **External Previewing:** Point Font Kit Studio's Target URL at your running GenomePulse local instance to inspect typography tokens externally.
+- **External Previewing:** Point Font Kit Studio's Target URL at your running Lucidase local instance to inspect typography tokens externally.
 
 ---
 

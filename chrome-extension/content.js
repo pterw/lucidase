@@ -1,5 +1,5 @@
 /**
- * GenomePulse Font Studio - Content Script
+ * Lucidase Font Studio - Content Script
  * Automatically ensures Typekit stylesheet is loaded and listens for live updates.
  */
 

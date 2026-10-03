@@ -1,0 +1,9 @@
+{
+  "bytes": 317,
+  "http_status": 200,
+  "method": "GET",
+  "request_body": null,
+  "retrieved_at": "2026-10-03T00:21:43Z",
+  "sha256_of_body": "0b1a030b7200a9f2a17402635bfe150a0ca13e6da9c9cc9e4d53739c832aa2ae",
+  "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term=rs1801133&retmode=json"
+}

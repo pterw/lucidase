@@ -15,31 +15,65 @@ Unified orchestrator integrating 5 premier computational biology tools & databas
    - Candidate cis-Regulatory Elements (promoters, enhancers, insulators) and multi-tissue RNA expression.
 5. AlphaGenome Deep Learning (/alphagenome-single-variant-analysis):
    - Splicing and regulatory disruption inference with safe credentials protocol integration.
+
+PRIVACY: unlike the Lucidase web app, which never transmits variant identifiers,
+this desktop tool SENDS rsIDs (and gene symbols) to NCBI (ClinVar) and Ensembl (VEP),
+and gene symbols to AlphaFold and ENCODE, through the skill scripts. Use it only when
+you accept that. Nothing is sent until an enrichment method is called.
+
+Configuration (environment variables; nothing is hard-coded to one machine):
+- LUCIDASE_BIOTOOLS_SKILLS_DIR: directory holding the skill folders
+  (clinvar_database, ensembl_database, alphafold_database_fetch_and_analyze,
+  encode_ccres_database). Unset means every skill-backed query returns an
+  {"error": ...} dict saying so.
+- LUCIDASE_CACHE_DIR: where query results are cached (default ~/.cache/lucidase).
+- LUCIDASE_UV_BIN: path to the `uv` executable (default: `uv` found on PATH).
+- LUCIDASE_HTTP_USER_AGENT: User-Agent for the skill scripts (default Lucidase/1.0).
+
+Constructing a BiotoolsOrchestrator does no I/O, and neither does importing this
+module. The cache directory is created on the first query that runs a script.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-# Base skill script paths
-SKILL_ROOT = Path(r"C:\Users\peter\.gemini\config\plugins\science\skills")
-CLINVAR_SCRIPT = SKILL_ROOT / "clinvar_database" / "scripts" / "clinvar_api.py"
-ENSEMBL_SCRIPT = SKILL_ROOT / "ensembl_database" / "scripts" / "ensembl_api.py"
-AF_FETCH_SCRIPT = SKILL_ROOT / "alphafold_database_fetch_and_analyze" / "scripts" / "fetch_structure.py"
-AF_PLDDT_SCRIPT = SKILL_ROOT / "alphafold_database_fetch_and_analyze" / "scripts" / "analyze_plddt.py"
-AF_PAE_SCRIPT = SKILL_ROOT / "alphafold_database_fetch_and_analyze" / "scripts" / "analyze_pae.py"
-ENCODE_SCREEN_SCRIPT = SKILL_ROOT / "encode_ccres_database" / "scripts" / "screen_api.py"
-ALPHAGENOME_DIR = SKILL_ROOT / "alphagenome_single_variant_analysis" / "scripts"
+ENV_SKILLS_DIR = "LUCIDASE_BIOTOOLS_SKILLS_DIR"
+ENV_CACHE_DIR = "LUCIDASE_CACHE_DIR"
+ENV_UV_BIN = "LUCIDASE_UV_BIN"
+ENV_USER_AGENT = "LUCIDASE_HTTP_USER_AGENT"
 
-UV_BIN = Path(r"c:\Users\peter\Python Projects\Thing\bin\uv.exe")
-if not UV_BIN.exists():
-    UV_BIN = Path(os.path.expanduser(r"~/.local/bin/uv.exe"))
+# Skill script locations, relative to the skills directory.
+SKILL_SCRIPTS: dict[str, tuple[str, ...]] = {
+    "clinvar": ("clinvar_database", "scripts", "clinvar_api.py"),
+    "ensembl": ("ensembl_database", "scripts", "ensembl_api.py"),
+    "af_fetch": ("alphafold_database_fetch_and_analyze", "scripts", "fetch_structure.py"),
+    "af_plddt": ("alphafold_database_fetch_and_analyze", "scripts", "analyze_plddt.py"),
+    "af_pae": ("alphafold_database_fetch_and_analyze", "scripts", "analyze_pae.py"),
+    "encode": ("encode_ccres_database", "scripts", "screen_api.py"),
+}
+
+
+def skills_dir() -> Optional[Path]:
+    """The configured skills directory, or None when LUCIDASE_BIOTOOLS_SKILLS_DIR is unset."""
+    value = os.environ.get(ENV_SKILLS_DIR, "").strip()
+    return Path(value).expanduser() if value else None
+
+
+def default_cache_dir() -> Path:
+    value = os.environ.get(ENV_CACHE_DIR, "").strip()
+    return Path(value).expanduser() if value else Path.home() / ".cache" / "lucidase"
+
+
+def uv_binary() -> str:
+    return os.environ.get(ENV_UV_BIN, "").strip() or shutil.which("uv") or "uv"
 
 
 # Mapping of key clinical genes to their canonical UniProt accession IDs
@@ -99,12 +133,30 @@ class BiotoolsOrchestrator:
     """High-level facade orchestrating execution of science skill scripts."""
 
     def __init__(self, cache_dir: Optional[str] = None):
-        self.cache_dir = Path(cache_dir or r"c:\Users\peter\Python Projects\Thing\.biotools_cache")
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.uv_bin = UV_BIN if UV_BIN.exists() else "uv"
+        # No I/O here: paths are resolved on use and the cache directory is created lazily.
+        self._cache_dir_arg = cache_dir
+
+    @property
+    def cache_dir(self) -> Path:
+        return Path(self._cache_dir_arg).expanduser() if self._cache_dir_arg else default_cache_dir()
+
+    @property
+    def uv_bin(self) -> str:
+        return uv_binary()
+
+    def _script(self, key: str) -> tuple[Optional[Path], str]:
+        """(path, "") when the skill script exists, else (None, error message)."""
+        root = skills_dir()
+        if root is None:
+            return None, f"{ENV_SKILLS_DIR} is not set, so the {key} skill script cannot be located"
+        path = root.joinpath(*SKILL_SCRIPTS[key])
+        if not path.exists():
+            return None, f"{key} skill script not found at {path}"
+        return path, ""
 
     def _run_uv_script(self, script_path: Path, args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:
         """Run a Python skill script with uv in an isolated subprocess."""
+        self.cache_dir.mkdir(parents=True, exist_ok=True)  # the first script run creates the cache
         cmd = [
             str(self.uv_bin),
             "run",
@@ -112,8 +164,8 @@ class BiotoolsOrchestrator:
             *args,
         ]
         env = os.environ.copy()
-        env["POLITE_HTTP_USER_AGENT"] = "GenomePulse/1.0 (peter.wiercioch@gmail.com)"
-        env["UV_CACHE_DIR"] = r"c:\Users\peter\Python Projects\Thing\.uv_cache"
+        env["POLITE_HTTP_USER_AGENT"] = env.get(ENV_USER_AGENT) or "Lucidase/1.0"
+        env["UV_CACHE_DIR"] = str(self.cache_dir / "uv")
 
         return subprocess.run(
             cmd,
@@ -135,12 +187,13 @@ class BiotoolsOrchestrator:
             except Exception:
                 pass
 
-        if not CLINVAR_SCRIPT.exists():
-            return {"error": f"ClinVar script not found at {CLINVAR_SCRIPT}"}
+        clinvar_script, problem = self._script("clinvar")
+        if clinvar_script is None:
+            return {"error": problem}
 
         out_search = self.cache_dir / f"clinvar_search_{rsid}.json"
         proc = self._run_uv_script(
-            CLINVAR_SCRIPT,
+            clinvar_script,
             ["search", "--query", f"{rsid}[rsid]", "--retmax", "5", "--output", str(out_search)],
             timeout=25,
         )
@@ -156,7 +209,7 @@ class BiotoolsOrchestrator:
 
             out_summary = self.cache_dir / f"clinvar_summary_{rsid}.json"
             proc_sum = self._run_uv_script(
-                CLINVAR_SCRIPT,
+                clinvar_script,
                 ["summary", "--variant_ids", *variant_ids[:5], "--output", str(out_summary)],
                 timeout=25,
             )
@@ -187,12 +240,13 @@ class BiotoolsOrchestrator:
             except Exception:
                 pass
 
-        if not ENSEMBL_SCRIPT.exists():
-            return {"error": f"Ensembl script not found at {ENSEMBL_SCRIPT}"}
+        ensembl_script, problem = self._script("ensembl")
+        if ensembl_script is None:
+            return {"error": problem}
 
         out_json = self.cache_dir / f"vep_{rsid_or_variant.replace(':', '_')}.json"
         proc = self._run_uv_script(
-            ENSEMBL_SCRIPT,
+            ensembl_script,
             ["vep", rsid_or_variant, "--species", "human", "--output", str(out_json)],
             timeout=35,
         )
@@ -216,12 +270,13 @@ class BiotoolsOrchestrator:
             except Exception:
                 pass
 
-        if not ENSEMBL_SCRIPT.exists():
-            return {"error": f"Ensembl script not found at {ENSEMBL_SCRIPT}"}
+        ensembl_script, problem = self._script("ensembl")
+        if ensembl_script is None:
+            return {"error": problem}
 
         out_json = self.cache_dir / f"gene_{gene_symbol}.json"
         proc = self._run_uv_script(
-            ENSEMBL_SCRIPT,
+            ensembl_script,
             ["resolve-gene", gene_symbol, "--species", "human", "--output", str(out_json)],
             timeout=20,
         )
@@ -252,12 +307,15 @@ class BiotoolsOrchestrator:
             except Exception:
                 pass
 
+        fetch_script, problem = self._script("af_fetch")
+        if fetch_script is None:
+            return {"error": problem}
         af_out_dir = self.cache_dir / f"af_{uniprot_id}"
         af_out_dir.mkdir(parents=True, exist_ok=True)
 
         # 1. Fetch structure files
         proc_fetch = self._run_uv_script(
-            AF_FETCH_SCRIPT,
+            fetch_script,
             [uniprot_id, "-o", str(af_out_dir)],
             timeout=40,
         )
@@ -272,8 +330,9 @@ class BiotoolsOrchestrator:
         }
 
         # 2. Analyze pLDDT
-        if meta_file.exists() and AF_PLDDT_SCRIPT.exists():
-            proc_plddt = self._run_uv_script(AF_PLDDT_SCRIPT, [str(meta_file)], timeout=15)
+        plddt_script, _ = self._script("af_plddt")
+        if meta_file.exists() and plddt_script is not None:
+            proc_plddt = self._run_uv_script(plddt_script, [str(meta_file)], timeout=15)
             # Parse pLDDT metrics from stdout
             out = proc_plddt.stdout
             result["plddt_stdout"] = out
@@ -288,8 +347,9 @@ class BiotoolsOrchestrator:
                     result["plddt_conclusion"] = out[idx:].splitlines()[1].strip()
 
         # 3. Analyze PAE / Domain Boundaries
-        if pae_file.exists() and AF_PAE_SCRIPT.exists():
-            proc_pae = self._run_uv_script(AF_PAE_SCRIPT, [str(pae_file)], timeout=25)
+        pae_script, _ = self._script("af_pae")
+        if pae_file.exists() and pae_script is not None:
+            proc_pae = self._run_uv_script(pae_script, [str(pae_file)], timeout=25)
             out_pae = proc_pae.stdout
             result["pae_stdout"] = out_pae
             domains = []
@@ -313,12 +373,13 @@ class BiotoolsOrchestrator:
             except Exception:
                 pass
 
-        if not ENCODE_SCREEN_SCRIPT.exists():
-            return {"error": f"SCREEN script not found at {ENCODE_SCREEN_SCRIPT}"}
+        encode_script, problem = self._script("encode")
+        if encode_script is None:
+            return {"error": problem}
 
         out_json = self.cache_dir / f"encode_raw_{gene_symbol}.json"
         proc = self._run_uv_script(
-            ENCODE_SCREEN_SCRIPT,
+            encode_script,
             ["gene-expression", gene_symbol, "--output", str(out_json)],
             timeout=25,
         )

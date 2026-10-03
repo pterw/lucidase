@@ -1,8 +1,14 @@
 """
-GenomePulse Coverage Taxonomy & Interpretation Scope
-====================================================
-Defines the formal coverage taxonomy, 5 mutually exclusive coverage states,
-evidence tiers, curation modes, and interpretation guardrails.
+Lucidase coverage taxonomy and evidence rules
+=============================================
+The KB describes loci and what each alt-allele count means (contract C2). Whatever
+depends on one person's sample is computed at analysis time and never stored in the KB.
+This module holds the pure rules shared by the build and the desktop tools:
+
+- `derive_evidence_tier` / `derive_evidence_sufficiency`: the KB build uses them to turn a
+  locus's ClinVar review into an evidence tier (contract C2).
+- `derive_coverage_state`: per-sample coverage state (contract C4). The desktop tools use
+  it at analysis time. It is never called by the KB build.
 
 Cardinal Principle:
 "Absence of a finding must never imply absence of genetic risk."
@@ -10,83 +16,125 @@ Cardinal Principle:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import Final
+from typing import Final, Optional
+
 
 # =============================================================================
-# 1. FIVE MUTUALLY EXCLUSIVE COVERAGE STATES
+# 1. COVERAGE STATES (computed per sample at analysis time, contract C4)
 # =============================================================================
+
 class CoverageState(str, Enum):
-    """
-    Every locus evaluated by GenomePulse resolves to exactly one coverage state.
-    """
-    # 1. Curated locus assayed by chip, non-reference / actionable / risk genotype observed
-    SUPPORTED_AND_OBSERVED = "supported_and_observed"
-
-    # 2. Curated locus assayed by chip, homozygous reference / benign wild-type observed
-    SUPPORTED_NOT_OBSERVED = "supported_not_observed"
-
-    # 3. Curated locus omitted by this specific microarray chip or uncallable (no-call '--')
-    NOT_TESTED_BY_ARRAY = "not_tested_by_array"
-
-    # 4. Marker assayed on array but outside GenomePulse's curated high-confidence variome
-    OUTSIDE_COVERAGE = "outside_coverage"
-
-    # 5. Locus present in catalog or input but marked by conflicting, weak, or unvalidated evidence
-    INSUFFICIENT_EVIDENCE = "insufficient_evidence"
+    """Five mutually exclusive per-sample coverage states."""
+    SUPPORTED_AND_OBSERVED = "supported_and_observed"      # alt count > 0 at a curated locus
+    SUPPORTED_NOT_OBSERVED = "supported_not_observed"      # alt count == 0 at a curated locus
+    NOT_TESTED_BY_ARRAY = "not_tested_by_array"            # not assayed, no-call, or absent from a VCF
+    OUTSIDE_COVERAGE = "outside_coverage"                  # marker present in the file but not curated
+    INSUFFICIENT_EVIDENCE = "insufficient_evidence"        # unresolvable genotype or insufficient locus evidence
 
 
 VALID_COVERAGE_STATES: Final[set[str]] = {s.value for s in CoverageState}
 
+NOT_ASSAYED_REASON: Final[str] = "locus not assayed on this array"
+NO_CALL_REASON: Final[str] = "no-call at this locus"
+VCF_ABSENT_REASON: Final[str] = "absent from VCF (variants-only VCFs omit reference calls)"
+NOT_INTERPRETABLE_REASON: Final[str] = "genotype not interpretable"
+INSUFFICIENT_LOCUS_REASON: Final[str] = "locus evidence is insufficient"
 
-# =============================================================================
-# 2. SUPPORTED INTERPRETATION CATEGORIES
-# =============================================================================
-class InterpretationCategory(str, Enum):
+
+class EvidenceSufficiency(str, Enum):
+    """Whether a locus's clinical evidence supports an assertion (derived from the tier)."""
+    SUFFICIENT = "sufficient"
+    INSUFFICIENT = "insufficient"
+
+
+@dataclass(frozen=True)
+class CoverageEvaluation:
+    """Result of `derive_coverage_state`."""
+    state: CoverageState
+    reason: Optional[str]
+    variant_present: Optional[bool]  # None when no interpretable genotype exists
+
+
+def derive_coverage_state(
+    evidence_sufficiency: EvidenceSufficiency,
+    *,
+    curated: bool = True,
+    assayed: bool = True,
+    resolvable: bool = True,
+    alt_count: Optional[int] = None,
+    assay: str = "array",
+) -> CoverageEvaluation:
+    """Contract C4. Rules are applied in this order:
+
+    1. not curated -> outside_coverage
+    2. not assayed or no-call -> not_tested_by_array (a VCF records why it is absent; a caller that
+       knows the locus was a no-call substitutes NO_CALL_REASON)
+    3. unresolvable genotype -> insufficient_evidence, "genotype not interpretable"
+    4. locus evidence insufficient -> insufficient_evidence (variant presence still reported)
+    5. alt count > 0 -> supported_and_observed; alt count == 0 -> supported_not_observed
+
+    `variant_present` is True exactly when alt_count > 0 (AGENTS.md 4.2), whatever the state.
     """
-    Formal categorization of curated variants within GenomePulse scope.
-    """
-    # High-confidence pathogenic / carrier variants with established clinical validity
-    PATHOGENIC_CARRIER = "pathogenic_carrier"
-
-    # ACMG Secondary Findings v3.2 loci where single-variant assay supports a meaningful statement
-    ACMG_SF_LOCUS = "acmg_sf_locus"
-
-    # Pharmacogenomics with CPIC Level A/B evidence, with explicit star-allele refusal
-    PHARMACOGENOMICS_CPIC = "pharmacogenomics_cpic"
-
-    # Common medically relevant risk alleles with replicated effect sizes (e.g. APOE-e4, F5 Leiden)
-    MEDICALLY_RELEVANT_RISK = "medically_relevant_risk"
-
-    # Selected ancestry-independent traits with scientific consensus (e.g. MCM6/LCT)
-    SCIENTIFICALLY_DEFENSIBLE_TRAIT = "scientifically_defensible_trait"
-
-    # Multi-locus epistatic or compound interactions (APOE diplotype, HFE C282Y/H63D)
-    COMPOUND_MULTILOCUS = "compound_multilocus"
+    if not curated:
+        return CoverageEvaluation(CoverageState.OUTSIDE_COVERAGE, None, None)
+    if not assayed:
+        reason = VCF_ABSENT_REASON if assay == "vcf" else NOT_ASSAYED_REASON
+        return CoverageEvaluation(CoverageState.NOT_TESTED_BY_ARRAY, reason, None)
+    if not resolvable:
+        return CoverageEvaluation(CoverageState.INSUFFICIENT_EVIDENCE, NOT_INTERPRETABLE_REASON, None)
+    if alt_count not in (0, 1, 2):
+        raise ValueError(f"alt_count must be 0, 1 or 2 for a resolvable genotype, got {alt_count!r}")
+    present = alt_count > 0
+    if evidence_sufficiency is EvidenceSufficiency.INSUFFICIENT:
+        return CoverageEvaluation(CoverageState.INSUFFICIENT_EVIDENCE, INSUFFICIENT_LOCUS_REASON, present)
+    state = CoverageState.SUPPORTED_AND_OBSERVED if present else CoverageState.SUPPORTED_NOT_OBSERVED
+    return CoverageEvaluation(state, None, present)
 
 
 # =============================================================================
-# 3. EVIDENCE TIERS
+# 2. EVIDENCE TIERS
 # =============================================================================
 class EvidenceTier(str, Enum):
-    """
-    Conservative 4-tier evidence rating derived transparently from upstream consensus.
-    """
-    # Practice guideline or expert panel (ClinVar 3-4 stars, CPIC Level A)
-    TIER_A = "Tier A"
+    """Conservative 4-tier evidence rating derived from the ClinVar review."""
+    TIER_A = "Tier A"  # practice guideline or expert panel (3-4 stars)
+    TIER_B = "Tier B"  # multiple submitters, no conflicts (2 stars)
+    TIER_C = "Tier C"  # single submitter (1 star)
+    TIER_D = "Tier D"  # no assertion criteria, conflicting, or no ClinVar record
 
-    # Robust multi-submitter clinical consensus without conflicts (ClinVar 2 stars)
-    TIER_B = "Tier B"
 
-    # Limited, single-submitter, or conflicting clinical evidence (ClinVar 1 star, e.g. MTHFR)
-    TIER_C = "Tier C"
+def derive_evidence_tier(stars: Optional[int], conflicting: bool = False) -> EvidenceTier:
+    """Tier from ClinVar stars: 3-4 -> A, 2 -> B, 1 -> C; 0, conflicting or missing -> D."""
+    if stars is not None and stars not in (0, 1, 2, 3, 4):
+        raise ValueError(f"ClinVar stars must be 0..4 or None, got {stars!r}")
+    if conflicting or stars is None or stars == 0:
+        return EvidenceTier.TIER_D
+    if stars >= 3:
+        return EvidenceTier.TIER_A
+    return EvidenceTier.TIER_B if stars == 2 else EvidenceTier.TIER_C
 
-    # Research / functional context only (GWAS exploratory, non-clinical)
-    TIER_D = "Tier D"
+
+def derive_tier_from_cpic_level(level: Optional[str]) -> EvidenceTier:
+    """Tier for a pharmacogenomic locus from its CPIC level: A -> A, B -> B, C or D -> C, no guideline -> D."""
+    if level is None:
+        return EvidenceTier.TIER_D
+    try:
+        return {"A": EvidenceTier.TIER_A, "B": EvidenceTier.TIER_B,
+                "C": EvidenceTier.TIER_C, "D": EvidenceTier.TIER_C}[level]
+    except KeyError:
+        raise ValueError(f"CPIC level must be A, B, C, D or None, got {level!r}") from None
+
+
+def derive_evidence_sufficiency(tier: EvidenceTier) -> EvidenceSufficiency:
+    """Tier A and B are sufficient; C and D are insufficient."""
+    if tier in (EvidenceTier.TIER_A, EvidenceTier.TIER_B):
+        return EvidenceSufficiency.SUFFICIENT
+    return EvidenceSufficiency.INSUFFICIENT
 
 
 # =============================================================================
-# 4. CURATION MODES
+# 3. CURATION MODES
 # =============================================================================
 class CurationMode(str, Enum):
     MACHINE_IMPORTED = "machine_imported"
@@ -95,11 +143,11 @@ class CurationMode(str, Enum):
 
 
 # =============================================================================
-# 5. CORE SCIENTIFIC GUARDRAILS & CAVEATS
+# 4. CORE SCIENTIFIC GUARDRAILS & CAVEATS
 # =============================================================================
 ABSENCE_OF_FINDING_GUARDRAIL: Final[str] = (
     "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. "
-    "GenomePulse analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. "
+    "Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. "
     "It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, "
     "and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats."
 )

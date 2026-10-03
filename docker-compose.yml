@@ -1,43 +1,17 @@
 services:
-  # GenomePulse Web Application
+  # Lucidase Web Application
   web:
     build:
       context: ./web
       dockerfile: Dockerfile
-    container_name: genomepulse_web
+    container_name: lucidase_web
     restart: unless-stopped
     ports:
       - "8080:80"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      redis:
-        condition: service_healthy
     networks:
       - genome-net
-
-  # Redis Cache for Clinical Annotations & PubMed Rate-Limiting
-  redis:
-    image: redis:alpine
-    container_name: genomepulse_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - genome-net
-
-volumes:
-  redis_data:
-    driver: local
 
 networks:
   genome-net:

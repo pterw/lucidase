@@ -1,6 +1,6 @@
-# GenomePulse Font Studio — Chrome Extension
+# Lucidase Font Studio — Chrome Extension
 
-A dedicated Chrome Extension (Manifest V3) that loads your Adobe Typekit typography kit (`cqu4tvx`) and provides live, instant font role switching for GenomePulse and clinical applications.
+A dedicated Chrome Extension (Manifest V3) that loads your Adobe Typekit typography kit (`cqu4tvx`) and provides live, instant font role switching for Lucidase and clinical applications.
 
 ---
 
@@ -30,5 +30,5 @@ A dedicated Chrome Extension (Manifest V3) that loads your Adobe Typekit typogra
    ```
    c:\Users\peter\Python Projects\Thing\chrome-extension
    ```
-5. The **GenomePulse Font Studio** icon (`🎨`) will appear in your Chrome toolbar.
+5. The **Lucidase Font Studio** icon (`🎨`) will appear in your Chrome toolbar.
 6. Click the extension icon while viewing `http://localhost:8000/` to test presets and live-swap fonts.

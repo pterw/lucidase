@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "GenomePulse Font Studio & Typography Companion",
+  "name": "Lucidase Font Studio & Typography Companion",
   "version": "1.0.0",
-  "description": "Interactive Adobe Typekit typography switcher and design companion for GenomePulse and clinical web applications.",
+  "description": "Interactive Adobe Typekit typography switcher and design companion for Lucidase and clinical web applications.",
   "permissions": [
     "activeTab",
     "scripting",
@@ -15,7 +15,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "GenomePulse Font Studio"
+    "default_title": "Lucidase Font Studio"
   },
   "content_scripts": [
     {

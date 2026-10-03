@@ -1,0 +1,7 @@
+# 23andMe file
+# build 37
+# rsid	chromosome	position	genotype
+<script>window.__xss_rsid=1</script>	1	1000	AA
+<img src=x onerror=window.__xss_img=1>	1	1001	GG
+rs429358	19	45411941	CC
+rs1800562	6	26093141	<svg/onload=window.__xss_gt=1>

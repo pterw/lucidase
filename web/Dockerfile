@@ -1,4 +1,4 @@
-# GenomePulse Multi-Stage Production Container
+# Lucidase Multi-Stage Production Container
 # ============================================
 
 # Stage 1: Static Asset Server (Nginx Alpine)
@@ -28,16 +28,22 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://use.typekit.net; font-src 'self' https://use.typekit.net https://p.typekit.net data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net; font-src 'self' https://use.typekit.net https://p.typekit.net data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'" always;
 
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # Static caching
-    location ~* \.(?:css|js|txt|svg|ico)$ {
-        expires 7d;
-        add_header Cache-Control "public, no-transform";
+    # Revalidate on every load (ETag); nothing is cached immutably
+    location ~* \.(?:css|js|json|txt|svg|ico)$ {
+        # add_header here replaces the server-level ones, so repeat them
+        add_header X-Frame-Options "DENY" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net; font-src 'self' https://use.typekit.net https://p.typekit.net data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'" always;
+        add_header Cache-Control "no-cache";
     }
 
     error_page 500 502 503 504 /50x.html;

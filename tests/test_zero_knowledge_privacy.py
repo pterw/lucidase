@@ -7,7 +7,7 @@ Validates that:
 2. Web Worker file processing executes in-memory without initiating network requests.
 3. No tracking or telemetry scripts (Google Analytics, Sentry, Mixpanel, Segment) exist.
 4. The client application NEVER transmits user variants or positive findings to any backend.
-5. The /api/enrich manifest endpoint returns static release provenance with zero input acceptance.
+5. The /api/manifest endpoint returns static release provenance with zero input acceptance.
 """
 
 import json
@@ -55,7 +55,8 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
             WEB_DIR / "index.html",
             WEB_DIR / "src" / "app.js",
             WEB_DIR / "src" / "worker.js",
-            WEB_DIR / "src" / "knowledge-base.js",
+            WEB_DIR / "src" / "kb-loader.js",
+            *sorted((WEB_DIR / "src" / "core").glob("*.js")),
         ]
 
         for file_path in target_files:
@@ -76,6 +77,58 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         self.assertIn("onmessage", content, "worker.js must communicate via message passing")
         self.assertIn("postMessage", content, "worker.js must return results via message passing")
 
+    # Strings are matched first so a "//" inside a literal is not read as a comment;
+    # string contents are kept, so self["fetch"] is still caught.
+    _TOKEN_RE = re.compile(
+        r"\"(?:\\.|[^\"\\\n])*\"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`|//[^\n]*|/\*.*?\*/",
+        re.DOTALL,
+    )
+    _FORBIDDEN_NETWORK = [
+        r"\bfetch\b",
+        r"XMLHttpRequest",
+        r"WebSocket",
+        r"sendBeacon",
+        r"EventSource",
+        r"importScripts",
+    ]
+    _DYNAMIC_IMPORT_RE = re.compile(r"\bimport\s*\(")
+    _KB_IMPORT_RE = re.compile(r"\bimport\s*\(\s*\"\./knowledge-base\.json\"")
+
+    @classmethod
+    def _strip_comments(cls, source):
+        def repl(match):
+            text = match.group(0)
+            return " " if text.startswith(("//", "/*")) else text
+
+        return cls._TOKEN_RE.sub(repl, source)
+
+    def test_no_network_primitives_in_worker_loader_or_core(self):
+        """One comment-stripped scan bans network primitives and dynamic import() across the offline code."""
+        src = WEB_DIR / "src"
+        targets = [
+            src / "worker.js",
+            src / "kb-loader.js",
+            *sorted((src / "core").glob("*.js")),
+        ]
+        self.assertGreater(len(targets), 2, "core/*.js must be found")
+
+        for path in targets:
+            self.assertTrue(path.exists(), f"File {path} must exist")
+            code = self._strip_comments(path.read_text(encoding="utf-8"))
+            for pattern in self._FORBIDDEN_NETWORK:
+                self.assertIsNone(re.search(pattern, code), f"{path.name} must not use {pattern}")
+
+            dynamic_imports = len(self._DYNAMIC_IMPORT_RE.findall(code))
+            allowed = 0
+            if path.name == "kb-loader.js":
+                allowed = len(self._KB_IMPORT_RE.findall(code))
+                self.assertEqual(allowed, 1, 'kb-loader.js must import "./knowledge-base.json" exactly once')
+            self.assertEqual(
+                dynamic_imports,
+                allowed,
+                f"{path.name} has an import() beyond the one literal ./knowledge-base.json load",
+            )
+
     def test_app_does_not_exfiltrate_user_variant_findings(self):
         """Verifies app.js does not transmit positive findings or state.records over the network."""
         app_path = WEB_DIR / "src" / "app.js"
@@ -95,8 +148,7 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         self.assertIn("local_analysis: true", content)
         self.assertIn("genomic_uploads: false", content)
         self.assertIn("variant_identifiers_transmitted: false", content)
-        self.assertIn("clinvar_release: \"2024-06\"", content)
-        self.assertIn("dbsnp_build: 156", content)
+        # Release facts are read from knowledge-base.json (web/tests/manifest.test.mjs), not asserted as constants.
 
 
 if __name__ == "__main__":

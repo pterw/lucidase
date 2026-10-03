@@ -3,33 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GenomePulse | Zero-Knowledge Clinical & Proteomic DNA Explorer</title>
+  <title>Lucidase | Zero-Knowledge Clinical & Proteomic DNA Explorer</title>
   
   <!-- Adobe Typekit Impeccable Typography (Gotham, Attribute Mono, Orpheus Pro, Neuzeit Grotesk) -->
   <link rel="stylesheet" href="https://use.typekit.net/cqu4tvx.css" id="typekit-stylesheet">
   
-  <!-- Tailwind CSS & DaisyUI via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-  
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['gotham', 'nimbus-sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-            mono: ['attribute-mono', 'ballinger-mono', 'azo-mono', 'monospace'],
-            serif: ['orpheuspro', 'archer-pro', 'Georgia', 'serif'],
-            display: ['neuzeit-grotesk-condensed', 'gotham', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
+  <!-- daisyUI (vendored, see src/vendor/README.md), then app styles, then Tailwind utilities -->
+  <link rel="stylesheet" href="src/vendor/daisyui-4.12.10.min.css">
 
   <!-- Custom Design System Styles -->
   <link rel="stylesheet" href="src/styles.css">
+  <!-- Utilities must come LAST: the Tailwind Play CDN appended its sheet after styles.css -->
+  <link rel="stylesheet" href="src/vendor/tailwind.css">
 </head>
 <body class="dna-bg-grid min-h-screen text-slate-900 dark:text-slate-100 flex flex-col justify-between">
 
@@ -42,7 +27,7 @@
       <div>
         <div class="flex items-center space-x-2">
           <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono" data-design-id="brand.wordmark" data-design-role="display">
-            GenomePulse
+            Lucidase
           </h1>
           <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-sm bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
             Clinical Variome
@@ -52,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Theme Switcher, Privacy & Redis Badges -->
+    <!-- Theme Switcher & Privacy Badge -->
     <div class="flex items-center space-x-2">
       <button id="btn-theme-toggle" type="button" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 rounded-sm text-xs px-2.5 py-1">
         <span id="theme-toggle-icon">🌙</span> <span id="theme-toggle-text" class="hidden sm:inline">Dark HUD</span>
@@ -61,11 +46,6 @@
       <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-300 shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span>Local-First (Client-Side Only)</span>
-      </div>
-
-      <div class="flex items-center space-x-1.5 px-3 py-1 rounded-sm bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/60 text-xs text-sky-700 dark:text-sky-300 shadow-sm">
-        <span class="text-sky-500">⚡</span>
-        <span id="redis-status-indicator">Redis Edge Ready</span>
       </div>
     </div>
   </header>
@@ -100,9 +80,7 @@
             </button>
           </div>
           <div class="flex items-center justify-center space-x-6 text-[11px] text-slate-500 dark:text-slate-400 pt-2 font-mono">
-            <span>🛡️ ClinVar 2026.1</span>
-            <span>·</span>
-            <span>🧬 ACMG SF v3.2 (81 Genes)</span>
+            <span id="hero-scope">🧬 ACMG SF</span>
             <span>·</span>
             <span>🔬 Human Protein Atlas</span>
             <span>·</span>
@@ -128,6 +106,12 @@
       </div>
     </section>
 
+    <!-- Analysis failure (hidden until the worker fails) -->
+    <section id="analysis-error" role="alert" class="hidden mb-8 p-4 rounded-sm bg-red-50/90 dark:bg-red-950/40 border-l-4 border-red-500 border border-red-200 dark:border-red-900/60 shadow-sm text-xs">
+      <p class="font-bold text-red-800 dark:text-red-300">The analysis could not be completed. Nothing was uploaded, and no results are shown. Please try again, or try a different file.</p>
+      <p class="mt-1 font-mono text-red-700 dark:text-red-400">Technical detail: <span id="analysis-error-detail"></span></p>
+    </section>
+
     <!-- Results Section (Populated dynamically) -->
     <section id="results-section" class="hidden space-y-6">
       
@@ -138,7 +122,7 @@
           <span>Scientific Scope & Guardrail: Absence of a Finding ≠ Absence of Risk</span>
         </div>
         <p class="mt-1 leading-relaxed text-slate-800 dark:text-slate-200 font-serif">
-          GenomePulse tests only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs) or structural repeats. <strong>Absence of a finding must never imply absence of genetic risk.</strong>
+          Lucidase tests only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs) or structural repeats. <strong>Absence of a finding must never imply absence of genetic risk.</strong>
         </p>
       </div>
 
@@ -167,7 +151,7 @@
               <span id="qc-het-rate" class="font-bold text-slate-800 dark:text-slate-200 ml-1 font-mono">—</span>
             </div>
             <div class="flex items-center space-x-1.5">
-              <span class="text-xs text-slate-500 dark:text-slate-400">Inferred Sex:</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">Sex-chromosome QC:</span>
               <span id="qc-inferred-sex" class="inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                 —
               </span>
@@ -184,7 +168,7 @@
           </div>
 
           <div class="p-4 rounded-sm bg-sky-50 dark:bg-slate-900/60 border border-sky-300 dark:border-sky-500/30">
-            <div class="text-xs text-sky-700 dark:text-sky-300 font-semibold font-mono">ACMG SF v3.2</div>
+            <div class="text-xs text-sky-700 dark:text-sky-300 font-semibold font-mono" data-acmg-version>ACMG SF</div>
             <div id="count-acmg" class="text-2xl font-black text-sky-600 dark:text-sky-400 mt-1 font-mono">0</div>
             <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Actionable genes</div>
           </div>
@@ -209,10 +193,10 @@
         </div>
 
         <!-- 5-State Coverage Taxonomy Counters -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-800/80">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-800/80">
           <div class="p-3 rounded-sm bg-sky-50/70 dark:bg-slate-900/40 border border-sky-200 dark:border-sky-500/20">
             <div class="text-[11px] text-sky-700 dark:text-sky-300 font-mono font-semibold flex items-center justify-between">
-              <span>Observed Findings</span>
+              <span>Observed</span>
               <span class="text-[9px] uppercase px-1 rounded bg-sky-200 dark:bg-sky-900/60 font-bold">State 1</span>
             </div>
             <div id="count-state-observed" class="text-xl font-bold text-sky-600 dark:text-sky-400 mt-1 font-mono">0</div>
@@ -221,20 +205,20 @@
 
           <div class="p-3 rounded-sm bg-emerald-50/70 dark:bg-slate-900/40 border border-emerald-200 dark:border-emerald-500/20">
             <div class="text-[11px] text-emerald-700 dark:text-emerald-300 font-mono font-semibold flex items-center justify-between">
-              <span>Tested Wild-Type</span>
+              <span>Tested WT</span>
               <span class="text-[9px] uppercase px-1 rounded bg-emerald-200 dark:bg-emerald-900/60 font-bold">State 2</span>
             </div>
             <div id="count-state-negative" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Supported, not observed</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Supported, not detected</div>
           </div>
 
           <div class="p-3 rounded-sm bg-amber-50/70 dark:bg-slate-900/40 border border-amber-200 dark:border-amber-500/20">
             <div class="text-[11px] text-amber-700 dark:text-amber-300 font-mono font-semibold flex items-center justify-between">
-              <span>Microarray Gaps</span>
+              <span>Array Gaps</span>
               <span class="text-[9px] uppercase px-1 rounded bg-amber-200 dark:bg-amber-900/60 font-bold">State 3</span>
             </div>
             <div id="count-state-gaps" class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Not tested by this chip</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Omitted from chip</div>
           </div>
 
           <div class="p-3 rounded-sm bg-slate-100/70 dark:bg-slate-900/40 border border-slate-300 dark:border-slate-700/50">
@@ -243,7 +227,16 @@
               <span class="text-[9px] uppercase px-1 rounded bg-slate-200 dark:bg-slate-800 font-bold">State 4</span>
             </div>
             <div id="count-state-outside" class="text-xl font-bold text-slate-700 dark:text-slate-300 mt-1 font-mono">0</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Array markers uncurated</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Markers uncurated</div>
+          </div>
+
+          <div class="p-3 rounded-sm bg-rose-50/70 dark:bg-slate-900/40 border border-rose-200 dark:border-rose-500/20">
+            <div class="text-[11px] text-rose-700 dark:text-rose-300 font-mono font-semibold flex items-center justify-between">
+              <span>Conflicting</span>
+              <span class="text-[9px] uppercase px-1 rounded bg-rose-200 dark:bg-rose-900/60 font-bold">State 5</span>
+            </div>
+            <div id="count-state-insufficient" class="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1 font-mono">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Disputed / insufficient</div>
           </div>
         </div>
       </div>
@@ -281,15 +274,11 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 text-xs">
           <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-sm">
             <span class="text-[10px] uppercase text-slate-500 font-bold block">Estimated Lifetime Risk</span>
-            <span id="apoe-lifetime-stat" class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5 block" data-design-id="apoe.lifetime.stat" data-design-role="stat" data-design-name="APOE Lifetime Stat">25–35% (vs. ~10–15% Population Baseline)</span>
-          </div>
-          <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-sm">
-            <span class="text-[10px] uppercase text-slate-500 font-bold block">Actionable Modulation</span>
-            <span class="text-xs text-slate-700 dark:text-slate-300 mt-0.5 block" data-design-id="apoe.modulation.narrative" data-design-role="editorial" data-design-name="Actionable Modulation">Aerobic exercise, ApoB/LDL cholesterol control, slow-wave sleep, Mediterranean-DASH diet.</span>
+            <span id="apoe-lifetime-stat" class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5 block" data-design-id="apoe.lifetime.stat" data-design-role="stat" data-design-name="APOE Lifetime Stat"></span>
           </div>
           <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-sm">
             <span class="text-[10px] uppercase text-slate-500 font-bold block">HPA Proteomic Abundance</span>
-            <span class="text-xs text-slate-700 dark:text-slate-300 mt-0.5 block" data-design-id="apoe.proteomic.desc" data-design-role="body" data-design-name="Proteomic Abundance">Liver (High), Cerebral Cortex (Medium), Plasma (High). Secreted Apolipoprotein.</span>
+            <span id="apoe-hpa-desc" class="text-xs text-slate-700 dark:text-slate-300 mt-0.5 block" data-design-id="apoe.proteomic.desc" data-design-role="body" data-design-name="Proteomic Abundance"></span>
           </div>
         </div>
       </div>
@@ -350,8 +339,8 @@
           <button data-filter="pathogenic" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
             Pathogenic
           </button>
-          <button data-filter="acmg" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-            ACMG SF v3.2
+          <button data-filter="acmg" data-acmg-version class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+            ACMG SF
           </button>
           <button data-filter="pgx" class="px-3 py-1.5 rounded-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
             Pharmacogenomics
@@ -368,9 +357,9 @@
             <span class="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
           </div>
 
-          <div id="kb-provenance-badge" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm text-[11px] font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700" title="Knowledge Base: ClinVar 2024-06 · dbSNP 156 · 3-Layer Provenance">
+          <div id="kb-provenance-badge" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm text-[11px] font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>KB: ClinVar 2024-06 · Offline</span>
+            <span id="kb-provenance-text">KB · Offline</span>
           </div>
 
           <div class="dropdown dropdown-end">
@@ -429,7 +418,7 @@
           </div>
           <p id="drawer-coord" class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">chr:pos</p>
           <div class="flex items-center space-x-2 mt-2">
-            <span id="drawer-tier-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30">Tier A</span>
+            <span id="drawer-tier-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700"></span>
             <span id="drawer-coverage-state-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700">Supported & Observed</span>
           </div>
         </div>
@@ -442,8 +431,8 @@
       <div id="drawer-acmg-box" class="hidden p-3.5 rounded-sm bg-sky-50 dark:bg-sky-500/10 border border-sky-300 dark:border-sky-500/30 flex items-start space-x-3">
         <span class="text-sky-600 dark:text-sky-400 text-lg">🛡️</span>
         <div>
-          <div class="text-xs font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider font-mono">ACMG Secondary Findings v3.2 Gene (81 Genes)</div>
-          <p class="text-xs text-slate-700 dark:text-slate-300 mt-0.5">Designated actionable locus under ACMG SF v3.2 screening guidelines. Note: Clinical assertions reflect curated ClinVar submissions; GenomePulse does not independently evaluate ACMG/AMP 2015 variant classification criteria.</p>
+          <div class="text-xs font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider font-mono"><span data-acmg-version>ACMG SF</span> Gene</div>
+          <p class="text-xs text-slate-700 dark:text-slate-300 mt-0.5">Designated actionable locus under <span data-acmg-version>ACMG SF</span> screening guidelines. Note: Clinical assertions reflect curated ClinVar submissions; Lucidase does not independently evaluate ACMG/AMP 2015 variant classification criteria.</p>
         </div>
       </div>
 
@@ -461,11 +450,9 @@
       <div id="drawer-refusal-box" class="hidden p-3.5 rounded-sm bg-purple-50/80 dark:bg-purple-950/40 border-l-4 border-purple-600 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
         <div class="font-bold text-purple-900 dark:text-purple-200 flex items-center space-x-1.5 font-mono uppercase tracking-wider text-[11px]">
           <span>🚫</span>
-          <span>Incomplete Star-Allele Inference Refusal</span>
+          <span>Limitation of this Test</span>
         </div>
-        <p id="drawer-refusal-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-serif">
-          Incomplete star-allele coverage refusal: Interrogating an isolated SNP cannot rule out other active alleles. A full metabolizer phenotype cannot be inferred.
-        </p>
+        <p id="drawer-refusal-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-serif"></p>
       </div>
 
       <!-- General Scientific Caveats Box -->
@@ -550,6 +537,7 @@
             <button type="button" data-partner="affected" class="partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all">Affected</button>
             <button type="button" data-partner="wildtype" class="partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all">Wild-Type</button>
           </div>
+          <p id="drawer-partner-model-note" class="text-[10px] text-slate-500 dark:text-slate-400 font-serif"></p>
 
           <!-- Offspring Probability Breakdown -->
           <div class="space-y-2 pt-1 text-xs font-mono bg-white dark:bg-slate-950 p-3 rounded-sm border border-slate-200 dark:border-slate-800">
@@ -637,16 +625,16 @@
           <div id="biotool-ensembl-card" class="p-3.5 rounded-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
             <div class="flex items-center justify-between">
               <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">Ensembl VEP & Constraint</span>
-              <span id="drawer-ens-transcript" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">ENST00000252486 (MANE Select)</span>
+              <span id="drawer-ens-transcript" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono"></span>
             </div>
             <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
               <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
                 <span class="text-[9px] uppercase text-slate-400 block">AlphaMissense Class</span>
-                <span id="drawer-ens-alphamissense" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">likely_benign</span>
+                <span id="drawer-ens-alphamissense" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block"></span>
               </div>
               <div class="p-2.5 bg-white dark:bg-slate-950 rounded-sm border border-slate-200 dark:border-slate-800">
                 <span class="text-[9px] uppercase text-slate-400 block">LOEUF Constraint</span>
-                <span id="drawer-ens-loeuf" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">1.26 (Tolerant)</span>
+                <span id="drawer-ens-loeuf" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block"></span>
               </div>
             </div>
           </div>
@@ -690,20 +678,16 @@
       <a id="drawer-clinvar-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline border-slate-300 dark:border-slate-700 hover:border-sky-500 text-sky-600 dark:text-sky-400 text-xs rounded-sm">
         Open ClinVar Record ↗
       </a>
-      <span class="text-[11px] text-slate-500 font-mono">Evidence Tier 1</span>
+      <span id="drawer-footer-tier" class="text-[11px] text-slate-500 font-mono">Evidence tier</span>
     </div>
   </aside>
 
   <!-- Footer -->
   <footer class="glass-header px-6 py-4 mt-12 text-center text-xs text-slate-500 font-mono border-t border-slate-200 dark:border-slate-800">
     <div class="flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto gap-2">
-      <div>GenomePulse · Zero-Knowledge Variome Analysis</div>
+      <div>Lucidase · Zero-Knowledge Variome Analysis</div>
       <div class="flex items-center space-x-4">
         <span>Zero-Knowledge / Client-Side Only</span>
-        <span>·</span>
-        <span>ClinVar 2024-06</span>
-        <span>·</span>
-        <span>dbSNP 156</span>
       </div>
     </div>
   </footer>

@@ -31,8 +31,14 @@ from bio_engine import (
     write_contigs_fasta,
     write_contigs_genbank,
 )
-from genomic_parser import GenomicParser, SampleQC, VariantCall
-from variant_annotator import AnnotationRecord, VariantAnnotator
+from genomic_parser import (
+    ParseResult,
+    UnsupportedFormatError,
+    compute_qc,
+    parse_genotype_file,
+    read_genotype_text,
+)
+from variant_annotator import APOE_ROW_ID, AnnotationRecord, AnnotationReport, VariantAnnotator
 from graph_core import (
     EDGE,
     FUTURE,
@@ -107,6 +113,26 @@ EXAMPLES = {
         text="# 23andMe sample data\n# rsid\tchromosome\tposition\tgenotype\nrs429358\t19\t45411941\tCC\nrs7412\t19\t45412079\tCC\nrs1800562\t6\t26093141\tAG\nrs1799945\t6\t26092913\tCG\nrs6025\t1\t169519049\tGG\nrs1799963\t11\t46761055\tGG\nrs4244285\t10\t96541604\tAG\nrs9923231\t16\t31107689\tAG\nrs4149056\t12\t21331549\tCT\nrs1801133\t1\t11856378\tAG\nrs4988235\t2\t136608646\tAA\nrs671\t12\t112241766\tGG\nrs113993960\t7\t117199644\tDI",
     ),
 }
+
+
+def _rate_text(value, note, digits: int = 2) -> str:
+    """A QC rate as a percentage, or "n/a" with the reason when it is not meaningful (VCF)."""
+    return f"{value * 100:.{digits}f}%" if value is not None else f"n/a ({note})"
+
+
+def _row_label(r: AnnotationRecord) -> str:
+    """The identifier to show. APOE is one combined finding, so it never shows "APOE-STATUS"."""
+    return "APOE (rs429358 + rs7412)" if r.rsid == APOE_ROW_ID else r.rsid
+
+
+def _coordinate_text(r: AnnotationRecord) -> str:
+    def one(rsid, chrom, pos):
+        return f"{rsid} chr{chrom}:{pos:,}" if pos is not None else f"{rsid} chr{chrom} (position unavailable)"
+
+    if r.rsid == APOE_ROW_ID:
+        parts = "; ".join(one(c["rsid"], c["chrom"], c["pos"]) for c in r.raw["components"])
+        return f"{parts} ({r.build})"
+    return f"{one('', r.chrom, r.pos).strip()} ({r.build})"
 
 
 # ===========================================================================
@@ -381,7 +407,8 @@ class ExplorerApp:
         self.genome_detail_text.pack(fill="both", expand=True)
         self.nb = nb
         self.genome_records: list[AnnotationRecord] = []
-        self.sample_qc: SampleQC | None = None
+        self.sample_qc: dict | None = None  # compute_qc output for the loaded file
+        self.sample_parse: ParseResult | None = None
 
         self._resize_job = None
         self.canvas.get_tk_widget().bind("<Configure>", self._on_resize, add="+")
@@ -471,7 +498,10 @@ class ExplorerApp:
             opener = gzip.open if path.endswith(".gz") else open
             with opener(path, "rt", encoding="utf-8", errors="ignore") as f:
                 head_lines = [f.readline() for _ in range(30)]
-            fmt, _ = GenomicParser.detect_format(head_lines)
+            try:
+                fmt = parse_genotype_file("".join(head_lines)).format
+            except UnsupportedFormatError:
+                fmt = "unknown"
             if fmt != "unknown":
                 with opener(path, "rt", encoding="utf-8", errors="ignore") as f:
                     content = f.read(500_000)
@@ -811,29 +841,30 @@ class ExplorerApp:
     # ---- Genomic / ClinVar / HPA processing
     def _build_genome_text(self, raw_text: str, prefix: str = ""):
         try:
-            variants, qc = GenomicParser.parse_text(raw_text)
-            annotator = VariantAnnotator()
-            records = annotator.annotate_genome(variants)
-            self._populate_genome_results(qc, records, prefix)
+            result = parse_genotype_file(raw_text)
+            report = VariantAnnotator().annotate_genome(result)
+            self._populate_genome_results(result, report, prefix)
         except Exception as err:
             self.set_status(f"Error parsing genomic text: {err}", error=True)
 
     def _build_genome_file(self, path: str, prefix: str = ""):
         try:
-            variants, qc = GenomicParser.parse_file(path)
-            annotator = VariantAnnotator()
-            records = annotator.annotate_genome(variants)
-            self._populate_genome_results(qc, records, prefix)
+            result = parse_genotype_file(read_genotype_text(path), os.path.basename(path))
+            report = VariantAnnotator().annotate_genome(result)
+            self._populate_genome_results(result, report, prefix)
         except Exception as err:
             self.set_status(f"Error parsing genomic file: {err}", error=True)
 
     def _populate_genome_results(
-        self, qc: SampleQC, records: list[AnnotationRecord], prefix: str = ""
+        self, result: ParseResult, report: AnnotationReport, prefix: str = ""
     ):
+        qc = compute_qc(result)
+        records = report.records
         self.sample_qc = qc
+        self.sample_parse = result
         self.genome_records = records
-        annotator = VariantAnnotator()
-        summary = annotator.summarize_annotations(records)
+        summary = VariantAnnotator().summarize_annotations(report)
+        coverage = summary["coverage"]
 
         # Populate tree
         self.genome_tree.delete(*self.genome_tree.get_children())
@@ -844,7 +875,7 @@ class ExplorerApp:
                 "",
                 "end",
                 values=(
-                    r.rsid,
+                    _row_label(r),
                     r.gene,
                     r.genotype,
                     r.category,
@@ -860,18 +891,21 @@ class ExplorerApp:
         self.genome_detail_text.delete("1.0", "end")
         lines = [
             "═" * 3 + " Quality Control & Sequencing Metrics " + "═" * 3 + "\n",
-            f"  Format Detected:........ {qc.format_name.upper()}\n",
-            f"  Genome Assembly:........ {qc.build}\n",
-            f"  Total Markers:.......... {qc.total_snps:,} SNPs\n",
-            f"  Call Rate:.............. {qc.call_rate*100:.2f}%\n",
-            f"  Heterozygosity Rate:.... {qc.heterozygosity_rate*100:.2f}%\n",
-            f"  Inferred Biological Sex: {qc.inferred_sex}\n\n",
-            "═" * 3 + f" Clinical & Proteomic Findings ({len(records)}) " + "═" * 3 + "\n",
+            f"  Format Detected:........ {result.format.upper()}\n",
+            f"  Genome Assembly:........ {result.build}\n",
+            f"  Total Markers:.......... {len(result.calls):,} SNPs\n",
+            f"  Call Rate:.............. {_rate_text(qc['call_rate'], qc['qc_note'])}\n",
+            f"  Heterozygosity Rate:.... {_rate_text(qc['heterozygosity_rate'], qc['qc_note'])}\n",
+            f"  Sex-chromosome QC:...... {qc['sex_signal']}\n\n",
+            "═" * 3 + f" Clinical & Proteomic Findings ({len(records)} loci) " + "═" * 3 + "\n",
             f"  Pathogenic Variants:.... {summary['pathogenic_count']}\n",
             f"  Carrier Conditions:..... {summary['carrier_count']}\n",
             f"  Pharmacogenomics:....... {summary['pgx_count']} drug response alerts\n",
             f"  Elevated Risk Factors:.. {summary['risk_factor_count']}\n",
-            f"  ACMG SF v3.2 Actionable: {summary['acmg_actionable_findings']}\n\n",
+            f"  ACMG SF v3.2 Actionable: {summary['acmg_actionable_findings']}\n",
+            f"  Not tested by this file: {coverage['not_tested_by_array_count']} of {coverage['total_loci']} loci\n",
+            f"  Insufficient evidence:.. {coverage['insufficient_evidence_count']}\n\n",
+            "Absence of a finding does not imply absence of genetic risk.\n\n",
             "Select any variant row in the table above to inspect ClinVar review criteria, OMIM/MedGen phenotypes, and Human Protein Atlas (HPA) tissue protein abundance.\n",
         ]
         self.genome_detail_text.insert("end", "".join(lines))
@@ -884,9 +918,9 @@ class ExplorerApp:
                 break
 
         msg = (
-            f"Parsed {qc.total_snps:,} SNPs ({qc.format_name.upper()}, {qc.build}) · "
-            f"Call rate: {qc.call_rate*100:.1f}% · Inferred: {qc.inferred_sex} · "
-            f"{len(records)} clinical findings"
+            f"Parsed {len(result.calls):,} SNPs ({result.format.upper()}, {result.build}) · "
+            f"Call rate: {_rate_text(qc['call_rate'], qc['qc_note'], 1)} · Sex-chromosome QC: {qc['sex_signal']} · "
+            f"{len(records)} loci"
         )
         if prefix:
             msg = f"{prefix}\n{msg}"
@@ -904,20 +938,32 @@ class ExplorerApp:
         self.genome_detail_text.configure(state="normal")
         self.genome_detail_text.delete("1.0", "end")
         lines = [
-            f"═" * 3 + f" Clinical Variant Inspection: {r.rsid} ({r.gene}) " + "═" * 3 + "\n\n",
-            f"  Genotype:............... {r.genotype} ({r.call.zygosity.upper()})\n",
-            f"  Chromosome Coordinate:.. chr{r.call.chrom}:{r.call.pos:,} ({r.call.build})\n",
+            f"═" * 3 + f" Clinical Variant Inspection: {_row_label(r)} ({r.gene}) " + "═" * 3 + "\n\n",
+            f"  Genotype:............... {r.genotype}\n",
+            f"  Coverage:............... {r.coverage_state.replace('_', ' ')}"
+            + (f" ({r.reason})" if r.reason else "")
+            + "\n",
+            f"  Chromosome Coordinate:.. {_coordinate_text(r)}\n",
             f"  Category:............... {r.category}\n",
             f"  Clinical Significance:.. {r.clinical_significance}\n",
-            f"  ClinVar Review Stars:... {'★' * r.review_stars} ({r.review_stars} / 4 stars)\n",
-            f"  Promethease Magnitude:.. {r.magnitude:.1f} / 10.0 (Repute: {r.repute})\n",
+            "  ClinVar Review Stars:... "
+            + (f"{'★' * r.review_stars} ({r.review_stars} / 4 stars)" if r.review_stars is not None else "not available")
+            + "\n",
+            f"  Evidence Tier:.......... {r.evidence_tier}\n",
+            "  Promethease Magnitude:.. "
+            + (f"{r.magnitude:.1f} / 10.0 (Repute: {r.repute})" if r.magnitude is not None else "not available")
+            + "\n",
         ]
+        if r.limitation:
+            lines.append(f"  Limitation:............. {r.limitation}\n")
         if r.acmg_actionable:
             lines.append("  ACMG Actionable:........ YES (Designated ACMG Secondary Findings v3.2 Gene)\n")
         if r.drug_response:
             lines.append(f"  Drug Response (CPIC):... {r.drug_response}\n")
-        lines.append(f"  gnomAD Allele Frequency: {r.gnomad_af*100:.2f}%\n")
-        lines.append(f"  gnomAD pLI (Constraint): {r.gnomad_pli:.2f}\n\n")
+        af_text = f"{r.gnomad_af*100:.2f}%" if r.gnomad_af is not None else "not available"
+        pli_text = f"{r.gnomad_pli:.2f}" if r.gnomad_pli is not None else "not available"
+        lines.append(f"  gnomAD Allele Frequency: {af_text}\n")
+        lines.append(f"  gnomAD pLI (Constraint): {pli_text}\n\n")
 
         lines.append("═" * 3 + " Clinical Condition & Phenotype " + "═" * 3 + "\n")
         lines.append(f"  {r.phenotype}\n\n")
@@ -946,7 +992,7 @@ class ExplorerApp:
         if not path:
             return
 
-        qc = self.sample_qc
+        qc, result = self.sample_qc, self.sample_parse
         if path.endswith(".csv"):
             import csv
             with open(path, "w", newline="", encoding="utf-8") as f:
@@ -954,30 +1000,31 @@ class ExplorerApp:
                 writer.writerow([
                     "rsid", "gene", "genotype", "category", "review_stars", "significance",
                     "magnitude", "repute", "phenotype", "drug_response", "acmg_actionable",
-                    "gnomad_af", "hpa_tissues", "hpa_subcellular"
+                    "gnomad_af", "hpa_tissues", "hpa_subcellular", "coverage_state", "evidence_tier"
                 ])
                 for r in self.genome_records:
                     writer.writerow([
-                        r.rsid, r.gene, r.genotype, r.category, r.review_stars,
+                        _row_label(r), r.gene, r.genotype, r.category, r.review_stars,
                         r.clinical_significance, r.magnitude, r.repute, r.phenotype,
                         r.drug_response, r.acmg_actionable, r.gnomad_af,
-                        str(r.hpa_tissues), ";".join(r.hpa_subcellular)
+                        str(r.hpa_tissues), ";".join(r.hpa_subcellular), r.coverage_state, r.evidence_tier
                     ])
         else:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(f"# Clinical & Proteomic Genomic Analysis Report\n\n")
                 f.write(f"### Sample Quality Control & Sequencing Metrics\n\n")
-                f.write(f"- **File Format**: `{qc.format_name.upper()}`\n")
-                f.write(f"- **Genome Assembly**: `{qc.build}`\n")
-                f.write(f"- **Total Markers Evaluated**: `{qc.total_snps:,}`\n")
-                f.write(f"- **Call Rate**: `{qc.call_rate*100:.2f}%`\n")
-                f.write(f"- **Inferred Biological Sex**: `{qc.inferred_sex}`\n\n")
+                f.write(f"- **File Format**: `{result.format.upper()}`\n")
+                f.write(f"- **Genome Assembly**: `{result.build}`\n")
+                f.write(f"- **Total Markers Evaluated**: `{len(result.calls):,}`\n")
+                f.write(f"- **Call Rate**: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
+                f.write(f"- **Sex-chromosome QC**: `{qc['sex_signal']}`\n\n")
+                f.write("Absence of a finding does not imply absence of genetic risk.\n\n")
                 f.write(f"### High-Impact Clinical & Pharmacogenomic Findings\n\n")
                 f.write(f"| rsID | Gene | Genotype | Category | Stars | Clinical Significance | Phenotype |\n")
                 f.write(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
                 for r in self.genome_records:
                     stars_str = "★" * r.review_stars if r.review_stars else "—"
-                    f.write(f"| **{r.rsid}** | `{r.gene}` | `{r.genotype}` | {r.category} | {stars_str} | {r.clinical_significance} | {r.phenotype} |\n")
+                    f.write(f"| **{_row_label(r)}** | `{r.gene}` | `{r.genotype}` | {r.category} | {stars_str} | {r.clinical_significance} | {r.phenotype} |\n")
         self.set_status(f"Saved clinical report to {os.path.basename(path)}")
 
 

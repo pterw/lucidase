@@ -1,0 +1,791 @@
+[
+  {
+    "id": "palindromic-cc",
+    "description": "C/G is palindromic: CC has no alt allele (P0-006)",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "G",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "C",
+        "C"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "palindromic-cg",
+    "description": "C/G palindromic: CG carries one G",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "G",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "C",
+        "G"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "palindromic-gg",
+    "description": "C/G palindromic: GG carries two G",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "G",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "G",
+        "G"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "palindromic-at-tt",
+    "description": "A/T palindromic: TT is two alts and is never complemented",
+    "input": {
+      "locus": {
+        "ref": "A",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "T",
+        "T"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "palindromic-no-complement",
+    "description": "A palindromic site never tries the complement: A/T alleles at a C/G site stay unresolvable",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "G",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "A",
+        "T"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "snp-ct-het",
+    "description": "C/T non-palindromic: CT carries one T",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "C",
+        "T"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "snp-ct-ref-hom",
+    "description": "C/T: CC is zero alts, no flip",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "C",
+        "C"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "snp-flipped-het",
+    "description": "C/T seen on the minus strand: AG complements to TC, one alt",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "A",
+        "G"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": true
+    }
+  },
+  {
+    "id": "snp-flipped-alt-hom",
+    "description": "C/T seen on the minus strand: AA complements to TT, two alts",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "A",
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": true
+    }
+  },
+  {
+    "id": "snp-flipped-ref-hom",
+    "description": "C/T minus strand: GG complements to CC, zero alts",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "G",
+        "G"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": true
+    }
+  },
+  {
+    "id": "snp-mixed-strand",
+    "description": "C/T: C is on the forward strand but A is not, and the complemented pair G/T is not in the set",
+    "input": {
+      "locus": {
+        "ref": "C",
+        "alt": "T",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "C",
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "snp-outside-alleles",
+    "description": "AT at a G/A site: T is not G or A, and its complement set {T,A} is not within {G,A}",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "A",
+        "T"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "snp-three-alleles",
+    "description": "More than two alleles is unresolvable",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "G",
+        "A",
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "array-di-het",
+    "description": "Array indel codes map through allele_codes: DI is one deletion allele (alt)",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "D",
+        "I"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "array-ii-ref",
+    "description": "II maps to the reference sequence twice",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "I",
+        "I"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "array-dd-alt",
+    "description": "DD maps to the deletion allele twice",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "D",
+        "D"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "array-codes-inverted",
+    "description": "allele_codes can map I to the alt allele (an insertion variant)",
+    "input": {
+      "locus": {
+        "ref": "A",
+        "alt": "AT",
+        "allele_codes": {
+          "D": "ref",
+          "I": "alt"
+        },
+        "chrom": "1"
+      },
+      "alleles": [
+        "I",
+        "D"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "array-code-at-snp",
+    "description": "A D/I code at a SNP locus (no allele_codes) is unresolvable",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "D",
+        "I"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "array-code-with-base",
+    "description": "A D code mixed with a base at an indel locus is unresolvable",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "D",
+        "G"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "vcf-indel-het",
+    "description": "VCF sequences match the normalised ref/alt form verbatim: ATCT,A is one alt",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "ATCT",
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "vcf-indel-alt-hom",
+    "description": "VCF A,A is two copies of the deletion allele",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "A",
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "vcf-indel-ref-hom",
+    "description": "VCF ATCT,ATCT is homozygous reference",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "ATCT",
+        "ATCT"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "vcf-indel-other-allele",
+    "description": "A different indel sequence at the same anchor is outside {ref, alt}",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "ATCT",
+        "AT"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "vcf-indel-no-complement",
+    "description": "Indel sequences are never complemented",
+    "input": {
+      "locus": {
+        "ref": "ATCT",
+        "alt": "A",
+        "allele_codes": {
+          "D": "alt",
+          "I": "ref"
+        },
+        "chrom": "7"
+      },
+      "alleles": [
+        "TAGA",
+        "TAGA"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "vcf-snv-sequences",
+    "description": "A VCF SNV call arrives as one-base sequences and counts like an array call",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "G",
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 1,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "haploid-x-alt",
+    "description": "Haploid [A] on chrX counts as [A,A]: two alts",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "X"
+      },
+      "alleles": [
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "haploid-x-ref",
+    "description": "Haploid [G] on chrX counts as [G,G]: zero alts",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "X"
+      },
+      "alleles": [
+        "G"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "haploid-y",
+    "description": "Haploid on chrY is allowed",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "Y"
+      },
+      "alleles": [
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "haploid-mt",
+    "description": "Haploid on MT is allowed",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "MT"
+      },
+      "alleles": [
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": false
+    }
+  },
+  {
+    "id": "haploid-x-flipped",
+    "description": "Haploid [T] at a G/A chrX site complements to A: two alts, flipped",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "X"
+      },
+      "alleles": [
+        "T"
+      ]
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": true
+    }
+  },
+  {
+    "id": "haploid-x-outside",
+    "description": "Haploid chrX allele outside {ref, alt} is unresolvable",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "X"
+      },
+      "alleles": [
+        "N"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "haploid-autosome",
+    "description": "Haploid call on an autosome is unresolvable",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": [
+        "A"
+      ]
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "no-call",
+    "description": "A null allele list is a no-call",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "1"
+      },
+      "alleles": null
+    },
+    "expected": {
+      "ok": false,
+      "reason": "no_call"
+    }
+  },
+  {
+    "id": "vcf-foreign-alt-c",
+    "description": "VCF ALT C at G>A site is a foreign allele: plus-strand by definition, never complemented (P0-009)",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "C",
+        "C"
+      ],
+      "assay": "vcf"
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "vcf-foreign-alt-t",
+    "description": "VCF ALT T at G>A site is a foreign allele, never read as hom-alt A (P0-009)",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "T",
+        "T"
+      ],
+      "assay": "vcf"
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "array-complement-cc",
+    "description": "Array CC at G>A site complements to GG: the array path keeps strand flipping",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "C",
+        "C"
+      ],
+      "assay": "array"
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": true
+    }
+  },
+  {
+    "id": "array-complement-tt",
+    "description": "Array TT at G>A site complements to AA: the array path keeps strand flipping",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "T",
+        "T"
+      ],
+      "assay": "array"
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": true
+    }
+  }
+]

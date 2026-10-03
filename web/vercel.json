@@ -4,7 +4,8 @@
   "builds": [
     {
       "src": "api/manifest.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": { "includeFiles": "src/knowledge-base.json" }
     },
     {
       "src": "**",
@@ -14,10 +15,6 @@
   "routes": [
     {
       "src": "/api/manifest",
-      "dest": "/api/manifest.js"
-    },
-    {
-      "src": "/api/enrich",
       "dest": "/api/manifest.js"
     },
     {
@@ -36,14 +33,20 @@
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://use.typekit.net; font-src 'self' https://use.typekit.net https://p.typekit.net data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net; font-src 'self' https://use.typekit.net https://p.typekit.net data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'"
         }
       ]
     },
     {
       "source": "/src/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
   ]

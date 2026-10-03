@@ -1,0 +1,1365 @@
+[
+  {
+    "id": "ar-het-x-unscreened",
+    "description": "AR carrier x unscreened partner with allele frequency q=0.02: child gets alt from the patient with 1/2 and from the partner with q",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "unscreened",
+      "af": 0.02,
+      "allele": "F508del"
+    },
+    "expected": {
+      "dist": {
+        "available": true,
+        "p0": 0.49,
+        "p1": 0.5,
+        "p2": 0.01
+      },
+      "outcome": {
+        "kind": "mendelian",
+        "affected": 0.01,
+        "carrier": 0.5
+      }
+    }
+  },
+  {
+    "id": "ar-het-x-het",
+    "description": "AR carrier x carrier: Mendelian 1/4, 1/2, 1/4",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "heterozygous",
+      "af": 0.02,
+      "allele": "F508del"
+    },
+    "expected": {
+      "dist": {
+        "p0": 0.25,
+        "p1": 0.5,
+        "p2": 0.25
+      },
+      "outcome": {
+        "kind": "mendelian",
+        "affected": 0.25,
+        "carrier": 0.5
+      }
+    }
+  },
+  {
+    "id": "ar-hom-x-wildtype",
+    "description": "AR affected x wild-type partner: every child is an obligate carrier",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 2,
+      "partner": "wildtype",
+      "af": 0.02,
+      "allele": "F508del"
+    },
+    "expected": {
+      "dist": {
+        "p0": 0,
+        "p1": 1,
+        "p2": 0
+      },
+      "outcome": {
+        "kind": "mendelian",
+        "affected": 0,
+        "carrier": 1
+      }
+    }
+  },
+  {
+    "id": "ar-wildtype-x-unscreened",
+    "description": "AR wild-type patient: no affected child is possible, whatever the partner frequency",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 0,
+      "partner": "unscreened",
+      "af": 0.02,
+      "allele": "F508del"
+    },
+    "expected": {
+      "dist": {
+        "p0": 0.98,
+        "p1": 0.02,
+        "p2": 0
+      },
+      "outcome": {
+        "kind": "mendelian",
+        "affected": 0
+      }
+    }
+  },
+  {
+    "id": "unscreened-needs-af",
+    "description": "Unscreened partner without a gnomAD allele frequency is unavailable and says so, with no default",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "unscreened",
+      "af": null,
+      "allele": "F508del"
+    },
+    "expected": {
+      "dist": {
+        "available": false
+      },
+      "outcome": {
+        "available": false
+      }
+    }
+  },
+  {
+    "id": "ad-het-x-wildtype-penetrance",
+    "description": "AD carrier x wild-type partner: P(child has >=1 copy)=1/2, affected = that x penetrance 0.5",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_dominant",
+          "mendelian_disease": true,
+          "penetrance": 0.5,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "wildtype",
+      "af": 0.01,
+      "allele": "variant"
+    },
+    "expected": {
+      "dist": {
+        "p0": 0.5,
+        "p1": 0.5,
+        "p2": 0
+      },
+      "outcome": {
+        "kind": "mendelian",
+        "affected": 0.25
+      }
+    }
+  },
+  {
+    "id": "ad-null-penetrance-unavailable",
+    "description": "AD with unknown penetrance cannot state an affected probability",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_dominant",
+          "mendelian_disease": true,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "wildtype",
+      "af": 0.01,
+      "allele": "variant"
+    },
+    "expected": {
+      "outcome": {
+        "kind": "mendelian",
+        "available": false
+      }
+    }
+  },
+  {
+    "id": "apoe-e4e4-x-wildtype",
+    "description": "e4/e4 x wild-type partner: every child inherits e4 (the drawer used to say 50/0/50). Risk-factor gene: transmission only",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 2,
+      "partner": "wildtype",
+      "af": 0.14852,
+      "allele": "e4"
+    },
+    "expected": {
+      "dist": {
+        "p0": 0,
+        "p1": 1,
+        "p2": 0
+      },
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 1,
+        "label": "Chance a child inherits the e4 allele"
+      },
+      "absent": [
+        "outcome.affected",
+        "outcome.carrier"
+      ],
+      "text_excludes": [
+        "affected",
+        "recurrence",
+        "disease risk"
+      ]
+    }
+  },
+  {
+    "id": "wildtype-f5-transmission-zero",
+    "description": "Wild-type F5 x wild-type partner: transmission 0 and no affected status",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 0,
+      "partner": "wildtype",
+      "af": 0.021432,
+      "allele": "Leiden"
+    },
+    "expected": {
+      "dist": {
+        "p0": 1,
+        "p1": 0,
+        "p2": 0
+      },
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 0
+      },
+      "absent": [
+        "outcome.affected"
+      ]
+    }
+  },
+  {
+    "id": "mthfr-het-trait-no-recurrence",
+    "description": "MTHFR C677T carrier (trait model) x unscreened: allele transmission only, no recurrence wording (S2)",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "trait",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "unscreened",
+      "af": 0.318214,
+      "allele": "677T"
+    },
+    "expected": {
+      "dist": {
+        "p0": 0.340893,
+        "p1": 0.5,
+        "p2": 0.159107
+      },
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 0.659107,
+        "label": "Chance a child inherits the 677T allele"
+      },
+      "absent": [
+        "outcome.affected"
+      ],
+      "text_excludes": [
+        "affected",
+        "recurrence",
+        "disease risk"
+      ]
+    }
+  },
+  {
+    "id": "pgx-transmission-only",
+    "description": "Pharmacogenomic gene: transmission only",
+    "input": {
+      "fn": "scenario",
+      "gene": {
+        "inheritance": {
+          "model": "pharmacogenomic",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "partner": "heterozygous",
+      "af": 0.16,
+      "allele": "*2"
+    },
+    "expected": {
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 0.75
+      },
+      "absent": [
+        "outcome.affected"
+      ]
+    }
+  },
+  {
+    "id": "status-ar-het",
+    "description": "AR heterozygote is a carrier and not affected",
+    "input": {
+      "fn": "status",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1
+    },
+    "expected": {
+      "status": {
+        "is_carrier": true,
+        "is_affected": false
+      }
+    }
+  },
+  {
+    "id": "status-ar-hom",
+    "description": "AR homozygote is affected and not a carrier",
+    "input": {
+      "fn": "status",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 2
+    },
+    "expected": {
+      "status": {
+        "is_carrier": false,
+        "is_affected": true
+      }
+    }
+  },
+  {
+    "id": "status-ar-wildtype",
+    "description": "AR wild-type is neither carrier nor affected (P0-008)",
+    "input": {
+      "fn": "status",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 0
+    },
+    "expected": {
+      "status": {
+        "is_carrier": false,
+        "is_affected": false
+      }
+    }
+  },
+  {
+    "id": "status-f5-wildtype-absent",
+    "description": "Risk-factor locus: is_affected and is_carrier do not exist",
+    "input": {
+      "fn": "status",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 0
+    },
+    "expected": {
+      "absent": [
+        "status.is_affected",
+        "status.is_carrier"
+      ]
+    }
+  },
+  {
+    "id": "status-f5-het-absent",
+    "description": "Risk-factor het: still no affected or carrier status",
+    "input": {
+      "fn": "status",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1
+    },
+    "expected": {
+      "absent": [
+        "status.is_affected",
+        "status.is_carrier"
+      ]
+    }
+  },
+  {
+    "id": "multi-f5-f2-het",
+    "description": "F5 het + F2 het on different chromosomes: recognised by gene and altCount, not genotype strings (plus-strand C/T and G/A shown)",
+    "input": {
+      "fn": "multi_locus",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs6025",
+          "gene": "F5",
+          "chrom": "1",
+          "altCount": 1,
+          "genotype_display": "C/T",
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs1799963",
+          "gene": "F2",
+          "chrom": "11",
+          "altCount": 1,
+          "genotype_display": "G/A",
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": [
+        {
+          "genes": [
+            "F5",
+            "F2"
+          ],
+          "joint_transmission_prob": 0.25,
+          "assumption": "assumes unlinked loci and a partner without these alleles"
+        }
+      ],
+      "text_excludes": [
+        "synergistic",
+        "20-40",
+        "thrombophilia"
+      ]
+    }
+  },
+  {
+    "id": "multi-f5-hom-f2-het",
+    "description": "F5 hom x F2 het: product of altCount/2 terms = 1 x 1/2",
+    "input": {
+      "fn": "multi_locus",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs6025",
+          "gene": "F5",
+          "chrom": "1",
+          "altCount": 2,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs1799963",
+          "gene": "F2",
+          "chrom": "11",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": [
+        {
+          "joint_transmission_prob": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-f5-wildtype",
+    "description": "Wild-type F5 (altCount 0) never forms a multi-locus finding",
+    "input": {
+      "fn": "multi_locus",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs6025",
+          "gene": "F5",
+          "chrom": "1",
+          "altCount": 0,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs1799963",
+          "gene": "F2",
+          "chrom": "11",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  },
+  {
+    "id": "multi-same-chromosome",
+    "description": "Loci on the same chromosome are not independent: no multi-locus finding",
+    "input": {
+      "fn": "multi_locus",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs6025",
+          "gene": "F5",
+          "chrom": "1",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs9999999",
+          "gene": "F2",
+          "chrom": "1",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  },
+  {
+    "id": "compound-cftr-double-het",
+    "description": "Two heterozygous CFTR loci: possible compound heterozygote, phase unknown, never asserted trans (C1)",
+    "input": {
+      "fn": "compound",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs113993960",
+          "gene": "CFTR",
+          "chrom": "7",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs75527207",
+          "gene": "CFTR",
+          "chrom": "7",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": [
+        {
+          "gene": "CFTR",
+          "phase": "unknown",
+          "loci": [
+            "rs113993960",
+            "rs75527207"
+          ]
+        }
+      ],
+      "text_includes": [
+        "possible compound heterozygote",
+        "phase unknown",
+        "cis or trans cannot be determined from unphased genotypes"
+      ],
+      "text_excludes": [
+        "trans phase",
+        "separate chromosomes"
+      ]
+    }
+  },
+  {
+    "id": "compound-hfe-c282y-h63d",
+    "description": "HFE C282Y het + H63D het: possible compound heterozygote, phase unknown",
+    "input": {
+      "fn": "compound",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs1800562",
+          "gene": "HFE",
+          "chrom": "6",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs1799945",
+          "gene": "HFE",
+          "chrom": "6",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": [
+        {
+          "gene": "HFE",
+          "phase": "unknown"
+        }
+      ],
+      "text_excludes": [
+        "trans phase"
+      ]
+    }
+  },
+  {
+    "id": "compound-one-hom-not-double-het",
+    "description": "C282Y hom + H63D het is not a double heterozygote",
+    "input": {
+      "fn": "compound",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs1800562",
+          "gene": "HFE",
+          "chrom": "6",
+          "altCount": 2,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs1799945",
+          "gene": "HFE",
+          "chrom": "6",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  },
+  {
+    "id": "compound-single-het",
+    "description": "A single heterozygous CFTR locus is not compound heterozygosity",
+    "input": {
+      "fn": "compound",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs113993960",
+          "gene": "CFTR",
+          "chrom": "7",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  },
+  {
+    "id": "compound-not-for-non-mendelian",
+    "description": "Two het loci in a non-Mendelian gene are not compound heterozygosity",
+    "input": {
+      "fn": "compound",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs1",
+          "gene": "MTHFR",
+          "chrom": "1",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs2",
+          "gene": "MTHFR",
+          "chrom": "1",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  },
+  {
+    "id": "multi-trait-pgx-het-pair-different-chromosomes",
+    "description": "Scope guard: a trait (MTHFR) and a pharmacogenomic (CYP2C19) heterozygous pair on different chromosomes is not a multi-locus finding while the risk_factor filter stands (owner ruling 9)",
+    "input": {
+      "fn": "multi_locus",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CYP2C19": {
+          "inheritance": {
+            "model": "pharmacogenomic",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs1801133",
+          "gene": "MTHFR",
+          "chrom": "1",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs4244285",
+          "gene": "CYP2C19",
+          "chrom": "10",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  },
+  {
+    "id": "multi-ar-het-pair-different-chromosomes",
+    "description": "Scope guard: an autosomal recessive heterozygous pair (HFE, CFTR) on different chromosomes is not a multi-locus finding while the risk_factor filter stands (owner ruling 9)",
+    "input": {
+      "fn": "multi_locus",
+      "genes": {
+        "F5": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "F2": {
+          "inheritance": {
+            "model": "risk_factor",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "HFE": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 0.2,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "CFTR": {
+          "inheritance": {
+            "model": "autosomal_recessive",
+            "mendelian_disease": true,
+            "penetrance": 1.0,
+            "disease": "x",
+            "omim": null
+          }
+        },
+        "MTHFR": {
+          "inheritance": {
+            "model": "trait",
+            "mendelian_disease": false,
+            "penetrance": null,
+            "disease": "x",
+            "omim": null
+          }
+        }
+      },
+      "records": [
+        {
+          "rsid": "rs1800562",
+          "gene": "HFE",
+          "chrom": "6",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        },
+        {
+          "rsid": "rs113993960",
+          "gene": "CFTR",
+          "chrom": "7",
+          "altCount": 1,
+          "genotype_display": null,
+          "standalone": true,
+          "role": "standard"
+        }
+      ]
+    },
+    "expected": {
+      "findings": []
+    }
+  }
+]
