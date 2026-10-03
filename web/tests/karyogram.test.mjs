@@ -2,7 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { loadKnowledgeBase } from "../src/kb-loader.js";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { CHROMOSOME_ORDER, layoutKaryogram } from "../src/core/karyogram.js";
+import { COVERAGE_STATES } from "../src/core/coverage.js";
+import { parseGenotypeFile } from "../src/core/parse.js";
+import { classify } from "../src/core/classify.js";
 
 const kb = await loadKnowledgeBase();
 const observations = Object.fromEntries(kb.lociList.map((l) => [l.rsid, "supported_not_observed"]));
@@ -86,4 +91,62 @@ test("bad input throws", () => {
   assert.throws(() => layoutKaryogram({ kb, sample, binSize: 1.5 }), /binSize/);
   const { assemblies, ...noAssemblies } = kb;
   assert.throws(() => layoutKaryogram({ kb: noAssemblies }), /assemblies/);
+});
+
+test("an observation that is not a known coverage state throws", () => {
+  const sample = { build: "GRCh37", calls: [], observations };
+  for (const bad of ["bogus", "", null, undefined, 3, "reference"]) {
+    const obs = { ...observations, rs429358: bad };
+    assert.throws(() => layoutKaryogram({ kb, sample: { ...sample, observations: obs } }), /rs429358.*coverage state/, String(bad));
+  }
+  for (const good of Object.values(COVERAGE_STATES)) {
+    const obs = { ...observations, rs429358: good };
+    assert.doesNotThrow(() => layoutKaryogram({ kb, sample: { ...sample, observations: obs } }), good);
+  }
+});
+
+test("chromosome names that collide with Object.prototype are counted as unplaced, not mangled", () => {
+  const calls = [call("constructor", 1), call("constructor", 2), call("__proto__", 3), call("toString", 4), call("1", 100)];
+  const { sample } = layoutKaryogram({ kb, sample: { build: "GRCh37", calls, observations } });
+  const t = sample.totals;
+  assert.deepEqual(Object.keys(t.unplaced).sort(), ["__proto__", "constructor", "toString"]);
+  assert.equal(t.unplaced.constructor, 2);
+  assert.equal(t.unplaced.toString, 1);
+  assert.equal(Object.getOwnPropertyDescriptor(t.unplaced, "__proto__").value, 1);
+  assert.equal(Object.getPrototypeOf(t.unplaced), Object.prototype);
+  assert.equal(t.placed, 1);
+  assert.equal(t.rows, t.placed + t.mt + sumUnplaced(t) + t.outOfBounds + t.notPlacedBuildUnknown);
+});
+
+test("the remaining bad-input branches throw", () => {
+  const sample = { build: "GRCh37", calls: [], observations };
+  assert.throws(() => layoutKaryogram(), /assemblies/);
+  assert.throws(() => layoutKaryogram({ kb: null }), /assemblies/);
+  assert.throws(() => layoutKaryogram({ kb: { ...kb, assemblies: "x" } }), /assemblies/);
+  assert.throws(() => layoutKaryogram({ kb: { ...kb, loci: undefined } }), /loci/);
+  assert.throws(() => layoutKaryogram({ kb, binSize: -5 }), /binSize/);
+  assert.throws(() => layoutKaryogram({ kb, binSize: "2000000" }), /binSize/);
+  assert.throws(() => layoutKaryogram({ kb, sample: { build: "GRCh37", calls: [] } }), /no observation/);
+  const noBuild = { ...kb, assemblies: { GRCh38: kb.assemblies.GRCh38 } };
+  assert.throws(() => layoutKaryogram({ kb: noBuild, sample }), /no GRCh37 assembly/);
+  assert.throws(() => layoutKaryogram({ kb: { ...kb, assemblies: { GRCh38: {} } } }), /no GRCh38 assembly/);
+  const { Y, ...noY } = kb.assemblies.GRCh37.chromosomes;
+  const noYKb = { ...kb, assemblies: { ...kb.assemblies, GRCh37: { ...kb.assemblies.GRCh37, chromosomes: noY } } };
+  assert.throws(() => layoutKaryogram({ kb: noYKb, sample }), /GRCh37 has no chromosome Y/);
+});
+
+test("the real committed karyogram sample lays out and the totals invariant holds", () => {
+  const text = readFileSync(fileURLToPath(new URL("../demo-data/sample-karyogram-23andme.txt", import.meta.url)), "utf8");
+  const parsed = parseGenotypeFile(text, "sample-karyogram-23andme.txt");
+  assert.equal(parsed.build, "GRCh37");
+  const { records } = classify(parsed, kb);
+  const obs = Object.fromEntries(records.map((r) => [r.rsid, r.coverage_state]));
+  const { sample } = layoutKaryogram({ kb, sample: { build: parsed.build, calls: parsed.calls, observations: obs } });
+  const t = sample.totals;
+  assert.equal(sample.density, "available");
+  assert.equal(t.rows, parsed.calls.length);
+  assert.equal(t.rows, t.placed + t.mt + sumUnplaced(t) + t.outOfBounds + t.notPlacedBuildUnknown);
+  assert.ok(t.placed > 15_000);
+  const binned = Object.values(sample.bins).flat().reduce((a, b) => a + b, 0);
+  assert.equal(binned, t.placed);
 });

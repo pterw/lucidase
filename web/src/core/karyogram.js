@@ -10,6 +10,7 @@
  * Nothing from a file is placed by position when its build is unknown (fail closed): density is "unavailable" and
  * every row on a drawable chromosome is counted in `totals.notPlacedBuildUnknown`.
  */
+import { COVERAGE_STATES } from "./coverage.js";
 
 export const CHROMOSOME_ORDER = Object.freeze([
   ...Array.from({ length: 22 }, (_, i) => String(i + 1)),
@@ -21,6 +22,7 @@ export const DEFAULT_BIN_SIZE = 2_000_000;
 
 const KNOWN_BUILDS = ["GRCh37", "GRCh38"];
 const DRAWABLE = new Set(CHROMOSOME_ORDER);
+const VALID_STATES = new Set(Object.values(COVERAGE_STATES));
 
 /** Bin index of a 1-based position. */
 export function binIndex(pos, binSize) {
@@ -45,8 +47,14 @@ export function layoutKaryogram({ kb, sample = null, binSize = DEFAULT_BIN_SIZE 
   const loci = Object.values(kb.loci);
   if (sample) {
     for (const locus of loci) {
-      if (!Object.prototype.hasOwnProperty.call(sample.observations ?? {}, locus.rsid)) {
+      const observations = sample.observations ?? {};
+      if (!Object.hasOwn(observations, locus.rsid)) {
         throw new Error(`layoutKaryogram: no observation for KB locus ${locus.rsid}`);
+      }
+      if (!VALID_STATES.has(observations[locus.rsid])) {
+        throw new Error(
+          `layoutKaryogram: observation for KB locus ${locus.rsid} is not a coverage state: ${String(observations[locus.rsid])}`,
+        );
       }
     }
   }
@@ -85,7 +93,9 @@ export function layoutKaryogram({ kb, sample = null, binSize = DEFAULT_BIN_SIZE 
     if (chrom === "MT") {
       totals.mt += 1;
     } else if (!DRAWABLE.has(chrom)) {
-      totals.unplaced[chrom] = (totals.unplaced[chrom] ?? 0) + 1;
+      // defineProperty, not assignment: a name such as "__proto__" or "constructor" must stay a plain own key.
+      const seen = Object.hasOwn(totals.unplaced, chrom) ? totals.unplaced[chrom] : 0;
+      Object.defineProperty(totals.unplaced, chrom, { value: seen + 1, enumerable: true, writable: true, configurable: true });
     } else if (!known) {
       totals.notPlacedBuildUnknown += 1;
     } else if (!Number.isInteger(call.pos) || call.pos < 1 || call.pos > lengthOf[chrom]) {

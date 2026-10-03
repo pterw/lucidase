@@ -106,8 +106,12 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
       ? `${sample.totals.placed} markers placed`
       : "density unavailable";
   const stateText = [...stateCounts].map(([s, n]) => `${labelOf(s)}: ${n}`).join("; ");
-  const title = `Karyogram (${geometry.build})`;
-  const desc = `${markerText}. Loci per state: ${stateText}.`;
+  // Unknown file build: the GRCh38 geometry is only a fallback reference, so never present it as the file's build.
+  const fallback = sample && sample.density !== "available";
+  const title = fallback ? `Karyogram (${geometry.build} reference; file build unknown)` : `Karyogram (${geometry.build})`;
+  const desc = fallback
+    ? `${geometry.build} reference; file build unknown. ${markerText}. Loci per state: ${stateText}.`
+    : `${markerText}. Loci per state: ${stateText}.`;
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${f(width)}" height="${f(height)}" viewBox="0 0 ${f(width)} ${f(height)}" role="img" aria-labelledby="kary-title kary-desc">` +

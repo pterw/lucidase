@@ -193,7 +193,8 @@ function checkLocusBounds(loci, assemblies, problems) {
   for (const [key, locus] of Object.entries(loci)) {
     if (!isObj(locus) || !isStr(locus.chrom)) continue;
     for (const [build, field] of Object.entries(BUILD_FIELDS)) {
-      const chrom = assemblies[build].chromosomes[locus.chrom];
+      const chroms = assemblies[build].chromosomes;
+      const chrom = Object.hasOwn(chroms, locus.chrom) ? chroms[locus.chrom] : undefined;
       if (!chrom) problems.push(`loci.${key}.chrom: chromosome "${locus.chrom}" is not in the ${build} assembly`);
       else if (Number.isInteger(locus[field]) && locus[field] > chrom.length) {
         problems.push(`loci.${key}.${field}: ${locus[field]} is beyond the ${build} length ${chrom.length} of chromosome ${locus.chrom}`);

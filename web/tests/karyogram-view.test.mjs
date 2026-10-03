@@ -128,3 +128,54 @@ test("the karyogram state labels reuse the analysis labels and add the reference
   labels.reference = "changed";
   assert.notEqual(karyogramStateLabels().reference, "changed");
 });
+
+// Hand-made layout, no sample, default 2 Mb bins. Column 1: 3 bins, centromere in bin 1. Column 2: 5 bins, centromere in
+// bin 2. So cenY = 24 + 2 * 7 = 38; column 1 bins sit at y 31, 38, 45 and column 2 bins at 24, 31, 38, 45, 52.
+const handLayout = () => ({
+  geometry: {
+    build: "GRCh38",
+    chromosomes: [
+      { name: "1", length: 6_000_000, centromere: [2_000_001, 2_500_000] },
+      { name: "2", length: 10_000_000, centromere: [4_000_001, 5_000_000] },
+    ],
+  },
+  reference: {
+    loci: [
+      { rsid: "rsA", gene: "GA", chrom: "1", pos: 2_100_000 },
+      { rsid: "rsB", gene: "GB", chrom: "2", pos: 100 },
+    ],
+  },
+  sample: null,
+});
+
+test("centromeres align across columns and loci sit at the exact y of their bin", () => {
+  const svg = renderKaryogramSvg(handLayout());
+  assert.match(svg, /width="56\.0" height="76\.0" viewBox="0 0 56\.0 76\.0"/);
+  const col = (n) => svg.match(new RegExp(`<g class="kary-col" data-chrom="${n}">[\\s\\S]*?</g>`))[0];
+  // Both centromere ticks are on y=38 (aligned), at the columns' x of 14 and 42.
+  assert.ok(col("1").includes('<line class="kary-cen" x1="11.0" y1="38.0" x2="17.0" y2="38.0"/>'));
+  assert.ok(col("2").includes('<line class="kary-cen" x1="39.0" y1="38.0" x2="45.0" y2="38.0"/>'));
+  const ys = (n) => [...col(n).matchAll(/<circle class="kary-bin[^"]*" cx="[\d.]+" cy="([\d.]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ys("1"), ["31.0", "45.0"]);
+  assert.deepEqual(ys("2"), ["24.0", "31.0", "45.0", "52.0"]);
+  assert.ok(col("1").includes('y="59.0"')); // label: last bin y 45 + 14
+  assert.ok(col("2").includes('y="66.0"'));
+  const locus = (rsid) => svg.match(new RegExp(`data-rsid="${rsid}"[\\s\\S]*?kary-core" cx="([\\d.]+)" cy="([\\d.]+)"`));
+  assert.deepEqual(locus("rsA").slice(1), ["14.0", "38.0"]);
+  assert.deepEqual(locus("rsB").slice(1), ["42.0", "24.0"]);
+});
+
+test("an unknown build says the GRCh38 geometry is a fallback and the file build is unknown", () => {
+  const svg = renderKaryogramSvg(sampleLayout([call("2", 5_000_001)], "unknown"));
+  const title = svg.match(/<title id="kary-title">([^<]*)<\/title>/)[1];
+  const desc = svg.match(/<desc id="kary-desc">([^<]*)<\/desc>/)[1];
+  assert.equal(title, "Karyogram (GRCh38 reference; file build unknown)");
+  assert.match(desc, /GRCh38 reference; file build unknown/);
+  assert.match(desc, /density unavailable/);
+});
+
+test("a known build keeps the plain title and desc", () => {
+  const svg = renderKaryogramSvg(sampleLayout([call("2", 5_000_001)]));
+  assert.match(svg, /<title id="kary-title">Karyogram \(GRCh37\)<\/title>/);
+  assert.doesNotMatch(svg, /file build unknown/);
+});

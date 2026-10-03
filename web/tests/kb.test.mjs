@@ -229,6 +229,14 @@ test("a locus on a chromosome the assembly lacks is rejected", () => {
   assert.match(problemsOf(kb).join("\n"), /rs1.*chromosome "MT"/);
 });
 
+test("a locus chromosome that names an Object.prototype member is rejected", () => {
+  for (const name of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
+    const kb = goodKb();
+    kb.loci.rs1.chrom = name;
+    assert.match(problemsOf(kb).join("\n"), new RegExp(`rs1.*chromosome "${name}" is not in the GRCh37 assembly`), name);
+  }
+});
+
 test("the committed knowledge base is accepted and exposes its assemblies, frozen", () => {
   const json = JSON.parse(readFileSync(new URL("../src/knowledge-base.json", import.meta.url), "utf-8"));
   const kb = validateKb(json);
