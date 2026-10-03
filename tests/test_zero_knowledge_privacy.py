@@ -37,6 +37,20 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
                     self.assertIn("frame-ancestors 'none'", csp, "CSP must prevent clickjacking via frame embedding")
         self.assertTrue(csp_found, "Content-Security-Policy header must be defined")
 
+    def test_vercel_config_is_valid_and_ships_the_manifest_data(self):
+        """routes/builds cannot sit beside headers on Vercel, or the CSP never ships (S5a-C-1)."""
+        config = json.loads((WEB_DIR / "vercel.json").read_text(encoding="utf-8"))
+        self.assertIn("headers", config)
+        for legacy in ("routes", "builds"):
+            self.assertNotIn(legacy, config, f"vercel.json must not combine {legacy} with headers")
+        function = config.get("functions", {}).get("api/manifest.js")
+        self.assertIsNotNone(function, "functions must be keyed by api/manifest.js")
+        source = (WEB_DIR / "api" / "manifest.js").read_text(encoding="utf-8")
+        read = re.search(r'new URL\("(\.\./[^"]+)", import\.meta\.url\)', source)
+        self.assertIsNotNone(read, "api/manifest.js must read its data through new URL(..., import.meta.url)")
+        needed = (WEB_DIR / "api" / Path(read.group(1))).resolve().relative_to(WEB_DIR.resolve())
+        self.assertEqual(function.get("includeFiles"), needed.as_posix())
+
     def test_no_telemetry_or_tracking_scripts(self):
         """Verifies absence of third-party analytics/telemetry trackers."""
         forbidden_patterns = [
@@ -51,13 +65,7 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
             r"loggly",
         ]
 
-        target_files = [
-            WEB_DIR / "index.html",
-            WEB_DIR / "src" / "app.js",
-            WEB_DIR / "src" / "worker.js",
-            WEB_DIR / "src" / "kb-loader.js",
-            *sorted((WEB_DIR / "src" / "core").glob("*.js")),
-        ]
+        target_files = [WEB_DIR / "index.html", *self._web_modules()]
 
         for file_path in target_files:
             self.assertTrue(file_path.exists(), f"File {file_path} must exist")
@@ -94,6 +102,15 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
     _DYNAMIC_IMPORT_RE = re.compile(r"\bimport\s*\(")
     _KB_IMPORT_RE = re.compile(r"\bimport\s*\(\s*\"\./knowledge-base\.json\"")
 
+    @staticmethod
+    def _web_modules():
+        """Every web/src/**/*.js outside vendor/ (the vendored CSS and fonts are not code we author)."""
+        src = WEB_DIR / "src"
+        modules = sorted(p for p in src.rglob("*.js") if "vendor" not in p.relative_to(src).parts)
+        names = {p.name for p in modules}
+        assert {"app.js", "worker.js", "view-model.js", "kb-loader.js", "parse.js"} <= names
+        return modules
+
     @classmethod
     def _strip_comments(cls, source):
         def repl(match):
@@ -102,21 +119,25 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
 
         return cls._TOKEN_RE.sub(repl, source)
 
-    def test_no_network_primitives_in_worker_loader_or_core(self):
-        """One comment-stripped scan bans network primitives and dynamic import() across the offline code."""
-        src = WEB_DIR / "src"
-        targets = [
-            src / "worker.js",
-            src / "kb-loader.js",
-            *sorted((src / "core").glob("*.js")),
-        ]
-        self.assertGreater(len(targets), 2, "core/*.js must be found")
+    # The only fetch in the web app: a same-origin GET of the bundled demo file. Nothing else may use one.
+    _FETCH_ALLOWED = {"app.js": [r'fetch\(\s*"\./demo-data/sample-23andme\.txt"\s*\)']}
+    _UPLOAD_RE = re.compile(r"method\s*:|body\s*:", re.IGNORECASE)
 
+    def test_no_network_primitives_in_any_web_module(self):
+        """One comment-stripped scan over every web module bans network primitives and dynamic import()."""
+        targets = self._web_modules()
         for path in targets:
-            self.assertTrue(path.exists(), f"File {path} must exist")
             code = self._strip_comments(path.read_text(encoding="utf-8"))
+            allowed_fetch = self._FETCH_ALLOWED.get(path.name, [])
+            if allowed_fetch:
+                for pattern in allowed_fetch:
+                    self.assertEqual(len(re.findall(pattern, code)), 1, f"{path.name}: expected one allow-listed fetch")
+                    code = re.sub(pattern, " ", code)
             for pattern in self._FORBIDDEN_NETWORK:
                 self.assertIsNone(re.search(pattern, code), f"{path.name} must not use {pattern}")
+            self.assertIsNone(
+                self._UPLOAD_RE.search(code), f"{path.name} must not build a request with method: or body:"
+            )
 
             dynamic_imports = len(self._DYNAMIC_IMPORT_RE.findall(code))
             allowed = 0
@@ -128,15 +149,6 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
                 allowed,
                 f"{path.name} has an import() beyond the one literal ./knowledge-base.json load",
             )
-
-    def test_app_does_not_exfiltrate_user_variant_findings(self):
-        """Verifies app.js does not transmit positive findings or state.records over the network."""
-        app_path = WEB_DIR / "src" / "app.js"
-        content = app_path.read_text(encoding="utf-8")
-
-        # Must not map records to POST body
-        self.assertNotIn("state.records.map(", content, "app.js must not map state.records to network payload")
-        self.assertNotIn("triggerRedisEnrichment", content, "Leaky enrichment trigger must be removed")
 
     def test_manifest_endpoint_guarantees(self):
         """Verifies backend api/manifest.js serves manifest with verifiable privacy guarantees."""

@@ -138,6 +138,13 @@ def test_dockerfile_asset_location_repeats_security_headers_and_csp():
     assert {"X-Content-Type-Options", "Content-Security-Policy"} <= set(headers)
     for name in headers:
         assert f"add_header {name} " in location, f"asset location drops {name}"
-    csp = re.search(r'add_header Content-Security-Policy "([^"]+)"', location).group(1)
-    assert csp == _csp(), "Dockerfile CSP differs from vercel.json"
     assert 'add_header Cache-Control "no-cache"' in location
+
+
+def test_every_dockerfile_csp_copy_equals_vercel_json():
+    """index.html gets the server-level copy, assets the location copy; both must match vercel.json (S5a-C-2)."""
+    text = (WEB_DIR / "Dockerfile").read_text(encoding="utf-8")
+    copies = re.findall(r'add_header Content-Security-Policy "([^"]+)"', text)
+    assert len(copies) == 2, f"expected the server-level and the asset-location copy, found {len(copies)}"
+    for copy in copies:
+        assert copy == _csp(), "a Dockerfile CSP copy differs from vercel.json"
