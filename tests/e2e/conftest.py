@@ -102,12 +102,19 @@ def page(browser, base_url, request):
         pytest.fail("browser errors recorded:\n" + "\n".join(problems))
 
 
+def goto_ready(page, url):
+    """Load index.html and wait until the app is live.
+
+    initApp binds every handler, then publishes window.__lucidase: an event sent
+    before that (an upload, a click) would be lost, so wait for the outcome.
+    """
+    page.goto(url, wait_until="networkidle")
+    page.wait_for_function("() => window.__lucidase !== undefined", timeout=WAIT_TIMEOUT_MS)
+
+
 @pytest.fixture
 def loaded_page(page):
-    page.goto(page.base_url, wait_until="networkidle")
-    # initApp binds every handler, then publishes window.__lucidase: an event sent
-    # before that (an upload, a click) would be lost, so wait for the outcome.
-    page.wait_for_function("() => window.__lucidase !== undefined")
+    goto_ready(page, page.base_url)
     return page
 
 

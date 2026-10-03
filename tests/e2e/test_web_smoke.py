@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
+
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE
+from conftest import DEMO_FILE, goto_ready
 
 
 def _assert_results_shown(page):
@@ -37,7 +39,7 @@ def _serve_worker(page, body):
 @pytest.mark.allow_console_errors
 def test_worker_failure_is_visible(page):
     _serve_worker(page, FAILING_WORKER)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     alert = page.locator("#analysis-error")
     # Causality: nothing is shown until the user starts an analysis.
     expect(alert).to_be_hidden()
@@ -52,7 +54,7 @@ def test_worker_failure_is_visible(page):
 @pytest.mark.allow_console_errors
 def test_retry_after_worker_failure_recovers(page):
     _serve_worker(page, FAILING_WORKER)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible()
     page.unroute("**/src/worker.js")
@@ -64,7 +66,7 @@ def test_retry_after_worker_failure_recovers(page):
 @pytest.mark.allow_console_errors
 def test_retry_with_still_failing_worker_shows_error_again(page):
     _serve_worker(page, FAILING_WORKER)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     for _ in range(2):
         page.locator("#btn-load-demo").click()
         expect(page.locator("#analysis-error")).to_be_visible()
@@ -75,7 +77,7 @@ def test_retry_with_still_failing_worker_shows_error_again(page):
 
 def test_silent_worker_times_out_visibly(page):
     _serve_worker(page, SILENT_WORKER)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible()
@@ -86,24 +88,29 @@ STALLING_WORKER = (
     "self.onmessage = () => "
     "self.postMessage({type: 'progress', percent: 5, status: 'x'});"
 )
-# Posts progress every 150 ms for ~1.2 s (longer than the 500 ms timeout), then completes.
+# The watchdog timeout is wall-clock while E2E_CPU_THROTTLE slows the page's main thread, so
+# the timeout scales with the throttle and the run always outlasts it by half (the property
+# under test: progress ticks every 150 ms keep a shorter-than-the-run watchdog quiet).
+THROTTLE = max(1.0, float(os.environ.get("E2E_CPU_THROTTLE", "1")))
+HEALTHY_TIMEOUT_MS = int(500 * THROTTLE)
+HEALTHY_TICKS = int(HEALTHY_TIMEOUT_MS * 1.5 / 150) + 1
 SLOW_HEALTHY_WORKER = """
 self.onmessage = () => {
   let n = 0;
   const t = setInterval(() => {
     self.postMessage({type: 'progress', percent: 10 + n, status: 'working'});
-    if (++n >= 8) {
+    if (++n >= __TICKS__) {
       clearInterval(t);
       self.postMessage({type: 'error', message: 'finished healthy run'});
     }
   }, 150);
 };
-"""
+""".replace("__TICKS__", str(HEALTHY_TICKS))
 
 
 def test_worker_stall_after_progress_times_out_visibly(page):
     _serve_worker(page, STALLING_WORKER)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible()
@@ -113,8 +120,8 @@ def test_worker_stall_after_progress_times_out_visibly(page):
 @pytest.mark.allow_console_errors
 def test_watchdog_does_not_fire_during_healthy_progress(page):
     _serve_worker(page, SLOW_HEALTHY_WORKER)
-    page.goto(page.base_url, wait_until="networkidle")
-    page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
+    goto_ready(page, page.base_url)
+    page.evaluate(f"window.__lucidase.state.workerTimeoutMs = {HEALTHY_TIMEOUT_MS}")
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible()
     # The alert must be the worker's own message, not the watchdog's.

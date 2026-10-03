@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, WEB_DIR, goto_ready, wait_drawer_closed, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -193,7 +193,7 @@ def test_a_kb_that_fails_validation_makes_no_page_claims(page):
     )
     errors: list[str] = []
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
     badge = page.locator("#kb-provenance-badge")
     assert MANIFEST["release"] not in badge.inner_text()
@@ -213,7 +213,7 @@ def test_kb_text_is_escaped_where_it_reaches_innerhtml(page):
         "**/knowledge-base.json",
         lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(kb)),
     )
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')"))
@@ -340,7 +340,7 @@ def test_page_claims_say_not_available_when_the_kb_cannot_load(page):
         "**/knowledge-base.json",
         lambda route: route.fulfill(status=500, content_type="application/json", body="{}"),
     )
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
     assert "Not available" in page.locator("#hero-scope").inner_text()
     assert not _violations(page.locator("body").inner_text(), STATIC_CLAIMS)

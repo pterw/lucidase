@@ -65,8 +65,8 @@ def main() -> int:
             b.kill()
             b.join()
     print(f"RESULT runs={done} failed_runs={failed} burners={args.burners}")
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 import pytest
 from playwright.sync_api import expect
 
-from conftest import WEB_DIR
+from conftest import WEB_DIR, goto_ready
 
 TYPEKIT_HOSTS = {"use.typekit.net", "p.typekit.net"}
 VIOLATION_LISTENER = """
@@ -116,7 +116,7 @@ def test_demo_renders_under_production_csp(browser, vercel_url):
     page = context.new_page()
     errors: list[str] = []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
-    page.goto(vercel_url, wait_until="networkidle")
+    goto_ready(page, vercel_url)
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     assert page.locator("#variants-tbody tr").count() > 0

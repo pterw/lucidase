@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE
+from conftest import DEMO_FILE, goto_ready
 
 FIXTURES = Path(__file__).parent / "fixtures"
 WILDTYPE = FIXTURES / "wildtype-23andme.txt"
@@ -93,7 +93,7 @@ def test_knowledge_base_fetch_failure_is_visible(page):
         "**/knowledge-base.json",
         lambda route: route.fulfill(status=500, content_type="application/json", body="{}"),
     )
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     expect(page.locator("#analysis-error")).to_be_hidden()
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#analysis-error")).to_be_visible()
