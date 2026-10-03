@@ -120,7 +120,15 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         return cls._TOKEN_RE.sub(repl, source)
 
     # The only fetch in the web app: a same-origin GET of the bundled demo file. Nothing else may use one.
-    _FETCH_ALLOWED = {"app.js": [r'fetch\(\s*"\./demo-data/sample-23andme\.txt"\s*\)']}
+    # karyogram-page.js does the same for its bundled synthetic sample (no user data, AGENTS.md section 5 allows
+    # same-origin static assets). The URL lives in a const, so the const's literal path is pinned too.
+    _FETCH_ALLOWED = {
+        "app.js": [r'fetch\(\s*"\./demo-data/sample-23andme\.txt"\s*\)'],
+        "karyogram-page.js": [
+            r'const\s+SAMPLE_URL\s*=\s*"\./demo-data/sample-karyogram-23andme\.txt"\s*;',
+            r"fetch\(\s*SAMPLE_URL\s*\)",
+        ],
+    }
     _UPLOAD_RE = re.compile(r"method\s*:|body\s*:", re.IGNORECASE)
 
     def test_no_network_primitives_in_any_web_module(self):
