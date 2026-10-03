@@ -14,6 +14,8 @@ from tools.coverage_taxonomy import (
     ABSENCE_OF_FINDING_GUARDRAIL,
     ACMG_SINGLE_LOCUS_CAVEAT,
     INCOMPLETE_STAR_ALLELE_REFUSAL,
+    NO_CALL_REASON,
+    NOT_ASSAYED_REASON,
     NOT_INTERPRETABLE_REASON,
     VALID_COVERAGE_STATES,
     VCF_ABSENT_REASON,
@@ -55,6 +57,13 @@ class TestCoverageStates(unittest.TestCase):
         result = derive_coverage_state(SUFFICIENT, assayed=False)
         self.assertEqual(result.state, CoverageState.NOT_TESTED_BY_ARRAY)
         self.assertIsNone(result.variant_present)
+
+    def test_array_reason_strings_are_the_wording_the_shared_vectors_fix(self):
+        """The vectors (apoe.json) are the spec for both strings; the desktop imports them from here."""
+        self.assertEqual(NOT_ASSAYED_REASON, "locus not assayed on this array")
+        self.assertEqual(NO_CALL_REASON, "no-call at this locus")
+        result = derive_coverage_state(SUFFICIENT, assayed=False, assay="array")
+        self.assertEqual(result.reason, NOT_ASSAYED_REASON)
 
     def test_vcf_absence_records_why(self):
         result = derive_coverage_state(SUFFICIENT, assayed=False, assay="vcf")

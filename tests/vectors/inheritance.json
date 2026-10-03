@@ -1201,7 +1201,7 @@
   },
   {
     "id": "multi-trait-pgx-het-pair-different-chromosomes",
-    "description": "Scope guard: a trait (MTHFR) and a pharmacogenomic (CYP2C19) heterozygous pair on different chromosomes is not a multi-locus finding while the risk_factor filter stands (owner ruling pending)",
+    "description": "Scope guard: a trait (MTHFR) and a pharmacogenomic (CYP2C19) heterozygous pair on different chromosomes is not a multi-locus finding while the risk_factor filter stands (owner ruling 9)",
     "input": {
       "fn": "multi_locus",
       "genes": {
@@ -1287,7 +1287,7 @@
   },
   {
     "id": "multi-ar-het-pair-different-chromosomes",
-    "description": "Scope guard: an autosomal recessive heterozygous pair (HFE, CFTR) on different chromosomes is not a multi-locus finding while the risk_factor filter stands (owner ruling pending)",
+    "description": "Scope guard: an autosomal recessive heterozygous pair (HFE, CFTR) on different chromosomes is not a multi-locus finding while the risk_factor filter stands (owner ruling 9)",
     "input": {
       "fn": "multi_locus",
       "genes": {

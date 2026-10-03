@@ -122,9 +122,9 @@ from gui import (  # noqa: E402
     run_gui,
 )
 from genomic_parser import (  # noqa: E402
-    GenomicParser,
-    SampleQC,
-    VariantCall,
+    compute_qc,
+    parse_genotype_file,
+    read_genotype_text,
 )
 from ml_engine import (  # noqa: E402
     bin_contigs,
@@ -136,6 +136,7 @@ from ml_engine import (  # noqa: E402
 )
 from variant_annotator import (  # noqa: E402
     ACMG_SF_GENES,
+    APOE_ROW_ID,
     AnnotationRecord,
     VariantAnnotator,
 )
@@ -213,6 +214,11 @@ def assemble(
 # ===========================================================================
 # Headless CLI Execution
 # ===========================================================================
+def _rate_text(value, note) -> str:
+    """A QC rate as a percentage, or "n/a" with the reason when it is not meaningful (VCF)."""
+    return f"{value * 100:.2f}%" if value is not None else f"n/a ({note})"
+
+
 def run_headless(args) -> int:
     """Execute command-line assembly, graph analysis, and artifact export."""
     from matplotlib.backends.backend_agg import FigureCanvasAgg
@@ -220,35 +226,45 @@ def run_headless(args) -> int:
 
     if getattr(args, "genome", None):
         try:
-            variants, qc = GenomicParser.parse_file(args.genome)
+            result = parse_genotype_file(read_genotype_text(args.genome), os.path.basename(args.genome))
+            qc = compute_qc(result)
             annotator = VariantAnnotator()
-            records = annotator.annotate_genome(variants)
-            summary = annotator.summarize_annotations(records)
+            report = annotator.annotate_genome(result)
+            records = report.records
+            summary = annotator.summarize_annotations(report)
         except Exception as err:
             print(f"Error parsing genomic file: {err}", file=sys.stderr)
             return 1
 
         print("=" * 60)
-        print(f"GENOMIC SAMPLE QUALITY CONTROL ({qc.format_name.upper()})")
+        print(f"GENOMIC SAMPLE QUALITY CONTROL ({result.format.upper()})")
         print("=" * 60)
-        print(f"  Genome Assembly:........ {qc.build}")
-        print(f"  Total Markers:.......... {qc.total_snps:,} SNPs")
-        print(f"  Call Rate:.............. {qc.call_rate*100:.2f}% ({qc.called_snps:,} called, {qc.nocall_snps:,} missing)")
-        print(f"  Heterozygosity Rate:.... {qc.heterozygosity_rate*100:.2f}%")
-        print(f"  Inferred Biological Sex: {qc.inferred_sex}")
+        print(f"  Genome Assembly:........ {result.build}")
+        print(f"  Total Markers:.......... {len(result.calls):,} SNPs")
+        print(
+            f"  Call Rate:.............. {_rate_text(qc['call_rate'], qc['qc_note'])} "
+            f"({result.stats.called:,} called, {result.stats.no_calls:,} missing)"
+        )
+        print(f"  Heterozygosity Rate:.... {_rate_text(qc['heterozygosity_rate'], qc['qc_note'])}")
+        print(f"  Sex-chromosome QC:...... {qc['sex_signal']}")
 
         print("\n" + "=" * 60)
-        print(f"CLINVAR & PROTEOMIC ANNOTATIONS ({len(records)} findings)")
+        print(f"CLINVAR & PROTEOMIC ANNOTATIONS ({len(records)} loci)")
         print("=" * 60)
         print(f"  Pathogenic Variants:.... {summary['pathogenic_count']}")
         print(f"  Carrier Conditions:..... {summary['carrier_count']}")
         print(f"  Pharmacogenomics:....... {summary['pgx_count']} drug response alerts")
         print(f"  Elevated Risk Factors:.. {summary['risk_factor_count']}")
-        print(f"  ACMG SF v3.2 Actionable: {summary['acmg_actionable_findings']}\n")
+        print(f"  ACMG SF v3.2 Actionable: {summary['acmg_actionable_findings']}")
+        coverage = summary["coverage"]
+        print(f"  Not tested by this file: {coverage['not_tested_by_array_count']} of {coverage['total_loci']} loci")
+        print(f"  Insufficient evidence:.. {coverage['insufficient_evidence_count']}")
+        print("  Absence of a finding does not imply absence of genetic risk.\n")
 
         for r in records:
             stars_str = "*" * r.review_stars if r.review_stars else "-"
-            print(f"- {r.rsid:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} ({stars_str})")
+            label = "APOE" if r.rsid == APOE_ROW_ID else r.rsid  # APOE_ROW_ID is an internal row id
+            print(f"- {label:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} ({stars_str}) | {r.coverage_state}")
             print(f"  Significance: {r.clinical_significance}")
             print(f"  Condition:    {r.phenotype}")
             if r.drug_response:
@@ -265,18 +281,18 @@ def run_headless(args) -> int:
                     writer = csv.writer(f)
                     writer.writerow(["rsid", "gene", "genotype", "category", "stars", "significance", "phenotype", "drug_response"])
                     for r in records:
-                        writer.writerow([r.rsid, r.gene, r.genotype, r.category, r.review_stars, r.clinical_significance, r.phenotype, r.drug_response])
+                        writer.writerow(["APOE (rs429358 + rs7412)" if r.rsid == APOE_ROW_ID else r.rsid, r.gene, r.genotype, r.category, r.review_stars, r.clinical_significance, r.phenotype, r.drug_response])
             else:
                 with open(args.clinical_report, "w", encoding="utf-8") as f:
                     f.write(f"# Clinical Genomic Report: {os.path.basename(args.genome)}\n\n")
-                    f.write(f"- Format: `{qc.format_name.upper()}` ({qc.build})\n")
-                    f.write(f"- Call Rate: `{qc.call_rate*100:.2f}%`\n")
-                    f.write(f"- Inferred Sex: `{qc.inferred_sex}`\n\n")
+                    f.write(f"- Format: `{result.format.upper()}` ({result.build})\n")
+                    f.write(f"- Call Rate: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
+                    f.write(f"- Sex-chromosome QC: `{qc['sex_signal']}`\n\n")
                     f.write(f"| rsID | Gene | Genotype | Category | Stars | Significance | Phenotype |\n")
                     f.write(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
                     for r in records:
                         s_str = "★" * r.review_stars if r.review_stars else "—"
-                        f.write(f"| {r.rsid} | {r.gene} | {r.genotype} | {r.category} | {s_str} | {r.clinical_significance} | {r.phenotype} |\n")
+                        f.write(f"| {'APOE (rs429358 + rs7412)' if r.rsid == APOE_ROW_ID else r.rsid} | {r.gene} | {r.genotype} | {r.category} | {s_str} | {r.clinical_significance} | {r.phenotype} |\n")
             print(f"Wrote clinical report to {args.clinical_report}")
         return 0
 

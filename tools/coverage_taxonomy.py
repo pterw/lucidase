@@ -36,6 +36,8 @@ class CoverageState(str, Enum):
 
 VALID_COVERAGE_STATES: Final[set[str]] = {s.value for s in CoverageState}
 
+NOT_ASSAYED_REASON: Final[str] = "locus not assayed on this array"
+NO_CALL_REASON: Final[str] = "no-call at this locus"
 VCF_ABSENT_REASON: Final[str] = "absent from VCF (variants-only VCFs omit reference calls)"
 NOT_INTERPRETABLE_REASON: Final[str] = "genotype not interpretable"
 INSUFFICIENT_LOCUS_REASON: Final[str] = "locus evidence is insufficient"
@@ -67,7 +69,8 @@ def derive_coverage_state(
     """Contract C4. Rules are applied in this order:
 
     1. not curated -> outside_coverage
-    2. not assayed or no-call -> not_tested_by_array (a VCF records why it is absent)
+    2. not assayed or no-call -> not_tested_by_array (a VCF records why it is absent; a caller that
+       knows the locus was a no-call substitutes NO_CALL_REASON)
     3. unresolvable genotype -> insufficient_evidence, "genotype not interpretable"
     4. locus evidence insufficient -> insufficient_evidence (variant presence still reported)
     5. alt count > 0 -> supported_and_observed; alt count == 0 -> supported_not_observed
@@ -77,7 +80,7 @@ def derive_coverage_state(
     if not curated:
         return CoverageEvaluation(CoverageState.OUTSIDE_COVERAGE, None, None)
     if not assayed:
-        reason = VCF_ABSENT_REASON if assay == "vcf" else "not assayed or no-call on this array"
+        reason = VCF_ABSENT_REASON if assay == "vcf" else NOT_ASSAYED_REASON
         return CoverageEvaluation(CoverageState.NOT_TESTED_BY_ARRAY, reason, None)
     if not resolvable:
         return CoverageEvaluation(CoverageState.INSUFFICIENT_EVIDENCE, NOT_INTERPRETABLE_REASON, None)

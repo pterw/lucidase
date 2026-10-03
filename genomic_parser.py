@@ -14,9 +14,8 @@ which both implementations must pass):
 - `compute_qc(result)` mirrors web/src/core/qc.js, including the sex-signal wording
   and thresholds. The signal describes X heterozygosity only, never a karyotype.
 
-The parser knows nothing about the knowledge base. `GenomicParser`, `SampleQC` and
-`VariantCall` below are thin compatibility helpers for the desktop GUI and annotator
-(until T10).
+The parser knows nothing about the knowledge base. `read_genotype_text(path)` reads a
+file (plain or gzip) for `parse_genotype_file`.
 """
 
 from __future__ import annotations
@@ -24,7 +23,7 @@ from __future__ import annotations
 import gzip
 import os
 import re
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 
 
 class UnsupportedFormatError(ValueError):
@@ -450,150 +449,15 @@ def compute_qc(result: ParseResult) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Compatibility helpers for gui.py and the annotator (T10 replaces these)
+# File reading
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class VariantCall:
-    """Legacy per-variant view used by the annotator and segregation engine (until T10)."""
-    rsid: str
-    chrom: str
-    pos: int
-    genotype: str
-    allele1: str = ""
-    allele2: str = ""
-    zygosity: str = "nocall"  # hom, het, nocall, hemizygous
-    build: str = "GRCh37"
-
-    def __post_init__(self):
-        # Normalize chromosome notation (e.g. 'chr1' -> '1', '23' -> 'X', '24' -> 'Y', '25' -> 'MT')
-        c = self.chrom.upper().replace("CHR", "")
-        if c == "23":
-            c = "X"
-        elif c == "24":
-            c = "Y"
-        elif c in ("25", "26", "M"):
-            c = "MT"
-        self.chrom = c
-
-        # Normalize genotype
-        gt = self.genotype.strip().upper()
-        if not gt or gt in ("--", "00", "NN", ".", "./.", ".|.", "??"):
-            self.genotype = "--"
-            self.allele1 = "-"
-            self.allele2 = "-"
-            self.zygosity = "nocall"
-        elif len(gt) == 1:
-            self.allele1 = gt
-            self.allele2 = gt
-            self.zygosity = "hemizygous"
-        elif len(gt) == 2:
-            a1, a2 = gt[0], gt[1]
-            if a1 == a2:
-                self.allele1 = a1
-                self.allele2 = a2
-                self.zygosity = "hom"
-            else:
-                # Sort alleles alphabetically for consistency (e.g. GA -> AG)
-                sorted_gt = "".join(sorted([a1, a2]))
-                self.allele1 = sorted_gt[0]
-                self.allele2 = sorted_gt[1]
-                self.genotype = sorted_gt
-                self.zygosity = "het"
-        else:
-            self.allele1 = gt[: len(gt) // 2]
-            self.allele2 = gt[len(gt) // 2 :]
-            self.zygosity = "het" if self.allele1 != self.allele2 else "hom"
-
-
-@dataclass
-class SampleQC:
-    """QC summary shown by the GUI (compat view over `compute_qc`)."""
-    format_name: str
-    build: str
-    total_snps: int = 0
-    called_snps: int = 0
-    nocall_snps: int = 0
-    call_rate: float = 0.0
-    heterozygosity_rate: float = 0.0
-    inferred_sex: str = SEX_SIGNAL_INDETERMINATE  # the C1 sex_signal wording
-    qc_note: str | None = None  # set for a variants-only VCF, whose rates are not meaningful
-    x_het_rate: float = 0.0
-    y_call_count: int = 0
-    chr_counts: dict[str, int] = field(default_factory=dict)
-
-
-def _to_variant_call(call: Call, build: str) -> VariantCall:
-    """Legacy VariantCall view of a Call. Multi-base (indel) alleles are joined with "/"."""
-    rsid = call.rsid or f"{call.chrom}:{call.pos}"
-    v = VariantCall(rsid, call.chrom, call.pos or 0, "--", build=build)
-    if call.alleles is None:
-        return v
-    alleles = sorted(call.alleles)
-    v.genotype = "".join(alleles) if all(len(a) == 1 for a in alleles) else "/".join(alleles)
-    v.allele1, v.allele2 = alleles[0], alleles[-1]
-    if len(alleles) == 1:
-        v.zygosity = "hemizygous"
-    elif len(set(alleles)) == 1:
-        v.zygosity = "hom"
-    else:
-        v.zygosity = "het"
-    return v
-
-
-class GenomicParser:
-    """Compatibility wrapper: the GUI and annotator still expect (dict, SampleQC)."""
-
-    @staticmethod
-    def detect_format(lines: list[str]) -> tuple[str, str]:
-        """(format or "unknown", build) for the GUI's file auto-detect."""
-        lines = list(lines)
-        fmt = _detect_format(lines, "")
-        if fmt is None:
-            return "unknown", "unknown"
-        build = _detect_vcf_build(lines) if fmt == "vcf" else _detect_array_build(lines)
-        return fmt, build
-
-    @classmethod
-    def parse_text(cls, text: str) -> tuple[dict[str, VariantCall], SampleQC]:
-        """Parse text to (rsid -> VariantCall, SampleQC). Raises UnsupportedFormatError.
-
-        The dict keeps one entry per rsid (a repeated rsid keeps the last call), and a
-        call without an rsid is keyed "chrom:pos". The full call list is lost here, so
-        new code should use `parse_genotype_file`.
-        """
-        result = parse_genotype_file(text)
-        variants: dict[str, VariantCall] = {}
-        chr_counts: dict[str, int] = {}
-        for call in result.calls:
-            v = _to_variant_call(call, result.build)
-            variants[v.rsid] = v
-            chr_counts[call.chrom] = chr_counts.get(call.chrom, 0) + 1
-        # The legacy GUI formats call_rate with `*100`, so it keeps numeric rates for a VCF too
-        # and carries the contract's note in `qc_note` for T10 to render.
-        qc = compute_qc(replace(result, assay="array"))
-        note = compute_qc(result)["qc_note"]
-        return variants, SampleQC(
-            format_name=result.format,
-            build=result.build,
-            total_snps=len(result.calls),
-            called_snps=result.stats.called,
-            nocall_snps=result.stats.no_calls,
-            call_rate=round(qc["call_rate"], 4),
-            heterozygosity_rate=round(qc["heterozygosity_rate"], 4),
-            inferred_sex=qc["sex_signal"],
-            qc_note=note,
-            x_het_rate=round(qc["x_het_rate"], 4),
-            y_call_count=qc["y_calls"],
-            chr_counts=dict(sorted(chr_counts.items())),
-        )
-
-    @classmethod
-    def parse_file(cls, path: str) -> tuple[dict[str, VariantCall], SampleQC]:
-        """Read a .txt, .csv, .vcf or .gz file and return (variants, qc)."""
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"File not found: {path}")
-        opener = gzip.open if path.endswith(".gz") else open
-        with opener(path, "rt", encoding="utf-8", errors="ignore", newline="") as f:
-            return cls.parse_text(f.read())
+def read_genotype_text(path: str) -> str:
+    """Read a .txt, .csv, .vcf or .gz genotype file as text. Opened with newline="" so a lone
+    CR is not a line break (as in the web app). Raises FileNotFoundError."""
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"File not found: {path}")
+    opener = gzip.open if path.endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8", errors="ignore", newline="") as f:
+        return f.read()
