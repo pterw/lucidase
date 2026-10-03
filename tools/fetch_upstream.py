@@ -25,6 +25,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -272,12 +273,23 @@ class Capturer:
         self.failures: list[CaptureFailed] = []
 
     def run(
-        self, source: str, key: str, spec: dict, allow_status: tuple[int, ...] = (), body_ext: str = ".json"
+        self,
+        source: str,
+        key: str,
+        spec: dict,
+        allow_status: tuple[int, ...] = (),
+        body_ext: str = ".json",
+        validate: Callable[[bytes], None] | None = None,
     ) -> tuple[int, bytes, dict]:
         """One request, written to disk. Raises `CaptureFailed` unless the status is 200 (non-empty body) or in
-        `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag)."""
+        `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag).
+
+        `validate` runs on a 200, non-empty body BEFORE anything is written, so a bad body can neither overwrite a
+        pinned file nor get a matching meta; whatever it raises propagates."""
         self.sleep(MIN_INTERVAL_S)
         status, body = perform_with_retry(spec, self.opener, self.sleep, self.log)
+        if validate is not None and status == 200 and body:
+            validate(body)
         meta = write_capture(self.out_dir, source, key, spec, status, body, body_ext=body_ext)
         self.total += meta["bytes"]
         self.rows.append({"source": source, "key": key, "status": status, "bytes": meta["bytes"]})
@@ -356,11 +368,18 @@ def capture_all(cap: Capturer, rsids=RSIDS, genes=GENES) -> None:
     capture_gnomad_multiallelic(cap, rsids)
 
 
+GZIP_MAGIC = bytes([0x1F, 0x8B])
+
+
 def capture_ucsc(cap: Capturer) -> None:
     """Capture the four UCSC tables, byte-verbatim (gzip), under ``ucsc/<key>``."""
     for key, spec in ucsc_requests():
+        def require_gzip(body: bytes, url: str = spec["url"]) -> None:
+            if body[:2] != GZIP_MAGIC:
+                raise UcscCaptureFailed(f"{url}: response body is not gzip (it does not start with the 1f 8b magic)")
+
         try:
-            cap.run("ucsc", key, spec, body_ext="")
+            cap.run("ucsc", key, spec, body_ext="", validate=require_gzip)
         except CaptureFailed as exc:
             reason = "empty response body" if exc.status == 200 else f"HTTP {exc.status}"
             raise UcscCaptureFailed(f"{spec['url']}: {reason}") from exc
@@ -371,18 +390,19 @@ def main(argv=None, opener=None, sleep=time.sleep) -> int:
     payload error (an unreadable response is systematic, so the run stops at once)."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
         "--gnomad-multiallelic-only",
         action="store_true",
         help="only query gnomAD by variant id for multiallelic rsIDs, reusing captured dbSNP/gnomAD files",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--clinvar-only",
         nargs="+",
         metavar="RSID",
         help="re-capture only ClinVar esearch+esummary for these rsIDs (must be curated rsIDs)",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--ucsc-only",
         action="store_true",
         help="capture only the four UCSC hg19/hg38 chromInfo and cytoBand tables",

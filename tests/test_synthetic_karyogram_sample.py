@@ -115,3 +115,36 @@ def test_rows_are_sorted_by_chromosome_order_then_position():
     order = gen.CHROM_ORDER
     keys = [(order.index(r[1]), int(r[2])) for r in _rows(_committed())]
     assert keys == sorted(keys)
+
+
+def _build_from(monkeypatch, lines):
+    monkeypatch.setattr(gen, "original_lines", lambda: lines)
+    return gen.build_sample_text()
+
+
+def _good_original():
+    return gen.original_lines()
+
+
+def test_missing_column_header_raises_a_named_error_not_stopiteration(monkeypatch):
+    lines = [l for l in _good_original() if not l.startswith("# rsid")]
+    with pytest.raises(gen.SampleInputError, match="column header"):
+        _build_from(monkeypatch, lines)
+
+
+@pytest.mark.parametrize(
+    "bad_row, message",
+    [
+        ("rs1\t1\t100", "4 tab-separated fields"),
+        ("rs1\t1\tabc\tAA", "position"),
+        ("rs1	1	0	AA", "position"),
+        ("rs1\tZZ\t100\tAA", "chromosome"),
+    ],
+)
+def test_malformed_original_row_raises_a_named_error(monkeypatch, bad_row, message):
+    with pytest.raises(gen.SampleInputError, match=message):
+        _build_from(monkeypatch, _good_original() + [bad_row])
+
+
+def test_sample_input_error_is_a_value_error():
+    assert issubclass(gen.SampleInputError, ValueError)

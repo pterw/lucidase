@@ -1333,3 +1333,59 @@ def test_verify_pinned_payloads_covers_the_ucsc_gzip_bodies(tmp_path):
     target.write_bytes(target.read_bytes() + b"x")
     errors = verify_pinned_payloads(root)
     assert len(errors) == 1 and "ucsc/hg38.cytoBand.txt.gz" in errors[0]
+
+
+# ---------------------------------------------------------------------------
+# UCSC adapter branch pins and the per-band range check (karyogram K8, review M2/M3)
+# ---------------------------------------------------------------------------
+def test_synthetic_duplicate_chrominfo_row_raises():
+    info, bands = _good_rows()
+    info.append(("chr2", 1000, "/x"))
+    with pytest.raises(AdapterError, match="duplicate row for chr2"):
+        _synthetic(info, bands)
+
+
+@pytest.mark.parametrize("start, end", [(700, 700), (700, 600)])
+def test_synthetic_cytoband_start_not_below_end_raises(start, end):
+    info, bands = _good_rows()
+    bands.append(("chr4", start, end, "q11", "gneg"))
+    with pytest.raises(AdapterError, match="start is not below end"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_overlapping_acen_rows_raise():
+    info, bands = _good_rows()
+    bands = [b for b in bands if b[0] != "chr7"]
+    bands += [("chr7", 400, 520, "p11.1", "acen"), ("chr7", 500, 600, "q11.1", "acen")]
+    with pytest.raises(AdapterError, match="chr7.*not contiguous"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_short_row_raises_naming_the_row():
+    info, bands = _good_rows()
+    bands.append(("chr4", 700, 800, "q11"))  # four columns, cytoBand needs five
+    with pytest.raises(AdapterError, match="malformed row"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_non_acen_band_beyond_length_raises():
+    info, bands = _good_rows()
+    bands.append(("chr6", 900, 1001, "q99", "gneg"))
+    with pytest.raises(AdapterError, match=r"chr6.*1001.*length 1000"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_non_acen_band_ending_at_length_is_accepted():
+    info, bands = _good_rows()
+    bands.append(("chr6", 900, 1000, "q99", "gneg"))
+    assert _synthetic(info, bands).chromosomes["6"].length == 1000
+
+
+def test_check_locus_bounds_flags_a_chromosome_missing_from_the_assembly():
+    from tools.build_canonical_kb import BUILDS, check_locus_bounds
+
+    assemblies = {build: {"chromosomes": {"1": {"length": 1000}}} for build, _ in BUILDS}
+    loci = {"rs1": {"chrom": "7", **{key: 10 for _, key in BUILDS}}}
+    errors = check_locus_bounds(loci, assemblies)
+    assert len(errors) == len(BUILDS)
+    assert all("rs1" in e and "'7' is not in the" in e for e in errors)

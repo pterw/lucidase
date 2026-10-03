@@ -511,9 +511,49 @@ def test_ucsc_capture_names_an_empty_200_body_as_empty(tmp_path):
     assert "HTTP 200" not in str(info.value)
 
 
+def test_ucsc_only_main_with_a_non_gzip_200_writes_nothing(tmp_path):
+    def opener(req, timeout):
+        return FakeResp(200, b"<html>")
+
+    assert fu.main(["--ucsc-only", "--out", str(tmp_path)], opener=opener, sleep=lambda s: None) != 0
+    assert not list(tmp_path.rglob("*.gz*"))
+    assert not (tmp_path / "ucsc").exists() or list((tmp_path / "ucsc").iterdir()) == []
+
+
+def test_clinvar_only_combined_with_gnomad_multiallelic_only_is_an_argparse_error(tmp_path, capsys):
+    with pytest.raises(SystemExit) as info:
+        fu.main(["--out", str(tmp_path), "--clinvar-only", "rs1", "--gnomad-multiallelic-only"])
+    assert info.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+
+
 def test_ucsc_only_cli_runs_only_the_ucsc_capture(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))
     monkeypatch.setattr(fu, "capture_all", lambda cap: calls.append("all"))
     assert fu.main(["--out", str(tmp_path), "--ucsc-only"]) == 0
     assert calls == ["ucsc"]
+
+
+def test_ucsc_capture_rejects_a_200_body_that_is_not_gzip(tmp_path):
+    def opener(req, timeout):
+        return FakeResp(200, b"<html>captive portal</html>")
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    with pytest.raises(fu.UcscCaptureFailed, match="chromInfo.txt.gz: response body is not gzip") as info:
+        fu.capture_ucsc(cap)
+    assert "HTTP 200" not in str(info.value)
+    assert not (tmp_path / "ucsc").exists() or list((tmp_path / "ucsc").iterdir()) == []
+
+
+@pytest.mark.parametrize("other", [["--clinvar-only", "rs671"], ["--gnomad-multiallelic-only"]])
+def test_ucsc_only_combined_with_another_fetch_mode_is_an_argparse_error(tmp_path, monkeypatch, other, capsys):
+    calls = []
+    monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))
+    monkeypatch.setattr(fu, "capture_gnomad_multiallelic", lambda cap: calls.append("gnomad"))
+    monkeypatch.setattr(fu, "capture_clinvar", lambda cap, rsid: calls.append("clinvar"))
+    with pytest.raises(SystemExit) as info:
+        fu.main(["--out", str(tmp_path), "--ucsc-only", *other])
+    assert info.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+    assert calls == []

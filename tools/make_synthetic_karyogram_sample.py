@@ -39,6 +39,10 @@ BANNER = [
 ]
 
 
+class SampleInputError(ValueError):
+    """The original demo sample or the knowledge base is not in the shape this generator needs."""
+
+
 def load_kb():
     return json.loads(KB_PATH.read_text(encoding="utf-8"))
 
@@ -79,7 +83,7 @@ def select_header(lines):
     for description, matches in wanted:
         found = [l for l in lines if matches(l)]
         if not found:
-            raise ValueError(f"{ORIGINAL_PATH.name}: header line not found: {description}")
+            raise SampleInputError(f"{ORIGINAL_PATH.name}: header line not found: {description}")
         picked.extend(found)
     return [l for l in lines if l in picked]
 
@@ -100,13 +104,23 @@ def build_sample_text():
 
     lines = original_lines()
     header = select_header(lines)
-    column_header = next(l for l in lines if l.startswith("# rsid"))
+    column_headers = [l for l in lines if l.startswith("# rsid")]
+    if not column_headers:
+        raise SampleInputError(f"{ORIGINAL_PATH.name}: the column header line starting '# rsid' was not found")
+    column_header = column_headers[0]
     original_rows = [l for l in lines if l and not l.startswith("#")]
 
     taken = {}  # chrom -> set of positions already used (original rows, then background)
     original = []
     for row in original_rows:
-        rsid, chrom, pos, geno = row.split("\t")
+        fields = row.split("\t")
+        if len(fields) != 4:
+            raise SampleInputError(f"{ORIGINAL_PATH.name}: expected 4 tab-separated fields, got {len(fields)}: {row[:80]!r}")
+        _rsid, chrom, pos, _geno = fields
+        if not (pos.isascii() and pos.isdigit() and int(pos) >= 1):
+            raise SampleInputError(f"{ORIGINAL_PATH.name}: position {pos!r} is not a positive integer: {row[:80]!r}")
+        if chrom not in CHROM_ORDER:
+            raise SampleInputError(f"{ORIGINAL_PATH.name}: chromosome {chrom!r} is not one of {CHROM_ORDER}: {row[:80]!r}")
         taken.setdefault(chrom, set()).add(int(pos))
         original.append((chrom, int(pos), row))
     loci = {}

@@ -232,6 +232,8 @@ def parse_ucsc_assembly(build: str, chrom_info: PinnedPayload, cytoband: PinnedP
         start, end = _ucsc_int(row[1], "cytoBand", row), _ucsc_int(row[2], "cytoBand", row)
         if start >= end:
             raise AdapterError(f"UCSC cytoBand: malformed row {row[:5]!r}: start is not below end")
+        if row[0] in lengths and end > lengths[row[0]]:
+            raise AdapterError(f"UCSC cytoBand: band {row[3]!r} of {row[0]} ends at {end}, beyond its length {lengths[row[0]]}")
         if row[4] == "acen":
             spans.setdefault(row[0], []).append((start + 1, end))
     chromosomes: dict[str, ChromosomeGeometry] = {}
