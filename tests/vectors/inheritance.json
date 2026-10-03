@@ -1511,5 +1511,185 @@
         "inherits_allele": 1
       }
     }
+  },
+  {
+    "id": "dsg-carrier-prior-ar",
+    "description": "Carrier prior 2q(1-q) for q=0.02 is 0.0392, one carrier in 26 (1/0.0392 = 25.5, rounded)",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "af": 0.02,
+      "allele": "A"
+    },
+    "expected": {
+      "segregation": {
+        "gene": "CFTR",
+        "af": 0.02,
+        "carrierPrior": {
+          "frequency": 0.0392,
+          "oneIn": 26
+        }
+      }
+    }
+  },
+  {
+    "id": "dsg-carrier-prior-rounds-half-up",
+    "description": "q=0.01 gives 1/0.0198 = 50.505..., shown as 1 in 51 (a floor would say 50)",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 0,
+      "af": 0.01,
+      "allele": "A"
+    },
+    "expected": {
+      "segregation": {
+        "carrierPrior": {
+          "frequency": 0.0198,
+          "oneIn": 51
+        }
+      }
+    }
+  },
+  {
+    "id": "dsg-carrier-prior-no-frequency",
+    "description": "No gnomAD allele frequency, no carrier prior",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "af": null,
+      "allele": "A"
+    },
+    "expected": {
+      "segregation": {
+        "carrierPrior": null
+      }
+    }
+  },
+  {
+    "id": "dsg-carrier-prior-zero-frequency",
+    "description": "A zero allele frequency has no 1-in-N figure",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 1.0,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "af": 0,
+      "allele": "A"
+    },
+    "expected": {
+      "segregation": {
+        "carrierPrior": null
+      }
+    }
+  },
+  {
+    "id": "dsg-penetrance-adjusted-recessive",
+    "description": "Recessive carrier x carrier partner: affected 0.25 times stated penetrance 0.8 is 0.2",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 0.8,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "af": 0.02,
+      "allele": "A",
+      "partner": "heterozygous"
+    },
+    "expected": {
+      "adjusted_affected": 0.2
+    }
+  },
+  {
+    "id": "dsg-penetrance-adjusted-no-penetrance",
+    "description": "No stated penetrance, no adjusted figure",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "af": 0.02,
+      "allele": "A",
+      "partner": "heterozygous"
+    },
+    "expected": {
+      "adjusted_affected": null
+    }
+  },
+  {
+    "id": "dsg-penetrance-adjusted-unscreened-no-frequency",
+    "description": "An unscreened partner with no allele frequency makes the outcome unavailable, so no adjusted figure",
+    "input": {
+      "fn": "describe_segregation",
+      "geneName": "CFTR",
+      "gene": {
+        "inheritance": {
+          "model": "autosomal_recessive",
+          "mendelian_disease": true,
+          "penetrance": 0.8,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "altCount": 1,
+      "af": null,
+      "allele": "A",
+      "partner": "unscreened"
+    },
+    "expected": {
+      "adjusted_affected": null
+    }
   }
 ]

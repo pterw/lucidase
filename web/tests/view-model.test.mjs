@@ -475,3 +475,48 @@ test("the APOE phenotype wording states 12-15x as a relative figure, not a lifet
   assert.ok(!/increased lifetime risk/.test(e44.phenotype));
   assert.ok(e44.phenotype.includes("12–15×"), "the numbers are unchanged");
 });
+
+/** The APOE row as the view model sees it for a given diplotype (the raw record's diplotype and KB interpretation replaced). */
+function apoeWith(diplotype) {
+  const kb = validateKb(structuredClone(KB_JSON));
+  const { records, summary } = classify(parseGenotypeFile(DEMO, "x.txt"), kb);
+  const { apoe } = assembleFindings(records, kb, summary.outside_coverage_count);
+  const kbInterp = kb.genes.APOE.diplotypes[diplotype];
+  const interpretation = kbInterp ? { ...kbInterp, caveats: [] } : null;
+  return toViewModel({ ...apoe, diplotype, interpretation }, kb.genes, {});
+}
+
+test("the Risk filter flag is Risk Factor OR an e3/e4 or e4/e4 APOE diplotype", () => {
+  for (const [diplotype, want] of [["e3/e4", true], ["e4/e4", true], ["e3/e3", false], ["e2/e3", false], ["atypical", false], [null, false]]) {
+    assert.equal(apoeWith(diplotype).riskFilter, want, `APOE ${diplotype}`);
+  }
+  // The diplotype rule stands on its own: it does not rely on the KB category being "Risk Factor".
+  const e4e4 = apoeWith("e4/e4");
+  const uncategorised = toViewModel({ ...e4e4, components: e4e4.components, interpretation: { ...e4e4.interpretation, category: "Carrier" } }, {}, {});
+  assert.equal(uncategorised.riskFilter, true);
+  const a = analyse(DEMO);
+  const riskFactor = a.vms.filter((v) => v.category === "Risk Factor");
+  assert.ok(riskFactor.length > 0, "the demo has Risk Factor rows");
+  assert.ok(riskFactor.every((v) => v.riskFilter === true));
+  const others = a.vms.filter((v) => v.category !== "Risk Factor");
+  assert.ok(others.length > 0 && others.every((v) => v.riskFilter === false));
+});
+
+test("PENDING OWNER DECISION: an e2/e4 APOE row is not under Risk Factors today", () => {
+  // Whether e2/e4 belongs in the Risk filter is an owner decision still open; this pins the current answer.
+  assert.equal(apoeWith("e2/e4").riskFilter, false);
+  assert.equal(apoeWith("e2/e4").apoeE4Accent, true, "the card still carries the e4 accent");
+});
+
+test("the APOE e4 accent flag and the card's accent key follow the diplotype", () => {
+  const cases = [["e4/e4", "e4e4", true], ["e3/e4", "e4", true], ["e2/e4", "e4", true], ["e2/e3", "e2", false], ["e3/e3", "e3e3", false]];
+  for (const [diplotype, accent, e4] of cases) {
+    const vm = apoeWith(diplotype);
+    assert.equal(apoeCardModel(vm).accent, accent, `card accent ${diplotype}`);
+    assert.equal(vm.apoeE4Accent, e4, `e4 flag ${diplotype}`);
+  }
+  for (const diplotype of ["atypical", null]) {
+    assert.equal(apoeCardModel(apoeWith(diplotype)).accent, null, `no accent for ${diplotype}`);
+    assert.equal(apoeWith(diplotype).apoeE4Accent, false);
+  }
+});

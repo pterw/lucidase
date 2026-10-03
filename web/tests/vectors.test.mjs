@@ -130,7 +130,7 @@ const HANDLERS = {
     assertClose({ listed_rsids: out.listed.map((r) => r.rsid), apoe: out.apoe, summary: out.summary }, vector.expected, vector.id);
   },
 
-  // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4", ... }. Numbers compare within
+  // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4" | "describe_segregation", ... }. Numbers compare within
   // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
   // lower-cased JSON of the result (scenario, multi_locus, compound).
   "inheritance.json": async (vector) => {
@@ -154,6 +154,13 @@ const HANDLERS = {
       if (e4Count !== null) {
         const dist = inh.offspringDistribution(e4Count, partner, af);
         result = { ...result, dist, outcome: inh.geneOutcome(gene, dist, allele) };
+      }
+    } else if (fn === "describe_segregation") {
+      // The inputs the drawer reruns, with the carrier prior; given a partner, the penetrance-adjusted affected figure.
+      result = { segregation: inh.describeSegregation(vector.input.geneName, gene, altCount, af, allele) };
+      if (partner !== undefined) {
+        const outcome = inh.geneOutcome(gene, inh.offspringDistribution(altCount, partner, af), allele);
+        result.adjusted_affected = inh.penetranceAdjustedAffected(outcome, gene.inheritance.penetrance);
       }
     } else {
       assert.fail(`${vector.id}: unknown fn ${fn}`);

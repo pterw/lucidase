@@ -152,6 +152,11 @@ def _run_inheritance(vector):
         if e4_count is not None:
             dist = seg.offspring_distribution(e4_count, inp["partner"], inp.get("af"))
             result.update(dist=dist, outcome=seg.gene_outcome(inp["gene"], dist, inp["allele"]))
+    elif fn == "describe_segregation":
+        result = {"segregation": seg.describe_segregation(inp["geneName"], inp["gene"], inp["altCount"], inp.get("af"), inp["allele"])}
+        if "partner" in inp:
+            outcome = seg.gene_outcome(inp["gene"], seg.offspring_distribution(inp["altCount"], inp["partner"], inp.get("af")), inp["allele"])
+            result["adjusted_affected"] = seg.penetrance_adjusted_affected(outcome, inp["gene"]["inheritance"].get("penetrance"))
     else:
         pytest.fail(f"{vector['id']}: unknown fn {fn}")
     facts = {k: v for k, v in vector["expected"].items() if k not in ("absent", "text_includes", "text_excludes")}

@@ -132,6 +132,17 @@ function insightsOf(gene) {
  * `testedCounts` the per-gene variant counts from `testedVariantCounts`. The record's own fields are kept (the
  * views and tests read `coverage_state`, `components`, ...); the display fields below are added.
  */
+/** The APOE card's accent key from a resolved diplotype (e4/e4, any other e4 carrier, any e2 carrier, e3/e3), else null. */
+function apoeAccentKey(diplotype) {
+  if (typeof diplotype !== "string" || diplotype === "atypical") return null;
+  const shown = displayDiplotype(diplotype);
+  if (shown === "ε4/ε4") return "e4e4";
+  if (shown.includes("ε4")) return "e4";
+  if (shown.includes("ε2")) return "e2";
+  if (shown === "ε3/ε3") return "e3e3";
+  return null;
+}
+
 export function toViewModel(record, genes, testedCounts = {}) {
   const state = STATE_TEXT[record.coverage_state];
   if (state === undefined) throw new Error(`unknown coverage state "${record.coverage_state}" on ${record.rsid}`);
@@ -199,6 +210,9 @@ export function toViewModel(record, genes, testedCounts = {}) {
     tier,
     category,
     isCarrier: category === "Carrier",
+    apoeE4Accent: ["e4e4", "e4"].includes(apoeAccentKey(record.diplotype)),
+    // The Risk filter: Risk Factor rows plus APOE e3/e4 and e4/e4. Whether e2/e4 joins is an open owner decision.
+    riskFilter: category === "Risk Factor" || record.diplotype === "e3/e4" || record.diplotype === "e4/e4",
     significance: significanceValue ?? state.label,
     significanceValue,
     phenotype,
@@ -291,6 +305,7 @@ export function apoeCardModel(apoe) {
   return {
     resolved,
     diplotype,
+    accent: resolved ? apoeAccentKey(apoe.diplotype) : null,
     stateLabel,
     title: resolved ? `APOE ${diplotype}` : `APOE: ${apoe.diplotype === null ? "no diplotype" : apoe.diplotype}`,
     rawLoci: apoe.components.map((c) => `${c.rsid}: ${c.genotype_display ?? NOT_AVAILABLE}`).join(" · "),

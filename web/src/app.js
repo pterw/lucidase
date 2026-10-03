@@ -10,7 +10,7 @@
  * through escapeHtml.
  */
 
-import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
+import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "./core/inheritance.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
 import {
   NOT_AVAILABLE,
@@ -460,6 +460,12 @@ function renderSummaryCards() {
   set("count-state-insufficient", cov.insufficient_evidence_count);
 }
 
+const APOE_ACCENTS = {
+  e4e4: { border: "border-rose-500", badge: "badge-pathogenic" },
+  e4: { border: "border-amber-500", badge: "badge-carrier" },
+  e2: { border: "border-purple-500", badge: "badge-pgx" },
+  e3e3: { border: "border-emerald-500", badge: "badge-benign" }
+};
 const APOE_NEUTRAL_BADGE = "bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
 
 function renderApoeCard() {
@@ -492,12 +498,7 @@ function renderApoeCard() {
   setValue(hpaEl, model.hpaSummary);
 
   // Visual accents depending on risk profile (existing classes only)
-  const diplotype = model.diplotype ?? "";
-  let accent = null;
-  if (diplotype === "ε4/ε4") accent = { border: "border-rose-500", badge: "badge-pathogenic" };
-  else if (diplotype.includes("ε4")) accent = { border: "border-amber-500", badge: "badge-carrier" };
-  else if (diplotype.includes("ε2")) accent = { border: "border-purple-500", badge: "badge-pgx" };
-  else if (diplotype === "ε3/ε3") accent = { border: "border-emerald-500", badge: "badge-benign" };
+  const accent = APOE_ACCENTS[model.accent] ?? null;
 
   if (accent) {
     card.className = `glass-panel p-6 border-l-4 ${accent.border} transition-all duration-200 bg-white dark:bg-slate-900/60`;
@@ -653,7 +654,7 @@ function renderVariantsTable() {
     if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
     if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
     if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
-    if (state.filterCategory === "risk" && (r.category !== "Risk Factor" && !(r.diplotype === "e3/e4" || r.diplotype === "e4/e4"))) return false;
+    if (state.filterCategory === "risk" && !r.riskFilter) return false;
     if (state.filterCategory === "acmg" && !r.acmg_actionable) return false;
 
     // Search query
@@ -970,8 +971,8 @@ function renderDrawerSegregation(record) {
   if (seg.af === null) {
     setValue(priorEl, null);
   } else if (mendelian) {
-    const carrierFreq = 2 * seg.af * (1 - seg.af);
-    setValue(priorEl, carrierFreq > 0 ? `1 in ${Math.round(1 / carrierFreq)} (${fmtPct(carrierFreq)})` : null);
+    const prior = seg.carrierPrior;
+    setValue(priorEl, prior ? `1 in ${prior.oneIn} (${fmtPct(prior.frequency)})` : null);
   } else {
     priorEl.textContent = fmtPct(seg.af);
   }
@@ -1050,7 +1051,8 @@ function renderSimulator(out, seg) {
     rows[1].value = out.carrier;
     rows[2].value = out.p0;
     effectiveLabel = "Affected Probability (adjusted for stated penetrance):";
-    effective = seg.penetrance === null ? null : fmtPct(out.affected * seg.penetrance);
+    const adjusted = penetranceAdjustedAffected(out, seg.penetrance);
+    effective = adjusted === null ? null : fmtPct(adjusted);
   } else if (out) {
     rows[0] = { id: "affected", label: "Affected Probability (penetrance-adjusted):", value: out.affected };
     rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.p1 };
