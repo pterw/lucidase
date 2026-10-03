@@ -358,13 +358,23 @@ def test_a_file_reader_failure_shows_the_error_and_frees_the_inputs(page):
 
 def test_a_silent_worker_trips_the_watchdog(page):
     # A worker that never answers: the 30 s watchdog is fast-forwarded with the fake clock, not waited for.
+    # The watchdog is armed only once the sample has been fetched and the job posted, so the fetch is held
+    # back until the test has seen the clock run, and the clock runs only after the silent worker got its job.
+    held = []
+    page.route("**/sample-karyogram-23andme.txt", lambda route: held.append(route))
     page.add_init_script(
-        "window.Worker = class { postMessage() {} terminate() {} };"
+        "window.Worker = class {"
+        " postMessage() { window.__jobPosted = true; } terminate() {} };"
     )
     page.clock.install()
     _open(page)
-    page.locator("#btn-load-karyogram-sample").click()
+    with page.expect_request("**/sample-karyogram-23andme.txt"):
+        page.locator("#btn-load-karyogram-sample").click()
     expect(page.locator("#karyogram-progress")).to_be_visible()
+    assert page.evaluate("() => window.__jobPosted") is None, "no watchdog can exist before the fetch ends"
+    assert len(held) == 1, "the sample request should be held by the route"
+    held[0].continue_()
+    page.wait_for_function("() => window.__jobPosted === true", timeout=WAIT_TIMEOUT_MS)
     page.clock.run_for(31000)
     _assert_failed_and_inputs_free(page)
     expect(page.locator("#karyogram-error-detail")).to_contain_text("stopped responding")
