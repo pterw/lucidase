@@ -120,6 +120,7 @@ def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):
     _wait_result(page)
     expect(page.locator("#karyogram-density-notice")).to_be_visible()
     expect(page.locator("#karyogram-density-notice")).to_contain_text("genome build is unknown")
+    expect(page.locator("#karyogram-provenance")).to_contain_text("build is unknown")
     assert _total(page, "density") == "Unavailable"
     assert _total(page, "placed") == "0"
     assert _total(page, "notPlacedBuildUnknown") == "5"
@@ -311,3 +312,59 @@ def test_an_unknown_locus_state_fails_fast_to_the_error_alert(page):
     expect(page.locator("#karyogram-file-input")).to_be_enabled()
     assert page.locator("#karyogram-figure .kary-col").count() == 24
     assert set(page.evaluate(LOCUS_STATES).values()) == {"reference"}
+
+
+def _assert_failed_and_inputs_free(page):
+    expect(page.locator("#karyogram-error")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
+    expect(page.locator("#karyogram-totals")).to_be_hidden()
+    expect(page.locator("#karyogram-file-input")).to_be_enabled()
+    expect(page.locator("#btn-load-karyogram-sample")).to_be_enabled()
+    assert page.locator("#karyogram-figure .kary-col").count() == 24
+
+
+# The page sets onmessageerror right after construction, so the handler is called on the next task.
+# It is called directly because in Chromium a synthetic dispatchEvent(new MessageEvent("messageerror"))
+# on a real Worker does not reach onmessageerror. The test therefore relies on the page assigning
+# the onmessageerror property (not addEventListener).
+MESSAGE_ERROR = """(() => {
+  const Real = window.Worker;
+  window.Worker = class extends Real {
+    constructor(...args) {
+      super(...args);
+      setTimeout(() => this.onmessageerror(new MessageEvent("messageerror")), 0);
+    }
+  };
+})();"""
+
+
+def test_a_worker_message_error_shows_the_error_and_frees_the_inputs(page):
+    page.add_init_script(MESSAGE_ERROR)
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _assert_failed_and_inputs_free(page)
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("could not read")
+
+
+def test_a_file_reader_failure_shows_the_error_and_frees_the_inputs(page):
+    page.add_init_script(
+        "FileReader.prototype.readAsText = function () {"
+        " setTimeout(() => this.onerror && this.onerror(new ProgressEvent('error')), 0); };"
+    )
+    _open(page)
+    page.set_input_files("#karyogram-file-input", str(DEMO_FILE))
+    _assert_failed_and_inputs_free(page)
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("Failed to read file from disk")
+
+
+def test_a_silent_worker_trips_the_watchdog(page):
+    # A worker that never answers: the 30 s watchdog is fast-forwarded with the fake clock, not waited for.
+    page.add_init_script(
+        "window.Worker = class { postMessage() {} terminate() {} };"
+    )
+    page.clock.install()
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-progress")).to_be_visible()
+    page.clock.run_for(31000)
+    _assert_failed_and_inputs_free(page)
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("stopped responding")

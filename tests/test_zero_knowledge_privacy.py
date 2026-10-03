@@ -65,7 +65,7 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
             r"loggly",
         ]
 
-        target_files = [WEB_DIR / "index.html", *self._web_modules()]
+        target_files = [WEB_DIR / "index.html", WEB_DIR / "karyogram.html", *self._web_modules()]
 
         for file_path in target_files:
             self.assertTrue(file_path.exists(), f"File {file_path} must exist")
