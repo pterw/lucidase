@@ -146,16 +146,54 @@ PREVIEW_LIMIT = 500_000  # characters of a loaded file shown in the text box; an
 CSV_COLUMNS = (
     "source_file", "kb_release", "rsid", "gene", "genotype", "category", "review_stars", "significance",
     "magnitude", "repute", "phenotype", "limitation", "caveats", "drug_response", "acmg_actionable",
-    "gnomad_af", "hpa_tissues", "hpa_subcellular", "hpa_provenance", "coverage_state", "evidence_tier",
+    "gnomad_af", "hpa_tissues", "hpa_subcellular", "hpa_provenance", "coverage_state", "sample_observation",
+    "reason", "not_detected_statement", "evidence_tier",
 )
+REPORT_CAVEAT = "Absence of a finding does not imply absence of genetic risk."
 NOT_AVAILABLE = "not available"
 
 
-def _stars_text(r: AnnotationRecord) -> str:
+def _one_stars_text(stars) -> str:
     """ClinVar review stars. Zero is a value ("0 stars"); only None is "not available"."""
-    if r.review_stars is None:
+    if stars is None:
         return NOT_AVAILABLE
-    return "★" * r.review_stars if r.review_stars else "0 stars"
+    return "★" * stars if stars else "0 stars"
+
+
+def _labelled(r: AnnotationRecord, pick, fmt) -> str:
+    """The APOE row's per-component values, each under its rsID (the row itself has none)."""
+    return " · ".join(f"{c['rsid']}: {fmt(pick(c))}" for c in r.component_evidence)
+
+
+def stars_text(r: AnnotationRecord) -> str:
+    if r.component_evidence is not None:
+        return _labelled(r, lambda c: c["review_stars"], _one_stars_text)
+    return _one_stars_text(r.review_stars)
+
+
+def _stars_detail(stars) -> str:
+    return f"{'★' * stars} ({stars} / 4 stars)".strip() if stars is not None else NOT_AVAILABLE
+
+
+def _af_text(af) -> str:
+    return f"{af * 100:.2f}%" if af is not None else NOT_AVAILABLE
+
+
+def _pli_text(pli) -> str:
+    return f"{pli:.2f}" if pli is not None else NOT_AVAILABLE
+
+
+def _tier_text(tier) -> str:
+    return tier if tier is not None else NOT_AVAILABLE
+
+
+def _export_cell(r: AnnotationRecord, field: str):
+    """The CSV value of stars, af or tier: the row's own, or the APOE components' values joined by ";" in
+    component order (an absent one is an empty slot; all absent is an empty cell)."""
+    if r.component_evidence is None:
+        return getattr(r, field)
+    values = [c[field] for c in r.component_evidence]
+    return "" if all(v is None for v in values) else ";".join("" if v is None else str(v) for v in values)
 
 
 def _hpa_provenance(r: AnnotationRecord) -> str:
@@ -170,7 +208,7 @@ def _table_values(r: AnnotationRecord) -> tuple:
         r.gene,
         r.genotype,
         r.category,
-        _stars_text(r),
+        stars_text(r),
         r.clinical_significance,
         r.phenotype,
         r.drug_response or "—",
@@ -189,11 +227,14 @@ def write_clinical_csv(path: str, records: list[AnnotationRecord], source: str, 
         writer.writerow(CSV_COLUMNS)
         for r in records:
             writer.writerow([
-                source, kb_release, _row_label(r), r.gene, r.genotype, r.category, r.review_stars,
+                source, kb_release, _row_label(r), r.gene, r.genotype, r.category,
+                _export_cell(r, "review_stars"),
                 r.clinical_significance, r.magnitude, r.repute, r.phenotype, r.limitation or "",
-                " | ".join(r.caveats), r.drug_response, r.acmg_actionable, r.gnomad_af,
+                " | ".join(r.caveats), r.drug_response, r.acmg_actionable,
+                _export_cell(r, "gnomad_af"),
                 str(r.hpa_tissues), ";".join(r.hpa_subcellular), _hpa_provenance(r),
-                r.coverage_state, r.evidence_tier,
+                r.coverage_state, r.sample_observation, r.reason or "", r.not_detected_statement or "",
+                _export_cell(r, "evidence_tier"),
             ])
 
 
@@ -210,14 +251,19 @@ def write_clinical_markdown(
         f.write(f"- **Total Markers Evaluated**: `{len(result.calls):,}`\n")
         f.write(f"- **Call Rate**: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
         f.write(f"- **Sex-chromosome QC**: `{qc['sex_signal']}`\n\n")
-        f.write("Absence of a finding does not imply absence of genetic risk.\n\n")
+        f.write(f"{REPORT_CAVEAT}\n\n")
         f.write("### High-Impact Clinical & Pharmacogenomic Findings\n\n")
-        f.write("| rsID | Gene | Genotype | Category | Stars | Clinical Significance | Phenotype | Limitation | Caveats |\n")
-        f.write("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
+        f.write(
+            "| rsID | Gene | Genotype | Coverage | Observation | Category | Stars | Clinical Significance | "
+            "Phenotype | Not detected | Limitation | Caveats |\n"
+        )
+        f.write("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
         for r in records:
             f.write(
-                f"| **{_md_cell(_row_label(r))}** | `{r.gene}` | `{r.genotype}` | {_md_cell(r.category)} | "
-                f"{_stars_text(r)} | {_md_cell(r.clinical_significance)} | {_md_cell(r.phenotype)} | "
+                f"| **{_md_cell(_row_label(r))}** | `{r.gene}` | `{r.genotype}` | {_md_cell(r.coverage_state)} | "
+                f"{_md_cell(r.sample_observation)} | {_md_cell(r.category)} | "
+                f"{_md_cell(stars_text(r))} | {_md_cell(r.clinical_significance)} | {_md_cell(r.phenotype)} | "
+                f"{_md_cell(r.not_detected_statement)} | "
                 f"{_md_cell(r.limitation)} | {_md_cell(' | '.join(r.caveats))} |\n"
             )
 
@@ -1096,13 +1142,25 @@ class ExplorerApp:
             f"  Category:............... {r.category}\n",
             f"  Clinical Significance:.. {r.clinical_significance}\n",
             "  ClinVar Review Stars:... "
-            + (f"{'★' * r.review_stars} ({r.review_stars} / 4 stars)".strip() if r.review_stars is not None else "not available")
+            + (
+                _labelled(r, lambda c: c["review_stars"], _stars_detail)
+                if r.component_evidence is not None
+                else _stars_detail(r.review_stars)
+            )
             + "\n",
-            f"  Evidence Tier:.......... {r.evidence_tier}\n",
+            "  Evidence Tier:.......... "
+            + (
+                _labelled(r, lambda c: c["evidence_tier"], _tier_text)
+                if r.component_evidence is not None
+                else _tier_text(r.evidence_tier)
+            )
+            + "\n",
             "  Magnitude:.............. "
             + (f"{r.magnitude:.1f} / 10.0 (Repute: {r.repute})" if r.magnitude is not None else "not available")
             + "\n",
         ]
+        if r.not_detected_statement:
+            lines.append(f"  Not detected:........... {r.not_detected_statement}\n")
         if r.limitation:
             lines.append(f"  Limitation:............. {r.limitation}\n")
         for caveat in r.caveats:
@@ -1111,8 +1169,11 @@ class ExplorerApp:
             lines.append("  ACMG Actionable:........ YES (Designated ACMG Secondary Findings v3.2 Gene)\n")
         if r.drug_response:
             lines.append(f"  Drug Response (CPIC):... {r.drug_response}\n")
-        af_text = f"{r.gnomad_af*100:.2f}%" if r.gnomad_af is not None else "not available"
-        pli_text = f"{r.gnomad_pli:.2f}" if r.gnomad_pli is not None else "not available"
+        if r.component_evidence is not None:
+            af_text = _labelled(r, lambda c: c["gnomad_af"], _af_text)
+            pli_text = _labelled(r, lambda c: c["gnomad_pli"], _pli_text)
+        else:
+            af_text, pli_text = _af_text(r.gnomad_af), _pli_text(r.gnomad_pli)
         lines.append(f"  gnomAD Allele Frequency: {af_text}\n")
         lines.append(f"  gnomAD pLI (Constraint): {pli_text}\n\n")
 

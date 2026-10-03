@@ -119,7 +119,10 @@ from graph_core import (  # noqa: E402
 from gui import (  # noqa: E402
     EXAMPLES,
     ExplorerApp,
+    stars_text,
     run_gui,
+    write_clinical_csv,
+    write_clinical_markdown,
 )
 from genomic_parser import (  # noqa: E402
     compute_qc,
@@ -261,11 +264,17 @@ def run_headless(args) -> int:
         print("  Absence of a finding does not imply absence of genetic risk.\n")
 
         for r in records:
-            stars_str = "*" * r.review_stars if r.review_stars else "-"
             label = "APOE" if r.rsid == APOE_ROW_ID else r.rsid  # APOE_ROW_ID is an internal row id
-            print(f"- {label:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} ({stars_str}) | {r.coverage_state}")
+            print(
+                f"- {label:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} "
+                f"({stars_text(r)}) | {r.coverage_state} | {r.sample_observation}"
+            )
             print(f"  Significance: {r.clinical_significance}")
             print(f"  Condition:    {r.phenotype}")
+            if r.not_detected_statement:
+                print(f"  Not detected: {r.not_detected_statement}")
+            if r.limitation:
+                print(f"  Limitation:   {r.limitation}")
             if r.drug_response:
                 print(f"  CPIC Drug:    {r.drug_response}")
             if r.hpa_tissues:
@@ -274,24 +283,16 @@ def run_headless(args) -> int:
             print()
 
         if getattr(args, "clinical_report", None):
-            if args.clinical_report.endswith(".csv"):
-                import csv
-                with open(args.clinical_report, "w", newline="", encoding="utf-8") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(["rsid", "gene", "genotype", "category", "stars", "significance", "phenotype", "drug_response"])
-                    for r in records:
-                        writer.writerow(["APOE (rs429358 + rs7412)" if r.rsid == APOE_ROW_ID else r.rsid, r.gene, r.genotype, r.category, r.review_stars, r.clinical_significance, r.phenotype, r.drug_response])
-            else:
-                with open(args.clinical_report, "w", encoding="utf-8") as f:
-                    f.write(f"# Clinical Genomic Report: {os.path.basename(args.genome)}\n\n")
-                    f.write(f"- Format: `{result.format.upper()}` ({result.build})\n")
-                    f.write(f"- Call Rate: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
-                    f.write(f"- Sex-chromosome QC: `{qc['sex_signal']}`\n\n")
-                    f.write(f"| rsID | Gene | Genotype | Category | Stars | Significance | Phenotype |\n")
-                    f.write(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
-                    for r in records:
-                        s_str = "★" * r.review_stars if r.review_stars else "—"
-                        f.write(f"| {'APOE (rs429358 + rs7412)' if r.rsid == APOE_ROW_ID else r.rsid} | {r.gene} | {r.genotype} | {r.category} | {s_str} | {r.clinical_significance} | {r.phenotype} |\n")
+            # The same serialisers as the GUI export, so the two cannot drift (S4c-C-4).
+            source = os.path.basename(args.genome)
+            try:
+                if args.clinical_report.endswith(".csv"):
+                    write_clinical_csv(args.clinical_report, records, source, report.kb_release)
+                else:
+                    write_clinical_markdown(args.clinical_report, records, result, qc, source, report.kb_release)
+            except OSError as err:
+                print(f"Error writing the clinical report: {err}", file=sys.stderr)
+                return 1
             print(f"Wrote clinical report to {args.clinical_report}")
         return 0
 

@@ -130,6 +130,16 @@ const HANDLERS = {
     assertClose({ listed_rsids: out.listed.map((r) => r.rsid), apoe: out.apoe, summary: out.summary }, vector.expected, vector.id);
   },
 
+  // input: { records: listed records (standalone rows and the APOE row) }; expected: { statements: {rsid: the
+  // "not detected (N variants tested in <gene>)" sentence, or null} }. The sentence comes from the view model.
+  "statements.json": async (vector) => {
+    const { testedVariantCounts, toViewModel } = await import("../src/view-model.js");
+    const { records } = vector.input;
+    const counts = testedVariantCounts(records);
+    const statements = Object.fromEntries(records.map((r) => [r.rsid, toViewModel(structuredClone(r), {}, counts).statement]));
+    assertClose({ statements }, vector.expected, vector.id);
+  },
+
   // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4" | "describe_segregation", ... }. Numbers compare within
   // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
   // lower-cased JSON of the result (scenario, multi_locus, compound).

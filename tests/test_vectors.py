@@ -193,6 +193,13 @@ def _run_assemble(vector):
     _assert_close(result, vector["expected"], vector["id"])
 
 
+def _run_statements(vector):
+    from variant_annotator import not_detected_statements
+
+    result = {"statements": not_detected_statements(copy.deepcopy(vector["input"]["records"]))}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
 AREAS = {
     "parse": _run_parse,
     "alleles": _run_alleles,
@@ -202,6 +209,7 @@ AREAS = {
     "qc": _run_qc,
     "kb": _run_kb,
     "assemble": _run_assemble,
+    "statements": _run_statements,
 }
 
 

@@ -1,0 +1,192 @@
+[
+  {
+    "id": "wild-type-rows-state-how-many-variants-were-tested-in-the-gene",
+    "description": "A wild-type row says the allele was not detected and how many distinct variants were tested in its gene. Counted per gene: an unresolvable genotype, an array gap and a variant-present row are not wild-type statements, and the first two are not counted as tested. APOE counts its two components. Web and desktop must produce the same sentence.",
+    "input": {
+      "records": [
+        {
+          "rsid": "rs113993960",
+          "gene": "CFTR",
+          "chrom": "1",
+          "pos": 1000,
+          "altCount": 0,
+          "coverage_state": "supported_not_observed",
+          "sample_observation": "wild_type",
+          "reason": null,
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs3918290",
+          "gene": "DPYD",
+          "chrom": "1",
+          "pos": 1000,
+          "altCount": 0,
+          "coverage_state": "supported_not_observed",
+          "sample_observation": "wild_type",
+          "reason": null,
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs67376798",
+          "gene": "DPYD",
+          "chrom": "1",
+          "pos": 1000,
+          "altCount": 0,
+          "coverage_state": "supported_not_observed",
+          "sample_observation": "wild_type",
+          "reason": null,
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs55886062",
+          "gene": "DPYD",
+          "chrom": "1",
+          "pos": 1000,
+          "altCount": null,
+          "coverage_state": "insufficient_evidence",
+          "sample_observation": "call_unavailable",
+          "reason": "genotype not interpretable",
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs72549303",
+          "gene": "DPYD",
+          "chrom": "1",
+          "pos": 1000,
+          "altCount": null,
+          "coverage_state": "not_tested_by_array",
+          "sample_observation": "call_unavailable",
+          "reason": "absent from VCF (variants-only VCFs omit reference calls)",
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "rs1800562",
+          "gene": "HFE",
+          "chrom": "1",
+          "pos": 1000,
+          "altCount": 1,
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "reason": null,
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A"
+        },
+        {
+          "rsid": "APOE-STATUS",
+          "gene": "APOE",
+          "chrom": "19",
+          "pos": 45411941,
+          "altCount": null,
+          "coverage_state": "supported_not_observed",
+          "sample_observation": "wild_type",
+          "reason": null,
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A",
+          "components": [
+            {
+              "rsid": "rs429358",
+              "chrom": "19",
+              "pos": 45411941,
+              "altCount": 0,
+              "role": "apoe_component",
+              "standalone": false
+            },
+            {
+              "rsid": "rs7412",
+              "chrom": "19",
+              "pos": 45412079,
+              "altCount": 0,
+              "role": "apoe_component",
+              "standalone": false
+            }
+          ],
+          "diplotype": "e3/e3"
+        }
+      ]
+    },
+    "expected": {
+      "statements": {
+        "rs113993960": "rs113993960 variant not detected (1 variant tested in CFTR)",
+        "rs3918290": "rs3918290 variant not detected (2 variants tested in DPYD)",
+        "rs67376798": "rs67376798 variant not detected (2 variants tested in DPYD)",
+        "rs55886062": null,
+        "rs72549303": null,
+        "rs1800562": null,
+        "APOE-STATUS": "APOE \u03b52 and \u03b54 alleles not detected (2 variants tested in APOE)"
+      }
+    }
+  },
+  {
+    "id": "a-variant-present-apoe-row-has-no-statement",
+    "description": "An APOE row with a variant present makes no not-detected claim",
+    "input": {
+      "records": [
+        {
+          "rsid": "APOE-STATUS",
+          "gene": "APOE",
+          "chrom": "19",
+          "pos": 45411941,
+          "altCount": null,
+          "coverage_state": "supported_and_observed",
+          "sample_observation": "variant_present",
+          "reason": null,
+          "standalone": true,
+          "role": "standard",
+          "genotype_display": null,
+          "evidence": {},
+          "evidence_tier": "Tier A",
+          "components": [
+            {
+              "rsid": "rs429358",
+              "chrom": "19",
+              "pos": 45411941,
+              "altCount": 0,
+              "role": "apoe_component",
+              "standalone": false
+            },
+            {
+              "rsid": "rs7412",
+              "chrom": "19",
+              "pos": 45412079,
+              "altCount": 0,
+              "role": "apoe_component",
+              "standalone": false
+            }
+          ],
+          "diplotype": "e3/e4"
+        }
+      ]
+    },
+    "expected": {
+      "statements": {
+        "APOE-STATUS": null
+      }
+    }
+  }
+]

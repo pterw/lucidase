@@ -659,7 +659,7 @@ class AnnotationRecord:
     repute: str
     drug_response: str
     caveats: list[str]
-    evidence_tier: str
+    evidence_tier: Optional[str]
     review_stars: Optional[int]
     gnomad_af: Optional[float]
     gnomad_pli: Optional[float]
@@ -669,6 +669,11 @@ class AnnotationRecord:
     acmg_actionable: bool
     segregation: Optional[dict]
     raw: dict
+    # APOE only: one entry per component locus, {"rsid", "review_stars", "gnomad_af", "gnomad_pli",
+    # "evidence_tier"}. The row-level stars, af, pli and tier are None for it: no component's figures stand for APOE.
+    component_evidence: Optional[list[dict]] = None
+    # "<allele> not detected (N variants tested in <gene>)", only for a wild-type row (AGENTS.md 4.1).
+    not_detected_statement: Optional[str] = None
     # Biotools live insights (filled only by enrich_record_with_biotools)
     vep_consequence: str = ""
     vep_sift: str = ""
@@ -723,11 +728,63 @@ def _segregation(rec: dict, kb: KnowledgeBase) -> Optional[dict]:
     return out
 
 
-def _to_annotation(rec: dict, kb: KnowledgeBase, build: str) -> AnnotationRecord:
+def tested_variant_counts(records: list[dict]) -> dict[str, int]:
+    """Distinct KB rsids per gene that gave an interpretable call in this file (the web's `testedVariantCounts`).
+    Array gaps and unresolvable genotypes (no allele count) tested nothing; the APOE row and its components are
+    counted by `not_detected_statement`, not here."""
+    rsids: dict[str, set] = {}
+    for r in records:
+        if r.get("role") == "apoe_component" or r.get("components"):
+            continue
+        if r["coverage_state"] == CoverageState.NOT_TESTED_BY_ARRAY.value or r.get("altCount") is None:
+            continue
+        rsids.setdefault(r["gene"], set()).add(r["rsid"])
+    return {gene: len(found) for gene, found in rsids.items()}
+
+
+def not_detected_statement(rec: dict, tested: dict[str, int]) -> Optional[str]:
+    """"<allele> not detected (N variant(s) tested in <gene>)", for a wild-type row only; the same sentence as the
+    web view model. APOE names its two alleles and its two component variants."""
+    if rec["sample_observation"] != OBSERVATION_WILD_TYPE:
+        return None
+    components = rec.get("components")
+    label = f"{rec['gene']} ε2 and ε4 alleles" if components else f"{rec['rsid']} variant"
+    total = len(components) if components else tested.get(rec["gene"])
+    if total is None:
+        return f"{label} not detected"
+    return f"{label} not detected ({total} {'variant' if total == 1 else 'variants'} tested in {rec['gene']})"
+
+
+def not_detected_statements(records: list[dict]) -> dict[str, Optional[str]]:
+    """The not-detected statement of every listed record, by rsid (None where it makes no such claim)."""
+    tested = tested_variant_counts(records)
+    return {r["rsid"]: not_detected_statement(r, tested) for r in records}
+
+
+def _component_evidence(rec: dict) -> dict:
+    evidence = rec.get("evidence") or {}
+    return {
+        "rsid": rec["rsid"],
+        "review_stars": (evidence.get("clinvar") or {}).get("stars"),
+        "gnomad_af": (evidence.get("gnomad") or {}).get("af"),
+        "gnomad_pli": (evidence.get("gnomad") or {}).get("pli"),
+        "evidence_tier": rec.get("evidence_tier"),
+    }
+
+
+def _shared_tier(components: list[dict]) -> Optional[str]:
+    """The APOE row's tier, by the web rule: the components' tier when they all agree, else None."""
+    tiers = [c["evidence_tier"] for c in components]
+    return tiers[0] if tiers and all(t == tiers[0] for t in tiers) else None
+
+
+def _to_annotation(rec: dict, kb: KnowledgeBase, build: str, tested: dict[str, int]) -> AnnotationRecord:
     interp = rec["interpretation"]
     evidence = rec["evidence"]
     clinvar = evidence.get("clinvar") or {}
     gnomad = evidence.get("gnomad") or {}
+    composite = bool(rec.get("components"))
+    components_evidence = [_component_evidence(c) for c in rec["components"]] if composite else []
     hpa = evidence.get("hpa") or {}
     state = rec["coverage_state"]
     if interp is not None:
@@ -759,17 +816,20 @@ def _to_annotation(rec: dict, kb: KnowledgeBase, build: str) -> AnnotationRecord
         repute=repute,
         drug_response=drug,
         caveats=caveats,
-        evidence_tier=rec["evidence_tier"],
+        # The APOE row has no evidence of its own (contracts C4): its tier is the components' shared tier, else None.
+        evidence_tier=_shared_tier(components_evidence) if composite else rec["evidence_tier"],
         # Locus-level ClinVar stars are shown only next to an interpreted genotype, never beside "not tested".
-        review_stars=clinvar.get("stars") if interp is not None else None,
-        gnomad_af=gnomad.get("af"),
-        gnomad_pli=gnomad.get("pli"),
+        review_stars=None if composite else (clinvar.get("stars") if interp is not None else None),
+        gnomad_af=None if composite else gnomad.get("af"),
+        gnomad_pli=None if composite else gnomad.get("pli"),
         hpa_tissues=dict(hpa.get("tissues") or {}),
         hpa_subcellular=list(hpa.get("subcellular") or []),
         limitation=rec["limitation"],
         acmg_actionable=bool(rec["acmg_sf"]),
         segregation=_segregation(rec, kb),
         raw=rec,
+        component_evidence=components_evidence if composite else None,
+        not_detected_statement=not_detected_statement(rec, tested),
     )
 
 
@@ -807,7 +867,8 @@ class VariantAnnotator:
         classified = classify(parse, kb)
         assembled = assemble_findings(classified["records"], kb, classified["summary"]["outside_coverage_count"])
         listed = assembled["listed"]
-        rows = [_to_annotation(r, kb, parse.build) for r in listed]
+        tested = tested_variant_counts(listed)
+        rows = [_to_annotation(r, kb, parse.build, tested) for r in listed]
         rows.sort(key=lambda a: (not a.variant_present, -(a.magnitude or 0.0)))
         return AnnotationReport(
             build=parse.build,
@@ -829,6 +890,8 @@ class VariantAnnotator:
             r for r in report.records
             if r.variant_present and r.acmg_actionable and r.category in ("Pathogenic", "Risk Factor", "Carrier")
         ]
+        # Distinct ACMG genes, as the web counts them: two variants in one gene are one actionable gene.
+        acmg_gene_count = len({r.gene for r in acmg})
         carriers = [r for r in report.records if r.segregation and r.segregation.get("is_carrier")]
         return {
             "total_loci": len(report.records),
@@ -836,7 +899,7 @@ class VariantAnnotator:
             "carrier_count": len(categories["Carrier"]),
             "pgx_count": len(categories["Pharmacogenomics"]),
             "risk_factor_count": len(categories["Risk Factor"]),
-            "acmg_actionable_findings": len(acmg),
+            "acmg_actionable_findings": acmg_gene_count,
             "categories": categories,
             "acmg_findings": acmg,
             "carrier_findings": carriers,
