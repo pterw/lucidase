@@ -1,0 +1,9 @@
+{
+  "bytes": 2694,
+  "http_status": 200,
+  "method": "GET",
+  "request_body": null,
+  "retrieved_at": "2026-10-03T05:13:15Z",
+  "sha256_of_body": "97db140af022e356b82572ead3166959f0a601a03851d9cb78168742cd70037e",
+  "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/chromInfo.txt.gz"
+}

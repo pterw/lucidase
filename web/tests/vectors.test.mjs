@@ -81,7 +81,8 @@ const HANDLERS = {
   "classify.json": async (vector) => {
     const { validateKb } = await import("../src/core/kb.js");
     const { classify } = await import("../src/core/classify.js");
-    const kb = validateKb(vector.input.kb);
+    const { withAssemblies } = await import("./support/with-assemblies.mjs");
+    const kb = validateKb(withAssemblies(vector.input.kb));
     const out = classify(vector.input.parse, kb);
     for (const [rsid, want] of Object.entries(vector.expected.records || {})) {
       const rec = out.records.find((r) => r.rsid === rsid);

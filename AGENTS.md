@@ -18,8 +18,9 @@ Do not route around it.
 ## 2. Architecture and boundaries
 
 **Single source of truth.** All curated genomic knowledge (loci, alleles,
-genotype interpretations, evidence, inheritance, gene insights) lives in
-`web/src/knowledge-base.json`. Only `tools/build_canonical_kb.py` writes
+genotype interpretations, evidence, inheritance, gene insights) and the
+reference assembly geometry (chromosome lengths and centromeres, GRCh37 and
+GRCh38) live in `web/src/knowledge-base.json`. Only `tools/build_canonical_kb.py` writes
 it, and nobody edits it by hand. The build's hand-edited input is
 `tools/curation/kb_curation.json`: change curated knowledge there, then
 rebuild. The web app and the desktop tools both *load* the KB. No second
@@ -46,7 +47,8 @@ what each *alt-allele count* means. Whatever depends on one person's sample
 analysis time and never stored in the KB.
 
 **Anti-Corruption Layer.** Only `tools/source_adapters.py` knows the shape
-of upstream payloads (ClinVar, dbSNP, Ensembl VEP, gnomAD). It translates them
+of upstream payloads (ClinVar, dbSNP, Ensembl VEP, gnomAD, UCSC chromInfo
+and cytoBand). It translates them
 into our own models (`tools/variome_models.py`).
 Nothing downstream reads a raw upstream field name. The adapters are tested
 against **real captured payloads** pinned in `tools/fixtures/upstream/`,

@@ -2,7 +2,7 @@
 Upstream source adapters: the anti-corruption layer (AGENTS.md section 2)
 =========================================================================
 The only module that names a field of an upstream payload. It reads the pinned captures under
-`tools/fixtures/upstream/real/` (ClinVar esummary, dbSNP refsnp, Ensembl VEP, gnomAD GraphQL) and
+`tools/fixtures/upstream/real/` (ClinVar esummary, dbSNP refsnp, Ensembl VEP, gnomAD GraphQL, UCSC chromInfo and cytoBand) and
 returns our models from `tools/variome_models.py`. Downstream code never sees a raw dict.
 
 Rules every adapter follows:
@@ -18,6 +18,7 @@ manually curated in the curation file.
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import re
@@ -26,6 +27,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 from tools.variome_models import (
+    AssemblyGeometry,
+    ChromosomeGeometry,
     ClinVarRecord,
     DbsnpPlacement,
     DbsnpRecord,
@@ -82,7 +85,15 @@ class PinnedPayload:
 
 
 def _meta_path(body_path: Path) -> Path:
+    """`<key>.json` -> `<key>.meta.json`; a gzip body `<key>.gz` -> `<key>.gz.meta.json`."""
+    if body_path.name.endswith(".gz"):
+        return body_path.with_name(body_path.name + ".meta.json")
     return body_path.with_name(body_path.name[: -len(".json")] + ".meta.json")
+
+
+def _body_path(meta_path: Path) -> Path:
+    stem = meta_path.name[: -len(".meta.json")]
+    return meta_path.with_name(stem if stem.endswith(".gz") else stem + ".json")
 
 
 def load_pinned(body_path: Path | str) -> PinnedPayload:
@@ -98,7 +109,8 @@ def load_pinned(body_path: Path | str) -> PinnedPayload:
         raise PayloadIntegrityError(f"{body_path}: capture was not a successful response")
     if hashlib.sha256(body).hexdigest() != meta["sha256_of_body"]:
         raise PayloadIntegrityError(f"{body_path}: sha256 does not match {meta_path.name}")
-    return PinnedPayload(body_path, json.loads(body.decode("utf-8")), meta)
+    data = body if body_path.name.endswith(".gz") else json.loads(body.decode("utf-8"))  # gzip: raw bytes
+    return PinnedPayload(body_path, data, meta)
 
 
 def verify_pinned_payloads(root: Path | str) -> list[str]:
@@ -111,7 +123,7 @@ def verify_pinned_payloads(root: Path | str) -> list[str]:
     if not metas:
         errors.append(f"no pinned payloads under {root}")
     for meta_path in metas:
-        body_path = meta_path.with_name(meta_path.name[: -len(".meta.json")] + ".json")
+        body_path = _body_path(meta_path)
         rel = body_path.relative_to(root).as_posix()
         try:
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -126,6 +138,85 @@ def verify_pinned_payloads(root: Path | str) -> list[str]:
         elif len(body) != meta.get("bytes"):
             errors.append(f"pinned payload {rel}: size {len(body)} differs from meta bytes {meta.get('bytes')}")
     return errors
+
+
+# =============================================================================
+# UCSC assembly geometry (chromInfo + cytoBand, gzip TSV)
+# =============================================================================
+PRIMARY_CHROMOSOMES = tuple(str(n) for n in range(1, 23)) + ("X", "Y")
+UCSC_NAMES = {"GRCh37": "hg19", "GRCh38": "hg38"}
+
+
+def _ucsc_rows(payload: PinnedPayload, table: str, columns: int) -> list[list[str]]:
+    try:
+        text = gzip.decompress(payload.data).decode("utf-8")
+    except (OSError, EOFError, UnicodeDecodeError, TypeError) as exc:
+        raise AdapterError(f"UCSC {table}: not a readable gzip text table ({exc})") from exc
+    rows = []
+    for number, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        fields = line.split("	")
+        if len(fields) < columns or not fields[0]:
+            raise AdapterError(f"UCSC {table}: malformed row {number}: {line[:80]!r}")
+        rows.append(fields)
+    return rows
+
+
+def _ucsc_int(value: str, table: str, line: list[str]) -> int:
+    if not value.isdigit():
+        raise AdapterError(f"UCSC {table}: malformed row {line[:5]!r}: {value!r} is not a non-negative integer")
+    return int(value)
+
+
+def parse_ucsc_assembly(build: str, chrom_info: PinnedPayload, cytoband: PinnedPayload) -> AssemblyGeometry:
+    """Lengths from chromInfo and the centromere from the cytoBand `acen` rows, for chr1-22, X and Y.
+
+    UCSC tables are 0-based half-open; the centromere (the union of the chromosome's `acen` rows) is
+    converted to 1-based inclusive `(chromStart + 1, chromEnd)`. Contigs outside the 24 primary
+    chromosomes (chrM, alts, unplaced) are ignored. Anything unreadable or inconsistent raises.
+    """
+    if build not in UCSC_NAMES:
+        raise AdapterError(f"unknown build {build!r}")
+    wanted = {f"chr{name}": name for name in PRIMARY_CHROMOSOMES}
+    lengths: dict[str, int] = {}
+    for row in _ucsc_rows(chrom_info, "chromInfo", 2):
+        if row[0] in wanted:
+            if row[0] in lengths:
+                raise AdapterError(f"UCSC chromInfo: duplicate row for {row[0]}")
+            length = _ucsc_int(row[1], "chromInfo", row)
+            if length < 1:
+                raise AdapterError(f"UCSC chromInfo: {row[0]} has length {length}")
+            lengths[row[0]] = length
+    spans: dict[str, list[tuple[int, int]]] = {}
+    seen_bands: set[str] = set()
+    for row in _ucsc_rows(cytoband, "cytoBand", 5):
+        if row[0] not in wanted:
+            continue
+        seen_bands.add(row[0])
+        start, end = _ucsc_int(row[1], "cytoBand", row), _ucsc_int(row[2], "cytoBand", row)
+        if start >= end:
+            raise AdapterError(f"UCSC cytoBand: malformed row {row[:5]!r}: start is not below end")
+        if row[4] == "acen":
+            spans.setdefault(row[0], []).append((start + 1, end))
+    chromosomes: dict[str, ChromosomeGeometry] = {}
+    for ucsc_name, name in wanted.items():
+        if ucsc_name not in lengths:
+            raise AdapterError(f"UCSC chromInfo has no row for {ucsc_name}")
+        if ucsc_name not in seen_bands:
+            raise AdapterError(f"UCSC cytoBand has no row for {ucsc_name}")
+        if ucsc_name not in spans:
+            raise AdapterError(f"UCSC cytoBand has no acen band for {ucsc_name}")
+        start, end = min(s for s, _ in spans[ucsc_name]), max(e for _, e in spans[ucsc_name])
+        if end > lengths[ucsc_name]:
+            raise AdapterError(f"UCSC cytoBand: the acen band of {ucsc_name} ends at {end}, beyond its length {lengths[ucsc_name]}")
+        chromosomes[name] = ChromosomeGeometry(name, lengths[ucsc_name], start, end)
+    ucsc = UCSC_NAMES[build]
+    sources = (
+        chrom_info.provenance("UCSC Genome Browser", ucsc, "chromInfo"),
+        cytoband.provenance("UCSC Genome Browser", ucsc, "cytoBand"),
+    )
+    return AssemblyGeometry(build, ucsc, chromosomes, sources)
 
 
 # =============================================================================
@@ -390,6 +481,14 @@ class UpstreamSnapshot:
     def _load(self, source: str, key: str) -> Optional[PinnedPayload]:
         path = self.root / source / f"{key}.json"
         return load_pinned(path) if path.is_file() else None
+
+    def assembly(self, build: str) -> AssemblyGeometry:
+        """The reference geometry of `build` from the pinned UCSC tables. A missing capture raises."""
+        if build not in UCSC_NAMES:
+            raise AdapterError(f"unknown build {build!r}")
+        ucsc = UCSC_NAMES[build]
+        tables = [load_pinned(self.root / "ucsc" / f"{ucsc}.{table}.txt.gz") for table in ("chromInfo", "cytoBand")]
+        return parse_ucsc_assembly(build, *tables)
 
     def clinvar(self, rsid: str, pos_grch38: int, ref: str, alt: str) -> Optional[ClinVarRecord]:
         summary = self._load("clinvar", rsid)

@@ -6,6 +6,7 @@ committed web/src/knowledge-base.json (that is the job of `build_canonical_kb.py
 """
 
 import copy
+from dataclasses import replace
 import hashlib
 import json
 import re
@@ -23,6 +24,7 @@ from tools.build_canonical_kb import (
     render_kb,
     validate_curation,
 )
+from tools.source_adapters import UpstreamSnapshot
 from tools.coverage_taxonomy import (
     ACMG_SINGLE_LOCUS_CAVEAT,
     INCOMPLETE_STAR_ALLELE_REFUSAL,
@@ -121,7 +123,7 @@ def has_error(errors, fragment):
 # ---------------------------------------------------------------------------
 def test_schema_version_and_top_level(built):
     assert built["schema_version"] == 2
-    assert set(built) == {"schema_version", "manifest", "genes", "loci"}
+    assert set(built) == {"schema_version", "manifest", "genes", "loci", "assemblies"}
     assert set(built["loci"]) == set(EXPECTED)
 
 
@@ -491,7 +493,7 @@ def test_manifest_has_no_wall_clock_and_a_canonical_sha(curation, built):
     assert not any(re.search(r"date|time", k) for k in manifest)
     assert manifest["locus_count"] == len(built["loci"])
     canonical = json.dumps(
-        {"genes": built["genes"], "loci": built["loci"]},
+        {"genes": built["genes"], "loci": built["loci"], "assemblies": built["assemblies"]},
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,
@@ -839,3 +841,70 @@ def test_drift_curated_clinvar_review_status_and_stars_must_equal_the_imported_o
     result = _drift(tmp_path, good_kb, curation, "rs671", mutate)
     assert result.returncode == 1
     assert "rs671" in result.stdout and "clinvar.review_status" in result.stdout and "clinvar.stars" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# Assemblies (karyogram K1, contract K-C1)
+# ---------------------------------------------------------------------------
+def test_assemblies_hold_both_builds_with_sources_copied_from_the_captures(built):
+    assemblies = built["assemblies"]
+    assert set(assemblies) == {"GRCh37", "GRCh38"}
+    assert assemblies["GRCh37"]["ucsc"] == "hg19" and assemblies["GRCh38"]["ucsc"] == "hg38"
+    assert list(assemblies["GRCh38"]["chromosomes"]) == [str(n) for n in range(1, 23)] + ["X", "Y"]
+    assert assemblies["GRCh38"]["chromosomes"]["1"]["length"] == 248956422
+    meta = json.loads((UPSTREAM / "ucsc" / "hg38.chromInfo.txt.gz.meta.json").read_text(encoding="utf-8"))
+    source = assemblies["GRCh38"]["sources"][0]
+    assert source == {
+        "table": "chromInfo",
+        "url": meta["url"],
+        "retrieved": meta["retrieved_at"][:10],
+        "sha256": meta["sha256_of_body"],
+    }
+    assert [s["table"] for s in assemblies["GRCh38"]["sources"]] == ["chromInfo", "cytoBand"]
+
+
+def test_every_kb_locus_lies_within_its_chromosome_in_both_builds(built):
+    for locus in built["loci"].values():
+        for build, key in (("GRCh37", "pos_grch37"), ("GRCh38", "pos_grch38")):
+            assert locus[key] <= built["assemblies"][build]["chromosomes"][locus["chrom"]]["length"]
+
+
+def test_qc_fails_when_a_locus_position_exceeds_its_chromosome_length(curation, monkeypatch):
+    real = UpstreamSnapshot.assembly
+
+    def shrunk(self, build):
+        geometry = real(self, build)
+        chromosomes = dict(geometry.chromosomes)
+        chrom = curation["loci"]["rs429358"]["chrom"]
+        old = chromosomes[chrom]
+        chromosomes[chrom] = replace(old, length=10, centromere_start=1, centromere_end=2)
+        return replace(geometry, chromosomes=chromosomes)
+
+    monkeypatch.setattr(UpstreamSnapshot, "assembly", shrunk)
+    payload, errors = build_kb(curation)
+    assert payload is None
+    assert has_error(errors, "rs429358") and has_error(errors, "length")
+
+
+def test_manifest_sha_changes_when_the_assemblies_change(curation, built, monkeypatch):
+    real = UpstreamSnapshot.assembly
+
+    def longer(self, build):
+        geometry = real(self, build)
+        chromosomes = dict(geometry.chromosomes)
+        chromosomes["Y"] = replace(chromosomes["Y"], length=chromosomes["Y"].length + 1)
+        return replace(geometry, chromosomes=chromosomes)
+
+    monkeypatch.setattr(UpstreamSnapshot, "assembly", longer)
+    other, errors = build_kb(curation)
+    assert errors == []
+    assert other["manifest"]["sha256"] != built["manifest"]["sha256"]
+
+
+def test_verify_only_reports_an_assemblies_difference(good_kb):
+    data = json.loads(good_kb.read_text(encoding="utf-8"))
+    data["assemblies"]["GRCh37"]["chromosomes"]["1"]["length"] += 1
+    good_kb.write_text(render_kb(data), encoding="utf-8", newline="\n")
+    result = run_cli("--verify-only", "--kb-path", str(good_kb))
+    assert result.returncode == 1
+    assert "assemblies: GRCh37 differs in chromosomes" in result.stdout

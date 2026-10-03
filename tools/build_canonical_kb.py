@@ -4,7 +4,8 @@ Canonical knowledge-base build (schema v2, contract C2)
 =======================================================
 Reads the hand-edited curation file `tools/curation/kb_curation.json`, validates it, overlays the
 machine-imported evidence from the pinned upstream payloads (`tools/fixtures/upstream/real/`, read
-only through `tools/source_adapters.py`), derives `evidence_tier` and `evidence_sufficiency` by rule,
+only through `tools/source_adapters.py`), adds the reference assembly geometry (`assemblies`, from the
+pinned UCSC chromInfo and cytoBand tables), derives `evidence_tier` and `evidence_sufficiency` by rule,
 and writes `web/src/knowledge-base.json`.
 
 Imported values (ClinVar accession, review status, stars and significance; gnomAD allele frequency,
@@ -17,7 +18,7 @@ The KB describes loci and what each alt-allele count means. Nothing in it depend
 person's sample: observed genotype and coverage state are computed at analysis time.
 
 The build is deterministic. The same curation file gives byte-identical JSON: no wall-clock
-time, sorted keys, and a sha256 over the canonical JSON of `genes` and `loci`.
+time, sorted keys, and a sha256 over the canonical JSON of `genes`, `loci` and `assemblies`.
 
 Cardinal Scientific Rule:
 "Absence of a finding must never imply absence of genetic risk."
@@ -592,6 +593,40 @@ def _build_locus(
     }, errors
 
 
+def _assembly_dict(geometry: Any) -> dict[str, Any]:
+    """K-C1 `Assembly` from the adapter's model. Sources are copied from the capture metadata."""
+    return {
+        "ucsc": geometry.ucsc,
+        "sources": [
+            {
+                "table": source.accession,
+                "url": source.url,
+                "retrieved": source.retrieved_at[:10],
+                "sha256": source.sha256,
+            }
+            for source in geometry.sources
+        ],
+        "chromosomes": {
+            name: {"length": chrom.length, "centromere": [chrom.centromere_start, chrom.centromere_end]}
+            for name, chrom in geometry.chromosomes.items()
+        },
+    }
+
+
+def check_locus_bounds(loci: dict[str, Any], assemblies: dict[str, Any]) -> list[str]:
+    """QC errors for every locus whose position lies outside its chromosome in the matching build."""
+    errors = []
+    for rsid, locus in sorted(loci.items()):
+        for build, key in BUILDS:
+            chromosome = assemblies[build]["chromosomes"].get(locus["chrom"])
+            if chromosome is None:
+                errors.append(f"{rsid}: chromosome {locus['chrom']!r} is not in the {build} assembly")
+            elif locus[key] > chromosome["length"]:
+                errors.append(f"{rsid}: {key} {locus[key]} exceeds the {build} length {chromosome['length']} "
+                              f"of chromosome {locus['chrom']}")
+    return errors
+
+
 def build_kb(
     curation: dict[str, Any], upstream_root: Optional[Path | str] = DEFAULT_UPSTREAM_ROOT
 ) -> tuple[Optional[dict[str, Any]], list[str]]:
@@ -614,9 +649,18 @@ def build_kb(
         locus = curation["loci"][rsid]
         loci[rsid], locus_errors = _build_locus(rsid, locus, curation["genes"][locus["gene"]], snapshot)
         errors.extend(locus_errors)
+    assemblies = None
+    if snapshot is not None:
+        try:
+            assemblies = {build: _assembly_dict(snapshot.assembly(build)) for build, _ in BUILDS}
+        except AdapterError as exc:
+            errors.append(f"assemblies: UCSC geometry cannot be imported: {exc}")
+        else:
+            errors.extend(check_locus_bounds(loci, assemblies))
     if errors:
         return None, errors
-    canonical = json.dumps({"genes": genes, "loci": loci}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    sections = {"genes": genes, "loci": loci, **({} if assemblies is None else {"assemblies": assemblies})}
+    canonical = json.dumps(sections, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     manifest = {
         "release": curation["release"],
         "acmg_sf_version": curation["acmg_sf_version"],
@@ -626,7 +670,7 @@ def build_kb(
         "guardrail": ABSENCE_OF_FINDING_GUARDRAIL,
         "privacy": dict(PRIVACY),
     }
-    return {"schema_version": SCHEMA_VERSION, "manifest": manifest, "genes": genes, "loci": loci}, []
+    return {"schema_version": SCHEMA_VERSION, "manifest": manifest, **sections}, []
 
 
 def render_kb(payload: dict[str, Any]) -> str:
@@ -641,8 +685,8 @@ def diff_summary(committed: Any, built: dict[str, Any]) -> list[str]:
     lines = []
     if committed.get("schema_version") != built["schema_version"]:
         lines.append(f"schema_version: committed {committed.get('schema_version')!r}, built {built['schema_version']!r}")
-    for section in ("genes", "loci"):
-        old, new = committed.get(section) or {}, built[section]
+    for section in ("genes", "loci", "assemblies"):
+        old, new = committed.get(section) or {}, built.get(section) or {}
         for key in sorted(set(old) - set(new)):
             lines.append(f"{section}: {key} only in the committed file")
         for key in sorted(set(new) - set(old)):

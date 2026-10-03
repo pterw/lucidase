@@ -31,6 +31,7 @@ The file is built, never hand-edited, by `tools/build_canonical_kb.py` from:
 
 - `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights);
 - the pinned upstream payloads in `tools/fixtures/upstream/real/` (ClinVar, dbSNP, Ensembl VEP, gnomAD), captured once by `tools/fetch_upstream.py` and read only through `tools/source_adapters.py`.
+- the reference assembly geometry (`assemblies`: GRCh37 and GRCh38 chromosome lengths and centromeres) comes from the pinned UCSC `chromInfo` and `cytoBand` tables (hg19 and hg38), captured by `tools/fetch_upstream.py --ucsc-only`; each source carries its URL, retrieval date and sha256.
 
 Imported values carry provenance `machine_imported` with the capture's real retrieval date and URL. Hand-entered values are labelled `manually_curated`. The build is deterministic: the same inputs give byte-identical JSON.
 

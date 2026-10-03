@@ -139,7 +139,8 @@ def test_committed_fixtures_match_their_sha256():
     checked = 0
     for meta_path in metas:
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        body_path = meta_path.with_name(meta_path.name[: -len(".meta.json")] + ".json")
+        stem = meta_path.name[: -len(".meta.json")]
+        body_path = meta_path.with_name(stem if stem.endswith(".gz") else stem + ".json")  # UCSC bodies are gzip
         if meta["sha256_of_body"] is None:
             assert not body_path.exists(), f"{body_path} exists but meta records no body"
             continue
@@ -277,3 +278,53 @@ def test_retry_policy_by_status(status, expected_calls):
 
     fu.perform_with_retry(fu.dbsnp_request("rs1"), opener, sleep=lambda s: None, log=lambda m: None)
     assert len(calls) == expected_calls
+
+
+# ---------------------------------------------------------------------------
+# UCSC assembly geometry capture (karyogram K1)
+# ---------------------------------------------------------------------------
+UCSC_URLS = [
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/chromInfo.txt.gz",
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz",
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz",
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/cytoBand.txt.gz",
+]
+
+
+def test_ucsc_capture_requests_exactly_the_four_approved_urls():
+    specs = fu.ucsc_requests()
+    assert [spec["url"] for _, spec in specs] == UCSC_URLS
+    assert [key for key, _ in specs] == [
+        "hg19.chromInfo.txt.gz",
+        "hg19.cytoBand.txt.gz",
+        "hg38.chromInfo.txt.gz",
+        "hg38.cytoBand.txt.gz",
+    ]
+    assert all(spec["method"] == "GET" and spec["body"] is None for _, spec in specs)
+
+
+def test_ucsc_capture_writes_the_gzip_body_verbatim_with_meta(tmp_path):
+    body = b"\x1f\x8b\x08\x00fake gzip bytes"
+    seen = []
+
+    def opener(req, timeout):
+        seen.append(req.full_url)
+        return FakeResp(200, body)
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    fu.capture_ucsc(cap)
+    assert seen == UCSC_URLS
+    written = tmp_path / "ucsc" / "hg19.chromInfo.txt.gz"
+    assert written.read_bytes() == body
+    meta = json.loads((tmp_path / "ucsc" / "hg19.chromInfo.txt.gz.meta.json").read_text(encoding="utf-8"))
+    assert meta["url"] == UCSC_URLS[0]
+    assert meta["sha256_of_body"] == hashlib.sha256(body).hexdigest()
+    assert meta["bytes"] == len(body) and meta["http_status"] == 200
+
+
+def test_ucsc_only_cli_runs_only_the_ucsc_capture(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))
+    monkeypatch.setattr(fu, "capture_all", lambda cap: calls.append("all"))
+    assert fu.main(["--out", str(tmp_path), "--ucsc-only"]) == 0
+    assert calls == ["ucsc"]

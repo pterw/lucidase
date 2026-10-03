@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { validateKb } from "../src/core/kb.js";
+import { withAssemblies } from "./support/with-assemblies.mjs";
 import { classify } from "../src/core/classify.js";
 import { COVERAGE_STATES, deriveCoverageState, summarizeCoverage } from "../src/core/coverage.js";
 
@@ -11,7 +12,7 @@ const vectors = JSON.parse(
   readFileSync(fileURLToPath(new URL("../../tests/vectors/classify.json", import.meta.url)), "utf8")
 );
 const KB_JSON = vectors[0].input.kb;
-const kb = () => validateKb(structuredClone(KB_JSON));
+const kb = () => validateKb(withAssemblies(structuredClone(KB_JSON)));
 
 const parse = (calls, extra = {}) => ({
   format: "23andme",
