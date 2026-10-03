@@ -25,8 +25,9 @@ from assembly import (  # noqa: E402
     build_assembly_graph,
     extract_contigs,
     simplify_graph,
+    write_gfa,
 )
-from bio_engine import revcomp  # noqa: E402
+from bio_engine import evaluate_assembly_against_reference, revcomp  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -140,7 +141,7 @@ def _random_genome(n: int, seed: int) -> str:
 def test_both_strands_reports_each_contig_once():
     genome = _random_genome(3000, 11)
     kmers, _ = gc.collect_kmers(genome, "seq", 21, True, False)
-    m = gc.analyze(kmers)
+    m = gc.analyze(kmers, both=True)
     total = m.metrics["total_length"]
     assert len(genome) - 5 <= total <= len(genome) + 5, (
         f"total_length {total} for a {len(genome)} bp genome"
@@ -160,14 +161,37 @@ def test_both_strands_keeps_lexicographically_smaller_strand():
     assert seq in (genome, revcomp(genome))
 
 
-def test_read_plus_revcomp_is_deduplicated():
-    # A read plus its reverse complement is strand-symmetric, so the two
-    # strands collapse to one contig of the true length.
+def test_read_plus_revcomp_is_deduplicated_when_both_strands_is_on():
+    s = "CTTCGCCTGATACG"
+    kmers, _ = gc.collect_kmers(s, "seq", 5, True, False)
+    result = gc.analyze(kmers, both=True)
+    assert len(result.contigs) == 1
+    assert result.metrics["total_length"] == len(s)
+    assert any("one contig per strand pair" in n for n in result.notes)
+
+
+def test_strand_closed_forward_input_keeps_both_contigs():
+    # C-7: strand symmetry is no longer inferred. A read plus its reverse complement,
+    # given as two forward reads, is two contigs and no note claims otherwise.
     s = "CTTCGCCTGATACG"
     kmers, _ = gc.collect_kmers(f"{s}\n{revcomp(s)}", "seq", 5, False, False)
     result = gc.analyze(kmers)
-    assert len(result.contigs) == 1
-    assert result.metrics["total_length"] == len(s)
+    assert sorted(c["sequence"] for c in result.contigs) == sorted([s, revcomp(s)])
+    assert result.metrics["total_length"] == 2 * len(s)
+    assert not any("strand pair" in n for n in result.notes)
+
+
+def test_both_strands_with_n_reports_each_contig_once():
+    # C-3: N is valid DNA in the reads and revcomp(N) = N, so N must not defeat the dedup.
+    seq = "ACGTNACGTTGCAGGATCCATTGACN"
+    kmers, _ = gc.collect_kmers(seq, "seq", 5, True, False)
+    result = gc.analyze(kmers, both=True)
+    assert "N" in "".join(kmers)
+    seqs = [c["sequence"] for c in result.contigs]
+    assert all(revcomp(x) not in seqs or revcomp(x) == x for x in seqs)
+    assert any("N" in x for x in seqs)
+    undeduplicated = gc.analyze(kmers, both=False)
+    assert len(result.contigs) < len(undeduplicated.contigs)
 
 
 def test_forward_only_input_drops_no_contig():
@@ -272,7 +296,114 @@ def test_both_strands_circular_genome_reported_once():
     k = 15
     circ = genome + genome[: k - 1]  # wrap-around k-mers make the graph a cycle
     kmers, _ = gc.collect_kmers(circ, "seq", k, True, False)
-    contigs = gc.analyze(kmers).contigs
+    contigs = gc.analyze(kmers, both=True).contigs
     assert len(contigs) == 1
     assert contigs[0]["circular"] is True
     assert contigs[0]["edges"] == len(genome)
+
+
+# ---------------------------------------------------------------------------
+# S4c-C-1: the reference evaluation scores either strand of a canonical contig
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize("seed", [5, 6, 7, 8])
+def test_reference_evaluation_is_strand_independent(seed):
+    genome = _random_genome(400, seed)
+    kmers, _ = gc.collect_kmers(genome, "seq", 15, True, False)
+    fwd = gc.analyze(kmers, ref_seq=genome, both=True).ref_eval
+    rev = gc.analyze(kmers, ref_seq=revcomp(genome), both=True).ref_eval
+    assert fwd["genome_fraction"] > 0.95
+    assert rev["genome_fraction"] == fwd["genome_fraction"]
+    assert rev["mean_identity"] == fwd["mean_identity"]
+
+
+def test_reference_evaluation_aligns_a_reverse_strand_contig():
+    genome = _random_genome(200, 21)
+    contig = {"id": 1, "sequence": revcomp(genome), "length": len(genome)}
+    ev = evaluate_assembly_against_reference([contig], genome)
+    assert ev["genome_fraction"] == 1.0
+    assert ev["mean_identity"] == 1.0
+
+
+# ---------------------------------------------------------------------------
+# S4c-C-2: GFA links follow the canonical sequences and use - where the rc was kept
+# ---------------------------------------------------------------------------
+def _gfa(tmp_path, text, k, both):
+    kmers, _ = gc.collect_kmers(text, "seq", k, both, False)
+    m = gc.analyze(kmers, both=both)
+    path = tmp_path / "out.gfa"
+    write_gfa(m.contigs, str(path), k, both=both)
+    segs, links = {}, []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        f = line.split("	")
+        if f[0] == "S":
+            segs[f[1]] = f[2]
+        elif f[0] == "L":
+            links.append(f[1:])
+    return m, segs, links
+
+
+def _oriented(segs, name, orient):
+    return segs[name] if orient == "+" else revcomp(segs[name])
+
+
+@pytest.mark.parametrize("seed", range(8))
+def test_gfa_links_branching_both_strands(tmp_path, seed):
+    stem, tail1, tail2 = (_random_genome(40, seed * 3 + i) for i in range(3))
+    head = _random_genome(40, seed * 3 + 100)
+    text = f"{head + stem + tail1}\n{head + stem + tail2}"
+    k = 11
+    m, segs, links = _gfa(tmp_path, text, k, True)
+    assert len(m.contigs) == 3  # the shared head+stem and the two tails, once each
+    assert len(links) == 2, links
+    for a, ao, b, bo, cigar in links:
+        assert cigar == f"{k - 1}M"
+        assert _oriented(segs, a, ao)[-(k - 1):] == _oriented(segs, b, bo)[: k - 1]
+
+
+def test_gfa_uses_minus_orientation_for_some_branching_input(tmp_path):
+    orients = set()
+    for seed in range(8):
+        stem, tail1, tail2 = (_random_genome(40, seed * 3 + i) for i in range(3))
+        head = _random_genome(40, seed * 3 + 100)
+        text = f"{head + stem + tail1}\n{head + stem + tail2}"
+        _, _, links = _gfa(tmp_path, text, 11, True)
+        orients |= {l[1] for l in links} | {l[3] for l in links}
+    assert "-" in orients
+
+
+def test_gfa_forward_only_input_keeps_plus_links(tmp_path):
+    stem, tail1, tail2 = (_random_genome(40, 60 + i) for i in range(3))
+    text = f"{stem + tail1}\n{stem + tail2}"
+    _, segs, links = _gfa(tmp_path, text, 11, False)
+    assert links
+    assert all(l[1] == "+" and l[3] == "+" for l in links)
+
+
+# ---------------------------------------------------------------------------
+# S4-F3 follow-up: the CLI prints the GUI's labels, rules and thresholds
+# ---------------------------------------------------------------------------
+def test_cli_prints_the_same_binning_and_identity_labels_as_the_gui(capsys):
+    import debruijn_explorer as d
+    from bio_engine import alignment_basis_text
+    from ml_engine import binning_caveat_lines
+
+    genome = _random_genome(300, 4)
+    args = d.parse_args(
+        ["--headless", "--seq", genome, "-k", "15", "--both-strands", "--binning", "--ref", genome]
+    )
+    assert d.run_headless(args) == 0
+    out = capsys.readouterr().out
+    assert "Potential Outliers" not in out
+    assert "Flagged by 10% rule" in out
+    assert "heuristic, exploratory" in out.lower()
+    assert "left unbinned" in out
+    assert alignment_basis_text() in out
+    for line in binning_caveat_lines({}):
+        assert line.split(";")[0] in out
+
+
+def test_gui_and_cli_share_one_default_k():
+    import debruijn_explorer as d
+
+    assert d.DEFAULT_K == gc.DEFAULT_K == 3
+    assert "IntVar(value=DEFAULT_K)" in open(os.path.join(ROOT, "gui.py"), encoding="utf-8").read()

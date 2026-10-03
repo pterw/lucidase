@@ -2,31 +2,19 @@
  * Lucidase Font Studio - Extension Popup Logic
  */
 
+// The kit gfe3vcu exposes four families (ruling 15); every preset resolves to option values that exist in the lists.
+const KIT_FONTS = {
+  sans: "'akzidenz-grotesk-next-pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  serif: "'orpheuspro', Georgia, serif",
+  mono: "'input-mono', ui-monospace, monospace",
+  display: "'swiss-721-bt-condensed', 'akzidenz-grotesk-next-pro', sans-serif"
+};
+
 const PRESETS = {
-  impeccable: {
-    sans: "'gotham', 'nimbus-sans', sans-serif",
-    serif: "'orpheuspro', 'archer-pro', Georgia, serif",
-    mono: "'attribute-mono', monospace",
-    display: "'neuzeit-grotesk-condensed', 'gotham', sans-serif"
-  },
-  editorial: {
-    sans: "'basic-sans', sans-serif",
-    serif: "'mencken-std', Georgia, serif",
-    mono: "'ballinger-mono', monospace",
-    display: "'obviously', sans-serif"
-  },
-  swiss: {
-    sans: "'nimbus-sans', 'gotham', sans-serif",
-    serif: "'archer-pro', Georgia, serif",
-    mono: "'dico-mono', monospace",
-    display: "'neuzeit-grotesk-extra-conden', 'gotham', sans-serif"
-  },
-  cyber: {
-    sans: "'century-gothic', sans-serif",
-    serif: "'corporate-a', Georgia, serif",
-    mono: "'azo-mono', monospace",
-    display: "'dystopian', sans-serif"
-  }
+  impeccable: KIT_FONTS,
+  editorial: KIT_FONTS,
+  swiss: KIT_FONTS,
+  cyber: KIT_FONTS
 };
 
 document.addEventListener("DOMContentLoaded", () => {

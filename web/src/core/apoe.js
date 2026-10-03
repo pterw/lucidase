@@ -8,7 +8,7 @@
  * no diplotype, never wild-type and never "presumed e3". Interpretation text, stars, allele frequency and
  * magnitude come from the knowledge base; nothing clinical is typed here.
  */
-import { COVERAGE_STATES, EVIDENCE_SUFFICIENCY, SAMPLE_OBSERVATION, summarizeCoverage } from "./coverage.js";
+import { COVERAGE_STATES, EVIDENCE_SUFFICIENCY, REASONS, SAMPLE_OBSERVATION, summarizeCoverage } from "./coverage.js";
 
 export const APOE_E4_RSID = "rs429358";
 export const APOE_E2_RSID = "rs7412";
@@ -30,6 +30,17 @@ const DIPLOTYPE_BY_COUNTS = {
   "1,2": ATYPICAL,
   "2,2": ATYPICAL,
 };
+
+/**
+ * The number of e4 alleles in a RESOLVED diplotype (e2/e2, e2/e3, e2/e4, e3/e3, e3/e4, e4/e4), else null.
+ * Null for ATYPICAL, null or anything else: no diplotype means no e4 transmission figures (fail closed).
+ * It is not the rs429358 alt count: an e1 allele also carries rs429358-C.
+ */
+export function e4CountForDiplotype(diplotype) {
+  if (typeof diplotype !== "string" || !Object.values(DIPLOTYPE_BY_COUNTS).includes(diplotype)) return null;
+  if (diplotype === ATYPICAL) return null;
+  return diplotype.split("/").filter((allele) => allele === "e4").length;
+}
 
 /** Display form of a diplotype key, e.g. "e3/e4" gives "ε3/ε4". */
 export const displayDiplotype = (diplotype) => diplotype.replace(/e/g, "ε");
@@ -130,7 +141,7 @@ export function resolveApoe(componentRecords, kb) {
     genotype_display: `${displayDiplotype(diplotype)} (${componentSummary(components)})`,
     coverage_state,
     sample_observation: observation,
-    reason: sufficient ? null : "locus evidence is insufficient (see the evidence tier rationale)",
+    reason: sufficient ? null : REASONS.INSUFFICIENT_EVIDENCE,
     interpretation_key: diplotype,
     interpretation: { ...kbInterp, caveats: caveat ? [...kbInterp.caveats, caveat] : [...kbInterp.caveats] },
     diplotype,

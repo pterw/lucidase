@@ -190,8 +190,35 @@ def write_contigs_genbank(contigs: list[dict], path: str) -> None:
         SeqIO.write(records, f, "genbank")
 
 
+# A local alignment shorter than this, or less identical than this, is chance similarity.
+MIN_ALIGNED_COLUMNS = 20
+MIN_ALIGNMENT_IDENTITY = 0.80
+
+
+def _count_matches(ref_u: str, seq: str, t_coords, q_coords) -> tuple[int, int]:
+    """(matches, aligned columns) counted over the aligned blocks (gaps are not columns)."""
+    matches = 0
+    columns = 0
+    for (ts, te), (qs, qe) in zip(t_coords, q_coords):
+        columns += te - ts
+        matches += sum(1 for a, b in zip(ref_u[ts:te], seq[qs:qe]) if a == b)
+    return matches, columns
+
+
+def alignment_basis_text() -> str:
+    """The rule behind the reported identity, for the tab and the CLI to print."""
+    return (
+        f"identity = matches / aligned columns; local hits under {MIN_ALIGNED_COLUMNS} columns "
+        f"or {MIN_ALIGNMENT_IDENTITY:.0%} identity are not counted"
+    )
+
+
 def evaluate_assembly_against_reference(contigs: list[dict], ref_seq: str) -> dict:
-    """Evaluate assembly fidelity against a reference genome using Biopython PairwiseAligner."""
+    """Evaluate assembly fidelity against a reference genome using Biopython PairwiseAligner.
+
+    Identity is matches / aligned columns counted from the aligned blocks, not the
+    alignment score. Hits below MIN_ALIGNED_COLUMNS or MIN_ALIGNMENT_IDENTITY are
+    not counted, so chance similarity cannot add to coverage."""
     if not contigs or not ref_seq:
         return {"reference_length": len(ref_seq), "genome_fraction": 0.0, "aligned_contigs": 0}
     aligner = PairwiseAligner()
@@ -212,21 +239,26 @@ def evaluate_assembly_against_reference(contigs: list[dict], ref_seq: str) -> di
         if len(seq) < 5:
             continue
         try:
-            alignments = aligner.align(ref_u, seq)
-            if not alignments:
+            # A canonical contig may be either strand of the reference: keep the better one.
+            best = None
+            for cand in (seq, revcomp(seq)):
+                alignments = aligner.align(ref_u, cand)
+                if alignments and (best is None or alignments[0].score > best.score):
+                    best, seq_used = alignments[0], cand
+            if best is None or best.score <= 0:
                 continue
-            best = alignments[0]
-            if best.score <= 0:
-                continue
+            seq = seq_used
             t_coords = best.aligned[0]
             q_coords = best.aligned[1]
-            aln_len = sum(end - start for start, end in q_coords)
+            matches, aln_len = _count_matches(ref_u, seq, t_coords, q_coords)
+            if aln_len < MIN_ALIGNED_COLUMNS or matches / aln_len < MIN_ALIGNMENT_IDENTITY:
+                continue
             for start, end in t_coords:
                 for pos in range(start, end):
                     covered_positions.add(pos)
-            ident = round(min(1.0, max(0.0, best.score / aln_len)), 3) if aln_len else 0.0
+            ident = round(matches / aln_len, 3)
             total_aligned_bases += aln_len
-            total_matches += int(best.score)
+            total_matches += matches
             contig_reports.append({
                 "contig_id": c["id"],
                 "length": len(seq),
@@ -245,6 +277,8 @@ def evaluate_assembly_against_reference(contigs: list[dict], ref_seq: str) -> di
         "covered_bases": len(covered_positions),
         "genome_fraction": genome_fraction,
         "aligned_contigs": len(contig_reports),
-        "mean_identity": min(1.0, mean_ident),
+        "mean_identity": mean_ident,
+        "min_aligned_columns": MIN_ALIGNED_COLUMNS,
+        "min_identity": MIN_ALIGNMENT_IDENTITY,
         "alignments": contig_reports,
     }

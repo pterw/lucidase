@@ -54,3 +54,7 @@ tests/test_encode_expr.json
 Thumbs.db
 .vscode/
 .idea/
+
+# Local secrets (never commit)
+.env
+.env.*

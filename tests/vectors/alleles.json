@@ -701,5 +701,91 @@
       "ok": false,
       "reason": "no_call"
     }
+  },
+  {
+    "id": "vcf-foreign-alt-c",
+    "description": "VCF ALT C at G>A site is a foreign allele: plus-strand by definition, never complemented (P0-009)",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "C",
+        "C"
+      ],
+      "assay": "vcf"
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "vcf-foreign-alt-t",
+    "description": "VCF ALT T at G>A site is a foreign allele, never read as hom-alt A (P0-009)",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "T",
+        "T"
+      ],
+      "assay": "vcf"
+    },
+    "expected": {
+      "ok": false,
+      "reason": "unresolvable"
+    }
+  },
+  {
+    "id": "array-complement-cc",
+    "description": "Array CC at G>A site complements to GG: the array path keeps strand flipping",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "C",
+        "C"
+      ],
+      "assay": "array"
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 0,
+      "strandFlipped": true
+    }
+  },
+  {
+    "id": "array-complement-tt",
+    "description": "Array TT at G>A site complements to AA: the array path keeps strand flipping",
+    "input": {
+      "locus": {
+        "ref": "G",
+        "alt": "A",
+        "allele_codes": null,
+        "chrom": "10"
+      },
+      "alleles": [
+        "T",
+        "T"
+      ],
+      "assay": "array"
+    },
+    "expected": {
+      "ok": true,
+      "altCount": 2,
+      "strandFlipped": true
+    }
   }
 ]

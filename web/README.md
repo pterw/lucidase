@@ -69,7 +69,7 @@ Absence of a finding is never reported as absence of risk.
 
 ## 🔒 Security Headers (Vercel and Docker)
 
-`vercel.json` and `Dockerfile` carry the same CSP, and a test enforces that:
+`vercel.json` and `Dockerfile` carry the same CSP. A test compares the `vercel.json` policy with both `add_header Content-Security-Policy` values in the `Dockerfile` (the server-level one that serves `index.html` and the asset-location one). It does not check what a deployed host sends:
 
 | Header | Value |
 |:---|:---|
@@ -90,7 +90,7 @@ Typekit (fonts) is the only external host. daisyUI and the compiled Tailwind CSS
 1. Push the repository to GitHub.
 2. Import into [Vercel](https://vercel.com), set **Root Directory** to `web/`.
 3. *(Optional)* Set `ALLOWED_ORIGIN` in Project Settings → Environment Variables to your custom domain.
-4. Click **Deploy**. `vercel.json` includes `src/knowledge-base.json` with the manifest function.
+4. Click **Deploy**. `vercel.json` uses the current form (`functions`, with no `builds` or `routes`, which Vercel cannot combine with `headers`) and bundles `src/knowledge-base.json` with the manifest function. A preview deploy has not been run here: confirm that the response headers and `/api/manifest` work before relying on it.
 
 ### 2. Docker & Docker Compose
 

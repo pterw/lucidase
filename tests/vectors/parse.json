@@ -752,5 +752,310 @@
         }
       ]
     }
+  },
+  {
+    "id": "vcf-failed-filter-is-no-call",
+    "description": "A VCF record whose FILTER is neither PASS nor '.' is a no-call counted in no_calls and filtered (C1, review S1a-C-1); a failed row with GT ./. is also counted",
+    "input": {
+      "text": "##fileformat=VCFv4.2\n##reference=GRCh38\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n1\t5\trs1\tA\tG\t3\tLowQual\t.\tGT\t0/1\n1\t6\trs2\tA\tG\t50\tPASS\t.\tGT\t0/1\n1\t7\trs3\tA\tG\t50\t.\t.\tGT\t1/1\n1\t8\trs4\tA\tG\t3\tq10;s50\t.\tGT\t./.\n",
+      "fileName": "filter.vcf"
+    },
+    "expected": {
+      "format": "vcf",
+      "assay": "vcf",
+      "calls": [
+        {
+          "rsid": "rs1",
+          "chrom": "1",
+          "pos": 5,
+          "alleles": null
+        },
+        {
+          "rsid": "rs2",
+          "chrom": "1",
+          "pos": 6,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": "rs3",
+          "chrom": "1",
+          "pos": 7,
+          "alleles": [
+            "G",
+            "G"
+          ]
+        },
+        {
+          "rsid": "rs4",
+          "chrom": "1",
+          "pos": 8,
+          "alleles": null
+        }
+      ],
+      "stats": {
+        "data_rows": 4,
+        "called": 2,
+        "no_calls": 2,
+        "skipped_malformed": 0,
+        "filtered": 2
+      }
+    }
+  },
+  {
+    "id": "vcf-all-pass-has-zero-filtered",
+    "description": "PASS and '.' FILTER records are called and filtered stays 0",
+    "input": {
+      "text": "##fileformat=VCFv4.2\n##reference=GRCh38\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n1\t6\trs2\tA\tG\t50\tPASS\t.\tGT\t0/1\n1\t7\trs3\tA\tG\t50\t.\t.\tGT\t1/1\n",
+      "fileName": "pass.vcf"
+    },
+    "expected": {
+      "format": "vcf",
+      "stats": {
+        "called": 2,
+        "no_calls": 0,
+        "filtered": 0
+      }
+    }
+  },
+  {
+    "id": "array-file-has-zero-filtered",
+    "description": "Array formats have no FILTER column, so filtered is 0",
+    "input": {
+      "text": "# rsid\tchromosome\tposition\tgenotype\nrs429358\t19\t45411941\tCT\nrs7412\t19\t45412079\t--\n",
+      "fileName": "genome.txt"
+    },
+    "expected": {
+      "format": "23andme",
+      "assay": "array",
+      "stats": {
+        "called": 1,
+        "no_calls": 1,
+        "filtered": 0
+      }
+    }
+  },
+  {
+    "id": "vcf-alleles-fail-closed",
+    "description": "A VCF row whose REF or a GT-selected ALT is not A/C/G/T (multi-base allowed) or I/D is a no-call: hostile =1+1, symbolic <DEL>, markup <script>, +G and @A never become allele strings; a lowercase valid allele and a hostile unselected ALT are accepted. Counted in no_calls, not in filtered (review S2a-C-1)",
+    "input": {
+      "text": "##fileformat=VCFv4.2\n##reference=GRCh38\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n1\t10\trs1\t=1+1\tG\t50\tPASS\t.\tGT\t0/1\n1\t11\trs2\tA\t<DEL>\t50\tPASS\t.\tGT\t1/1\n1\t12\trs3\tA\t<script>\t50\tPASS\t.\tGT\t0/1\n1\t13\trs4\ta\tg\t50\tPASS\t.\tGT\t0/1\n1\t14\trs5\tCTT\tC\t50\tPASS\t.\tGT\t0/1\n1\t15\trs6\tA\tG,=1+1\t50\tPASS\t.\tGT\t0/1\n1\t16\trs7\tA\t+G\t50\tPASS\t.\tGT\t1/1\n1\t17\trs8\t@A\tG\t50\tPASS\t.\tGT\t0/0\n1\t18\trs9\tA\tG\t50\tPASS\t.\tGT\t0/1\n",
+      "fileName": "alleles.vcf"
+    },
+    "expected": {
+      "format": "vcf",
+      "assay": "vcf",
+      "calls": [
+        {
+          "rsid": "rs1",
+          "chrom": "1",
+          "pos": 10,
+          "alleles": null
+        },
+        {
+          "rsid": "rs2",
+          "chrom": "1",
+          "pos": 11,
+          "alleles": null
+        },
+        {
+          "rsid": "rs3",
+          "chrom": "1",
+          "pos": 12,
+          "alleles": null
+        },
+        {
+          "rsid": "rs4",
+          "chrom": "1",
+          "pos": 13,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": "rs5",
+          "chrom": "1",
+          "pos": 14,
+          "alleles": [
+            "CTT",
+            "C"
+          ]
+        },
+        {
+          "rsid": "rs6",
+          "chrom": "1",
+          "pos": 15,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": "rs7",
+          "chrom": "1",
+          "pos": 16,
+          "alleles": null
+        },
+        {
+          "rsid": "rs8",
+          "chrom": "1",
+          "pos": 17,
+          "alleles": null
+        },
+        {
+          "rsid": "rs9",
+          "chrom": "1",
+          "pos": 18,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        }
+      ],
+      "stats": {
+        "data_rows": 9,
+        "called": 4,
+        "no_calls": 5,
+        "skipped_malformed": 0,
+        "filtered": 0
+      }
+    }
+  },
+  {
+    "id": "vcf-alleles-ascii-only",
+    "description": "Non-ASCII look-alikes of the I allele (U+0130 dotted capital I, U+0131 dotless small i) are no-calls as REF or as a GT-selected ALT; matching is ASCII only so web and desktop agree. The genuine I allele is still called",
+    "input": {
+      "text": "##fileformat=VCFv4.2\n##reference=GRCh38\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n1\t10\trs1\t\u0130\tG\t50\tPASS\t.\tGT\t0/1\n1\t11\trs2\t\u0131\tG\t50\tPASS\t.\tGT\t0/1\n1\t12\trs3\tA\t\u0130\t50\tPASS\t.\tGT\t0/1\n1\t13\trs4\tA\t\u0131\t50\tPASS\t.\tGT\t1/1\n1\t14\trs5\tA\tI\t50\tPASS\t.\tGT\t0/1\n1\t15\trs6\tA\tG,\u0130\t50\tPASS\t.\tGT\t0/1\n",
+      "fileName": "alleles.vcf"
+    },
+    "expected": {
+      "format": "vcf",
+      "assay": "vcf",
+      "calls": [
+        {
+          "rsid": "rs1",
+          "chrom": "1",
+          "pos": 10,
+          "alleles": null
+        },
+        {
+          "rsid": "rs2",
+          "chrom": "1",
+          "pos": 11,
+          "alleles": null
+        },
+        {
+          "rsid": "rs3",
+          "chrom": "1",
+          "pos": 12,
+          "alleles": null
+        },
+        {
+          "rsid": "rs4",
+          "chrom": "1",
+          "pos": 13,
+          "alleles": null
+        },
+        {
+          "rsid": "rs5",
+          "chrom": "1",
+          "pos": 14,
+          "alleles": [
+            "A",
+            "I"
+          ]
+        },
+        {
+          "rsid": "rs6",
+          "chrom": "1",
+          "pos": 15,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        }
+      ],
+      "stats": {
+        "data_rows": 6,
+        "called": 2,
+        "no_calls": 4,
+        "skipped_malformed": 0,
+        "filtered": 0
+      }
+    }
+  },
+  {
+    "id": "vcf-gt-shapes-allele-check",
+    "description": "Haploid, phased and multi-allelic (1/2) GTs follow the same allele rule: one hostile selected ALT is a no-call, valid ALTs are called",
+    "input": {
+      "text": "##fileformat=VCFv4.2\n##reference=GRCh38\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n1\t10\trs1\tA\tG\t50\tPASS\t.\tGT\t1\n1\t11\trs2\tA\t=1+1\t50\tPASS\t.\tGT\t1\n1\t12\trs3\tA\tG\t50\tPASS\t.\tGT\t0|1\n1\t13\trs4\tA\t<DEL>\t50\tPASS\t.\tGT\t0|1\n1\t14\trs5\tA\tG,T\t50\tPASS\t.\tGT\t1/2\n1\t15\trs6\tA\tG,=1+1\t50\tPASS\t.\tGT\t1/2\n1\t16\trs7\tA\tG,<DEL>\t50\tPASS\t.\tGT\t2/2\n",
+      "fileName": "alleles.vcf"
+    },
+    "expected": {
+      "format": "vcf",
+      "assay": "vcf",
+      "calls": [
+        {
+          "rsid": "rs1",
+          "chrom": "1",
+          "pos": 10,
+          "alleles": [
+            "G"
+          ]
+        },
+        {
+          "rsid": "rs2",
+          "chrom": "1",
+          "pos": 11,
+          "alleles": null
+        },
+        {
+          "rsid": "rs3",
+          "chrom": "1",
+          "pos": 12,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": "rs4",
+          "chrom": "1",
+          "pos": 13,
+          "alleles": null
+        },
+        {
+          "rsid": "rs5",
+          "chrom": "1",
+          "pos": 14,
+          "alleles": [
+            "G",
+            "T"
+          ]
+        },
+        {
+          "rsid": "rs6",
+          "chrom": "1",
+          "pos": 15,
+          "alleles": null
+        },
+        {
+          "rsid": "rs7",
+          "chrom": "1",
+          "pos": 16,
+          "alleles": null
+        }
+      ],
+      "stats": {
+        "data_rows": 7,
+        "called": 3,
+        "no_calls": 4,
+        "skipped_malformed": 0,
+        "filtered": 0
+      }
+    }
   }
 ]

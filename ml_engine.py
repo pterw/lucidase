@@ -139,12 +139,49 @@ def extract_kmer_features(seq: str, k: int = 3) -> np.ndarray:
     return vec
 
 
-def bin_contigs(contigs: list[dict], n_clusters: int | None = None) -> tuple[list[dict], dict]:
-    """Metagenomic contig binning, PCA, and anomaly detection with scikit-learn.
+# Heuristic limits of the binning, stated in the GUI and the CLI.
+MIN_BIN_CONTIG_LEN = 100  # shorter contigs are left unbinned (bin 0): 64 trinucleotides are noise
+MIN_SILHOUETTE = 0.5  # below this the data show no cluster structure, so one bin is reported
+OUTLIER_FRACTION = 0.1  # IsolationForest contamination: it flags this share by construction
+UNBINNED = 0
 
-    Uses normalized trinucleotide frequencies, GC fraction, and coverage depth.
-    Applies StandardScaler, PCA (2D coordinates), KMeans clustering (with
-    silhouette optimization), and IsolationForest outlier detection."""
+
+def binning_caveat_lines(summary: dict) -> list[str]:
+    """What the binning is and is not, for the tab and the CLI to print above the numbers."""
+    return [
+        "Heuristic, exploratory: KMeans on trinucleotide, GC and coverage features.",
+        f"Contigs under {summary.get('min_contig_len', MIN_BIN_CONTIG_LEN)} bp are left unbinned "
+        f"(bin {UNBINNED}); {summary.get('n_unbinned', 0)} here.",
+        f"One bin is reported unless the silhouette is at least {MIN_SILHOUETTE}.",
+        f"Outliers use a fixed {OUTLIER_FRACTION:.0%} rule, so some are flagged by "
+        "construction; this is not evidence of contamination.",
+    ]
+
+
+def bin_contigs(contigs: list[dict], n_clusters: int | None = None) -> tuple[list[dict], dict]:
+    """Heuristic, exploratory contig binning, PCA and outlier flagging (scikit-learn).
+
+    Contigs shorter than MIN_BIN_CONTIG_LEN are not modelled (bin UNBINNED, never an
+    outlier). The rest use normalized trinucleotide frequencies, GC fraction and
+    coverage depth with StandardScaler, PCA, KMeans (k by silhouette; one bin when the
+    best silhouette is under MIN_SILHOUETTE) and IsolationForest at a fixed
+    OUTLIER_FRACTION."""
+    eligible = [c for c in contigs if c["length"] >= MIN_BIN_CONTIG_LEN]
+    for c in contigs:
+        if c["length"] < MIN_BIN_CONTIG_LEN:
+            c["bin_id"] = UNBINNED
+            c["pca_x"] = 0.0
+            c["pca_y"] = 0.0
+            c["is_outlier"] = False
+    _, summary = _bin_eligible(eligible, n_clusters)
+    summary.setdefault("outlier_count", 0)
+    summary["n_unbinned"] = len(contigs) - len(eligible)
+    summary["min_contig_len"] = MIN_BIN_CONTIG_LEN
+    summary["outlier_rule"] = f"fixed {OUTLIER_FRACTION:.0%} (IsolationForest contamination)"
+    return contigs, summary
+
+
+def _bin_eligible(contigs: list[dict], n_clusters: int | None = None) -> tuple[list[dict], dict]:
     n = len(contigs)
     if n < 2:
         for c in contigs:
@@ -199,18 +236,18 @@ def bin_contigs(contigs: list[dict], n_clusters: int | None = None) -> tuple[lis
     # KMeans clustering with silhouette selection
     if n_clusters is not None:
         k = max(1, min(n_clusters, n_unique))
-    elif n >= 4 and n_unique >= 3:
-        best_k, best_score = 2, -1.0
+    elif n >= 3 and n_unique >= 3:
+        best_k, best_score = 1, MIN_SILHOUETTE
         max_test_k = min(5, n_unique, n - 1)
         for test_k in range(2, max_test_k + 1):
             km_test = KMeans(n_clusters=test_k, random_state=42, n_init="auto").fit(X_scaled)
             score = silhouette_score(X_scaled, km_test.labels_)
-            if score > best_score:
+            if score >= best_score:
                 best_score = score
                 best_k = test_k
         k = best_k
     else:
-        k = 2 if n_unique >= 2 else 1
+        k = 1
 
     kmeans = KMeans(n_clusters=k, random_state=42, n_init="auto").fit(X_scaled)
     labels = kmeans.labels_
@@ -219,7 +256,7 @@ def bin_contigs(contigs: list[dict], n_clusters: int | None = None) -> tuple[lis
     outliers = np.ones(n, dtype=int)
     if n >= 4 and n_unique >= 3:
         try:
-            iso = IsolationForest(contamination=0.1, random_state=42)
+            iso = IsolationForest(contamination=OUTLIER_FRACTION, random_state=42)
             outliers = iso.fit_predict(X_scaled)
         except Exception:
             pass

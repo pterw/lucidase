@@ -97,6 +97,22 @@ export function patientStatus(gene, altCount) {
 }
 
 /**
+ * Carrier prior from the allele frequency: the heterozygote frequency 2q(1-q) and its "1 in N" rounding.
+ * Null when there is no usable frequency or the frequency is zero (no 1-in-N figure exists).
+ */
+export function carrierPrior(af) {
+  if (typeof af !== "number" || !Number.isFinite(af) || af < 0 || af > 1) return null;
+  const frequency = 2 * af * (1 - af);
+  return frequency > 0 ? { frequency, oneIn: Math.round(1 / frequency) } : null;
+}
+
+/** The affected probability times the stated penetrance; null when the outcome is unavailable or no penetrance is stated. */
+export function penetranceAdjustedAffected(outcome, penetrance) {
+  if (!outcome.available || typeof outcome.affected !== "number" || typeof penetrance !== "number") return null;
+  return outcome.affected * penetrance;
+}
+
+/**
  * Per-record inheritance summary for the UI. The UI reruns offspringDistribution / geneOutcome
  * for the chosen partner model from `altCount` and `af`, so the worker sends inputs, not results.
  */
@@ -113,6 +129,7 @@ export function describeSegregation(geneName, gene, altCount, af, allele) {
     altCount,
     af,
     allele,
+    carrierPrior: carrierPrior(af),
     ...patientStatus(gene, altCount),
   };
 }

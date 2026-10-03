@@ -44,6 +44,7 @@ from segregation_engine import (
     offspring_distribution,
 )
 from tools.coverage_taxonomy import (
+    INSUFFICIENT_LOCUS_REASON,
     NO_CALL_REASON,
     NOT_ASSAYED_REASON,
     VCF_ABSENT_REASON,
@@ -53,21 +54,6 @@ from tools.coverage_taxonomy import (
 )
 
 DEFAULT_KB_PATH = Path(__file__).resolve().parent / "web" / "src" / "knowledge-base.json"
-
-# ===========================================================================
-# ACMG SF v3.2 Actionable Gene List (81 Genes)
-# ===========================================================================
-ACMG_SF_GENES = {
-    "ACTA2", "ACTC1", "ACVRL1", "APC", "APOB", "ATP7B", "BAG3", "BMPR1A", "BRCA1",
-    "BRCA2", "BTD", "CACNA1S", "CALM1", "CALM2", "CALM3", "CASQ2", "COL3A1",
-    "DES", "DSC2", "DSG2", "DSP", "ENG", "FBN1", "FLNC", "GAA", "GLA", "HFE",
-    "HNF1A", "KCNH2", "KCNJ2", "KCNQ1", "LDLR", "LMNA", "MAX", "MEN1", "MLH1",
-    "MSH2", "MSH6", "MUTYH", "MYBPC3", "MYH11", "MYH7", "MYL2", "MYL3", "NF2",
-    "OTC", "PALB2", "PCSK9", "PKP2", "PMS2", "PRKAG2", "PTEN", "RB1", "RBM20",
-    "RET", "RPE65", "RYR1", "RYR2", "SCN5A", "SDHAF2", "SDHB", "SDHC", "SDHD",
-    "SMAD3", "SMAD4", "STK11", "TGFBR1", "TGFBR2", "TMEM127", "TMEM43", "TNNC1",
-    "TNNI3", "TNNT2", "TP53", "TPM1", "TRDN", "TSC1", "TSC2", "TTN", "VHL", "WT1",
-}
 
 # ===========================================================================
 # Knowledge base loading and validation (contract C2, schema v2)
@@ -311,8 +297,9 @@ def _count_alts(alleles: list[str], ref: str, alt: str) -> Optional[int]:
     return n
 
 
-def resolve_alt_count(locus: dict, alleles: list[str] | None) -> dict:
-    """locus: {ref, alt, allele_codes, chrom}; alleles: list of tokens or None.
+def resolve_alt_count(locus: dict, alleles: list[str] | None, assay: str) -> dict:
+    """locus: {ref, alt, allele_codes, chrom}; alleles: list of tokens or None; assay: "array" | "vcf".
+    VCF alleles are plus-strand by definition, so only a non-VCF assay may strand-complement.
 
     Returns {"ok": True, "altCount": 0|1|2, "strandFlipped": bool} or
     {"ok": False, "reason": "no_call" | "unresolvable"}. "palindromic_ambiguous" is in the
@@ -339,7 +326,9 @@ def resolve_alt_count(locus: dict, alleles: list[str] | None) -> dict:
     direct = _count_alts(called, ref, alt)
     if direct is not None:
         return {"ok": True, "altCount": direct, "strandFlipped": False}
-    if _is_base(ref) and _is_base(alt) and not is_palindromic(ref, alt) and all(_is_base(a) for a in called):
+    # Only an array may complement; a VCF's alleles are plus-strand, so a foreign alt stays unresolvable.
+    can_complement = assay != "vcf" and _is_base(ref) and _is_base(alt) and not is_palindromic(ref, alt)
+    if can_complement and all(_is_base(a) for a in called):
         flipped = _count_alts([_COMPLEMENT[a] for a in called], ref, alt)
         if flipped is not None:
             return {"ok": True, "altCount": flipped, "strandFlipped": True}
@@ -408,15 +397,15 @@ def summarize_coverage(records: list[dict], outside_count: int = 0) -> dict:
 
 
 def _match_calls(parse: ParseResult, kb: KnowledgeBase) -> tuple[dict[str, list], int]:
-    """Calls matched to KB loci: by rsID, or by chrom:pos for the file's build when the call has no rsID."""
+    """Calls matched to KB loci. A call whose rsID is a KB key matches that locus and is never re-matched
+    by position. Any other call (no rsID, or an rsID the KB lacks) matches by chrom:pos for the file's build."""
     by_rsid: dict[str, list] = {}
     matched = 0
     positions = kb.by_position.get(parse.build)
     for call in parse.calls:
         rsid = None
-        if call.rsid is not None:
-            if call.rsid in kb.loci:
-                rsid = call.rsid
+        if call.rsid is not None and call.rsid in kb.loci:
+            rsid = call.rsid
         elif positions is not None and call.pos is not None:
             rsid = positions.get(f"{call.chrom}:{call.pos}")
         if rsid is None:
@@ -450,9 +439,10 @@ def classify(parse: ParseResult, kb: KnowledgeBase) -> dict:
         resolution = None
         if call is not None and call.alleles is not None:
             # Two calls for one locus that disagree are never guessed between.
-            resolution = (
-                {"ok": False, "reason": "unresolvable"} if conflicting else resolve_alt_count(locus, call.alleles)
-            )
+            if conflicting:
+                resolution = {"ok": False, "reason": "unresolvable"}
+            else:
+                resolution = resolve_alt_count(locus, call.alleles, parse.assay)
         state = _derive_state(parse.assay, call, resolution, locus["evidence_sufficiency"])
 
         resolved = resolution is not None and resolution["ok"]
@@ -520,6 +510,14 @@ def display_diplotype(diplotype: str) -> str:
 
 def _component_summary(components: list[dict]) -> str:
     return ", ".join(f"{c['rsid']}:{c['genotype_display'] if c.get('genotype_display') is not None else '--'}" for c in components)
+
+
+def e4_count_for_diplotype(diplotype: Optional[str]) -> Optional[int]:
+    """Number of e4 alleles in a resolved diplotype (e2/e2 ... e4/e4), else None (atypical, None, anything else).
+    It is not the rs429358 alt count: an e1 allele also carries rs429358-C."""
+    if not isinstance(diplotype, str) or diplotype == ATYPICAL or diplotype not in set(_DIPLOTYPE_BY_COUNTS.values()):
+        return None
+    return diplotype.split("/").count("e4")
 
 
 def resolve_apoe(component_records: list[dict], kb: Any) -> dict:
@@ -604,7 +602,7 @@ def resolve_apoe(component_records: list[dict], kb: Any) -> dict:
         "genotype_display": f"{display_diplotype(diplotype)} ({_component_summary(components)})",
         "coverage_state": state,
         "sample_observation": OBSERVATION_WILD_TYPE if wild_type else OBSERVATION_VARIANT_PRESENT,
-        "reason": None if sufficient else "locus evidence is insufficient",
+        "reason": None if sufficient else INSUFFICIENT_LOCUS_REASON,
         "interpretation_key": diplotype,
         "interpretation": {**kb_interp, "caveats": [*kb_interp["caveats"], *([caveat] if caveat else [])]},
         "diplotype": diplotype,
@@ -661,7 +659,7 @@ class AnnotationRecord:
     repute: str
     drug_response: str
     caveats: list[str]
-    evidence_tier: str
+    evidence_tier: Optional[str]
     review_stars: Optional[int]
     gnomad_af: Optional[float]
     gnomad_pli: Optional[float]
@@ -671,6 +669,11 @@ class AnnotationRecord:
     acmg_actionable: bool
     segregation: Optional[dict]
     raw: dict
+    # APOE only: one entry per component locus, {"rsid", "review_stars", "gnomad_af", "gnomad_pli",
+    # "evidence_tier"}. The row-level stars, af, pli and tier are None for it: no component's figures stand for APOE.
+    component_evidence: Optional[list[dict]] = None
+    # "<allele> not detected (N variants tested in <gene>)", only for a wild-type row (AGENTS.md 4.1).
+    not_detected_statement: Optional[str] = None
     # Biotools live insights (filled only by enrich_record_with_biotools)
     vep_consequence: str = ""
     vep_sift: str = ""
@@ -706,10 +709,10 @@ def _segregation(rec: dict, kb: KnowledgeBase) -> Optional[dict]:
     gnomad = (rec["evidence"].get("gnomad") or {})
     af = gnomad.get("af")
     if rec["rsid"] == APOE_ROW_ID:
-        # APOE transmits e4 by its e4 copy count (rs429358), so e4/e4 transmits e4 with probability 1.
-        if rec.get("diplotype") in (None, ATYPICAL):
+        # APOE transmits e4 by the e4 count of its resolved diplotype, so e4/e4 transmits e4 with probability 1.
+        e4_count = e4_count_for_diplotype(rec.get("diplotype"))
+        if e4_count is None:
             return None
-        e4_count = rec["components"][0]["altCount"]
         alt_count, allele = e4_count, "e4"
     else:
         if rec["altCount"] is None:
@@ -725,11 +728,68 @@ def _segregation(rec: dict, kb: KnowledgeBase) -> Optional[dict]:
     return out
 
 
-def _to_annotation(rec: dict, kb: KnowledgeBase, build: str) -> AnnotationRecord:
+def tested_variant_counts(records: list[dict]) -> dict[str, int]:
+    """Distinct KB rsids per gene that gave an interpretable call in this file (the web's `testedVariantCounts`).
+    Array gaps and unresolvable genotypes (no allele count) tested nothing; the APOE row and its components are
+    counted by `not_detected_statement`, not here."""
+    rsids: dict[str, set] = {}
+    for r in records:
+        if r.get("role") == "apoe_component" or r.get("components"):
+            continue
+        if r["coverage_state"] == CoverageState.NOT_TESTED_BY_ARRAY.value or r.get("altCount") is None:
+            continue
+        rsids.setdefault(r["gene"], set()).add(r["rsid"])
+    return {gene: len(found) for gene, found in rsids.items()}
+
+
+def not_detected_statement(rec: dict, tested: dict[str, int]) -> Optional[str]:
+    """"<allele> not detected (N variant(s) tested in <gene>)", for a wild-type row only; the same sentence as the
+    web view model. APOE names its two alleles and its two component variants."""
+    if rec["sample_observation"] != OBSERVATION_WILD_TYPE:
+        return None
+    components = rec.get("components")
+    label = f"{rec['gene']} ε2 and ε4 alleles" if components else f"{rec['rsid']} variant"
+    total = len(components) if components else tested.get(rec["gene"])
+    if total is None:
+        return f"{label} not detected"
+    return f"{label} not detected ({total} {'variant' if total == 1 else 'variants'} tested in {rec['gene']})"
+
+
+def not_detected_statements(records: list[dict]) -> dict[str, Optional[str]]:
+    """The not-detected statement of every listed record, by rsid (None where it makes no such claim)."""
+    tested = tested_variant_counts(records)
+    return {r["rsid"]: not_detected_statement(r, tested) for r in records}
+
+
+def _component_evidence(rec: dict) -> dict:
+    evidence = rec.get("evidence") or {}
+    return {
+        "rsid": rec["rsid"],
+        "review_stars": (evidence.get("clinvar") or {}).get("stars"),
+        "gnomad_af": (evidence.get("gnomad") or {}).get("af"),
+        "gnomad_pli": (evidence.get("gnomad") or {}).get("pli"),
+        "evidence_tier": rec.get("evidence_tier"),
+    }
+
+
+def composite_tier(components: list[dict]) -> Optional[str]:
+    """The APOE row's tier, by the web rule (view-model.js): None when no component has one, the shared tier when they
+    all agree, else the labelled join "rs429358: Tier A · rs7412: Tier C" (a component without one reads "Not available")."""
+    tiers = [c["evidence_tier"] for c in components]
+    if all(t is None for t in tiers):
+        return None
+    if all(t == tiers[0] for t in tiers):
+        return tiers[0]
+    return " · ".join(f"{c['rsid']}: {c['evidence_tier'] if c['evidence_tier'] is not None else 'Not available'}" for c in components)
+
+
+def _to_annotation(rec: dict, kb: KnowledgeBase, build: str, tested: dict[str, int]) -> AnnotationRecord:
     interp = rec["interpretation"]
     evidence = rec["evidence"]
     clinvar = evidence.get("clinvar") or {}
     gnomad = evidence.get("gnomad") or {}
+    composite = bool(rec.get("components"))
+    components_evidence = [_component_evidence(c) for c in rec["components"]] if composite else []
     hpa = evidence.get("hpa") or {}
     state = rec["coverage_state"]
     if interp is not None:
@@ -761,17 +821,20 @@ def _to_annotation(rec: dict, kb: KnowledgeBase, build: str) -> AnnotationRecord
         repute=repute,
         drug_response=drug,
         caveats=caveats,
-        evidence_tier=rec["evidence_tier"],
+        # The APOE row has no evidence of its own (contracts C4): its tier is composite_tier (shared tier, else the labelled join).
+        evidence_tier=composite_tier(components_evidence) if composite else rec["evidence_tier"],
         # Locus-level ClinVar stars are shown only next to an interpreted genotype, never beside "not tested".
-        review_stars=clinvar.get("stars") if interp is not None else None,
-        gnomad_af=gnomad.get("af"),
-        gnomad_pli=gnomad.get("pli"),
+        review_stars=None if composite else (clinvar.get("stars") if interp is not None else None),
+        gnomad_af=None if composite else gnomad.get("af"),
+        gnomad_pli=None if composite else gnomad.get("pli"),
         hpa_tissues=dict(hpa.get("tissues") or {}),
         hpa_subcellular=list(hpa.get("subcellular") or []),
         limitation=rec["limitation"],
         acmg_actionable=bool(rec["acmg_sf"]),
         segregation=_segregation(rec, kb),
         raw=rec,
+        component_evidence=components_evidence if composite else None,
+        not_detected_statement=not_detected_statement(rec, tested),
     )
 
 
@@ -809,7 +872,8 @@ class VariantAnnotator:
         classified = classify(parse, kb)
         assembled = assemble_findings(classified["records"], kb, classified["summary"]["outside_coverage_count"])
         listed = assembled["listed"]
-        rows = [_to_annotation(r, kb, parse.build) for r in listed]
+        tested = tested_variant_counts(listed)
+        rows = [_to_annotation(r, kb, parse.build, tested) for r in listed]
         rows.sort(key=lambda a: (not a.variant_present, -(a.magnitude or 0.0)))
         return AnnotationReport(
             build=parse.build,
@@ -831,6 +895,8 @@ class VariantAnnotator:
             r for r in report.records
             if r.variant_present and r.acmg_actionable and r.category in ("Pathogenic", "Risk Factor", "Carrier")
         ]
+        # Distinct ACMG genes, as the web counts them: two variants in one gene are one actionable gene.
+        acmg_gene_count = len({r.gene for r in acmg})
         carriers = [r for r in report.records if r.segregation and r.segregation.get("is_carrier")]
         return {
             "total_loci": len(report.records),
@@ -838,7 +904,7 @@ class VariantAnnotator:
             "carrier_count": len(categories["Carrier"]),
             "pgx_count": len(categories["Pharmacogenomics"]),
             "risk_factor_count": len(categories["Risk Factor"]),
-            "acmg_actionable_findings": len(acmg),
+            "acmg_actionable_findings": acmg_gene_count,
             "categories": categories,
             "acmg_findings": acmg,
             "carrier_findings": carriers,

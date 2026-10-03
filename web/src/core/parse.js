@@ -9,7 +9,9 @@
  * `stats`: total_lines (all lines), data_rows (data lines, excluding blanks,
  * comments and the column-header row), skipped_malformed (data lines that could
  * not be parsed), called / no_calls (counted per Call, so a VCF line with two
- * `;`-joined IDs adds two).
+ * `;`-joined IDs adds two), filtered (VCF calls whose FILTER is neither PASS nor `.`;
+ * they are no-calls, so they are also in no_calls; always 0 for array formats).
+ * A VCF row whose REF, or a GT-selected ALT, is not A/C/G/T sequence or I/D is a no-call too (in no_calls, not filtered).
  */
 
 export class UnsupportedFormatError extends Error {
@@ -198,11 +200,18 @@ function parseMyHeritageLine(line) {
   return arrayCall(cols[0], cols[1], cols[2], arrayAlleles(cols[3]));
 }
 
+/**
+ * A VCF allele we will carry: A/C/G/T sequences (SNPs and indel sequences) or the single codes I/D.
+ * Anything else (symbolic `<DEL>`, `=1+1`, markup) is untrusted file content and is never kept.
+ */
+const VCF_ALLELE = /^(?:[ACGT]+|[ID])$/i;
+
 /** GT string and allele table to alleles: null = no-call, undefined = malformed. */
 function vcfAlleles(gt, table) {
   const tokens = gt.split(/[/|]/);
   const out = [];
-  let missing = false;
+  // REF is checked for every row; an ALT only when the GT selects it.
+  let missing = table[0] !== "*" && !VCF_ALLELE.test(table[0]);
   for (const t of tokens) {
     if (t === ".") {
       missing = true;
@@ -216,9 +225,19 @@ function vcfAlleles(gt, table) {
       missing = true;
       continue;
     }
+    if (!VCF_ALLELE.test(table[idx])) {
+      missing = true;
+      continue;
+    }
     out.push(table[idx].toUpperCase());
   }
   return missing ? null : out;
+}
+
+/** A VCF record is usable only when FILTER is PASS or `.`; anything else failed the caller's filters. */
+function failedFilter(filterField) {
+  const f = filterField.trim();
+  return f !== "PASS" && f !== ".";
 }
 
 function parseVcfLine(line, ctx) {
@@ -237,12 +256,15 @@ function parseVcfLine(line, ctx) {
   const alt = cols[4].trim();
   const table = [cols[3].trim(), ...(alt === "." || alt === "" ? [] : alt.split(","))].map((a) => a.trim());
   if (!table[0]) return null;
-  const alleles = vcfAlleles(gt.trim(), table);
-  if (alleles === undefined) return null;
+  const parsedAlleles = vcfAlleles(gt.trim(), table);
+  if (parsedAlleles === undefined) return null;
+  const filtered = failedFilter(cols[6]);
+  const alleles = filtered ? null : parsedAlleles;
 
   const ids = cols[2].trim() === "." || cols[2].trim() === "" ? [null] : cols[2].split(";").map((s) => s.trim()).filter((s) => s && s !== ".");
   if (ids.length === 0) ids.push(null);
   const chrom = normalizeChrom(cols[0]);
+  if (filtered) ctx.filtered += ids.length;
   return ids.map((rsid) => ({ rsid, chrom, pos, alleles: alleles === null ? null : [...alleles] }));
 }
 
@@ -285,10 +307,10 @@ export function parseGenotypeFile(text, fileName = "") {
     throw new UnsupportedFormatError("Unsupported file: VCF contains no sample genotypes (no FORMAT or sample column).");
   }
   const calls = [];
-  const stats = { total_lines: lines.length, data_rows: 0, called: 0, no_calls: 0, skipped_malformed: 0 };
+  const stats = { total_lines: lines.length, data_rows: 0, called: 0, no_calls: 0, skipped_malformed: 0, filtered: 0 };
 
   // VCF columns are fixed: FORMAT is column 8 and the FIRST sample is column 9.
-  const vcfCtx = { sampleIdx: 9, formatIdx: 8 };
+  const vcfCtx = { sampleIdx: 9, formatIdx: 8, filtered: 0 };
   const parseLine = format === "vcf" ? (l) => parseVcfLine(l, vcfCtx) : LINE_PARSERS[format];
 
   for (const line of lines) {
@@ -308,5 +330,6 @@ export function parseGenotypeFile(text, fileName = "") {
     }
   }
 
+  stats.filtered = vcfCtx.filtered;
   return { format, build, assay, calls, stats };
 }

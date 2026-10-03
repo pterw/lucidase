@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, REPO_ROOT, WEB_DIR
+from conftest import DEMO_FILE, REPO_ROOT, WAIT_TIMEOUT_MS, WEB_DIR, goto_ready
 
 KARYOGRAM_SAMPLE = WEB_DIR / "demo-data" / "sample-karyogram-23andme.txt"
 FIXTURES = REPO_ROOT / "tests" / "e2e" / "fixtures"
@@ -32,6 +32,7 @@ APP_LOCUS_STATES = """() => {
 
 def _open(page):
     page.goto(f"{page.base_url}/karyogram.html", wait_until="networkidle")
+    page.wait_for_function("() => window.__lucidaseKaryogram !== undefined", timeout=WAIT_TIMEOUT_MS)
     expect(page.locator("#karyogram-figure svg")).to_be_visible()
 
 
@@ -48,7 +49,7 @@ def _total(page, name):
 
 
 def _wait_result(page):
-    expect(page.locator("#karyogram-totals")).to_be_visible(timeout=30000)
+    expect(page.locator("#karyogram-totals")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
 
 
 def test_load_shows_reference_only_karyogram(page):
@@ -86,9 +87,9 @@ def test_synthetic_sample_matches_the_file_and_the_main_app(page):
     karyogram_states = page.evaluate(LOCUS_STATES)
     assert "reference" not in karyogram_states.values()
 
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     page.set_input_files("#file-input", str(KARYOGRAM_SAMPLE))
-    expect(page.locator("#results-section")).to_be_visible(timeout=30000)
+    expect(page.locator("#results-section")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
     app_states = page.evaluate(APP_LOCUS_STATES)
     assert len(app_states) == 14
     assert karyogram_states == app_states
@@ -135,7 +136,7 @@ def test_garbage_file_shows_the_error_alert(page):
         "#karyogram-file-input",
         files=[{"name": "garbage.txt", "mimeType": "text/plain", "buffer": b"this is not\na genotype file\n"}],
     )
-    expect(page.locator("#karyogram-error")).to_be_visible(timeout=15000)
+    expect(page.locator("#karyogram-error")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
     expect(page.locator("#karyogram-error")).to_contain_text("Nothing was uploaded")
     expect(page.locator("#karyogram-totals")).to_be_hidden()
     assert page.locator("#karyogram-figure .kary-col").count() == 24
@@ -205,7 +206,7 @@ def test_file_input_and_demo_button_are_reachable_by_tab(page):
 
 
 def test_index_header_links_to_the_karyogram_page(page):
-    page.goto(page.base_url, wait_until="networkidle")
+    goto_ready(page, page.base_url)
     assert page.locator("#link-karyogram").get_attribute("href") == "karyogram.html"
 
 

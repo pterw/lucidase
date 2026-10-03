@@ -2,12 +2,12 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lucidase-screenshot-dark.png">
-  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase analysis results for the bundled demo sample: summary counts, the APOE composite row and the inheritance section">
+  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase analysis results for the bundled demo sample: the scientific-scope guardrail, the sample profile, the summary counts and the APOE compound haplotype card">
 </picture>
 
 *The bundled synthetic demo sample, analysed in the browser.*
 
-Lucidase reads a raw genotype file in your browser and interprets the 14 curated loci (12 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA and MyHeritage array files and VCF 4.2 files, and rejects any other format with a visible error. Formerly GenomePulse.
+Lucidase reads a raw genotype file in your browser and interprets the 14 curated loci (12 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA and MyHeritage array files and VCF files, and rejects any other format with a visible error. Formerly GenomePulse.
 
 ## Karyogram view
 

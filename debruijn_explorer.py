@@ -83,6 +83,7 @@ from assembly import (  # noqa: E402
 )
 from bio_engine import (  # noqa: E402
     _gc_content,
+    alignment_basis_text,
     contigs_to_seqrecords,
     evaluate_assembly_against_reference,
     find_orfs,
@@ -97,6 +98,7 @@ from graph_core import (  # noqa: E402
     EDGE,
     FUTURE,
     FUTURE_TXT,
+    DEFAULT_K,
     INK,
     LEMON,
     LIME,
@@ -119,7 +121,10 @@ from graph_core import (  # noqa: E402
 from gui import (  # noqa: E402
     EXAMPLES,
     ExplorerApp,
+    stars_text,
     run_gui,
+    write_clinical_csv,
+    write_clinical_markdown,
 )
 from genomic_parser import (  # noqa: E402
     compute_qc,
@@ -127,7 +132,9 @@ from genomic_parser import (  # noqa: E402
     read_genotype_text,
 )
 from ml_engine import (  # noqa: E402
+    OUTLIER_FRACTION,
     bin_contigs,
+    binning_caveat_lines,
     coverage_summary,
     estimate_error_threshold,
     extract_kmer_features,
@@ -135,15 +142,13 @@ from ml_engine import (  # noqa: E402
     kmer_spectrum,
 )
 from variant_annotator import (  # noqa: E402
-    ACMG_SF_GENES,
     APOE_ROW_ID,
     AnnotationRecord,
     VariantAnnotator,
 )
 
 
-# One default k for the Python API and the CLI (matches the GUI's default).
-DEFAULT_K = 3
+# DEFAULT_K lives in graph_core, so the GUI, the Python API and the CLI share one value.
 
 
 # ===========================================================================
@@ -197,7 +202,7 @@ def assemble(
     >>> print(f"Contigs: {len(result['contigs'])}, N50: {result['metrics']['n50']}")
     """
     kmers, notes = collect_kmers(text, mode, k, both_strands, unique)
-    m = analyze(kmers, notes, ref_seq=ref_seq)
+    m = analyze(kmers, notes, ref_seq=ref_seq, both=both_strands)
     return {
         "contigs": m.contigs,
         "records": m.records,
@@ -262,11 +267,17 @@ def run_headless(args) -> int:
         print("  Absence of a finding does not imply absence of genetic risk.\n")
 
         for r in records:
-            stars_str = "*" * r.review_stars if r.review_stars else "-"
             label = "APOE" if r.rsid == APOE_ROW_ID else r.rsid  # APOE_ROW_ID is an internal row id
-            print(f"- {label:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} ({stars_str}) | {r.coverage_state}")
+            print(
+                f"- {label:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} "
+                f"({stars_text(r)}) | {r.coverage_state} | {r.sample_observation}"
+            )
             print(f"  Significance: {r.clinical_significance}")
             print(f"  Condition:    {r.phenotype}")
+            if r.not_detected_statement:
+                print(f"  Not detected: {r.not_detected_statement}")
+            if r.limitation:
+                print(f"  Limitation:   {r.limitation}")
             if r.drug_response:
                 print(f"  CPIC Drug:    {r.drug_response}")
             if r.hpa_tissues:
@@ -275,24 +286,16 @@ def run_headless(args) -> int:
             print()
 
         if getattr(args, "clinical_report", None):
-            if args.clinical_report.endswith(".csv"):
-                import csv
-                with open(args.clinical_report, "w", newline="", encoding="utf-8") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(["rsid", "gene", "genotype", "category", "stars", "significance", "phenotype", "drug_response"])
-                    for r in records:
-                        writer.writerow(["APOE (rs429358 + rs7412)" if r.rsid == APOE_ROW_ID else r.rsid, r.gene, r.genotype, r.category, r.review_stars, r.clinical_significance, r.phenotype, r.drug_response])
-            else:
-                with open(args.clinical_report, "w", encoding="utf-8") as f:
-                    f.write(f"# Clinical Genomic Report: {os.path.basename(args.genome)}\n\n")
-                    f.write(f"- Format: `{result.format.upper()}` ({result.build})\n")
-                    f.write(f"- Call Rate: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
-                    f.write(f"- Sex-chromosome QC: `{qc['sex_signal']}`\n\n")
-                    f.write(f"| rsID | Gene | Genotype | Category | Stars | Significance | Phenotype |\n")
-                    f.write(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
-                    for r in records:
-                        s_str = "★" * r.review_stars if r.review_stars else "—"
-                        f.write(f"| {'APOE (rs429358 + rs7412)' if r.rsid == APOE_ROW_ID else r.rsid} | {r.gene} | {r.genotype} | {r.category} | {s_str} | {r.clinical_significance} | {r.phenotype} |\n")
+            # The same serialisers as the GUI export, so the two cannot drift (S4c-C-4).
+            source = os.path.basename(args.genome)
+            try:
+                if args.clinical_report.endswith(".csv"):
+                    write_clinical_csv(args.clinical_report, records, source, report.kb_release)
+                else:
+                    write_clinical_markdown(args.clinical_report, records, result, qc, source, report.kb_release)
+            except OSError as err:
+                print(f"Error writing the clinical report: {err}", file=sys.stderr)
+                return 1
             print(f"Wrote clinical report to {args.clinical_report}")
         return 0
 
@@ -315,7 +318,7 @@ def run_headless(args) -> int:
                 ref_seq = args.ref.strip().upper()
 
         kmers, notes = collect_kmers(text, mode, args.k, args.both_strands, args.unique)
-        m = analyze(kmers, notes, ref_seq=ref_seq)
+        m = analyze(kmers, notes, ref_seq=ref_seq, both=args.both_strands)
     except (ValueError, OSError) as err:
         print(f"Error: {err}", file=sys.stderr)
         return 1
@@ -364,15 +367,17 @@ def run_headless(args) -> int:
             print(f"  ... ({len(m.contigs) - 20} more)")
 
     if args.binning:
-        print("\n--- Scikit-Learn Contig Binning & PCA ---")
+        print("\n--- Contig Binning & PCA (heuristic, exploratory) ---")
         bs = m.binning_summary
+        for line in binning_caveat_lines(bs):
+            print(f"  {line}")
         print(f"  Clusters (KMeans Bins):... {bs.get('n_bins', 1)}")
         if bs.get("pca_variance_ratio"):
             vars_str = ", ".join(
                 f"PC{i+1}: {v*100:.1f}%" for i, v in enumerate(bs["pca_variance_ratio"])
             )
             print(f"  PCA Explained Variance:... {vars_str}")
-        print(f"  Potential Outliers:....... {bs.get('outlier_count', 0)}")
+        print(f"  Flagged by {OUTLIER_FRACTION:.0%} rule:...... {bs.get('outlier_count', 0)}")
         for b_name, b_data in bs.get("clusters", {}).items():
             print(
                 f"  {b_name}: {b_data.get('contigs')} contigs, {b_data.get('total_bp'):,} bp, "
@@ -396,10 +401,11 @@ def run_headless(args) -> int:
         print(
             f"  Mean Alignment Identity:.. {m.ref_eval.get('mean_identity', 0)*100:.2f}%"
         )
+        print(f"  ({alignment_basis_text()})")
         print(f"  Aligned Contigs:.......... {m.ref_eval.get('aligned_contigs')}")
 
     if args.gfa:
-        write_gfa(m.contigs, args.gfa, m.k)
+        write_gfa(m.contigs, args.gfa, m.k, both=m.both)
         print(f"Wrote GFA to {args.gfa} ({len(m.contigs)} contigs)")
     if args.contigs:
         write_contigs_fasta(m.contigs, args.contigs)

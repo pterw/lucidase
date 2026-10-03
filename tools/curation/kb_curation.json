@@ -24,11 +24,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000010704",
-          "canonical_transcript": "ENST00000357618 (MANE Select)",
-          "sift_prediction": "deleterious (0.00)",
-          "alphamissense_class": "likely_pathogenic",
-          "alphamissense_pathogenicity": 0.842,
-          "loeuf": 0.82
+          "sift_prediction": "deleterious (0.00)"
         },
         "encode": {
           "top_tissues": {
@@ -66,11 +62,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000001626",
-          "canonical_transcript": "ENST00000003084 (MANE Select)",
-          "sift_prediction": "inframe deletion (deltaF508)",
-          "alphamissense_class": "pathogenic (misfolding & ERAD degradation)",
-          "alphamissense_pathogenicity": 0.985,
-          "loeuf": 0.44
+          "sift_prediction": "inframe deletion (deltaF508)"
         },
         "encode": {
           "top_tissues": {
@@ -106,11 +98,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000130203",
-          "canonical_transcript": "ENST00000252486 (MANE Select)",
-          "sift_prediction": "tolerated (1.0)",
-          "alphamissense_class": "likely_benign",
-          "alphamissense_pathogenicity": 0.0365,
-          "loeuf": 1.26
+          "sift_prediction": "tolerated (1.0)"
         },
         "encode": {
           "top_tissues": {
@@ -144,7 +132,7 @@
           "significance": "Risk Factor / Carrier",
           "magnitude": 4.2,
           "repute": "Bad",
-          "phenotype": "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring ~3–4× elevated risk for late-onset Alzheimer's disease (~20–25% population prevalence; ~25–35% lifetime risk). Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
+          "phenotype": "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring a ~3–4× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease (~20–25% population prevalence); the absolute lifetime risk ~25–35% is a separate figure. Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
           "drug_response": null,
           "caveats": [
             "Relative risk: 3–4× Increased Risk",
@@ -157,7 +145,7 @@
           "significance": "High Risk Factor",
           "magnitude": 6.0,
           "repute": "Bad",
-          "phenotype": "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). Confers ~12–15× increased lifetime risk of late-onset Alzheimer's disease and increased LDL/atherosclerosis susceptibility.",
+          "phenotype": "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). Confers a ~12–15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease, and increased LDL/atherosclerosis susceptibility.",
           "drug_response": null,
           "caveats": [
             "Relative risk: 12–15× Markedly Elevated Risk",
@@ -170,7 +158,7 @@
           "significance": "Protective / Carrier",
           "magnitude": 2.2,
           "repute": "Good",
-          "phenotype": "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele (~10–15% population prevalence). Associated with ~40–50% lower lifetime risk of Alzheimer's disease and lower circulating LDL-cholesterol.",
+          "phenotype": "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele (~10–15% population prevalence). Associated with ~40–50% lower relative risk (versus ε3/ε3) of Alzheimer's disease (absolute lifetime risk ~5–8% is a separate figure) and lower circulating LDL-cholesterol.",
           "drug_response": null,
           "caveats": [
             "Relative risk: 0.6× (Protective Effect)",
@@ -196,7 +184,7 @@
           "significance": "Risk Factor / Carrier",
           "magnitude": 3.2,
           "repute": "Bad",
-          "phenotype": "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4.",
+          "phenotype": "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4 (relative risk ~1.5–2× versus ε3/ε3; absolute lifetime risk ~15–20% is a separate figure).",
           "drug_response": null,
           "caveats": [
             "Relative risk: 1.5–2× Intermediate Risk",
@@ -229,11 +217,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000198734",
-          "canonical_transcript": "ENST00000367520 (MANE Select)",
-          "sift_prediction": "tolerated (0.28)",
-          "alphamissense_class": "ambiguous / pathogenic (APC cleavage resistant)",
-          "alphamissense_pathogenicity": 0.612,
-          "loeuf": 0.74
+          "sift_prediction": "tolerated (0.28)"
         },
         "encode": {
           "top_tissues": {
@@ -269,11 +253,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000188404",
-          "canonical_transcript": "ENST00000344445 (MANE Select)",
-          "sift_prediction": "N/A (3' UTR regulatory variant)",
-          "alphamissense_class": "N/A (elevates mRNA cleavage/polyadenylation)",
-          "alphamissense_pathogenicity": null,
-          "loeuf": 0.68
+          "sift_prediction": null
         },
         "encode": {
           "top_tissues": {
@@ -307,11 +287,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000165841",
-          "canonical_transcript": "ENST00000371401 (MANE Select)",
-          "sift_prediction": "deleterious (0.00)",
-          "alphamissense_class": "pathogenic (*2 splice defect / *3 stop)",
-          "alphamissense_pathogenicity": 0.941,
-          "loeuf": 0.72
+          "sift_prediction": "deleterious (0.00)"
         },
         "encode": {
           "top_tissues": {
@@ -345,11 +321,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000167397",
-          "canonical_transcript": "ENST00000394985 (MANE Select)",
-          "sift_prediction": "N/A (Promoter -1639G>A regulatory variant)",
-          "alphamissense_class": "N/A (Altered transcription factor binding)",
-          "alphamissense_pathogenicity": null,
-          "loeuf": 0.65
+          "sift_prediction": null
         },
         "encode": {
           "top_tissues": {
@@ -385,11 +357,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000134538",
-          "canonical_transcript": "ENST00000256958 (MANE Select)",
-          "sift_prediction": "deleterious (0.02)",
-          "alphamissense_class": "likely_pathogenic (Val174Ala)",
-          "alphamissense_pathogenicity": 0.792,
-          "loeuf": 0.62
+          "sift_prediction": "deleterious (0.02)"
         },
         "encode": {
           "top_tissues": {
@@ -427,11 +395,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000188641",
-          "canonical_transcript": "ENST00000370192 (MANE Select)",
-          "sift_prediction": "deleterious (0.00)",
-          "alphamissense_class": "pathogenic (*2A splice disruption)",
-          "alphamissense_pathogenicity": 0.965,
-          "loeuf": 0.58
+          "sift_prediction": "deleterious (0.00)"
         },
         "encode": {
           "top_tissues": {
@@ -467,11 +431,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000185010",
-          "canonical_transcript": "ENST00000376585 (MANE Select)",
-          "sift_prediction": "tolerated (0.34)",
-          "alphamissense_class": "likely_benign (thermolabile modifier)",
-          "alphamissense_pathogenicity": 0.215,
-          "loeuf": 0.54
+          "sift_prediction": "tolerated (0.34)"
         },
         "encode": {
           "top_tissues": {
@@ -519,11 +479,7 @@
         },
         "ensembl": {
           "ensg": "ENSG00000111275",
-          "canonical_transcript": "ENST00000261733 (MANE Select)",
-          "sift_prediction": "deleterious (0.00)",
-          "alphamissense_class": "pathogenic (Glu504Lys dominant negative)",
-          "alphamissense_pathogenicity": 0.912,
-          "loeuf": 0.61
+          "sift_prediction": "deleterious (0.00)"
         },
         "encode": {
           "top_tissues": {
@@ -573,7 +529,7 @@
           "significance": "High Risk Factor",
           "magnitude": 5,
           "repute": "Bad",
-          "phenotype": "APOE ε4/ε4 homozygote: ~12-15× elevated lifetime risk of late-onset Alzheimer's disease.",
+          "phenotype": "APOE ε4/ε4 homozygote: ~12-15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease.",
           "drug_response": null,
           "caveats": []
         }
@@ -1101,8 +1057,8 @@
           "significance": "Drug Response",
           "magnitude": 3,
           "repute": "Bad",
-          "phenotype": "CYP2C19 Intermediate Metabolizer (*1/*2): Reduced clopidogrel activation; CPIC recommends alternative agent for acute coronary syndrome.",
-          "drug_response": "Clopidogrel: Intermediate Metabolizer (Reduced activation)",
+          "phenotype": "One CYP2C19*2 (rs4244285) allele detected. This variant is associated with reduced clopidogrel activation, and CPIC recommends an alternative agent for acute coronary syndrome in people with reduced CYP2C19 function. A metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Clopidogrel: Reduced activation (one *2 allele)",
           "caveats": []
         },
         "2": {
@@ -1110,8 +1066,8 @@
           "significance": "Drug Response",
           "magnitude": 4.5,
           "repute": "Bad",
-          "phenotype": "CYP2C19 Poor Metabolizer (*2/*2): Significantly impaired clopidogrel activation. Alternative antiplatelet (ticagrelor/prasugrel) strongly indicated by CPIC.",
-          "drug_response": "Clopidogrel: Poor Metabolizer (Alternative drug recommended)",
+          "phenotype": "Two CYP2C19*2 (rs4244285) alleles detected. Two copies of this variant are associated with significantly impaired clopidogrel activation, and CPIC indicates an alternative antiplatelet (ticagrelor/prasugrel). A metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Clopidogrel: Impaired activation (two *2 alleles; alternative drug recommended)",
           "caveats": []
         }
       },
@@ -1349,8 +1305,8 @@
           "significance": "Drug Response",
           "magnitude": 5,
           "repute": "Bad",
-          "phenotype": "DPYD Partial Deficiency (*2A heterozygote): High risk of life-threatening neutropenia and mucositis. CPIC mandates ≥50% dose reduction.",
-          "drug_response": "5-Fluorouracil / Capecitabine: Intermediate (Reduce dose ≥50%)",
+          "phenotype": "One DPYD*2A (rs3918290) allele detected. This variant is associated with a high risk of life-threatening neutropenia and mucositis on fluoropyrimidines, and CPIC recommends a ≥50% dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
           "caveats": []
         },
         "2": {
@@ -1358,8 +1314,8 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 6.5,
           "repute": "Bad",
-          "phenotype": "DPYD Complete Deficiency (*2A/*2A): Fatal toxicity with standard 5-FU/capecitabine chemotherapy. Alternate therapy required.",
-          "drug_response": "5-Fluorouracil / Capecitabine: Complete Deficiency (Contraindicated)",
+          "phenotype": "Two DPYD*2A (rs3918290) alleles detected. Two copies of this variant are associated with severe, potentially fatal toxicity with standard 5-FU/capecitabine dosing, and CPIC recommends an alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends avoiding standard dosing (alternative therapy)",
           "caveats": []
         }
       },
@@ -1499,11 +1455,11 @@
       "limitation": "Single-variant test: this assay covers only the MCM6/LCT -13910C>T lactase-persistence variant. Other lactase-persistence variants exist in some populations, so a result without it does not establish lactase non-persistence.",
       "interpretations": {
         "0": {
-          "category": "Trait",
-          "significance": "Trait",
-          "magnitude": 1.5,
-          "repute": "Bad",
-          "phenotype": "Lactose non-persistent (primary adult hypolactasia): Susceptible to lactose intolerance symptoms.",
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No MCM6/LCT -13910T allele detected at this position. Lactase persistence from other variants is not excluded.",
           "drug_response": null,
           "caveats": [
             "Based on a single variant (-13910C>T); other lactase persistence variants exist in some populations."

@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 import pytest
 from playwright.sync_api import expect
 
-from conftest import WEB_DIR
+from conftest import WEB_DIR, goto_ready
 
 TYPEKIT_HOSTS = {"use.typekit.net", "p.typekit.net"}
 VIOLATION_LISTENER = """
@@ -116,9 +116,9 @@ def test_demo_renders_under_production_csp(browser, vercel_url):
     page = context.new_page()
     errors: list[str] = []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
-    page.goto(vercel_url, wait_until="networkidle")
+    goto_ready(page, vercel_url)
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     assert page.locator("#variants-tbody tr").count() > 0
     violations = page.evaluate("window.__cspViolations")
     context.close()
@@ -138,6 +138,13 @@ def test_dockerfile_asset_location_repeats_security_headers_and_csp():
     assert {"X-Content-Type-Options", "Content-Security-Policy"} <= set(headers)
     for name in headers:
         assert f"add_header {name} " in location, f"asset location drops {name}"
-    csp = re.search(r'add_header Content-Security-Policy "([^"]+)"', location).group(1)
-    assert csp == _csp(), "Dockerfile CSP differs from vercel.json"
     assert 'add_header Cache-Control "no-cache"' in location
+
+
+def test_every_dockerfile_csp_copy_equals_vercel_json():
+    """index.html gets the server-level copy, assets the location copy; both must match vercel.json (S5a-C-2)."""
+    text = (WEB_DIR / "Dockerfile").read_text(encoding="utf-8")
+    copies = re.findall(r'add_header Content-Security-Policy "([^"]+)"', text)
+    assert len(copies) == 2, f"expected the server-level and the asset-location copy, found {len(copies)}"
+    for copy in copies:
+        assert copy == _csp(), "a Dockerfile CSP copy differs from vercel.json"

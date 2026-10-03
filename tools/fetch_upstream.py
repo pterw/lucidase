@@ -9,6 +9,8 @@ byte-verbatim; ``<key>.meta.json`` records how each body was obtained and its
 sha256, so a tampered fixture is detectable offline.
 
 Request construction (pure) is separate from I/O so tests never need a network.
+This script names no field of any payload: reading a response is `tools/source_adapters.py`'s job
+(AGENTS.md section 2). A failed request fails the run (exit 1, failed keys listed).
 Stdlib only.
 """
 
@@ -24,6 +26,20 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:  # run as `python tools/fetch_upstream.py`, as build_canonical_kb.py does
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from tools.source_adapters import (  # noqa: E402
+    AdapterError,
+    TruncatedSearch,
+    esearch_uids,
+    gnomad_variant_ids_from_dbsnp,
+    is_multiple_variants_refusal,
+)
+
+__all__ = ["TruncatedSearch"]  # re-exported: the completeness rule lives in the adapters
 
 USER_AGENT = "Lucidase-KB-builder/1.0 (fixture capture)"
 TIMEOUT_S = 30
@@ -88,8 +104,12 @@ class UcscCaptureFailed(RuntimeError):
     """Raised when one of the four approved UCSC requests does not return HTTP 200."""
 
 
-class TruncatedSearch(RuntimeError):
-    """Raised when an esearch reports more hits (count) than it returned (idlist)."""
+class CaptureFailed(RuntimeError):
+    """A request ended in a final non-200 status (or an empty body). Its meta is on disk; the run must fail."""
+
+    def __init__(self, source: str, key: str, status: int):
+        super().__init__(f"{source}/{key}: HTTP {status}")
+        self.source, self.key, self.status = source, key, status
 
 
 ESEARCH_RETMAX = 500
@@ -185,8 +205,13 @@ def ucsc_requests() -> list[tuple[str, dict]]:
 # ---------------------------------------------------------------------------
 # I/O
 # ---------------------------------------------------------------------------
-def perform(spec: dict, opener=urllib.request.urlopen, timeout: float = TIMEOUT_S) -> tuple[int, bytes]:
-    """Execute one request. Returns (http_status, body_bytes); status 0 = transport failure."""
+def perform(spec: dict, opener=None, timeout: float = TIMEOUT_S) -> tuple[int, bytes]:
+    """Execute one request. Returns (http_status, body_bytes); status 0 = transport failure.
+
+    `opener` defaults to `urllib.request.urlopen`, looked up at call time (so a test guard can replace it).
+    It is called with the timeout only: urllib's default certificate verification stays on.
+    """
+    opener = opener or urllib.request.urlopen
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json", **spec["headers"]}
     data = spec["body"].encode("utf-8") if spec["body"] is not None else None
     req = urllib.request.Request(spec["url"], data=data, headers=headers, method=spec["method"])
@@ -199,7 +224,7 @@ def perform(spec: dict, opener=urllib.request.urlopen, timeout: float = TIMEOUT_
         return 0, str(exc).encode("utf-8")
 
 
-def perform_with_retry(spec, opener=urllib.request.urlopen, sleep=time.sleep, log=print):
+def perform_with_retry(spec, opener=None, sleep=time.sleep, log=print):
     """At most one logged retry, only for transport failure, 429 or 5xx."""
     status, body = perform(spec, opener)
     if status == 0 or status == 429 or status >= 500:
@@ -240,12 +265,17 @@ def write_capture(
 
 
 class Capturer:
-    def __init__(self, out_dir: Path, opener=urllib.request.urlopen, sleep=time.sleep, log=print):
+    def __init__(self, out_dir: Path, opener=None, sleep=time.sleep, log=print):
         self.out_dir, self.opener, self.sleep, self.log = Path(out_dir), opener, sleep, log
         self.total = 0
         self.rows: list[dict] = []
+        self.failures: list[CaptureFailed] = []
 
-    def run(self, source: str, key: str, spec: dict, body_ext: str = ".json") -> tuple[int, bytes, dict]:
+    def run(
+        self, source: str, key: str, spec: dict, allow_status: tuple[int, ...] = (), body_ext: str = ".json"
+    ) -> tuple[int, bytes, dict]:
+        """One request, written to disk. Raises `CaptureFailed` unless the status is 200 (non-empty body) or in
+        `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag)."""
         self.sleep(MIN_INTERVAL_S)
         status, body = perform_with_retry(spec, self.opener, self.sleep, self.log)
         meta = write_capture(self.out_dir, source, key, spec, status, body, body_ext=body_ext)
@@ -254,90 +284,90 @@ class Capturer:
         self.log(f"{source}/{key}: HTTP {status}, {meta['bytes']} bytes")
         if self.total > MAX_TOTAL_BYTES:
             raise CapBytesExceeded(f"captured {self.total} bytes, over the {MAX_TOTAL_BYTES} byte cap")
+        if (status != 200 or not body) and status not in allow_status:
+            raise CaptureFailed(source, key, status)
         return status, body, meta
 
-
-def _uids(body: bytes) -> list[str]:
-    """Uids from an esearch body; fails closed if the result list is truncated."""
-    try:
-        result = json.loads(body)["esearchresult"]
-        uids = list(result["idlist"])
-        count = int(result["count"])
-    except (ValueError, KeyError, TypeError):
-        return []
-    if count != len(uids):
-        raise TruncatedSearch(f"esearch count {count} != {len(uids)} uids returned; raise retmax")
-    return uids
+    def attempt(self, unit, *args, **kwargs) -> None:
+        """Run one unit of work (one rsID, one gene). A `CaptureFailed` is recorded and the run goes on, so one
+        outage lists every failed key instead of hiding the second behind the first. Nothing else is caught."""
+        try:
+            unit(self, *args, **kwargs)
+        except CaptureFailed as exc:
+            self.failures.append(exc)
+            self.log(f"FAILED {exc}")
 
 
 def capture_clinvar(cap: Capturer, rsid: str) -> None:
-    status, body, _ = cap.run("clinvar", f"{rsid}.esearch", clinvar_esearch_request(rsid))
-    uids = _uids(body) if status == 200 else []
+    _, body, _ = cap.run("clinvar", f"{rsid}.esearch", clinvar_esearch_request(rsid))
+    uids = esearch_uids(body)
     if not uids:
         cap.log(f"{rsid}: plain term returned 0 uids; trying tagged term")
-        status, body, _ = cap.run("clinvar", f"{rsid}.esearch_tagged", clinvar_esearch_request(rsid, True))
-        uids = _uids(body) if status == 200 else []
+        _, body, _ = cap.run("clinvar", f"{rsid}.esearch_tagged", clinvar_esearch_request(rsid, True))
+        uids = esearch_uids(body)
     if uids:
         cap.run("clinvar", rsid, clinvar_esummary_request(uids))
-
-
-def grch38_variant_ids(dbsnp_body: bytes) -> list[str]:
-    """gnomAD variant ids (chrom-pos-ref-alt, plus strand, GRCh38) from a dbSNP payload."""
-    snap = json.loads(dbsnp_body)["primary_snapshot_data"]
-    for placement in snap["placements_with_allele"]:
-        seq = placement["seq_id"]
-        if placement.get("is_ptlp") and seq.startswith("NC_0000"):
-            chrom = {"23": "X", "24": "Y"}.get(str(int(seq[3:9])), str(int(seq[3:9])))
-            ids = []
-            for allele in placement["alleles"]:
-                spdi = allele["allele"]["spdi"]
-                if spdi["deleted_sequence"] != spdi["inserted_sequence"]:
-                    ids.append(f"{chrom}-{spdi['position'] + 1}-{spdi['deleted_sequence']}-{spdi['inserted_sequence']}")
-            return ids
-    return []
 
 
 def capture_gnomad_multiallelic(cap: Capturer, rsids=RSIDS) -> None:
     """For rsIDs whose gnomAD rsid query errored as multiallelic, query each alt by variant id."""
     for rsid in rsids:
         path = cap.out_dir / "gnomad" / f"{rsid}.json"
-        if not path.exists() or b"Multiple variants found" not in path.read_bytes():
+        if not path.exists() or not is_multiple_variants_refusal(path.read_bytes()):
             continue
-        dbsnp = (cap.out_dir / "dbsnp" / f"{rsid}.json").read_bytes()
-        for vid in grch38_variant_ids(dbsnp):
+        dbsnp = json.loads((cap.out_dir / "dbsnp" / f"{rsid}.json").read_bytes())
+        for vid in gnomad_variant_ids_from_dbsnp(dbsnp):
             if (cap.out_dir / "gnomad" / f"{rsid}.{vid}.meta.json").exists():
                 continue  # already captured; do not re-query
-            cap.run("gnomad", f"{rsid}.{vid}", gnomad_variant_id_request(vid))
+            cap.attempt(_capture_gnomad_variant_id, rsid, vid)
+
+
+def _capture_gnomad_variant_id(cap: Capturer, rsid: str, vid: str) -> None:
+    cap.run("gnomad", f"{rsid}.{vid}", gnomad_variant_id_request(vid))
+
+
+def _capture_locus(cap: Capturer, rsid: str) -> None:
+    cap.run("dbsnp", rsid, dbsnp_request(rsid))
+
+    capture_clinvar(cap, rsid)
+
+    # The one status handled in place: VEP answers 400 when the AlphaMissense flag is not supported. The 400
+    # is kept (renamed) as evidence and the request is repeated once without the flag; that repeat must be 200.
+    status, _, _ = cap.run("ensembl", rsid, vep_request(rsid), allow_status=(400,))
+    if status == 400:
+        cap.log(f"{rsid}: VEP rejected request; error payload kept in meta, retrying without AlphaMissense")
+        rejected = cap.out_dir / "ensembl"
+        (rejected / f"{rsid}.meta.json").replace(rejected / f"{rsid}.alphamissense_rejected.meta.json")
+        cap.run("ensembl", rsid, vep_request(rsid, alphamissense=False))
+
+    cap.run("gnomad", rsid, gnomad_variant_request(rsid))
+
+
+def _capture_constraint(cap: Capturer, gene: str) -> None:
+    cap.run("gnomad", f"constraint_{gene}", gnomad_constraint_request(gene))
 
 
 def capture_all(cap: Capturer, rsids=RSIDS, genes=GENES) -> None:
+    """Every request. A failed request ends its rsID (or gene) and the run goes on; `cap.failures` lists them."""
     for rsid in rsids:
-        cap.run("dbsnp", rsid, dbsnp_request(rsid))
-
-        capture_clinvar(cap, rsid)
-
-        status, _, _ = cap.run("ensembl", rsid, vep_request(rsid))
-        if status == 400:
-            cap.log(f"{rsid}: VEP rejected request; error payload kept in meta, retrying without AlphaMissense")
-            rejected = cap.out_dir / "ensembl"
-            (rejected / f"{rsid}.meta.json").replace(rejected / f"{rsid}.alphamissense_rejected.meta.json")
-            cap.run("ensembl", rsid, vep_request(rsid, alphamissense=False))
-
-        cap.run("gnomad", rsid, gnomad_variant_request(rsid))
+        cap.attempt(_capture_locus, rsid)
     for gene in genes:
-        cap.run("gnomad", f"constraint_{gene}", gnomad_constraint_request(gene))
+        cap.attempt(_capture_constraint, gene)
     capture_gnomad_multiallelic(cap, rsids)
 
 
 def capture_ucsc(cap: Capturer) -> None:
     """Capture the four UCSC tables, byte-verbatim (gzip), under ``ucsc/<key>``."""
     for key, spec in ucsc_requests():
-        status, _, _ = cap.run("ucsc", key, spec, body_ext="")
-        if status != 200:
-            raise UcscCaptureFailed(f"{spec['url']}: HTTP {status}")
+        try:
+            cap.run("ucsc", key, spec, body_ext="")
+        except CaptureFailed as exc:
+            raise UcscCaptureFailed(f"{spec['url']}: HTTP {exc.status}") from exc
 
 
-def main(argv=None) -> int:
+def main(argv=None, opener=None, sleep=time.sleep) -> int:
+    """Exit 0 when every request succeeded, 1 when any failed (failed keys listed on stderr), 2 on a cap or
+    payload error (an unreadable response is systematic, so the run stops at once)."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument(
@@ -357,7 +387,7 @@ def main(argv=None) -> int:
         help="capture only the four UCSC hg19/hg38 chromInfo and cytoBand tables",
     )
     args = parser.parse_args(argv)
-    cap = Capturer(args.out)
+    cap = Capturer(args.out, opener=opener, sleep=sleep)
     try:
         if args.ucsc_only:
             capture_ucsc(cap)
@@ -365,14 +395,19 @@ def main(argv=None) -> int:
             for rsid in args.clinvar_only:
                 if rsid not in RSIDS:
                     raise SystemExit(f"{rsid} is not one of the approved rsIDs")
-                capture_clinvar(cap, rsid)
+                cap.attempt(capture_clinvar, rsid)
         elif args.gnomad_multiallelic_only:
             capture_gnomad_multiallelic(cap)
         else:
             capture_all(cap)
-    except (CapBytesExceeded, TruncatedSearch, UcscCaptureFailed) as exc:
+    except (CapBytesExceeded, AdapterError, UcscCaptureFailed) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
+    if cap.failures:
+        print(f"FAILED {len(cap.failures)} request(s) of {len(cap.rows)}:", file=sys.stderr)
+        for failure in cap.failures:
+            print(f"  {failure.source}/{failure.key}: HTTP {failure.status}", file=sys.stderr)
+        return 1
     print(f"done: {len(cap.rows)} requests, {cap.total} body bytes")
     return 0
 

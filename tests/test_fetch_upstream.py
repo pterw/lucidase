@@ -3,17 +3,33 @@
 import hashlib
 import io
 import json
-import sys
+import socket
 import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
-import fetch_upstream as fu  # noqa: E402
+from tools import fetch_upstream as fu
+from tools.source_adapters import AdapterError
 
 REAL = Path(__file__).resolve().parent.parent / "tools" / "fixtures" / "upstream" / "real"
+
+
+@pytest.fixture(autouse=True)
+def offline_guard(monkeypatch):
+    """No test here may reach the network (AGENTS.md section 6; the upstream fetch was approved once, in T2).
+
+    Replaces urlopen, DNS and socket connect, so a test that forgets to pass an opener fails at once.
+    """
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("network access attempted in an offline test")
+
+    monkeypatch.setattr(urllib.request, "urlopen", refuse)
+    monkeypatch.setattr(socket, "getaddrinfo", refuse)
+    monkeypatch.setattr(socket.socket, "connect", refuse)
 
 
 class FakeResp:
@@ -161,34 +177,11 @@ def test_gnomad_variant_id_request_and_validation():
         fu.gnomad_variant_id_request("10-abc-G-A")
 
 
-def test_grch38_variant_ids_from_dbsnp_payload():
-    payload = {
-        "primary_snapshot_data": {
-            "placements_with_allele": [
-                {"seq_id": "NG_1.1", "is_ptlp": False, "alleles": []},
-                {
-                    "seq_id": "NC_000010.11",
-                    "is_ptlp": True,
-                    "alleles": [
-                        {"allele": {"spdi": {"position": 94781858, "deleted_sequence": "G", "inserted_sequence": "G"}}},
-                        {"allele": {"spdi": {"position": 94781858, "deleted_sequence": "G", "inserted_sequence": "A"}}},
-                    ],
-                },
-            ]
-        }
-    }
-    assert fu.grch38_variant_ids(json.dumps(payload).encode()) == ["10-94781859-G-A"]
-
-
 def test_multiallelic_fallback_queries_each_alt_by_variant_id(tmp_path):
-    (tmp_path / "gnomad").mkdir()
-    (tmp_path / "dbsnp").mkdir()
-    (tmp_path / "gnomad" / "rs1.json").write_bytes(b'{"errors":[{"message":"Multiple variants found, x"}]}')
-    dbsnp = {"primary_snapshot_data": {"placements_with_allele": [{
-        "seq_id": "NC_000001.11", "is_ptlp": True,
-        "alleles": [{"allele": {"spdi": {"position": 4, "deleted_sequence": "C", "inserted_sequence": a}}} for a in "AGT"],
-    }]}}
-    (tmp_path / "dbsnp" / "rs1.json").write_text(json.dumps(dbsnp))
+    """Real rs4244285 captures: the gnomAD refusal and the dbSNP placements drive one query per alt allele."""
+    for source in ("gnomad", "dbsnp"):
+        (tmp_path / source).mkdir()
+        (tmp_path / source / "rs4244285.json").write_bytes((REAL / source / "rs4244285.json").read_bytes())
     seen = []
 
     def opener(req, timeout):
@@ -196,9 +189,19 @@ def test_multiallelic_fallback_queries_each_alt_by_variant_id(tmp_path):
         return FakeResp(200, b"{}")
 
     cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
-    fu.capture_gnomad_multiallelic(cap, rsids=("rs1",))
-    assert seen == ["1-5-C-A", "1-5-C-G", "1-5-C-T"]
-    assert (tmp_path / "gnomad" / "rs1.1-5-C-G.json").exists()
+    fu.capture_gnomad_multiallelic(cap, rsids=("rs4244285",))
+    assert seen == ["10-94781859-G-A", "10-94781859-G-C", "10-94781859-G-T"]
+    assert (tmp_path / "gnomad" / "rs4244285.10-94781859-G-C.json").exists()
+
+
+def test_multiallelic_detection_ignores_a_biallelic_capture_and_rejects_garbage(tmp_path):
+    (tmp_path / "gnomad").mkdir()
+    (tmp_path / "gnomad" / "rs671.json").write_bytes((REAL / "gnomad" / "rs671.json").read_bytes())
+    cap = fu.Capturer(tmp_path, opener=lambda req, timeout: pytest.fail("no request expected"), sleep=lambda s: None, log=lambda m: None)
+    fu.capture_gnomad_multiallelic(cap, rsids=("rs671",))
+    (tmp_path / "gnomad" / "rs1.json").write_bytes(b"<html>502</html>")
+    with pytest.raises(AdapterError):
+        fu.capture_gnomad_multiallelic(cap, rsids=("rs1",))
 
 
 def _esearch_body(count, uids):
@@ -278,6 +281,169 @@ def test_retry_policy_by_status(status, expected_calls):
 
     fu.perform_with_retry(fu.dbsnp_request("rs1"), opener, sleep=lambda s: None, log=lambda m: None)
     assert len(calls) == expected_calls
+
+
+# ---------------------------------------------------------------------------
+# S3-F2a: a failed request fails the run
+# ---------------------------------------------------------------------------
+def _http_error(req, status, body=b"x"):
+    return urllib.error.HTTPError(req.full_url, status, "e", {}, io.BytesIO(body))
+
+
+def _quiet_capturer(tmp_path, opener):
+    return fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+
+
+@pytest.mark.parametrize("status", [404, 500, 503, 429])
+def test_final_non_200_raises_capture_failed_and_keeps_the_failure_meta(tmp_path, status):
+    def opener(req, timeout):
+        raise _http_error(req, status)
+
+    cap = _quiet_capturer(tmp_path, opener)
+    with pytest.raises(fu.CaptureFailed) as info:
+        cap.run("dbsnp", "rs1", fu.dbsnp_request("rs1"))
+    assert (info.value.source, info.value.key, info.value.status) == ("dbsnp", "rs1", status)
+    assert json.loads((tmp_path / "dbsnp" / "rs1.meta.json").read_text())["http_status"] == status
+
+
+def test_transport_failure_and_empty_200_body_fail_too(tmp_path):
+    def down(req, timeout):
+        raise urllib.error.URLError("down")
+
+    with pytest.raises(fu.CaptureFailed) as info:
+        _quiet_capturer(tmp_path, down).run("dbsnp", "rs1", fu.dbsnp_request("rs1"))
+    assert info.value.status == 0
+    with pytest.raises(fu.CaptureFailed):
+        _quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, b"")).run("dbsnp", "rs2", fu.dbsnp_request("rs2"))
+
+
+def test_a_200_does_not_raise(tmp_path):
+    status, body, _ = _quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, b"{}")).run(
+        "dbsnp", "rs1", fu.dbsnp_request("rs1")
+    )
+    assert (status, body) == (200, b"{}")
+
+
+def test_esearch_500_is_a_failure_not_zero_uids(tmp_path):
+    seen = []
+
+    def opener(req, timeout):
+        seen.append(req.full_url)
+        raise _http_error(req, 500)
+
+    with pytest.raises(fu.CaptureFailed) as info:
+        fu.capture_clinvar(_quiet_capturer(tmp_path, opener), "rs671")
+    assert info.value.key == "rs671.esearch" and info.value.status == 500
+    assert not any("esummary" in u or "Variant+ID" in u or "Variant%20ID" in u or "%5BVariant" in u for u in seen)
+
+
+@pytest.mark.parametrize("body", [b"{}", b"not json", b'{"esearchresult": {"count": "1"}}'])
+def test_malformed_esearch_body_raises_instead_of_meaning_no_hits(tmp_path, body):
+    cap = _quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, body))
+    with pytest.raises(AdapterError):
+        fu.capture_clinvar(cap, "rs671")
+
+
+def test_truncated_search_is_the_adapters_exception():
+    from tools.source_adapters import TruncatedSearch
+
+    assert fu.TruncatedSearch is TruncatedSearch and issubclass(fu.TruncatedSearch, AdapterError)
+
+
+def test_vep_400_is_tolerated_once_but_the_retry_must_succeed(tmp_path):
+    def opener(req, timeout):
+        if "rest.ensembl.org" in req.full_url:
+            raise _http_error(req, 400, b'{"error":"AlphaMissense"}')
+        if "esearch" in req.full_url:
+            return FakeResp(200, _esearch_body(0, []))
+        return FakeResp(200, b"{}")
+
+    cap = _quiet_capturer(tmp_path, opener)
+    fu.capture_all(cap, rsids=("rs671",), genes=())
+    assert [(f.source, f.key, f.status) for f in cap.failures] == [("ensembl", "rs671", 400)]
+    assert (tmp_path / "ensembl" / "rs671.alphamissense_rejected.meta.json").exists()
+
+
+def test_capture_all_keeps_going_after_a_failure_and_lists_every_failed_key(tmp_path):
+    def opener(req, timeout):
+        url = req.full_url
+        posted = (req.data or b"").decode()
+        if "refsnp/429358" in url or '"symbol":"APOE"' in posted:
+            raise _http_error(req, 500)
+        if "esearch" in url:
+            return FakeResp(200, _esearch_body(0, []))
+        return FakeResp(200, b"{}")
+
+    cap = _quiet_capturer(tmp_path, opener)
+    fu.capture_all(cap, rsids=("rs429358", "rs671"), genes=("APOE", "F5"))
+    assert [(f.source, f.key) for f in cap.failures] == [("dbsnp", "rs429358"), ("gnomad", "constraint_APOE")]
+    assert (tmp_path / "dbsnp" / "rs671.json").exists()  # the second rsID was still captured
+    assert (tmp_path / "gnomad" / "constraint_F5.json").exists()
+
+
+def test_main_exits_1_and_lists_the_failed_keys(tmp_path, capsys):
+    def opener(req, timeout):
+        if "term=rs671&" in req.full_url:
+            raise _http_error(req, 500)
+        if "esearch" in req.full_url:
+            return FakeResp(200, _esearch_body(1, ["5"]))
+        return FakeResp(200, b'{"result": {}}')
+
+    code = fu.main(["--out", str(tmp_path), "--clinvar-only", "rs671", "rs1801133"], opener=opener, sleep=lambda s: None)
+    err = capsys.readouterr().err
+    assert code == 1
+    assert "clinvar/rs671.esearch: HTTP 500" in err
+    assert (tmp_path / "clinvar" / "rs1801133.json").exists()  # the run kept going
+
+
+def test_main_exits_0_when_every_request_succeeds(tmp_path):
+    def opener(req, timeout):
+        if "esearch" in req.full_url:
+            return FakeResp(200, _esearch_body(1, ["5"]))
+        return FakeResp(200, b"{}")
+
+    assert fu.main(["--out", str(tmp_path), "--clinvar-only", "rs671"], opener=opener, sleep=lambda s: None) == 0
+
+
+def test_main_exits_2_on_a_truncated_search(tmp_path, capsys):
+    opener = lambda req, timeout: FakeResp(200, _esearch_body(37, ["1", "2"]))  # noqa: E731
+    code = fu.main(["--out", str(tmp_path), "--clinvar-only", "rs671"], opener=opener, sleep=lambda s: None)
+    assert code == 2 and "truncated" in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------------------
+# S3-F2a (review S3a-C-10, C-14): TLS stays on, the recorded URL is the requested one, the guard works
+# ---------------------------------------------------------------------------
+def test_the_offline_guard_stops_a_request_with_no_opener():
+    """The default opener is resolved at call time, so the guard catches a test that forgets to pass one."""
+    with pytest.raises(AssertionError, match="network access attempted"):
+        fu.perform(fu.dbsnp_request("rs671"))
+
+
+def test_every_request_spec_is_https():
+    specs = [fu.dbsnp_request("rs1"), fu.clinvar_esearch_request("rs1"), fu.clinvar_esearch_request("rs1", True),
+             fu.clinvar_esummary_request(["1"]), fu.vep_request("rs1"), fu.gnomad_variant_request("rs1"),
+             fu.gnomad_variant_id_request("1-5-C-A"), fu.gnomad_constraint_request("F5")]
+    assert all(spec["url"].startswith("https://") for spec in specs)
+
+
+def test_perform_passes_only_a_timeout_so_certificate_verification_stays_default():
+    seen = {}
+
+    def opener(req, **kwargs):
+        seen.update(kwargs)
+        return FakeResp(200, b"{}")
+
+    fu.perform(fu.dbsnp_request("rs1"), opener)
+    assert set(seen) == {"timeout"}, "an SSL context argument would be the only way to weaken verification"
+    assert not hasattr(fu, "ssl")
+
+
+def test_the_recorded_url_is_the_requested_url_on_disk(tmp_path):
+    spec = fu.clinvar_esearch_request("rs671")
+    _quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, b"{}")).run("clinvar", "rs671.esearch", spec)
+    meta = json.loads((tmp_path / "clinvar" / "rs671.esearch.meta.json").read_text())
+    assert meta["url"] == spec["url"] and meta["url"].startswith("https://eutils.ncbi.nlm.nih.gov/")
 
 
 # ---------------------------------------------------------------------------

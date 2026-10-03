@@ -8,10 +8,10 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['gotham', 'nimbus-sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['attribute-mono', 'ballinger-mono', 'azo-mono', 'monospace'],
-        serif: ['orpheuspro', 'archer-pro', 'Georgia', 'serif'],
-        display: ['neuzeit-grotesk-condensed', 'gotham', 'sans-serif'],
+        sans: ['akzidenz-grotesk-next-pro', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['input-mono', 'ui-monospace', 'monospace'],
+        serif: ['orpheuspro', 'Georgia', 'serif'],
+        display: ['swiss-721-bt-condensed', 'akzidenz-grotesk-next-pro', 'sans-serif'],
       },
     },
   },

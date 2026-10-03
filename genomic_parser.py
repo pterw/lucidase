@@ -47,6 +47,7 @@ class ParseStats:
     called: int = 0
     no_calls: int = 0
     skipped_malformed: int = 0
+    filtered: int = 0  # VCF calls whose FILTER is not PASS or '.'; they are also in no_calls
 
 
 @dataclass
@@ -269,10 +270,16 @@ def _parse_myheritage_line(line: str):
     return _array_call(cols[0], cols[1], cols[2], _array_alleles(cols[3]))
 
 
+# A VCF allele we carry: A/C/G/T sequences (SNPs and indels) or the single codes I/D. Symbolic
+# `<DEL>`, `=1+1` and markup are untrusted file content and are never kept.
+_VCF_ALLELE = re.compile(r"(?:[ACGT]+|[ID])", re.IGNORECASE | re.ASCII)
+
+
 def _vcf_alleles(gt: str, table: list[str]):
     """GT string and allele table to alleles: None = no-call, _MALFORMED = bad GT."""
     out: list[str] = []
-    missing = False
+    # REF is checked for every row; an ALT only when the GT selects it.
+    missing = table[0] != "*" and not _VCF_ALLELE.fullmatch(table[0])
     for t in re.split(r"[/|]", gt):
         if t == ".":
             missing = True
@@ -286,11 +293,19 @@ def _vcf_alleles(gt: str, table: list[str]):
         if table[idx] == "*":
             missing = True
             continue
+        if not _VCF_ALLELE.fullmatch(table[idx]):
+            missing = True
+            continue
         out.append(table[idx].upper())
     return None if missing else out
 
 
-def _parse_vcf_line(line: str):
+def _failed_filter(filter_field: str) -> bool:
+    """A VCF record is usable only when FILTER is PASS or '.'."""
+    return _trim(filter_field) not in ("PASS", ".")
+
+
+def _parse_vcf_line(line: str, stats: ParseStats):
     sample_idx, format_idx = 9, 8  # FORMAT is column 8, the FIRST sample is column 9
     cols = line.split("\t")
     if len(cols) <= sample_idx or len(cols) < 5:
@@ -316,6 +331,9 @@ def _parse_vcf_line(line: str):
     alleles = _vcf_alleles(_trim(gt), table)
     if alleles is _MALFORMED:
         return None
+    filtered = _failed_filter(cols[6])
+    if filtered:
+        alleles = None
 
     if _trim(cols[2]) in (".", ""):
         ids: list[str | None] = [None]
@@ -324,6 +342,8 @@ def _parse_vcf_line(line: str):
         if not ids:
             ids = [None]
     chrom = _normalize_chrom(cols[0])
+    if filtered:
+        stats.filtered += len(ids)
     return [Call(rsid, chrom, pos, None if alleles is None else list(alleles)) for rsid in ids]
 
 
@@ -371,7 +391,10 @@ def parse_genotype_file(text: str, file_name: str = "") -> ParseResult:
             "Unsupported file: VCF contains no sample genotypes (no FORMAT or sample column)."
         )
     result = ParseResult(fmt, build, assay, [], ParseStats(total_lines=len(lines)))
-    parse_line = _parse_vcf_line if fmt == "vcf" else _LINE_PARSERS[fmt]
+    if fmt == "vcf":
+        parse_line = lambda l: _parse_vcf_line(l, result.stats)  # noqa: E731
+    else:
+        parse_line = _LINE_PARSERS[fmt]
 
     for line in lines:
         if not _trim(line) or line.startswith("#"):

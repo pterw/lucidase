@@ -31,12 +31,13 @@ function countAlts(alleles, ref, alt) {
 }
 
 /**
- * locus: { ref, alt, allele_codes, chrom }; alleles: string[] | null.
+ * locus: { ref, alt, allele_codes, chrom }; alleles: string[] | null; assay: "array" | "vcf".
+ * VCF alleles are plus-strand by definition, so only a non-VCF assay may strand-complement.
  * Returns { ok: true, altCount: 0|1|2, strandFlipped } or { ok: false, reason: "no_call" | "unresolvable" }.
  * "palindromic_ambiguous" is part of the contract's reason set but is never produced: a palindromic
  * site's complement is the same pair, so an unmatched call there is simply "unresolvable".
  */
-export function resolveAltCount(locus, alleles) {
+export function resolveAltCount(locus, alleles, assay) {
   if (!Array.isArray(alleles) || alleles.length === 0) return fail("no_call");
 
   const { ref, alt, allele_codes: codes, chrom } = locus;
@@ -60,8 +61,9 @@ export function resolveAltCount(locus, alleles) {
   const direct = countAlts(called, ref, alt);
   if (direct !== null) return { ok: true, altCount: direct, strandFlipped: false };
 
-  // 3. Complement only a single-base, non-palindromic site, and only the whole genotype.
-  if (isBase(ref) && isBase(alt) && !isPalindromic(ref, alt) && called.every(isBase)) {
+  // 3. Complement only for an array, at a single-base, non-palindromic site, for the whole genotype.
+  //    A VCF call never complements: a foreign alt there is a different allele, not the other strand.
+  if (assay !== "vcf" && isBase(ref) && isBase(alt) && !isPalindromic(ref, alt) && called.every(isBase)) {
     const flipped = countAlts(called.map((a) => COMPLEMENT[a]), ref, alt);
     if (flipped !== null) return { ok: true, altCount: flipped, strandFlipped: true };
   }

@@ -92,7 +92,7 @@ def _assert_text_and_absent(result, expected, vector_id):
 def _run_alleles(vector):
     from variant_annotator import resolve_alt_count
 
-    result = resolve_alt_count(vector["input"]["locus"], vector["input"]["alleles"])
+    result = resolve_alt_count(vector["input"]["locus"], vector["input"]["alleles"], vector["input"].get("assay", "array"))
     _assert_close(result, vector["expected"], vector["id"])
 
 
@@ -144,11 +144,67 @@ def _run_inheritance(vector):
         result = {"findings": seg.detect_multi_locus(inp["records"], inp["genes"])}
     elif fn == "compound":
         result = {"findings": seg.detect_compound_heterozygosity(inp["records"], inp["genes"])}
+    elif fn == "apoe_e4":
+        from variant_annotator import e4_count_for_diplotype
+
+        e4_count = e4_count_for_diplotype(inp["diplotype"])
+        result = {"e4_count": e4_count}
+        if e4_count is not None:
+            dist = seg.offspring_distribution(e4_count, inp["partner"], inp.get("af"))
+            result.update(dist=dist, outcome=seg.gene_outcome(inp["gene"], dist, inp["allele"]))
+    elif fn == "describe_segregation":
+        result = {"segregation": seg.describe_segregation(inp["geneName"], inp["gene"], inp["altCount"], inp.get("af"), inp["allele"])}
+        if "partner" in inp:
+            outcome = seg.gene_outcome(inp["gene"], seg.offspring_distribution(inp["altCount"], inp["partner"], inp.get("af")), inp["allele"])
+            result["adjusted_affected"] = seg.penetrance_adjusted_affected(outcome, inp["gene"]["inheritance"].get("penetrance"))
     else:
         pytest.fail(f"{vector['id']}: unknown fn {fn}")
     facts = {k: v for k, v in vector["expected"].items() if k not in ("absent", "text_includes", "text_excludes")}
     _assert_close(result, facts, vector["id"])
     _assert_text_and_absent(result, vector["expected"], vector["id"])
+
+
+def _run_qc(vector):
+    from genomic_parser import Call, ParseResult, ParseStats, compute_qc
+
+    inp = vector["input"]
+    parse = ParseResult("23andme", "unknown", inp["assay"], [Call(**c) for c in inp["calls"]], ParseStats())
+    _assert_close(compute_qc(parse), vector["expected"], vector["id"])
+
+
+def _run_kb(vector):
+    from variant_annotator import KbSchemaError, validate_kb
+
+    try:
+        validate_kb(vector["input"]["kb"])
+        result = {"problems": []}
+    except KbSchemaError as err:
+        result = {"problems": err.problems}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
+def _run_assemble(vector):
+    from variant_annotator import assemble_findings
+
+    inp = vector["input"]
+    kb = SimpleNamespace(genes=inp["kb"]["genes"], loci=inp["kb"]["loci"])
+    out = assemble_findings(copy.deepcopy(inp["records"]), kb, inp["outside_count"])
+    result = {"listed_rsids": [r["rsid"] for r in out["listed"]], "apoe": out["apoe"], "summary": out["summary"]}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
+def _run_statements(vector):
+    from variant_annotator import not_detected_statements
+
+    result = {"statements": not_detected_statements(copy.deepcopy(vector["input"]["records"]))}
+    _assert_close(result, vector["expected"], vector["id"])
+
+
+def _run_composite_tier(vector):
+    from variant_annotator import composite_tier
+
+    result = {"tier": composite_tier(copy.deepcopy(vector["input"]["components"]))}
+    _assert_close(result, vector["expected"], vector["id"])
 
 
 AREAS = {
@@ -157,6 +213,11 @@ AREAS = {
     "classify": _run_classify,
     "apoe": _run_apoe,
     "inheritance": _run_inheritance,
+    "qc": _run_qc,
+    "kb": _run_kb,
+    "assemble": _run_assemble,
+    "statements": _run_statements,
+    "composite_tier": _run_composite_tier,
 }
 
 

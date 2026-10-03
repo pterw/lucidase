@@ -1,0 +1,1065 @@
+[
+  {
+    "id": "array-call-and-het-rates",
+    "description": "Array: call rate is called/(called+no-call); het rate is het/diploid calls only (a haploid call is not diploid)",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "1",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "1",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "2",
+          "pos": null,
+          "alleles": [
+            "C",
+            "T"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "2",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "3",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "3",
+          "pos": null,
+          "alleles": null
+        }
+      ]
+    },
+    "expected": {
+      "call_rate": 0.8333333333333334,
+      "heterozygosity_rate": 0.75,
+      "qc_note": null,
+      "x_markers": 0,
+      "x_het_rate": 0,
+      "y_calls": 0,
+      "sex_signal": "Indeterminate (too few X markers)"
+    }
+  },
+  {
+    "id": "vcf-rates-are-null-with-a-note",
+    "description": "A variants-only VCF has no meaningful call or het rate, so both are null and the note says why",
+    "input": {
+      "assay": "vcf",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "1",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "2",
+          "pos": null,
+          "alleles": [
+            "C",
+            "T"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "call_rate": null,
+      "heterozygosity_rate": null,
+      "qc_note": "not meaningful for variants-only VCF"
+    }
+  },
+  {
+    "id": "empty-array-rates-are-zero",
+    "description": "No calls at all: both rates are 0 and the sex signal is indeterminate",
+    "input": {
+      "assay": "array",
+      "calls": []
+    },
+    "expected": {
+      "call_rate": 0,
+      "heterozygosity_rate": 0,
+      "x_markers": 0,
+      "sex_signal": "Indeterminate (too few X markers)"
+    }
+  },
+  {
+    "id": "x-het-exactly-at-cutoff-is-one-x",
+    "description": "1 het of 20 X markers is exactly 0.05; strictly greater means two X, so this is one X",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 20,
+      "x_het_rate": 0.05,
+      "sex_signal": "X heterozygosity consistent with one X chromosome"
+    }
+  },
+  {
+    "id": "x-het-just-above-cutoff-is-two-x",
+    "description": "1 het of 16 X markers is 0.0625, just above the 0.05 cut-off: two X chromosomes (with the 20-marker case this pins the cut-off between 0.05 and 0.0625)",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 16,
+      "x_het_rate": 0.0625,
+      "sex_signal": "X heterozygosity consistent with two X chromosomes"
+    }
+  },
+  {
+    "id": "x-het-above-cutoff-is-two-x",
+    "description": "2 het of 20 X markers is 0.10, above the 0.05 cut-off: two X chromosomes",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 20,
+      "x_het_rate": 0.1,
+      "sex_signal": "X heterozygosity consistent with two X chromosomes"
+    }
+  },
+  {
+    "id": "nine-x-markers-is-indeterminate",
+    "description": "Fewer than 10 called X markers cannot support a signal, whatever their het rate",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 9,
+      "x_het_rate": 0.4444444444444444,
+      "sex_signal": "Indeterminate (too few X markers)"
+    }
+  },
+  {
+    "id": "ten-x-markers-is-enough",
+    "description": "Exactly 10 called X markers is the minimum that supports a signal",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 10,
+      "x_het_rate": 0,
+      "sex_signal": "X heterozygosity consistent with one X chromosome"
+    }
+  },
+  {
+    "id": "x-no-calls-are-not-markers",
+    "description": "No-calls on X are not called markers, so ten of them leave the signal indeterminate",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": null
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 0,
+      "sex_signal": "Indeterminate (too few X markers)",
+      "call_rate": 0
+    }
+  },
+  {
+    "id": "haploid-x-calls-are-never-het",
+    "description": "A haploid X call is a marker but never heterozygous",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "X",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "x_markers": 10,
+      "x_het_rate": 0,
+      "sex_signal": "X heterozygosity consistent with one X chromosome"
+    }
+  },
+  {
+    "id": "y-calls-are-counted-without-a-claim",
+    "description": "Y calls are counted but never turn into a sex signal on their own",
+    "input": {
+      "assay": "array",
+      "calls": [
+        {
+          "rsid": null,
+          "chrom": "Y",
+          "pos": null,
+          "alleles": [
+            "A"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "Y",
+          "pos": null,
+          "alleles": [
+            "G"
+          ]
+        },
+        {
+          "rsid": null,
+          "chrom": "Y",
+          "pos": null,
+          "alleles": null
+        }
+      ]
+    },
+    "expected": {
+      "y_calls": 2,
+      "x_markers": 0,
+      "sex_signal": "Indeterminate (too few X markers)"
+    }
+  }
+]

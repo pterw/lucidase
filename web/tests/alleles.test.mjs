@@ -24,9 +24,17 @@ test("a palindromic site gives CC=0 CG=1 GG=2 and never reports a strand flip (P
 
 test("a non-palindromic site is complemented as a whole, once", () => {
   const locus = snp("C", "T");
-  assert.deepEqual(resolveAltCount(locus, ["A", "G"]), { ok: true, altCount: 1, strandFlipped: true });
+  assert.deepEqual(resolveAltCount(locus, ["A", "G"], "array"), { ok: true, altCount: 1, strandFlipped: true });
   // half forward, half complemented is never a valid call
   assert.deepEqual(resolveAltCount(locus, ["C", "A"]), { ok: false, reason: "unresolvable" });
+});
+
+test("a VCF call is never strand-complemented: a foreign alt is unresolvable (P0-009)", () => {
+  const locus = snp("G", "A", "10");
+  assert.deepEqual(resolveAltCount(locus, ["C", "C"], "vcf"), { ok: false, reason: "unresolvable" });
+  assert.deepEqual(resolveAltCount(locus, ["T", "T"], "vcf"), { ok: false, reason: "unresolvable" });
+  assert.deepEqual(resolveAltCount(locus, ["G", "A"], "vcf"), { ok: true, altCount: 1, strandFlipped: false });
+  assert.deepEqual(resolveAltCount(locus, ["C", "C"], "array"), { ok: true, altCount: 0, strandFlipped: true });
 });
 
 test("a result never uses the reason palindromic_ambiguous for an unmatched palindromic call", () => {

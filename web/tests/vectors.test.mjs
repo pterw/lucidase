@@ -73,7 +73,7 @@ const HANDLERS = {
   // input: { locus: {ref, alt, allele_codes, chrom}, alleles }; expected is a subset of the result.
   "alleles.json": async (vector) => {
     const { resolveAltCount } = await import("../src/core/alleles.js");
-    const result = resolveAltCount(vector.input.locus, vector.input.alleles);
+    const result = resolveAltCount(vector.input.locus, vector.input.alleles, vector.input.assay);
     assertSubset(result, vector.expected, vector.id);
   },
 
@@ -104,7 +104,60 @@ const HANDLERS = {
     }
   },
 
-  // input: { fn: "scenario" | "status" | "multi_locus" | "compound", ... }. Numbers compare within
+  // input: { assay, calls }; expected is a subset of computeQc's result (numbers within 1e-12).
+  "qc.json": async (vector) => {
+    const { computeQc } = await import("../src/core/qc.js");
+    assertClose(computeQc({ assay: vector.input.assay, calls: vector.input.calls }), vector.expected, vector.id);
+  },
+
+  // input: { kb }; expected: { problems }, the exact list validateKb reports ([] for a valid KB).
+  "kb.json": async (vector) => {
+    const { validateKb } = await import("../src/core/kb.js");
+    // The vectors are shared with the Python validator, which does not know the assembly geometry (K-C1): every
+    // vector KB is given the built KB's real, valid `assemblies`, so each expected list is about the other fields.
+    const { assemblies } = JSON.parse(readFileSync(new URL("../src/knowledge-base.json", import.meta.url), "utf-8"));
+    let result = { problems: [] };
+    try {
+      const kb = vector.input.kb;
+      validateKb(kb !== null && typeof kb === "object" && !Array.isArray(kb) ? { assemblies, ...kb } : kb);
+    } catch (err) {
+      if (err.name !== "KbSchemaError") throw err;
+      result = { problems: err.problems };
+    }
+    assertClose(result, vector.expected, vector.id);
+  },
+
+  // input: { kb: {genes, loci}, records: classified records, outside_count }; expected: { listed_rsids, apoe, summary }.
+  "assemble.json": async (vector) => {
+    const { assembleFindings } = await import("../src/core/apoe.js");
+    const { kb, records, outside_count: outside } = vector.input;
+    const out = assembleFindings(structuredClone(records), kb, outside);
+    assertClose({ listed_rsids: out.listed.map((r) => r.rsid), apoe: out.apoe, summary: out.summary }, vector.expected, vector.id);
+  },
+
+  // input: { records: listed records (standalone rows and the APOE row) }; expected: { statements: {rsid: the
+  // "not detected (N variants tested in <gene>)" sentence, or null} }. The sentence comes from the view model.
+  "statements.json": async (vector) => {
+    const { testedVariantCounts, toViewModel } = await import("../src/view-model.js");
+    const { records } = vector.input;
+    const counts = testedVariantCounts(records);
+    const statements = Object.fromEntries(records.map((r) => [r.rsid, toViewModel(structuredClone(r), {}, counts).statement]));
+    assertClose({ statements }, vector.expected, vector.id);
+  },
+
+  // input: { components: [{ rsid, evidence_tier }] }, the APOE row's components; expected: { tier }, the row's tier text
+  // (the shared tier, a labelled join when they differ, or null). The text comes from the view model.
+  "composite_tier.json": async (vector) => {
+    const { toViewModel } = await import("../src/view-model.js");
+    const components = vector.input.components.map((c) => ({ ...c, chrom: "19", pos: 1, evidence: {} }));
+    const record = {
+      rsid: "APOE-STATUS", gene: "APOE", chrom: "19", pos: 1, coverage_state: "supported_and_observed",
+      sample_observation: "variant_present", interpretation: null, evidence: {}, components,
+    };
+    assertClose({ tier: toViewModel(record, {}).tier }, vector.expected, vector.id);
+  },
+
+  // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4" | "describe_segregation", ... }. Numbers compare within
   // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
   // lower-cased JSON of the result (scenario, multi_locus, compound).
   "inheritance.json": async (vector) => {
@@ -120,6 +173,22 @@ const HANDLERS = {
       result = { findings: inh.detectMultiLocus(records, genes) };
     } else if (fn === "compound") {
       result = { findings: inh.detectCompoundHeterozygosity(records, genes) };
+    } else if (fn === "apoe_e4") {
+      // The APOE row's offspring figures: the e4 count comes from the diplotype; no count, no figures.
+      const { e4CountForDiplotype } = await import("../src/core/apoe.js");
+      const e4Count = e4CountForDiplotype(vector.input.diplotype);
+      result = { e4_count: e4Count };
+      if (e4Count !== null) {
+        const dist = inh.offspringDistribution(e4Count, partner, af);
+        result = { ...result, dist, outcome: inh.geneOutcome(gene, dist, allele) };
+      }
+    } else if (fn === "describe_segregation") {
+      // The inputs the drawer reruns, with the carrier prior; given a partner, the penetrance-adjusted affected figure.
+      result = { segregation: inh.describeSegregation(vector.input.geneName, gene, altCount, af, allele) };
+      if (partner !== undefined) {
+        const outcome = inh.geneOutcome(gene, inh.offspringDistribution(altCount, partner, af), allele);
+        result.adjusted_affected = inh.penetranceAdjustedAffected(outcome, gene.inheritance.penetrance);
+      }
     } else {
       assert.fail(`${vector.id}: unknown fn ${fn}`);
     }
