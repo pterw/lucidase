@@ -8,28 +8,13 @@
   <!-- Adobe Typekit Impeccable Typography (Gotham, Attribute Mono, Orpheus Pro, Neuzeit Grotesk) -->
   <link rel="stylesheet" href="https://use.typekit.net/cqu4tvx.css" id="typekit-stylesheet">
   
-  <!-- Tailwind CSS & DaisyUI via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-  
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['gotham', 'nimbus-sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-            mono: ['attribute-mono', 'ballinger-mono', 'azo-mono', 'monospace'],
-            serif: ['orpheuspro', 'archer-pro', 'Georgia', 'serif'],
-            display: ['neuzeit-grotesk-condensed', 'gotham', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
+  <!-- daisyUI (vendored, see src/vendor/README.md), then app styles, then Tailwind utilities -->
+  <link rel="stylesheet" href="src/vendor/daisyui-4.12.10.min.css">
 
   <!-- Custom Design System Styles -->
   <link rel="stylesheet" href="src/styles.css">
+  <!-- Utilities must come LAST: the Tailwind Play CDN appended its sheet after styles.css -->
+  <link rel="stylesheet" href="src/vendor/tailwind.css">
 </head>
 <body class="dna-bg-grid min-h-screen text-slate-900 dark:text-slate-100 flex flex-col justify-between">
 

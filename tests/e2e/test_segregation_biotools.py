@@ -10,12 +10,14 @@ from __future__ import annotations
 
 from playwright.sync_api import expect
 
+from conftest import wait_drawer_open
+
 
 def _open_hfe_drawer(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible(timeout=10000)
     page.locator("button.btn-inspect-gene[data-gene='HFE']").first.click()
-    page.wait_for_selector("#variant-drawer:not(.translate-x-full)", timeout=3000)
+    wait_drawer_open(page)
 
 
 def test_hfe_offspring_simulator(loaded_page):

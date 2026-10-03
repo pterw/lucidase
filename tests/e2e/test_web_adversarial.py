@@ -17,6 +17,8 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
+from conftest import wait_drawer_closed, wait_drawer_open
+
 FIXTURES = Path(__file__).parent / "fixtures"
 EVIL_QUERIES = [
     "(a+)+$",
@@ -37,8 +39,8 @@ def _load_demo(page):
 def _wait_outcome(page):
     """Wait until the run ends in either results or a visible analysis error."""
     page.wait_for_function(
-        "() => !document.getElementById('results-section').classList.contains('hidden')"
-        " || !document.getElementById('analysis-error').classList.contains('hidden')",
+        "() => ['results-section', 'analysis-error'].some("
+        "id => document.getElementById(id).getBoundingClientRect().height > 0)",
         timeout=10000,
     )
 
@@ -65,17 +67,17 @@ def test_search_survives_adversarial_queries(loaded_page):
 def test_drawer_opens_and_closes(loaded_page):
     _load_demo(loaded_page)
     loaded_page.locator("#variants-tbody tr").first.click()
-    loaded_page.wait_for_selector("#variant-drawer:not(.translate-x-full)", timeout=3000)
+    wait_drawer_open(loaded_page)
     assert loaded_page.locator("#drawer-rsid").text_content().strip()
     assert loaded_page.locator("#drawer-gene").text_content().strip()
     loaded_page.locator("#btn-close-drawer").click()
-    loaded_page.wait_for_selector("#variant-drawer.translate-x-full", timeout=3000)
+    wait_drawer_closed(loaded_page)
 
 
 def test_drawer_screenshot_to_tmp(loaded_page, tmp_path):
     _load_demo(loaded_page)
     loaded_page.locator("#variants-tbody tr").first.click()
-    loaded_page.wait_for_selector("#variant-drawer:not(.translate-x-full)", timeout=3000)
+    wait_drawer_open(loaded_page)
     shot = tmp_path / "drawer.png"
     loaded_page.screenshot(path=str(shot), full_page=True)
     assert shot.stat().st_size > 0
@@ -142,11 +144,11 @@ def test_export_handlers_run(loaded_page):
 
 def test_apoe_e3e4_upload_and_inspect(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "apoe-e3e4-23andme.txt"))
-    loaded_page.wait_for_selector("#apoe-status-card:not(.hidden)", timeout=10000)
+    loaded_page.locator("#apoe-status-card").wait_for(state="visible", timeout=10000)
     assert "ε3/ε4" in loaded_page.locator("#apoe-diplotype-title").text_content()
     assert "3–4×" in loaded_page.locator("#apoe-risk-ratio").text_content()
     loaded_page.locator("#btn-inspect-apoe").click()
-    loaded_page.wait_for_selector("#variant-drawer:not(.translate-x-full)", timeout=3000)
+    wait_drawer_open(loaded_page)
     assert loaded_page.locator("#drawer-gene").text_content() == "APOE"
 
 

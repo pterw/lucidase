@@ -1,8 +1,8 @@
 """Browser test seam: serves web/ locally and drives it with Playwright Chromium.
 
 Any uncaught page error or console error fails the test at teardown, unless the
-test is marked ``allow_console_errors``. External hosts (CDN CSS, fonts) are
-answered locally so tests never touch the network.
+test is marked ``allow_console_errors``. The Typekit host is answered locally and every other external
+host is refused, so tests never touch the network.
 """
 
 from __future__ import annotations
@@ -18,19 +18,6 @@ from playwright.sync_api import sync_playwright
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WEB_DIR = REPO_ROOT / "web"
 DEMO_FILE = WEB_DIR / "demo-data" / "sample-23andme.txt"
-
-# Stand-in for the Tailwind CDN script until the CSS is vendored: defines the
-# global the inline config assigns to, and the one rule visibility checks need.
-# Limitation: it does not emulate translate-x-full, responsive or dark variants, so
-# drawer tests assert the class, not the on-screen position. Remove with the CDN
-# script when the compiled CSS is vendored (T12). Likewise _stub_external answers
-# every other external URL with an empty 200; narrow it then.
-_TAILWIND_STUB = (
-    "window.tailwind = {};"
-    "document.head.appendChild(Object.assign(document.createElement('style'),"
-    "{textContent: '.hidden{display:none}'}));"
-)
-
 
 class _QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):  # noqa: A002
@@ -68,13 +55,12 @@ def browser():
 
 
 def _stub_external(route):
-    url = route.request.url
-    if "cdn.tailwindcss.com" in url:
-        route.fulfill(status=200, content_type="application/javascript", body=_TAILWIND_STUB)
-    elif url.endswith(".css") or "typekit" in url:
+    # Only the Typekit font stylesheet is external; everything else is vendored,
+    # so any other external request is a bug and is refused.
+    if "typekit" in route.request.url:
         route.fulfill(status=200, content_type="text/css", body="")
     else:
-        route.fulfill(status=200, body="")
+        route.abort()
 
 
 @pytest.fixture
@@ -107,3 +93,31 @@ def page(browser, base_url, request):
 def loaded_page(page):
     page.goto(page.base_url, wait_until="networkidle")
     return page
+
+
+# Real geometry, not a class-name proxy. The drawer slides in over 300 ms, so a
+# state counts only once the box is identical on two consecutive animation frames:
+# open = right edge at the viewport edge, closed = fully off the right edge.
+_DRAWER_SETTLED = """(want) => {
+  const el = document.getElementById('variant-drawer');
+  const r = el.getBoundingClientRect();
+  const prev = window.__drawerLeft;
+  window.__drawerLeft = r.left;
+  if (prev === undefined || Math.abs(prev - r.left) >= 0.5) return false;
+  return want === 'open'
+    ? r.width > 0 && Math.abs(r.right - window.innerWidth) < 1
+    : r.left >= window.innerWidth;
+}"""
+
+
+def _wait_drawer(page, want, timeout):
+    page.evaluate("delete window.__drawerLeft")
+    page.wait_for_function(_DRAWER_SETTLED, arg=want, polling="raf", timeout=timeout)
+
+
+def wait_drawer_open(page, timeout=3000):
+    _wait_drawer(page, "open", timeout)
+
+
+def wait_drawer_closed(page, timeout=3000):
+    _wait_drawer(page, "closed", timeout)
