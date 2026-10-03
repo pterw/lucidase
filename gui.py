@@ -28,6 +28,7 @@ from matplotlib.figure import Figure
 
 from assembly import write_gfa
 from bio_engine import (
+    alignment_basis_text,
     load_sequences_as_fasta,
     write_contigs_fasta,
     write_contigs_genbank,
@@ -39,6 +40,7 @@ from genomic_parser import (
     parse_genotype_file,
     read_genotype_text,
 )
+from ml_engine import binning_caveat_lines
 from variant_annotator import APOE_ROW_ID, AnnotationRecord, AnnotationReport, VariantAnnotator
 from graph_core import (
     EDGE,
@@ -807,15 +809,16 @@ class ExplorerApp:
         # ---- ML Binning & Features tab
         self.ml_text.configure(state="normal")
         self.ml_text.delete("1.0", "end")
-        m_lines = ["\u2550" * 3 + " Scikit-Learn Contig Binning & PCA " + "\u2550" * 3 + "\n"]
+        m_lines = ["\u2550" * 3 + " Contig Binning & PCA (heuristic, exploratory) " + "\u2550" * 3 + "\n"]
         bs = m.binning_summary
+        m_lines.extend(f"  {line}\n" for line in binning_caveat_lines(bs))
         m_lines.append(f"  Clusters (KMeans Bins):... {bs.get('n_bins', 1)}\n")
         if bs.get("pca_variance_ratio"):
             vars_str = ", ".join(
                 f"PC{i+1}: {v*100:.1f}%" for i, v in enumerate(bs["pca_variance_ratio"])
             )
             m_lines.append(f"  PCA Explained Variance:... {vars_str}\n")
-        m_lines.append(f"  Potential Outliers:....... {bs.get('outlier_count', 0)}\n\n")
+        m_lines.append(f"  Flagged by 10% rule:...... {bs.get('outlier_count', 0)}\n\n")
         for b_name, b_data in bs.get("clusters", {}).items():
             m_lines.append(f"  {b_name}:\n")
             m_lines.append(
@@ -862,6 +865,7 @@ class ExplorerApp:
             m_lines.append(
                 f"  Mean Alignment Identity:.. {m.ref_eval.get('mean_identity', 0)*100:.2f}%\n"
             )
+            m_lines.append(f"  ({alignment_basis_text()})\n")
             m_lines.append(
                 f"  Aligned Contigs:.......... {m.ref_eval.get('aligned_contigs')}\n"
             )
