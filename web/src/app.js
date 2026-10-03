@@ -252,7 +252,7 @@ function initEventListeners() {
   // Inspect APOE button
   if (btnInspectApoe) {
     btnInspectApoe.addEventListener("click", () => {
-      const apoeRec = state.records.find(r => r.rsid === "APOE-STATUS") || state.records.find(r => r.gene === "APOE");
+      const apoeRec = state.apoe;
       if (apoeRec) {
         openDrawer(apoeRec);
       }
@@ -339,7 +339,7 @@ function handleParseComplete(data) {
   state.insufficientEvidence = (data.insufficient_evidence || []).map(toViewRecord);
   state.coverageSummary = data.coverage_taxonomy || {};
   state.summary = data.summary;
-  state.apoe = data.apoe;
+  state.apoe = data.apoe ? toViewRecord(data.apoe) : null;
   state.compoundHeterozygotes = data.compound_heterozygotes || [];
   state.independentAssortment = data.independent_assortment || [];
 
@@ -405,6 +405,24 @@ function renderSummaryCards() {
   if (elIns) elIns.textContent = (cov.insufficient_evidence_count ?? state.insufficientEvidence.length);
 }
 
+/** "ε3/ε4" for the KB key "e3/e4". */
+const apoeDisplay = (diplotype) => diplotype.replace(/e/g, "ε");
+
+/** The KB's "Relative risk: ..." / "Lifetime risk: ..." caveat text for a diplotype, or null. */
+function apoeKbCaveat(apoe, prefix) {
+  const hit = apoe.caveats.find((c) => c.startsWith(prefix));
+  return hit ? hit.slice(prefix.length) : null;
+}
+
+const APOE_STATE_LABEL = {
+  supported_and_observed: "Observed",
+  supported_not_observed: "Not detected",
+  not_tested_by_array: "Not tested by array",
+  insufficient_evidence: "Insufficient evidence"
+};
+
+const APOE_NEUTRAL_BADGE = "bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
+
 function renderApoeCard() {
   const card = document.getElementById("apoe-status-card");
   if (!card) return;
@@ -424,34 +442,36 @@ function renderApoeCard() {
   const lifetimeEl = document.getElementById("apoe-lifetime-stat");
   const pillEl = document.getElementById("apoe-carrier-pill");
 
-  titleEl.textContent = `APOE ${apoe.diplotype} (${apoe.label.replace(/^APOE\s*/, "")})`;
-  riskRatioEl.textContent = apoe.riskRatio;
-  descEl.textContent = apoe.phenotype;
-  rawLociEl.textContent = apoe.rawSummary;
-  lifetimeEl.textContent = apoe.lifetimeRisk;
+  const resolved = apoe.diplotype !== null && apoe.diplotype !== "atypical";
+  const stateLabel = APOE_STATE_LABEL[apoe.coverage_state];
+  titleEl.textContent = resolved ? `APOE ${apoeDisplay(apoe.diplotype)}` : `APOE: ${apoe.diplotype === null ? "no diplotype" : apoe.diplotype}`;
+  rawLociEl.textContent = apoe.components.map(c => `${c.rsid}: ${c.genotype_display ?? "—"}`).join(" · ");
 
-  // Visual accents depending on risk profile
-  if (apoe.diplotype === "ε4/ε4") {
-    card.className = "glass-panel p-6 border-l-4 border-rose-500 transition-all duration-200 bg-white dark:bg-slate-900/60";
-    riskRatioEl.className = "px-2.5 py-1 text-xs font-bold rounded-sm font-mono border badge-pathogenic";
-    pillEl.className = "px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border badge-pathogenic";
-    pillEl.textContent = "High Risk Locus";
-  } else if (apoe.diplotype === "ε3/ε4" || apoe.diplotype.includes("ε4")) {
-    card.className = "glass-panel p-6 border-l-4 border-amber-500 transition-all duration-200 bg-white dark:bg-slate-900/60";
-    riskRatioEl.className = "px-2.5 py-1 text-xs font-bold rounded-sm font-mono border badge-carrier";
-    pillEl.className = "px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border badge-carrier";
-    pillEl.textContent = "Carrier Status";
-  } else if (apoe.diplotype.includes("ε2")) {
-    card.className = "glass-panel p-6 border-l-4 border-purple-500 transition-all duration-200 bg-white dark:bg-slate-900/60";
-    riskRatioEl.className = "px-2.5 py-1 text-xs font-bold rounded-sm font-mono border badge-pgx";
-    pillEl.className = "px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border badge-pgx";
-    pillEl.textContent = "Neuroprotective / Carrier";
+  // Everything below is KB text; an unresolved APOE shows the reason and no numbers.
+  const parts = [resolved ? apoe.phenotype : apoe.reason];
+  if (apoe.caveat) parts.push(`Caveat: ${apoe.caveat}.`);
+  descEl.textContent = parts.join(" ");
+  riskRatioEl.textContent = (resolved && apoeKbCaveat(apoe, "Relative risk: ")) || stateLabel;
+  lifetimeEl.textContent = (resolved && apoeKbCaveat(apoe, "Lifetime risk: ")) || "Not available";
+  pillEl.textContent = resolved ? `${stateLabel} · ${apoe.significance}` : stateLabel;
+
+  // Visual accents depending on risk profile (existing classes only)
+  const diplotype = resolved ? apoeDisplay(apoe.diplotype) : "";
+  let accent = null;
+  if (diplotype === "ε4/ε4") accent = { border: "border-rose-500", badge: "badge-pathogenic" };
+  else if (diplotype.includes("ε4")) accent = { border: "border-amber-500", badge: "badge-carrier" };
+  else if (diplotype.includes("ε2")) accent = { border: "border-purple-500", badge: "badge-pgx" };
+  else if (diplotype === "ε3/ε3") accent = { border: "border-emerald-500", badge: "badge-benign" };
+
+  if (accent) {
+    card.className = `glass-panel p-6 border-l-4 ${accent.border} transition-all duration-200 bg-white dark:bg-slate-900/60`;
+    riskRatioEl.className = `px-2.5 py-1 text-xs font-bold rounded-sm font-mono border ${accent.badge}`;
+    pillEl.className = `px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border ${accent.badge}`;
   } else {
-    // Normal baseline (e3/e3)
-    card.className = "glass-panel p-6 border-l-4 border-emerald-500 transition-all duration-200 bg-white dark:bg-slate-900/60";
-    riskRatioEl.className = "px-2.5 py-1 text-xs font-bold rounded-sm font-mono border badge-benign";
-    pillEl.className = "px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm border badge-benign";
-    pillEl.textContent = "Normal Baseline";
+    // No diplotype asserted: neutral accents, never the normal-baseline green.
+    card.className = "glass-panel p-6 border-l-4 transition-all duration-200 bg-white dark:bg-slate-900/60 border-slate-300 dark:border-slate-700";
+    riskRatioEl.className = `px-2.5 py-1 text-xs font-bold rounded-sm font-mono ${APOE_NEUTRAL_BADGE}`;
+    pillEl.className = `px-2 py-0.5 text-[11px] font-bold uppercase rounded-sm ${APOE_NEUTRAL_BADGE}`;
   }
 }
 
@@ -569,7 +589,7 @@ function renderVariantsTable() {
     if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
     if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
     if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
-    if (state.filterCategory === "risk" && (r.category !== "Risk Factor" && !(r.apoeInfo && (r.apoeInfo.diplotype === "ε3/ε4" || r.apoeInfo.diplotype === "ε4/ε4")))) return false;
+    if (state.filterCategory === "risk" && (r.category !== "Risk Factor" && !(r.diplotype === "e3/e4" || r.diplotype === "e4/e4"))) return false;
     if (state.filterCategory === "acmg" && !r.acmg_actionable) return false;
 
     // Search query
@@ -583,7 +603,7 @@ function renderVariantsTable() {
         (r.category && r.category.toLowerCase().includes(q)) ||
         (r.significance && r.significance.toLowerCase().includes(q)) ||
         (r.drug_response && r.drug_response.toLowerCase().includes(q)) ||
-        (r.apoeInfo && (r.apoeInfo.label.toLowerCase().includes(q) || r.apoeInfo.diplotype.toLowerCase().includes(q)))
+        (r.diplotype && (r.diplotype.toLowerCase().includes(q) || apoeDisplay(r.diplotype).toLowerCase().includes(q)))
       );
       if (!match) return false;
     }
@@ -789,9 +809,6 @@ function openDrawer(record) {
   const clinvarLink = document.getElementById("drawer-clinvar-link");
   if (record.clinvar_id) {
     clinvarLink.href = `https://www.ncbi.nlm.nih.gov/clinvar/variation/${record.clinvar_id.replace(/\D/g, "")}`;
-    clinvarLink.classList.remove("hidden");
-  } else if (record.gene === "APOE") {
-    clinvarLink.href = `https://www.ncbi.nlm.nih.gov/clinvar/variation/17864/`;
     clinvarLink.classList.remove("hidden");
   } else {
     clinvarLink.classList.add("hidden");
@@ -1091,11 +1108,25 @@ function exportMarkdownReport() {
 
   if (apoe) {
     md += `## APOE Neuro-Genomic Status\n`;
-    md += `- **Diplotype**: APOE ${apoe.diplotype} (${apoe.label})\n`;
-    md += `- **Risk Ratio**: ${apoe.riskRatio}\n`;
-    md += `- **Estimated Lifetime Risk**: ${apoe.lifetimeRisk}\n`;
-    md += `- **Underlying Loci**: ${apoe.rawSummary}\n`;
-    md += `- **Clinical Guidance**: ${apoe.phenotype}\n\n`;
+    const resolved = apoe.diplotype !== null && apoe.diplotype !== "atypical";
+    md += `- **Diplotype**: ${resolved ? `APOE ${apoeDisplay(apoe.diplotype)}` : "none asserted"}
+`;
+    md += `- **State**: ${APOE_STATE_LABEL[apoe.coverage_state]}${apoe.reason ? ` (${apoe.reason})` : ""}
+`;
+    if (resolved) {
+      md += `- **Risk Ratio**: ${apoeKbCaveat(apoe, "Relative risk: ") ?? "Not available"}
+`;
+      md += `- **Estimated Lifetime Risk**: ${apoeKbCaveat(apoe, "Lifetime risk: ") ?? "Not available"}
+`;
+    }
+    if (apoe.caveat) md += `- **Caveat**: ${apoe.caveat}
+`;
+    md += `- **Underlying Loci**: ${apoe.components.map(c => `${c.rsid}: ${c.genotype_display ?? "--"}`).join(", ")}
+`;
+    if (resolved) md += `- **Clinical Guidance**: ${apoe.phenotype}
+`;
+    md += `
+`;
   }
 
   if (state.compoundHeterozygotes && state.compoundHeterozygotes.length > 0) {

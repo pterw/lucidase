@@ -73,6 +73,18 @@ const HANDLERS = {
     }
     if (vector.expected.summary) assertSubset(out.summary, vector.expected.summary, `${vector.id}.summary`);
   },
+
+  // input: { kb: {genes.APOE, loci.rs429358}, components: [classified component records] }; expected is a subset of
+  // the APOE record, plus `caveats_include`: strings the record's caveats must contain.
+  "apoe.json": async (vector) => {
+    const { resolveApoe } = await import("../src/core/apoe.js");
+    const rec = resolveApoe(structuredClone(vector.input.components), vector.input.kb);
+    const { caveats_include: caveats, ...subset } = vector.expected;
+    assertSubset(rec, subset, vector.id);
+    for (const want of caveats || []) {
+      assert.ok(rec.interpretation.caveats.includes(want), `${vector.id}: missing caveat "${want}"`);
+    }
+  },
 };
 
 const files = readdirSync(VECTOR_DIR).filter((f) => f.endsWith(".json")).sort();
