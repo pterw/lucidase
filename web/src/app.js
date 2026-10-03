@@ -6,7 +6,7 @@
  * filtering, sorting, variant inspection drawer, and Redis enrichment.
  */
 
-import { simulateOffspringPedigree, BIOTOOLS_GENE_INSIGHTS, computeSegregationReport, KB_MANIFEST, ABSENCE_OF_FINDING_GUARDRAIL } from "./knowledge-base.js";
+import { simulateOffspringPedigree } from "./knowledge-base.js";
 
 // Global Application State
 const state = {
@@ -22,6 +22,8 @@ const state = {
   coverageSummary: null,
   summary: null,
   apoe: null,
+  manifest: null,
+  genes: {},
   compoundHeterozygotes: [],
   independentAssortment: [],
   selectedVariant: null,
@@ -289,12 +291,52 @@ function updateProgress(percent, message) {
   if (pct) pct.textContent = `${percent}%`;
 }
 
+/**
+ * Flattens a classified record (core/classify.js) into the fields the table, drawer and exports
+ * read. Everything comes from the record or the knowledge base; a locus with no interpretation
+ * (not tested, not interpretable) shows its reason where a phenotype would be.
+ */
+function toViewRecord(rec) {
+  const interp = rec.interpretation;
+  const clinvar = (rec.evidence && rec.evidence.clinvar) || {};
+  const gnomad = (rec.evidence && rec.evidence.gnomad) || {};
+  const hpa = (rec.evidence && rec.evidence.hpa) || {};
+  return {
+    ...rec,
+    genotype: rec.genotype_display,
+    category: interp ? interp.category : null,
+    significance: interp ? interp.significance : rec.reason,
+    magnitude: interp ? interp.magnitude : null,
+    repute: interp ? interp.repute : null,
+    phenotype: interp ? interp.phenotype : rec.reason,
+    drug_response: interp ? interp.drug_response : null,
+    caveats: interp ? interp.caveats : [],
+    isCarrier: Boolean(interp && interp.category === "Carrier"),
+    clinvar_stars: clinvar.stars ?? null,
+    clinvar_id: clinvar.accession ?? null,
+    gnomad_af: gnomad.af ?? null,
+    gnomad_loeuf: gnomad.loeuf ?? null,
+    hpa_tissues: hpa.tissues || {},
+    hpa_subcellular: hpa.subcellular || [],
+    acmg_actionable: rec.acmg_sf,
+    refusal_notices: rec.limitation ? [rec.limitation] : []
+  };
+}
+
+/** Gene drawer content from the knowledge base; an empty insights object counts as none. */
+function geneInsights(gene) {
+  const insights = state.genes[gene] && state.genes[gene].insights;
+  return insights && Object.keys(insights).length > 0 ? insights : null;
+}
+
 function handleParseComplete(data) {
+  state.manifest = data.manifest;
+  state.genes = data.genes;
   state.qc = data.qc;
-  state.records = data.records;
-  state.negativeChecks = data.negative_checks || [];
-  state.arrayGaps = data.array_gaps || [];
-  state.insufficientEvidence = data.insufficient_evidence || [];
+  state.records = data.records.map(toViewRecord);
+  state.negativeChecks = (data.negative_checks || []).map(toViewRecord);
+  state.arrayGaps = (data.array_gaps || []).map(toViewRecord);
+  state.insufficientEvidence = (data.insufficient_evidence || []).map(toViewRecord);
   state.coverageSummary = data.coverage_taxonomy || {};
   state.summary = data.summary;
   state.apoe = data.apoe;
@@ -801,7 +843,8 @@ function openDrawer(record) {
 }
 
 function renderDrawerSegregation(record) {
-  const seg = record.segregation || (record.gene ? computeSegregationReport(record.gene, record.genotype, record.category, record.significance) : null);
+  // No segregation report exists for a locus with no interpretable genotype (not tested, no-call).
+  const seg = record.segregation || null;
   const modeBadge = document.getElementById("drawer-seg-mode-badge");
   const priorEl = document.getElementById("drawer-seg-carrier-prior");
   const penetranceEl = document.getElementById("drawer-seg-penetrance");
@@ -891,7 +934,7 @@ function updateSimulator(partner, gene) {
 
 function renderDrawerBiotools(record) {
   const gene = record.gene;
-  const biotools = record.segregation?.biotools || BIOTOOLS_GENE_INSIGHTS[gene];
+  const biotools = geneInsights(gene);
   const geneBadge = document.getElementById("drawer-biotool-gene-badge");
 
   if (geneBadge) geneBadge.textContent = gene;
@@ -1035,7 +1078,7 @@ function exportMarkdownReport() {
   const cov = state.coverageSummary || {};
 
   let md = `# GenomePulse Variome Clinical Report\n\n`;
-  md += `> **CARDINAL SCOPE GUARDRAIL**: ${ABSENCE_OF_FINDING_GUARDRAIL}\n\n`;
+  md += `> **CARDINAL SCOPE GUARDRAIL**: ${state.manifest.guardrail}\n\n`;
   md += `**Sample**: ${state.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
   md += `**Markers**: ${qc.total_snps.toLocaleString()} | **Call Rate**: ${formatRate(qc.call_rate)} | **Heterozygosity**: ${formatRate(qc.heterozygosity_rate)}\n\n`;
 

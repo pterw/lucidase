@@ -10,24 +10,30 @@ const messages = [];
 globalThis.self = { postMessage: (m) => messages.push(m) };
 await import("../src/worker.js");
 
-test("worker.js parses and completes a real analysis of the demo sample", () => {
+// The worker loads the knowledge base asynchronously, so a run ends with a complete or error message.
+async function run(data) {
   messages.length = 0;
+  await self.onmessage({ data });
+}
+
+test("worker.js parses and completes a real analysis of the demo sample", async () => {
   assert.equal(typeof self.onmessage, "function");
 
   const text = readFileSync(SAMPLE, "utf8");
-  self.onmessage({ data: { action: "parse", text, fileName: "sample-23andme.txt" } });
+  await run({ action: "parse", text, fileName: "sample-23andme.txt" });
 
   const errors = messages.filter((m) => m.type === "error");
   assert.deepEqual(errors, []);
   const complete = messages.find((m) => m.type === "complete");
   assert.ok(complete, "worker never posted a completion message");
   assert.ok(complete.records.length >= 1, "completion carried no records");
+  assert.ok(complete.manifest.guardrail, "completion carried no KB manifest");
+  assert.ok(complete.genes.HFE, "completion carried no genes map");
 });
 
-test("worker.js reports a thrown failure as an error message", () => {
-  messages.length = 0;
+test("worker.js reports a thrown failure as an error message", async () => {
   // text that is not a string makes the parser throw
-  self.onmessage({ data: { action: "parse", text: null, fileName: "x.txt" } });
+  await run({ action: "parse", text: null, fileName: "x.txt" });
   const err = messages.find((m) => m.type === "error");
   assert.ok(err, "no error message posted");
   assert.ok(typeof err.message === "string" && err.message.length > 0);

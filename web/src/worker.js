@@ -3,322 +3,144 @@
  * =================================================
  * Runs off the main UI thread to parse 1,000,000-line raw genotyping files
  * (23andMe, AncestryDNA, MyHeritage, VCF) without freezing the browser.
+ *
+ * The knowledge base is the pipeline's JSON (web/src/knowledge-base.json), validated once
+ * per worker and cached. Classification is by alt-allele count (core/classify.js).
  */
 
-import { 
-  CURATED_KB, 
-  ACMG_SF_GENES, 
-  COVERAGE_STATES,
-  ASSAY_COVERAGE,
-  CURATION_SCOPE,
-  EVIDENCE_SUFFICIENCY,
-  SAMPLE_OBSERVATION,
-  deriveCoverageEvaluation,
-  EVIDENCE_TIERS,
-  ABSENCE_OF_FINDING_GUARDRAIL,
-  computeSegregationReport, 
-  detectCompoundHeterozygosity, 
-  computeIndependentAssortment 
+import {
+  computeSegregationReport,
+  detectCompoundHeterozygosity,
+  computeIndependentAssortment
 } from "./knowledge-base.js";
 
 import { parseGenotypeFile } from "./core/parse.js";
 import { computeQc } from "./core/qc.js";
+import { validateKb } from "./core/kb.js";
+import { classify } from "./core/classify.js";
+import { COVERAGE_STATES, REASONS, SAMPLE_OBSERVATION } from "./core/coverage.js";
 
-self.onmessage = function (e) {
+self.onmessage = async function (e) {
   try {
     const { action, text, fileName } = e.data;
     if (action === "parse") {
-      analyzeGenotypeFile(text, fileName);
+      await analyzeGenotypeFile(text, fileName);
     }
   } catch (err) {
     self.postMessage({ type: "error", message: String((err && err.message) || err) });
   }
 };
 
-/** Curated loci by "chrom:pos" for one assembly, used to place calls that carry no rsID. */
-function buildPositionIndex(build) {
-  const field = build === "GRCh38" ? "pos_grch38" : build === "GRCh37" ? "pos_grch37" : null;
-  const index = new Map();
-  if (!field) return index;
-  for (const [rsid, entry] of Object.entries(CURATED_KB)) {
-    if (entry[field]) index.set(`${entry.chrom}:${entry[field]}`, rsid);
+let kbPromise = null;
+
+/**
+ * Loads and validates the knowledge base once. It is imported as a JSON module rather than
+ * fetched: tests/test_zero_knowledge_privacy.py requires that worker.js contains no fetch
+ * call at all, and a JSON import is the same same-origin static load. A failed load is not
+ * cached, so a retry can succeed.
+ */
+function loadKnowledgeBase() {
+  if (!kbPromise) {
+    kbPromise = import("./knowledge-base.json", { with: { type: "json" } })
+      .then((mod) => validateKb(mod.default))
+      .catch((err) => {
+        kbPromise = null;
+        throw new Error(`The knowledge base could not be loaded: ${(err && err.message) || err}`);
+      });
   }
-  return index;
+  return kbPromise;
 }
 
-function analyzeGenotypeFile(text, fileName = "") {
+/** Plus-strand allele string for an alt count, e.g. ref T / alt C with count 1 gives "TC". */
+function genotypeFromAltCount(locus, altCount) {
+  return locus.ref.repeat(2 - altCount) + locus.alt.repeat(altCount);
+}
+
+/**
+ * Transitional (until T8): the existing segregation functions take a genotype string. An alt
+ * count of 0 passes an empty string, so a wild-type result is neither carrier nor affected.
+ */
+function segregationFor(rec) {
+  if (rec.altCount === null) return null;
+  const pseudoGenotype = ["", "RV", "VV"][rec.altCount];
+  const seg = computeSegregationReport(rec.gene, pseudoGenotype, rec.interpretation.category, rec.interpretation.significance);
+  return seg;
+}
+
+async function analyzeGenotypeFile(text, fileName = "") {
   self.postMessage({ type: "progress", percent: 5, status: "Detecting format and header..." });
 
   // Throws UnsupportedFormatError for unrecognised content; the catch above reports it.
   const parsed = parseGenotypeFile(text, fileName);
-  const format = parsed.format;
-  const build = parsed.build;
+  const { format, build } = parsed;
 
   self.postMessage({ type: "progress", percent: 15, status: `Parsed ${format.toUpperCase()} (${build})...` });
 
-  const totalSnps = parsed.calls.length;
-  const calledSnps = parsed.stats.called;
-  const nocallSnps = parsed.stats.no_calls;
   const chromDist = {};
+  for (const call of parsed.calls) chromDist[call.chrom] = (chromDist[call.chrom] || 0) + 1;
 
-  let gt429 = null;
-  let gt741 = null;
+  self.postMessage({ type: "progress", percent: 90, status: `Parsed ${parsed.calls.length.toLocaleString()} SNPs...` });
 
-  const assayedCurated = new Map();
-  const positionIndex = buildPositionIndex(build);
-
-  for (const call of parsed.calls) {
-    chromDist[call.chrom] = (chromDist[call.chrom] || 0) + 1;
-
-    // Minimal adaptation until the classification is rewritten (T6): the old genotype
-    // string, and curated lookup by chrom:pos for calls that have no rsID.
-    const rsid = call.rsid || positionIndex.get(`${call.chrom}:${call.pos}`);
-    if (!rsid) continue;
-    const genotype = call.alleles === null ? "--" : call.alleles.join("");
-
-    if (call.alleles === null) {
-      // If a curated locus had a no-call on the array, track it for gap reporting
-      if (CURATED_KB[rsid]) {
-        assayedCurated.set(rsid, { chrom: call.chrom, pos: call.pos, genotype, isNoCall: true });
-      }
-      continue;
-    }
-
-    // Track APOE key SNPs
-    if (rsid === "rs429358") gt429 = genotype;
-    if (rsid === "rs7412") gt741 = genotype;
-
-    // Track all interrogated curated loci for 5-state coverage taxonomy evaluation
-    if (CURATED_KB[rsid]) {
-      assayedCurated.set(rsid, { chrom: call.chrom, pos: call.pos, genotype, isNoCall: false });
-    }
-  }
-
-  self.postMessage({ type: "progress", percent: 90, status: `Parsed ${totalSnps.toLocaleString()} SNPs...` });
-
+  const kb = await loadKnowledgeBase();
   const qcMetrics = computeQc(parsed);
+  const { records, summary: coverage } = classify(parsed, kb);
 
-  // -------------------------------------------------------------------------
-  // 5-STATE COVERAGE TAXONOMY EVALUATION
-  // -------------------------------------------------------------------------
-  const observedFindings = [];
-  const negativeChecks = [];
-  const arrayGaps = [];
-  const insufficientEvidence = [];
+  for (const rec of records) rec.segregation = segregationFor(rec);
 
-  for (const [rsid, entry] of Object.entries(CURATED_KB)) {
-    const isAcmg = ACMG_SF_GENES.has(entry.gene);
-    const assayed = assayedCurated.get(rsid);
+  // Transitional (until T7): the combined APOE finding is built from the two component loci.
+  const byRsid = Object.fromEntries(records.map((r) => [r.rsid, r]));
+  const gt = (rsid) => {
+    const rec = byRsid[rsid];
+    return rec && rec.altCount !== null ? genotypeFromAltCount(kb.loci[rsid], rec.altCount) : null;
+  };
+  const apoeFinding = resolveApoeDiplotype(gt("rs429358"), gt("rs7412"), kb);
 
-    if (!assayed) {
-      // State 3: Not Tested By This Array (Omitted from chip)
-      const isWeak = entry.evidence_tier === "Tier C" || entry.evidence_tier === "Tier D";
-      const evalRes = deriveCoverageEvaluation(
-        ASSAY_COVERAGE.UNPROBED,
-        CURATION_SCOPE.IN_SCOPE,
-        isWeak ? EVIDENCE_SUFFICIENCY.INSUFFICIENT : EVIDENCE_SUFFICIENCY.SUFFICIENT,
-        SAMPLE_OBSERVATION.CALL_UNAVAILABLE
-      );
-      arrayGaps.push({
-        rsid,
-        gene: entry.gene,
-        name: entry.name || rsid,
-        coverage_state: evalRes.derived_state,
-        assay_coverage: evalRes.assay_coverage,
-        curation_scope: evalRes.curation_scope,
-        evidence_sufficiency: evalRes.evidence_sufficiency,
-        sample_observation: evalRes.sample_observation,
-        user_label: evalRes.user_label,
-        explanation: evalRes.explanation,
-        reason: "Omitted from microarray chip manifest",
-        chrom: entry.chrom,
-        pos_grch37: entry.pos_grch37,
-        pos_grch38: entry.pos_grch38,
-        evidence_tier: entry.evidence_tier || "Tier D",
-        acmg_actionable: isAcmg
-      });
-      continue;
-    }
+  // Group by the UI's lists. Component loci are not listed on their own (no double counting).
+  const listed = records.filter((r) => r.standalone);
+  const isObserved = (r) =>
+    r.sample_observation === SAMPLE_OBSERVATION.VARIANT_PRESENT &&
+    (r.coverage_state === COVERAGE_STATES.SUPPORTED_AND_OBSERVED || r.coverage_state === COVERAGE_STATES.INSUFFICIENT_EVIDENCE);
+  const observedFindings = listed.filter(isObserved);
+  const negativeChecks = listed.filter(
+    (r) =>
+      r.coverage_state === COVERAGE_STATES.SUPPORTED_NOT_OBSERVED ||
+      (r.coverage_state === COVERAGE_STATES.INSUFFICIENT_EVIDENCE && r.sample_observation === SAMPLE_OBSERVATION.WILD_TYPE)
+  );
+  const arrayGaps = listed.filter((r) => r.coverage_state === COVERAGE_STATES.NOT_TESTED_BY_ARRAY);
+  const insufficientEvidence = listed.filter((r) => r.coverage_state === COVERAGE_STATES.INSUFFICIENT_EVIDENCE);
 
-    if (assayed.isNoCall) {
-      // State 3: Assayed on array but uncallable / no-call
-      const isWeak = entry.evidence_tier === "Tier C" || entry.evidence_tier === "Tier D";
-      const evalRes = deriveCoverageEvaluation(
-        ASSAY_COVERAGE.NO_CALL,
-        CURATION_SCOPE.IN_SCOPE,
-        isWeak ? EVIDENCE_SUFFICIENCY.INSUFFICIENT : EVIDENCE_SUFFICIENCY.SUFFICIENT,
-        SAMPLE_OBSERVATION.CALL_UNAVAILABLE
-      );
-      arrayGaps.push({
-        rsid,
-        gene: entry.gene,
-        name: entry.name || rsid,
-        coverage_state: evalRes.derived_state,
-        assay_coverage: evalRes.assay_coverage,
-        curation_scope: evalRes.curation_scope,
-        evidence_sufficiency: evalRes.evidence_sufficiency,
-        sample_observation: evalRes.sample_observation,
-        user_label: evalRes.user_label,
-        explanation: evalRes.explanation,
-        reason: "No-call / uncallable on array (--)",
-        chrom: entry.chrom,
-        pos_grch37: entry.pos_grch37,
-        pos_grch38: entry.pos_grch38,
-        evidence_tier: entry.evidence_tier || "Tier D",
-        acmg_actionable: isAcmg
-      });
-      continue;
-    }
-
-    // Match genotype against curated assertions
-    const genotype = assayed.genotype;
-    const sortedGt = genotype.length === 2 ? genotype.split("").sort().join("") : genotype;
-    let match = entry.genotypes[genotype] || entry.genotypes[sortedGt];
-
-    if (!match && !entry.is_palindromic) {
-      // Check complement only if not palindromic
-      const compMap = { "A": "T", "T": "A", "C": "G", "G": "C" };
-      const compGt = genotype.split("").map(b => compMap[b] || b).sort().join("");
-      match = entry.genotypes[compGt];
-    }
-
-    const segregation = computeSegregationReport(entry.gene, genotype, match ? match.category : "Trait", match ? match.significance : "Baseline");
-
-    const record = {
-      rsid,
-      gene: entry.gene,
-      genotype,
-      chrom: assayed.chrom || entry.chrom,
-      pos: assayed.pos || entry.pos_grch37,
-      category: match ? match.category : "Trait",
-      significance: match ? match.significance : "Negative / Wild-Type",
-      magnitude: match ? match.magnitude : 1.0,
-      repute: match ? match.repute : "Good",
-      phenotype: match ? match.phenotype : "Normal / Baseline non-risk genotype confirmed.",
-      drug_response: match ? match.drug_response : null,
-      clinvar_stars: entry.clinvar_stars,
-      clinvar_id: entry.clinvar_id,
-      gnomad_af: entry.gnomad_af,
-      gnomad_pli: entry.gnomad_pli,
-      hpa_tissues: entry.hpa_tissues || {},
-      hpa_subcellular: entry.hpa_subcellular || [],
-      acmg_actionable: isAcmg,
-      evidence_tier: entry.evidence_tier || (entry.clinvar_stars >= 3 ? "Tier A" : (entry.clinvar_stars === 2 ? "Tier B" : "Tier C")),
-      tier_rationale: entry.tier_rationale || "",
-      caveats: entry.caveats || [],
-      refusal_notices: entry.refusal_notices || [],
-      segregation
-    };
-
-    // Determine Coverage State & Orthogonal Dimensions
-    const isRiskOrActionable = match && (
-      match.category === "Pathogenic" ||
-      match.category === "Carrier" ||
-      match.category === "Pharmacogenomics" ||
-      match.category === "Risk Factor" ||
-      match.magnitude >= 2.0 ||
-      match.isCarrier
-    );
-
-    const isConflictingOrWeak = record.evidence_tier === "Tier C" || record.evidence_tier === "Tier D" || (entry.clinvar_status && entry.clinvar_status.includes("conflicting"));
-    const evSuff = isConflictingOrWeak ? EVIDENCE_SUFFICIENCY.INSUFFICIENT : EVIDENCE_SUFFICIENCY.SUFFICIENT;
-    const sampleObs = isRiskOrActionable ? SAMPLE_OBSERVATION.VARIANT_PRESENT : SAMPLE_OBSERVATION.WILD_TYPE;
-
-    const evalRes = deriveCoverageEvaluation(
-      ASSAY_COVERAGE.ASSAYED_CALLED,
-      CURATION_SCOPE.IN_SCOPE,
-      evSuff,
-      sampleObs
-    );
-
-    record.coverage_state = evalRes.derived_state;
-    record.assay_coverage = evalRes.assay_coverage;
-    record.curation_scope = evalRes.curation_scope;
-    record.evidence_sufficiency = evalRes.evidence_sufficiency;
-    record.sample_observation = evalRes.sample_observation;
-    record.user_label = evalRes.user_label;
-    record.explanation = evalRes.explanation;
-
-    if (evalRes.derived_state === COVERAGE_STATES.INSUFFICIENT_EVIDENCE) {
-      // State 5: Insufficient / Conflicting Evidence (e.g. MTHFR C677T)
-      insufficientEvidence.push(record);
-      if (sampleObs === SAMPLE_OBSERVATION.VARIANT_PRESENT) {
-        observedFindings.push(record);
-      } else {
-        negativeChecks.push(record);
-      }
-    } else if (evalRes.derived_state === COVERAGE_STATES.SUPPORTED_AND_OBSERVED) {
-      // State 1: Supported and Observed
-      observedFindings.push(record);
-    } else {
-      // State 2: Supported but Not Observed (Negative check / Wild-Type)
-      record.significance = "Negative / Wild-Type (Tested Normal)";
-      record.repute = "Good";
-      negativeChecks.push(record);
-    }
-  }
-
-  // Synthesize compound APOE Diplotype (rs429358 + rs7412)
-  const apoeFinding = resolveApoeDiplotype(gt429, gt741);
   if (apoeFinding) {
-    const isApoeRisk = apoeFinding.apoeInfo.diplotype.includes("ε4") || apoeFinding.apoeInfo.diplotype.includes("ε2/ε2");
-    const apoeObs = isApoeRisk ? SAMPLE_OBSERVATION.VARIANT_PRESENT : SAMPLE_OBSERVATION.WILD_TYPE;
-    const apoeEval = deriveCoverageEvaluation(
-      ASSAY_COVERAGE.ASSAYED_CALLED,
-      CURATION_SCOPE.IN_SCOPE,
-      EVIDENCE_SUFFICIENCY.SUFFICIENT,
-      apoeObs
-    );
-    apoeFinding.coverage_state = apoeEval.derived_state;
-    apoeFinding.assay_coverage = apoeEval.assay_coverage;
-    apoeFinding.curation_scope = apoeEval.curation_scope;
-    apoeFinding.evidence_sufficiency = apoeEval.evidence_sufficiency;
-    apoeFinding.sample_observation = apoeEval.sample_observation;
-    apoeFinding.user_label = apoeEval.user_label;
-    apoeFinding.explanation = apoeEval.explanation;
-    apoeFinding.evidence_tier = EVIDENCE_TIERS.TIER_A;
-    if (isApoeRisk) {
-      observedFindings.push(apoeFinding);
-    } else {
-      negativeChecks.push(apoeFinding);
-    }
+    if (apoeFinding.coverage_state === COVERAGE_STATES.INSUFFICIENT_EVIDENCE) insufficientEvidence.push(apoeFinding);
+    else if (apoeFinding.sample_observation === SAMPLE_OBSERVATION.VARIANT_PRESENT) observedFindings.push(apoeFinding);
+    else negativeChecks.push(apoeFinding);
   }
 
-  // Sort observed findings by clinical priority (Magnitude descending, then stars)
-  observedFindings.sort((a, b) => (b.magnitude - a.magnitude) || (b.clinvar_stars - a.clinvar_stars));
+  // Sort observed findings by clinical priority (magnitude descending)
+  observedFindings.sort((a, b) => (b.interpretation.magnitude - a.interpretation.magnitude));
 
-  // Detect Multi-Locus Segregation & Assortment
-  const compoundHeterozygotes = detectCompoundHeterozygosity(observedFindings);
-  const independentAssortment = computeIndependentAssortment(observedFindings);
+  // Transitional (until T8): the multi-locus functions read a "genotype" string and an rsid.
+  const legacy = (r) => ({ rsid: r.rsid, genotype: r.genotype_display ? r.genotype_display.replace("/", "") : "" });
+  const compoundHeterozygotes = detectCompoundHeterozygosity(observedFindings.map(legacy));
+  const independentAssortment = computeIndependentAssortment(observedFindings.map(legacy));
 
-  const outsideCoverageCount = Math.max(0, totalSnps - assayedCurated.size);
-
-  // Summary counts
+  const category = (c) => observedFindings.filter((f) => f.interpretation.category === c).length;
   const summary = {
     total_annotated: observedFindings.length,
-    pathogenic_count: observedFindings.filter(f => f.category === "Pathogenic").length,
-    carrier_count: observedFindings.filter(f => f.category === "Carrier" || f.isCarrier).length,
-    pgx_count: observedFindings.filter(f => f.category === "Pharmacogenomics").length,
-    risk_factor_count: observedFindings.filter(f => f.category === "Risk Factor").length,
-    acmg_actionable_findings: observedFindings.filter(f => f.acmg_actionable).length,
+    pathogenic_count: category("Pathogenic"),
+    carrier_count: category("Carrier"),
+    pgx_count: category("Pharmacogenomics"),
+    risk_factor_count: category("Risk Factor"),
+    acmg_actionable_findings: observedFindings.filter((f) => f.acmg_sf).length,
     compound_heterozygotes_count: compoundHeterozygotes.length,
-    independent_assortment_count: independentAssortment.length,
-    coverage_taxonomy: {
-      cardinal_guardrail: ABSENCE_OF_FINDING_GUARDRAIL,
-      supported_and_observed_count: observedFindings.filter(f => f.coverage_state === COVERAGE_STATES.SUPPORTED_AND_OBSERVED).length,
-      supported_not_observed_count: negativeChecks.filter(f => f.coverage_state === COVERAGE_STATES.SUPPORTED_NOT_OBSERVED).length,
-      not_tested_by_array_count: arrayGaps.length,
-      outside_coverage_count: outsideCoverageCount,
-      insufficient_evidence_count: insufficientEvidence.length
-    }
+    independent_assortment_count: independentAssortment.length
   };
 
   const qc = {
     format_name: format,
     build,
-    total_snps: totalSnps,
-    called_snps: calledSnps,
-    nocall_snps: nocallSnps,
+    total_snps: parsed.calls.length,
+    called_snps: parsed.stats.called,
+    nocall_snps: parsed.stats.no_calls,
     ...qcMetrics,
     chrom_distribution: chromDist
   };
@@ -330,22 +152,17 @@ function analyzeGenotypeFile(text, fileName = "") {
     negative_checks: negativeChecks,
     array_gaps: arrayGaps,
     insufficient_evidence: insufficientEvidence,
-    coverage_taxonomy: {
-      cardinal_guardrail: ABSENCE_OF_FINDING_GUARDRAIL,
-      supported_and_observed_count: observedFindings.length,
-      supported_not_observed_count: negativeChecks.length,
-      not_tested_by_array_count: arrayGaps.length,
-      outside_coverage_count: outsideCoverageCount,
-      insufficient_evidence_count: insufficientEvidence.length
-    },
+    coverage_taxonomy: coverage,
     summary,
     apoe: apoeFinding ? apoeFinding.apoeInfo : null,
     compound_heterozygotes: compoundHeterozygotes,
-    independent_assortment: independentAssortment
+    independent_assortment: independentAssortment,
+    manifest: kb.manifest,
+    genes: kb.genes
   });
 }
 
-function resolveApoeDiplotype(gt429, gt741) {
+function resolveApoeDiplotype(gt429, gt741, kb) {
   if (!gt429 && !gt741) return null;
 
   function norm429(gt) {
@@ -464,27 +281,41 @@ function resolveApoeDiplotype(gt429, gt741) {
 
   const rawSummary = `rs429358:${gt429 || '--'}, rs7412:${gt741 || '--'}`;
 
+  const determinate = /^ε[234]\/ε[234]$/.test(diplotype);
+  const isRisk = diplotype.includes("ε4") || diplotype.includes("ε2/ε2");
+  const sampleObservation = !determinate
+    ? SAMPLE_OBSERVATION.CALL_UNAVAILABLE
+    : isRisk ? SAMPLE_OBSERVATION.VARIANT_PRESENT : SAMPLE_OBSERVATION.WILD_TYPE;
+  // Evidence, tier and limitation come from the KB's APOE locus, not from hand-typed values.
+  const base = kb.loci.rs429358;
+  if (!base) throw new Error("The knowledge base has no rs429358 locus, so APOE cannot be assembled.");
+
   return {
     rsid: "APOE-STATUS",
     gene: "APOE",
-    genotype: `${diplotype} (${rawSummary})`,
-    chrom: "19",
-    pos: 45411941,
-    category: category,
-    isCarrier: true,
-    significance: significance,
-    magnitude: magnitude,
-    repute: repute,
-    phenotype: phenotype,
-    drug_response: null,
-    clinvar_stars: 4,
-    clinvar_id: "VCV000017864",
-    gnomad_af: 0.15,
-    gnomad_pli: 0.0,
-    hpa_tissues: { "liver": "High", "cerebral cortex": "Medium", "plasma": "High" },
-    hpa_subcellular: ["Secreted", "Endoplasmic reticulum"],
-    acmg_actionable: false,
-    segregation: computeSegregationReport("APOE", diplotype, category, significance),
+    chrom: base.chrom,
+    pos: base.pos_grch37,
+    genotype_display: `${diplotype} (${rawSummary})`,
+    altCount: null,
+    strandFlipped: null,
+    coverage_state: !determinate
+      ? COVERAGE_STATES.INSUFFICIENT_EVIDENCE
+      : isRisk ? COVERAGE_STATES.SUPPORTED_AND_OBSERVED : COVERAGE_STATES.SUPPORTED_NOT_OBSERVED,
+    sample_observation: sampleObservation,
+    reason: determinate ? null : REASONS.NOT_INTERPRETABLE,
+    interpretation_key: null,
+    interpretation: { category, significance, magnitude, repute, phenotype, drug_response: null, caveats: [] },
+    evidence: base.evidence,
+    evidence_tier: base.evidence_tier,
+    tier_source: base.tier_source,
+    tier_rationale: base.tier_rationale,
+    tier_citation: base.tier_citation,
+    evidence_sufficiency: base.evidence_sufficiency,
+    limitation: base.limitation,
+    acmg_sf: kb.genes.APOE.acmg_sf,
+    role: "standard",
+    standalone: true,
+    segregation: computeSegregationReport("APOE", isRisk ? "RV" : "", category, significance),
     apoeInfo: {
       diplotype,
       label,

@@ -52,6 +52,27 @@ const HANDLERS = {
       }
     }
   },
+
+  // input: { locus: {ref, alt, allele_codes, chrom}, alleles }; expected is a subset of the result.
+  "alleles.json": async (vector) => {
+    const { resolveAltCount } = await import("../src/core/alleles.js");
+    const result = resolveAltCount(vector.input.locus, vector.input.alleles);
+    assertSubset(result, vector.expected, vector.id);
+  },
+
+  // input: { kb, parse }; expected: { records: {rsid: subset}, summary: subset }.
+  "classify.json": async (vector) => {
+    const { validateKb } = await import("../src/core/kb.js");
+    const { classify } = await import("../src/core/classify.js");
+    const kb = validateKb(vector.input.kb);
+    const out = classify(vector.input.parse, kb);
+    for (const [rsid, want] of Object.entries(vector.expected.records || {})) {
+      const rec = out.records.find((r) => r.rsid === rsid);
+      assert.ok(rec, `${vector.id}: no record for ${rsid}`);
+      assertSubset(rec, want, `${vector.id}.${rsid}`);
+    }
+    if (vector.expected.summary) assertSubset(out.summary, vector.expected.summary, `${vector.id}.summary`);
+  },
 };
 
 const files = readdirSync(VECTOR_DIR).filter((f) => f.endsWith(".json")).sort();
