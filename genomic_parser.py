@@ -272,7 +272,7 @@ def _parse_myheritage_line(line: str):
 
 # A VCF allele we carry: A/C/G/T sequences (SNPs and indels) or the single codes I/D. Symbolic
 # `<DEL>`, `=1+1` and markup are untrusted file content and are never kept.
-_VCF_ALLELE = re.compile(r"(?:[ACGT]+|[ID])", re.IGNORECASE)
+_VCF_ALLELE = re.compile(r"(?:[ACGT]+|[ID])", re.IGNORECASE | re.ASCII)
 
 
 def _vcf_alleles(gt: str, table: list[str]):
