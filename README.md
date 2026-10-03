@@ -9,6 +9,15 @@
 
 Lucidase reads a raw genotype file in your browser and interprets the 14 curated loci (12 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA and MyHeritage array files and VCF files, and rejects any other format with a visible error. Formerly GenomePulse.
 
+## Karyogram view
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lucidase-karyogram-dark.png">
+  <img src="docs/assets/lucidase-karyogram-light.png" alt="The Lucidase karyogram of the bundled example file: 24 chromosome columns of marker-density dots with the 14 genes this report checks marked by result">
+</picture>
+
+`web/karyogram.html` maps a genotype file onto the chromosomes. Each dot stands for a stretch of chromosome about 4 million DNA letters long, sized by how many markers from your file fall there, and the 14 genes this report checks are marked with their coverage state. A file that doesn't say which genome version it uses is not placed on the chromosomes: the page says so and still shows the results for the genes this report checks. The map is drawn in the browser from UCSC chromosome lengths and centromeres stored in the knowledge base, and your file never leaves the page.
+
 ## What it does
 
 - Parses the file in a Web Worker, in the page.

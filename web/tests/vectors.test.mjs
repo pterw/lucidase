@@ -81,7 +81,8 @@ const HANDLERS = {
   "classify.json": async (vector) => {
     const { validateKb } = await import("../src/core/kb.js");
     const { classify } = await import("../src/core/classify.js");
-    const kb = validateKb(vector.input.kb);
+    const { withAssemblies } = await import("./support/with-assemblies.mjs");
+    const kb = validateKb(withAssemblies(vector.input.kb));
     const out = classify(vector.input.parse, kb);
     for (const [rsid, want] of Object.entries(vector.expected.records || {})) {
       const rec = out.records.find((r) => r.rsid === rsid);
@@ -112,9 +113,13 @@ const HANDLERS = {
   // input: { kb }; expected: { problems }, the exact list validateKb reports ([] for a valid KB).
   "kb.json": async (vector) => {
     const { validateKb } = await import("../src/core/kb.js");
+    // The vectors are shared with the Python validator, which does not know the assembly geometry (K-C1): every
+    // vector KB is given the built KB's real, valid `assemblies`, so each expected list is about the other fields.
+    const { assemblies } = JSON.parse(readFileSync(new URL("../src/knowledge-base.json", import.meta.url), "utf-8"));
     let result = { problems: [] };
     try {
-      validateKb(vector.input.kb);
+      const kb = vector.input.kb;
+      validateKb(kb !== null && typeof kb === "object" && !Array.isArray(kb) ? { assemblies, ...kb } : kb);
     } catch (err) {
       if (err.name !== "KbSchemaError") throw err;
       result = { problems: err.problems };

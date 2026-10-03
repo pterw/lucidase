@@ -1192,3 +1192,200 @@ def test_synthetic_gnomad_record_with_ac_but_no_an_key_raises():
 def test_synthetic_gnomad_record_with_an_null_is_still_skipped():
     """Real exome records carry an: null; only a missing key is a partial record."""
     assert parse_gnomad_variant(_gnomad(exome={"ac": None, "an": None}, genome={"ac": 1, "an": 10})).af == pytest.approx(0.1)
+
+
+# ---------------------------------------------------------------------------
+# UCSC assembly geometry (karyogram K1, contract K-C1)
+# ---------------------------------------------------------------------------
+import gzip  # noqa: E402
+
+from tools.source_adapters import PinnedPayload, parse_ucsc_assembly  # noqa: E402
+
+UCSC = REAL / "ucsc"
+PRIMARY = [str(n) for n in range(1, 23)] + ["X", "Y"]
+
+
+def _ucsc_real(build):
+    ucsc = {"GRCh37": "hg19", "GRCh38": "hg38"}[build]
+    return parse_ucsc_assembly(
+        build,
+        load_pinned(UCSC / f"{ucsc}.chromInfo.txt.gz"),
+        load_pinned(UCSC / f"{ucsc}.cytoBand.txt.gz"),
+    )
+
+
+def _synthetic(chrom_info_rows, cytoband_rows):
+    def payload(rows):
+        text = "".join("\t".join(map(str, r)) + "\n" for r in rows)
+        return PinnedPayload(Path("synthetic.txt.gz"), gzip.compress(text.encode()), {"url": "u", "retrieved_at": "2026-01-02T00:00:00Z", "sha256_of_body": "0" * 64})
+
+    return parse_ucsc_assembly("GRCh38", payload(chrom_info_rows), payload(cytoband_rows))
+
+
+def test_ucsc_non_ascii_digit_is_an_adapter_error_not_a_value_error():
+    info, bands = _good_rows()
+    info[0] = ("chr1", "\u00b2", "/x")  # "\u00b2".isdigit() is True but int() raises ValueError
+    with pytest.raises(AdapterError, match="not a non-negative integer"):
+        _synthetic(info, bands)
+
+
+@pytest.mark.parametrize("data", [b"\x1f\x8b\x08\x00" + b"\xff" * 16, gzip.compress(b"chr1\t1\n" * 50)[:-12]])
+def test_ucsc_corrupt_gzip_stream_is_an_adapter_error(data):
+    bad = PinnedPayload(Path("bad.txt.gz"), data, {"url": "u", "retrieved_at": "2026-01-02T00:00:00Z", "sha256_of_body": "0" * 64})
+    with pytest.raises(AdapterError, match="not a readable gzip"):
+        parse_ucsc_assembly("GRCh38", bad, bad)
+
+
+def _good_rows():
+    info = [(f"chr{n}", 1000, "/x") for n in PRIMARY] + [("chrM", 16, "/x"), ("chr1_alt", 5, "/x")]
+    bands = [(f"chr{n}", 400, 600, "p11.1", "acen") for n in PRIMARY] + [("chr1_alt", 0, 9, "p1", "acen")]
+    return info, bands
+
+
+@pytest.mark.parametrize("build", ["GRCh37", "GRCh38"])
+def test_ucsc_assembly_has_the_24_primary_chromosomes_in_range(build):
+    geometry = _ucsc_real(build)
+    assert geometry.build == build
+    assert list(geometry.chromosomes) == PRIMARY
+    for chrom in geometry.chromosomes.values():
+        assert 1 <= chrom.centromere_start <= chrom.centromere_end <= chrom.length
+
+
+def test_ucsc_assembly_known_lengths_and_one_based_centromere():
+    assert _ucsc_real("GRCh38").chromosomes["1"].length == 248956422
+    grch37 = _ucsc_real("GRCh37").chromosomes["1"]
+    assert grch37.length == 249250621
+    # hg19 chr1 acen rows are 121500000-125000000 and 125000000-128900000 (0-based half-open).
+    assert (grch37.centromere_start, grch37.centromere_end) == (121500001, 128900000)
+
+
+def test_ucsc_assembly_sources_come_from_the_capture_meta():
+    geometry = _ucsc_real("GRCh37")
+    assert geometry.ucsc == "hg19"
+    assert [s.accession for s in geometry.sources] == ["chromInfo", "cytoBand"]
+    assert geometry.sources[0].url.endswith("/hg19/database/chromInfo.txt.gz")
+    meta = json.loads((UCSC / "hg19.cytoBand.txt.gz.meta.json").read_text(encoding="utf-8"))
+    assert geometry.sources[1].sha256 == meta["sha256_of_body"]
+    assert geometry.sources[1].retrieved_at == meta["retrieved_at"]
+
+
+def test_synthetic_good_rows_parse_and_skip_non_primary_contigs():
+    """Synthetic: minimal gzip tables with an alt contig and chrM that must be ignored."""
+    assert list(_synthetic(*_good_rows()).chromosomes) == PRIMARY
+
+
+def test_synthetic_missing_primary_chromosome_in_chrominfo_raises():
+    info, bands = _good_rows()
+    info = [r for r in info if r[0] != "chr7"]
+    with pytest.raises(AdapterError, match="chr7"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_missing_primary_chromosome_in_cytoband_raises():
+    info, bands = _good_rows()
+    bands = [r for r in bands if r[0] != "chrY"]
+    with pytest.raises(AdapterError, match="chrY"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_no_acen_band_raises():
+    info, bands = _good_rows()
+    bands = [(c, s, e, n, "gneg" if c == "chr3" else st) for c, s, e, n, st in bands]
+    with pytest.raises(AdapterError, match="acen.*chr3"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_acen_beyond_length_raises():
+    info, bands = _good_rows()
+    bands = [(c, s, 1001 if c == "chr5" else e, n, st) for c, s, e, n, st in bands]
+    with pytest.raises(AdapterError, match="chr5"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_non_contiguous_acen_rows_raise():
+    info, bands = _good_rows()
+    bands = [b for b in bands if b[0] != "chr7"]
+    bands += [("chr7", 400, 500, "p11.1", "acen"), ("chr7", 520, 600, "q11.1", "acen")]  # a 20 bp gap
+    with pytest.raises(AdapterError, match="chr7.*not contiguous"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_contiguous_acen_rows_are_united():
+    info, bands = _good_rows()
+    bands = [b for b in bands if b[0] != "chr7"]
+    bands += [("chr7", 400, 500, "p11.1", "acen"), ("chr7", 500, 600, "q11.1", "acen")]
+    centromere = _synthetic(info, bands).chromosomes["7"]
+    assert (centromere.centromere_start, centromere.centromere_end) == (401, 600)
+
+
+def test_synthetic_malformed_row_raises():
+    info, bands = _good_rows()
+    bands[2] = ("chr3", "four", 600, "p11.1", "acen")
+    with pytest.raises(AdapterError, match="malformed"):
+        _synthetic(info, bands)
+
+
+def test_verify_pinned_payloads_covers_the_ucsc_gzip_bodies(tmp_path):
+    root = tmp_path / "real"
+    shutil.copytree(UCSC, root / "ucsc")
+    assert verify_pinned_payloads(root) == []
+    target = root / "ucsc" / "hg38.cytoBand.txt.gz"
+    target.write_bytes(target.read_bytes() + b"x")
+    errors = verify_pinned_payloads(root)
+    assert len(errors) == 1 and "ucsc/hg38.cytoBand.txt.gz" in errors[0]
+
+
+# ---------------------------------------------------------------------------
+# UCSC adapter branch pins and the per-band range check (karyogram K8, review M2/M3)
+# ---------------------------------------------------------------------------
+def test_synthetic_duplicate_chrominfo_row_raises():
+    info, bands = _good_rows()
+    info.append(("chr2", 1000, "/x"))
+    with pytest.raises(AdapterError, match="duplicate row for chr2"):
+        _synthetic(info, bands)
+
+
+@pytest.mark.parametrize("start, end", [(700, 700), (700, 600)])
+def test_synthetic_cytoband_start_not_below_end_raises(start, end):
+    info, bands = _good_rows()
+    bands.append(("chr4", start, end, "q11", "gneg"))
+    with pytest.raises(AdapterError, match="start is not below end"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_overlapping_acen_rows_raise():
+    info, bands = _good_rows()
+    bands = [b for b in bands if b[0] != "chr7"]
+    bands += [("chr7", 400, 520, "p11.1", "acen"), ("chr7", 500, 600, "q11.1", "acen")]
+    with pytest.raises(AdapterError, match="chr7.*not contiguous"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_short_row_raises_naming_the_row():
+    info, bands = _good_rows()
+    bands.append(("chr4", 700, 800, "q11"))  # four columns, cytoBand needs five
+    with pytest.raises(AdapterError, match="malformed row"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_non_acen_band_beyond_length_raises():
+    info, bands = _good_rows()
+    bands.append(("chr6", 900, 1001, "q99", "gneg"))
+    with pytest.raises(AdapterError, match=r"chr6.*1001.*length 1000"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_non_acen_band_ending_at_length_is_accepted():
+    info, bands = _good_rows()
+    bands.append(("chr6", 900, 1000, "q99", "gneg"))
+    assert _synthetic(info, bands).chromosomes["6"].length == 1000
+
+
+def test_check_locus_bounds_flags_a_chromosome_missing_from_the_assembly():
+    from tools.build_canonical_kb import BUILDS, check_locus_bounds
+
+    assemblies = {build: {"chromosomes": {"1": {"length": 1000}}} for build, _ in BUILDS}
+    loci = {"rs1": {"chrom": "7", **{key: 10 for _, key in BUILDS}}}
+    errors = check_locus_bounds(loci, assemblies)
+    assert len(errors) == len(BUILDS)
+    assert all("rs1" in e and "'7' is not in the" in e for e in errors)

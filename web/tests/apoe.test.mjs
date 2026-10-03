@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { validateKb } from "../src/core/kb.js";
+import { withAssemblies } from "./support/with-assemblies.mjs";
 import { classify } from "../src/core/classify.js";
 import { assembleFindings, e4CountForDiplotype, resolveApoe } from "../src/core/apoe.js";
 
@@ -21,7 +22,7 @@ function kbWithApoe(mutate = (raw) => raw) {
   Object.assign(e7412, { rsid: "rs7412", pos_grch37: 45412079, pos_grch38: 44908822, ref: "C", alt: "T" });
   raw.loci.rs7412 = e7412;
   raw.genes.APOE.diplotypes = structuredClone(apoeVectors[0].input.kb.genes.APOE.diplotypes);
-  return validateKb(mutate(raw));
+  return validateKb(withAssemblies(mutate(raw)));
 }
 
 const parse = (calls) => ({

@@ -5,7 +5,7 @@ The page loads no third-party code. Both stylesheets are served from this direct
 | File | Version | Source | sha256 |
 |---|---|---|---|
 | `daisyui-4.12.10.min.css` | daisyUI 4.12.10 | https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css (downloaded once, unmodified) | `3c5948b1ebb3a6344521dd01ab3b3660eb95bbdd0b6dfe008cd6f803e99ac054` |
-| `tailwind.css` | Tailwind CSS 3.4.17 (generated, minified) | compiled from `web/tailwind.config.js` and `web/src/tailwind.input.css` | changes whenever classes in `index.html` or `src/**/*.js` change |
+| `tailwind.css` | Tailwind CSS 3.4.17 (generated, minified) | compiled from `web/tailwind.config.js` and `web/src/tailwind.input.css` | changes whenever classes in `index.html`, `karyogram.html` or `src/**/*.js` change |
 
 The Tailwind standalone CLI v3.4.17 is not committed. Put it at `bin/tailwindcss.exe` (or `bin/tailwindcss`);
 its sha256 for the Windows build is `67f1c5e3f5a03406a7bf5badf5ada09b79f3ae78ec43450c15f7e983068da346`.

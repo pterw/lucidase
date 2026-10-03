@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { KbSchemaError, validateKb } from "../src/core/kb.js";
@@ -12,9 +13,21 @@ const interp = (category, magnitude) => ({
   caveats: [],
 });
 
+const CHROMS = [...Array.from({ length: 22 }, (_, i) => String(i + 1)), "X", "Y"];
+const assembly = (ucsc, length) => ({
+  ucsc,
+  sources: [
+    { table: "chromInfo", url: "https://example.test/chromInfo", retrieved: "2026-10-03", sha256: "a".repeat(64) },
+    { table: "cytoBand", url: "https://example.test/cytoBand", retrieved: "2026-10-03", sha256: "b".repeat(64) },
+  ],
+  chromosomes: Object.fromEntries(CHROMS.map((c) => [c, { length, centromere: [length / 2, length / 2 + 10] }])),
+});
+const goodAssemblies = () => ({ GRCh37: assembly("hg19", 1000), GRCh38: assembly("hg38", 2000) });
+
 function goodKb() {
   return {
     schema_version: 2,
+    assemblies: goodAssemblies(),
     manifest: { release: "test", guardrail: "Absence of a finding is not absence of risk." },
     genes: {
       HFE: {
@@ -150,4 +163,85 @@ test("APOE diplotypes, when present, need all six keys", () => {
 test("non-object input is a KbSchemaError, not a TypeError", () => {
   assert.throws(() => validateKb(null), KbSchemaError);
   assert.throws(() => validateKb("x"), KbSchemaError);
+});
+
+test("assemblies are required", () => {
+  const kb = goodKb();
+  delete kb.assemblies;
+  assert.match(problemsOf(kb).join("\n"), /assemblies: required object/);
+});
+
+test("each build must carry its own UCSC name (GRCh37 is hg19, GRCh38 is hg38)", () => {
+  for (const [build, wrong, expected] of [["GRCh37", "hg38", "hg19"], ["GRCh38", "hg19", "hg38"], ["GRCh37", "other", "hg19"]]) {
+    const kb = goodKb();
+    kb.assemblies[build].ucsc = wrong;
+    assert.ok(problemsOf(kb).some((m) => m.startsWith(`assemblies.${build}.ucsc`) && m.includes(expected)), `${build} as ${wrong}`);
+  }
+});
+
+test("a build missing from assemblies is rejected", () => {
+  const kb = goodKb();
+  delete kb.assemblies.GRCh38;
+  assert.match(problemsOf(kb).join("\n"), /assemblies\.GRCh38/);
+});
+
+test("a missing chromosome is rejected", () => {
+  const kb = goodKb();
+  delete kb.assemblies.GRCh37.chromosomes.Y;
+  assert.match(problemsOf(kb).join("\n"), /assemblies\.GRCh37\.chromosomes.*Y/);
+});
+
+test("an extra chromosome name is rejected", () => {
+  const kb = goodKb();
+  kb.assemblies.GRCh37.chromosomes.MT = { length: 16, centromere: [1, 2] };
+  assert.match(problemsOf(kb).join("\n"), /chromosomes.*MT/);
+});
+
+test("a chromosome length must be a positive integer", () => {
+  const kb = goodKb();
+  kb.assemblies.GRCh37.chromosomes["3"].length = 0;
+  kb.assemblies.GRCh38.chromosomes["4"].length = 1.5;
+  const text = problemsOf(kb).join("\n");
+  assert.match(text, /GRCh37\.chromosomes\.3\.length/);
+  assert.match(text, /GRCh38\.chromosomes\.4\.length/);
+});
+
+test("a centromere must be an integer pair within 1 <= start <= end <= length", () => {
+  for (const bad of [[0, 5], [20, 10], [10, 1001], [1.5, 3], [5], "x"]) {
+    const kb = goodKb();
+    kb.assemblies.GRCh37.chromosomes["2"].centromere = bad;
+    assert.match(problemsOf(kb).join("\n"), /GRCh37\.chromosomes\.2\.centromere/, JSON.stringify(bad));
+  }
+});
+
+test("a locus beyond its chromosome length is rejected in each build", () => {
+  const kb = goodKb();
+  kb.loci.rs1.pos_grch37 = 1001;
+  kb.loci.rs1.pos_grch38 = 2001;
+  const text = problemsOf(kb).join("\n");
+  assert.match(text, /rs1.*pos_grch37.*GRCh37/);
+  assert.match(text, /rs1.*pos_grch38.*GRCh38/);
+});
+
+test("a locus on a chromosome the assembly lacks is rejected", () => {
+  const kb = goodKb();
+  kb.loci.rs1.chrom = "MT";
+  assert.match(problemsOf(kb).join("\n"), /rs1.*chromosome "MT"/);
+});
+
+test("a locus chromosome that names an Object.prototype member is rejected", () => {
+  for (const name of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
+    const kb = goodKb();
+    kb.loci.rs1.chrom = name;
+    assert.match(problemsOf(kb).join("\n"), new RegExp(`rs1.*chromosome "${name}" is not in the GRCh37 assembly`), name);
+  }
+});
+
+test("the committed knowledge base is accepted and exposes its assemblies, frozen", () => {
+  const json = JSON.parse(readFileSync(new URL("../src/knowledge-base.json", import.meta.url), "utf-8"));
+  const kb = validateKb(json);
+  assert.equal(kb.assemblies.GRCh38.chromosomes["1"].length, 248956422);
+  assert.equal(kb.assemblies.GRCh37.chromosomes["1"].length, 249250621);
+  assert.equal(kb.assemblies.GRCh37.sources.length, 2);
+  assert.ok(Object.isFrozen(kb.assemblies.GRCh38.chromosomes["1"].centromere));
 });

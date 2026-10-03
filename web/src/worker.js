@@ -12,6 +12,7 @@ import { parseGenotypeFile } from "./core/parse.js";
 import { computeQc } from "./core/qc.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { classify } from "./core/classify.js";
+import { layoutKaryogram } from "./core/karyogram.js";
 import { assembleFindings, e4CountForDiplotype } from "./core/apoe.js";
 import { COVERAGE_STATES, SAMPLE_OBSERVATION } from "./core/coverage.js";
 import { describeSegregation, detectMultiLocus, detectCompoundHeterozygosity } from "./core/inheritance.js";
@@ -21,6 +22,8 @@ self.onmessage = async function (e) {
     const { action, text, fileName } = e.data;
     if (action === "parse") {
       await analyzeGenotypeFile(text, fileName);
+    } else if (action === "karyogram") {
+      await buildKaryogram(text, fileName);
     }
   } catch (err) {
     self.postMessage({ type: "error", message: String((err && err.message) || err) });
@@ -39,6 +42,31 @@ function segregationFor(rec, kb, altCount = rec.altCount, afRsid = rec.rsid) {
   const af = gnomad && typeof gnomad.af === "number" ? gnomad.af : null;
   const allele = afRsid === "rs429358" ? "e4" : locus.alt;
   return describeSegregation(rec.gene, kb.genes[rec.gene], altCount, af, allele);
+}
+
+// Each dot of the karyogram is one 4 Mb stretch of a chromosome (K-C4).
+const KARYOGRAM_BIN_SIZE = 4_000_000;
+
+/**
+ * The karyogram action: parse, classify (for the per-locus coverage state), lay out, post { type: "karyogram", layout }.
+ * Observations hold one state for EVERY KB locus, straight from the classifier; layoutKaryogram throws on a gap.
+ */
+async function buildKaryogram(text, fileName = "") {
+  self.postMessage({ type: "progress", percent: 5, status: "Detecting format and header..." });
+
+  const parsed = parseGenotypeFile(text, fileName);
+  self.postMessage({ type: "progress", percent: 15, status: `Parsed ${parsed.format.toUpperCase()} (${parsed.build})...` });
+  self.postMessage({ type: "progress", percent: 90, status: `Parsed ${parsed.calls.length.toLocaleString()} SNPs...` });
+
+  const kb = await loadKnowledgeBase();
+  const { records } = classify(parsed, kb);
+  const observations = Object.fromEntries(records.map((r) => [r.rsid, r.coverage_state]));
+  const layout = layoutKaryogram({
+    kb,
+    sample: { build: parsed.build, calls: parsed.calls, observations },
+    binSize: KARYOGRAM_BIN_SIZE,
+  });
+  self.postMessage({ type: "karyogram", layout });
 }
 
 async function analyzeGenotypeFile(text, fileName = "") {

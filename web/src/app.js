@@ -12,6 +12,7 @@
 
 import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "./core/inheritance.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
+import { getTheme, initTheme, setTheme } from "./theme.js";
 import {
   NOT_AVAILABLE,
   acmgVersionLabel,
@@ -52,18 +53,11 @@ const state = {
   filterCategory: "all",
   searchQuery: "",
   sortBy: "magnitude",
-  // Not a clinical field: a missing or unreadable stored preference means the light theme.
-  theme: readStoredTheme()
-};
-
-// localStorage throws when site data is blocked; the theme is not a clinical field, so that means light.
-function readStoredTheme() {
-  try {
-    return localStorage.getItem("lucidase-theme") || "light";
-  } catch {
-    return "light";
+  // Read-only view of the theme owned by theme.js (its storage reads and writes are guarded there).
+  get theme() {
+    return getTheme();
   }
-}
+};
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
 function initApp() {
@@ -84,39 +78,6 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initApp);
 } else {
   initApp();
-}
-
-function initTheme() {
-  setTheme(state.theme);
-  const btnToggle = document.getElementById("btn-theme-toggle");
-  if (btnToggle) {
-    btnToggle.addEventListener("click", () => {
-      const nextTheme = state.theme === "light" ? "dark" : "light";
-      setTheme(nextTheme);
-    });
-  }
-}
-
-function setTheme(theme) {
-  state.theme = theme;
-  try {
-    localStorage.setItem("lucidase-theme", theme);
-  } catch {
-    // Blocked or full storage: the theme still applies for this session.
-  }
-  document.documentElement.setAttribute("data-theme", theme);
-
-  const icon = document.getElementById("theme-toggle-icon");
-  const text = document.getElementById("theme-toggle-text");
-  if (icon && text) {
-    if (theme === "dark") {
-      icon.textContent = "☀️";
-      text.textContent = "Light Mode";
-    } else {
-      icon.textContent = "🌙";
-      text.textContent = "Dark HUD";
-    }
-  }
 }
 
 // A value the record or the KB does not carry is shown as "Not available" in a muted style, never as a placeholder.

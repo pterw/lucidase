@@ -17,7 +17,7 @@ A privacy-first consumer genomics analysis page supporting **23andMe**, **Ancest
 | APOE diplotype, inheritance and multi-locus figures | Browser | Nothing |
 | Exports (Markdown / CSV) | Browser (a downloaded Blob) | Nothing |
 
-There is no enrichment endpoint, no cache and no Redis. The page makes no network request that carries variant data: the CSP is `connect-src 'self'`, and the only same-origin fetch is the demo file.
+There is no enrichment endpoint, no cache and no Redis. The page makes no network request that carries variant data: the CSP is `connect-src 'self'`, and there are two same-origin GETs, each of a bundled static demo file that carries no user data: the main page's `demo-data/sample-23andme.txt` and the karyogram page's `demo-data/sample-karyogram-23andme.txt`.
 
 The one server function is `GET /api/manifest` (`web/api/manifest.js`, Vercel only). It accepts no input and returns a static manifest of the shipped knowledge base: its release, locus count and sha256. Every value is read from `src/knowledge-base.json` at request time, so the manifest cannot drift from the file the app loads. CORS is same-origin; set `ALLOWED_ORIGIN` in Vercel env vars for a custom domain.
 
@@ -31,6 +31,7 @@ The file is built, never hand-edited, by `tools/build_canonical_kb.py` from:
 
 - `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights);
 - the pinned upstream payloads in `tools/fixtures/upstream/real/` (ClinVar, dbSNP, Ensembl VEP, gnomAD), captured once by `tools/fetch_upstream.py` and read only through `tools/source_adapters.py`.
+- the pinned UCSC `chromInfo` and `cytoBand` tables (hg19 and hg38), captured by `tools/fetch_upstream.py --ucsc-only`, which give the reference assembly geometry (`assemblies`: GRCh37 and GRCh38 chromosome lengths and centromeres); each source carries its URL, retrieval date and sha256.
 
 Imported values carry provenance `machine_imported` with the capture's real retrieval date and URL. Hand-entered values are labelled `manually_curated`. The build is deterministic: the same inputs give byte-identical JSON.
 
@@ -107,6 +108,12 @@ cd web
 python -m http.server 8000
 # Open http://localhost:8000
 ```
+
+---
+
+## Karyogram page
+
+`karyogram.html` (linked from the header of `index.html`, and back) draws the file's markers on the 24 chromosome columns of the build the file declares (GRCh37 or GRCh38). It reuses the analysis worker through the `"karyogram"` action, which parses, classifies and lays out with `src/core/karyogram.js`; `src/karyogram-view.js` renders the SVG and `src/karyogram-page.js` owns the DOM. Dots are 4 Mb bins; an empty bin is a faint r 0.9 dot, a bin with markers is r 1.6 to 3.2 by the square root of its count, and the busiest bin sets the largest dot. The 14 curated loci carry the coverage state the analysis assigns. When the build is unknown, nothing is placed by position, density is reported as unavailable and the loci still carry their states. Rows that cannot be placed (MT, unplaced names, out-of-range positions) are counted in the totals panel, never dropped. The page makes same-origin requests only. Its geometry comes from the KB `assemblies` section, built by `tools/build_canonical_kb.py` from the pinned UCSC tables. Both pages share the theme logic in `src/theme.js`. `demo-data/sample-karyogram-23andme.txt` is a deterministic synthetic file made by `tools/make_synthetic_karyogram_sample.py`.
 
 ---
 

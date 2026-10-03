@@ -2,7 +2,8 @@
 
 Owner-approved network use (hardening pass, ruling 5): public NCBI E-utilities
 (ClinVar), NCBI Variation Services (dbSNP), Ensembl REST VEP and the gnomAD
-GraphQL API, for the curated rsIDs only. The captured bodies are committed as
+GraphQL API, for the curated rsIDs only. Karyogram K1 adds one more approved capture: the UCSC
+hg19/hg38 chromInfo and cytoBand tables (``--ucsc-only``, four GET requests). The captured bodies are committed as
 fixtures under ``tools/fixtures/upstream/real/<source>/<key>.json`` and are
 byte-verbatim; ``<key>.meta.json`` records how each body was obtained and its
 sha256, so a tampered fixture is detectable offline.
@@ -24,6 +25,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -97,6 +99,10 @@ GNOMAD_CONSTRAINT_QUERY = (
 
 class CapBytesExceeded(RuntimeError):
     """Raised when the running body total passes the owner-approved cap."""
+
+
+class UcscCaptureFailed(RuntimeError):
+    """Raised when one of the four approved UCSC requests does not return HTTP 200."""
 
 
 class CaptureFailed(RuntimeError):
@@ -179,6 +185,24 @@ def gnomad_constraint_request(gene: str) -> dict:
     return _graphql(GNOMAD_CONSTRAINT_QUERY, {"symbol": gene})
 
 
+# UCSC Genome Browser assembly geometry (karyogram K1): the four owner-approved gzip tables, GET only.
+UCSC_BASE = "https://hgdownload.soe.ucsc.edu/goldenPath"
+UCSC_ASSEMBLIES = ("hg19", "hg38")  # GRCh37, GRCh38
+UCSC_TABLES = ("chromInfo", "cytoBand")
+
+
+def ucsc_requests() -> list[tuple[str, dict]]:
+    """(key, request spec) for exactly the four approved UCSC tables. Keys double as the body file names."""
+    return [
+        (
+            f"{assembly}.{table}.txt.gz",
+            _spec(f"{UCSC_BASE}/{assembly}/database/{table}.txt.gz", headers={"Accept": "*/*"}),
+        )
+        for assembly in UCSC_ASSEMBLIES
+        for table in UCSC_TABLES
+    ]
+
+
 # ---------------------------------------------------------------------------
 # I/O
 # ---------------------------------------------------------------------------
@@ -211,8 +235,13 @@ def perform_with_retry(spec, opener=None, sleep=time.sleep, log=print):
     return status, body
 
 
-def write_capture(out_dir: Path, source: str, key: str, spec: dict, status: int, body: bytes, now=None) -> dict:
-    """Write verbatim body (if the request succeeded with a non-empty body) and its meta."""
+def write_capture(
+    out_dir: Path, source: str, key: str, spec: dict, status: int, body: bytes, now=None, body_ext: str = ".json"
+) -> dict:
+    """Write verbatim body (if the request succeeded with a non-empty body) and its meta.
+
+    The body file is ``<key><body_ext>``; the meta is always ``<key>.meta.json``.
+    """
     now = now or _dt.datetime.now(_dt.timezone.utc)
     ok = 200 <= status < 300 and len(body) > 0
     meta = {
@@ -229,7 +258,7 @@ def write_capture(out_dir: Path, source: str, key: str, spec: dict, status: int,
     target = Path(out_dir) / source
     target.mkdir(parents=True, exist_ok=True)
     if ok:
-        (target / f"{key}.json").write_bytes(body)
+        (target / f"{key}{body_ext}").write_bytes(body)
     (target / f"{key}.meta.json").write_text(
         json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
     )
@@ -243,12 +272,25 @@ class Capturer:
         self.rows: list[dict] = []
         self.failures: list[CaptureFailed] = []
 
-    def run(self, source: str, key: str, spec: dict, allow_status: tuple[int, ...] = ()) -> tuple[int, bytes, dict]:
+    def run(
+        self,
+        source: str,
+        key: str,
+        spec: dict,
+        allow_status: tuple[int, ...] = (),
+        body_ext: str = ".json",
+        validate: Callable[[bytes], None] | None = None,
+    ) -> tuple[int, bytes, dict]:
         """One request, written to disk. Raises `CaptureFailed` unless the status is 200 (non-empty body) or in
-        `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag)."""
+        `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag).
+
+        `validate` runs on a 200, non-empty body BEFORE anything is written, so a bad body can neither overwrite a
+        pinned file nor get a matching meta; whatever it raises propagates."""
         self.sleep(MIN_INTERVAL_S)
         status, body = perform_with_retry(spec, self.opener, self.sleep, self.log)
-        meta = write_capture(self.out_dir, source, key, spec, status, body)
+        if validate is not None and status == 200 and body:
+            validate(body)
+        meta = write_capture(self.out_dir, source, key, spec, status, body, body_ext=body_ext)
         self.total += meta["bytes"]
         self.rows.append({"source": source, "key": key, "status": status, "bytes": meta["bytes"]})
         self.log(f"{source}/{key}: HTTP {status}, {meta['bytes']} bytes")
@@ -326,26 +368,51 @@ def capture_all(cap: Capturer, rsids=RSIDS, genes=GENES) -> None:
     capture_gnomad_multiallelic(cap, rsids)
 
 
+GZIP_MAGIC = bytes([0x1F, 0x8B])
+
+
+def capture_ucsc(cap: Capturer) -> None:
+    """Capture the four UCSC tables, byte-verbatim (gzip), under ``ucsc/<key>``."""
+    for key, spec in ucsc_requests():
+        def require_gzip(body: bytes, url: str = spec["url"]) -> None:
+            if body[:2] != GZIP_MAGIC:
+                raise UcscCaptureFailed(f"{url}: response body is not gzip (it does not start with the 1f 8b magic)")
+
+        try:
+            cap.run("ucsc", key, spec, body_ext="", validate=require_gzip)
+        except CaptureFailed as exc:
+            reason = "empty response body" if exc.status == 200 else f"HTTP {exc.status}"
+            raise UcscCaptureFailed(f"{spec['url']}: {reason}") from exc
+
+
 def main(argv=None, opener=None, sleep=time.sleep) -> int:
     """Exit 0 when every request succeeded, 1 when any failed (failed keys listed on stderr), 2 on a cap or
     payload error (an unreadable response is systematic, so the run stops at once)."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
         "--gnomad-multiallelic-only",
         action="store_true",
         help="only query gnomAD by variant id for multiallelic rsIDs, reusing captured dbSNP/gnomAD files",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--clinvar-only",
         nargs="+",
         metavar="RSID",
         help="re-capture only ClinVar esearch+esummary for these rsIDs (must be curated rsIDs)",
     )
+    modes.add_argument(
+        "--ucsc-only",
+        action="store_true",
+        help="capture only the four UCSC hg19/hg38 chromInfo and cytoBand tables",
+    )
     args = parser.parse_args(argv)
     cap = Capturer(args.out, opener=opener, sleep=sleep)
     try:
-        if args.clinvar_only:
+        if args.ucsc_only:
+            capture_ucsc(cap)
+        elif args.clinvar_only:
             for rsid in args.clinvar_only:
                 if rsid not in RSIDS:
                     raise SystemExit(f"{rsid} is not one of the approved rsIDs")
@@ -354,7 +421,7 @@ def main(argv=None, opener=None, sleep=time.sleep) -> int:
             capture_gnomad_multiallelic(cap)
         else:
             capture_all(cap)
-    except (CapBytesExceeded, AdapterError) as exc:
+    except (CapBytesExceeded, AdapterError, UcscCaptureFailed) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     if cap.failures:

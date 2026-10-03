@@ -1,4 +1,380 @@
 {
+  "assemblies": {
+    "GRCh37": {
+      "chromosomes": {
+        "1": {
+          "centromere": [
+            121500001,
+            128900000
+          ],
+          "length": 249250621
+        },
+        "10": {
+          "centromere": [
+            38000001,
+            42300000
+          ],
+          "length": 135534747
+        },
+        "11": {
+          "centromere": [
+            51600001,
+            55700000
+          ],
+          "length": 135006516
+        },
+        "12": {
+          "centromere": [
+            33300001,
+            38200000
+          ],
+          "length": 133851895
+        },
+        "13": {
+          "centromere": [
+            16300001,
+            19500000
+          ],
+          "length": 115169878
+        },
+        "14": {
+          "centromere": [
+            16100001,
+            19100000
+          ],
+          "length": 107349540
+        },
+        "15": {
+          "centromere": [
+            15800001,
+            20700000
+          ],
+          "length": 102531392
+        },
+        "16": {
+          "centromere": [
+            34600001,
+            38600000
+          ],
+          "length": 90354753
+        },
+        "17": {
+          "centromere": [
+            22200001,
+            25800000
+          ],
+          "length": 81195210
+        },
+        "18": {
+          "centromere": [
+            15400001,
+            19000000
+          ],
+          "length": 78077248
+        },
+        "19": {
+          "centromere": [
+            24400001,
+            28600000
+          ],
+          "length": 59128983
+        },
+        "2": {
+          "centromere": [
+            90500001,
+            96800000
+          ],
+          "length": 243199373
+        },
+        "20": {
+          "centromere": [
+            25600001,
+            29400000
+          ],
+          "length": 63025520
+        },
+        "21": {
+          "centromere": [
+            10900001,
+            14300000
+          ],
+          "length": 48129895
+        },
+        "22": {
+          "centromere": [
+            12200001,
+            17900000
+          ],
+          "length": 51304566
+        },
+        "3": {
+          "centromere": [
+            87900001,
+            93900000
+          ],
+          "length": 198022430
+        },
+        "4": {
+          "centromere": [
+            48200001,
+            52700000
+          ],
+          "length": 191154276
+        },
+        "5": {
+          "centromere": [
+            46100001,
+            50700000
+          ],
+          "length": 180915260
+        },
+        "6": {
+          "centromere": [
+            58700001,
+            63300000
+          ],
+          "length": 171115067
+        },
+        "7": {
+          "centromere": [
+            58000001,
+            61700000
+          ],
+          "length": 159138663
+        },
+        "8": {
+          "centromere": [
+            43100001,
+            48100000
+          ],
+          "length": 146364022
+        },
+        "9": {
+          "centromere": [
+            47300001,
+            50700000
+          ],
+          "length": 141213431
+        },
+        "X": {
+          "centromere": [
+            58100001,
+            63000000
+          ],
+          "length": 155270560
+        },
+        "Y": {
+          "centromere": [
+            11600001,
+            13400000
+          ],
+          "length": 59373566
+        }
+      },
+      "sources": [
+        {
+          "retrieved": "2026-10-03",
+          "sha256": "97db140af022e356b82572ead3166959f0a601a03851d9cb78168742cd70037e",
+          "table": "chromInfo",
+          "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/chromInfo.txt.gz"
+        },
+        {
+          "retrieved": "2026-10-03",
+          "sha256": "f9b82309b2bca1eb9d91a5cb2c6aa0528351158e6e20b51d82cca36d01735cba",
+          "table": "cytoBand",
+          "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz"
+        }
+      ],
+      "ucsc": "hg19"
+    },
+    "GRCh38": {
+      "chromosomes": {
+        "1": {
+          "centromere": [
+            121700001,
+            125100000
+          ],
+          "length": 248956422
+        },
+        "10": {
+          "centromere": [
+            38000001,
+            41600000
+          ],
+          "length": 133797422
+        },
+        "11": {
+          "centromere": [
+            51000001,
+            55800000
+          ],
+          "length": 135086622
+        },
+        "12": {
+          "centromere": [
+            33200001,
+            37800000
+          ],
+          "length": 133275309
+        },
+        "13": {
+          "centromere": [
+            16500001,
+            18900000
+          ],
+          "length": 114364328
+        },
+        "14": {
+          "centromere": [
+            16100001,
+            18200000
+          ],
+          "length": 107043718
+        },
+        "15": {
+          "centromere": [
+            17500001,
+            20500000
+          ],
+          "length": 101991189
+        },
+        "16": {
+          "centromere": [
+            35300001,
+            38400000
+          ],
+          "length": 90338345
+        },
+        "17": {
+          "centromere": [
+            22700001,
+            27400000
+          ],
+          "length": 83257441
+        },
+        "18": {
+          "centromere": [
+            15400001,
+            21500000
+          ],
+          "length": 80373285
+        },
+        "19": {
+          "centromere": [
+            24200001,
+            28100000
+          ],
+          "length": 58617616
+        },
+        "2": {
+          "centromere": [
+            91800001,
+            96000000
+          ],
+          "length": 242193529
+        },
+        "20": {
+          "centromere": [
+            25700001,
+            30400000
+          ],
+          "length": 64444167
+        },
+        "21": {
+          "centromere": [
+            10900001,
+            13000000
+          ],
+          "length": 46709983
+        },
+        "22": {
+          "centromere": [
+            13700001,
+            17400000
+          ],
+          "length": 50818468
+        },
+        "3": {
+          "centromere": [
+            87800001,
+            94000000
+          ],
+          "length": 198295559
+        },
+        "4": {
+          "centromere": [
+            48200001,
+            51800000
+          ],
+          "length": 190214555
+        },
+        "5": {
+          "centromere": [
+            46100001,
+            51400000
+          ],
+          "length": 181538259
+        },
+        "6": {
+          "centromere": [
+            58500001,
+            62600000
+          ],
+          "length": 170805979
+        },
+        "7": {
+          "centromere": [
+            58100001,
+            62100000
+          ],
+          "length": 159345973
+        },
+        "8": {
+          "centromere": [
+            43200001,
+            47200000
+          ],
+          "length": 145138636
+        },
+        "9": {
+          "centromere": [
+            42200001,
+            45500000
+          ],
+          "length": 138394717
+        },
+        "X": {
+          "centromere": [
+            58100001,
+            63800000
+          ],
+          "length": 156040895
+        },
+        "Y": {
+          "centromere": [
+            10300001,
+            10600000
+          ],
+          "length": 57227415
+        }
+      },
+      "sources": [
+        {
+          "retrieved": "2026-10-03",
+          "sha256": "6788b62a18f994c9357b1afb132a832a7377106e4f542f9e84b4f6d63b131d97",
+          "table": "chromInfo",
+          "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz"
+        },
+        {
+          "retrieved": "2026-10-03",
+          "sha256": "e514e48b0a12a516fd5231b44241a20a282f290bdd6131cadcddc6276ee26082",
+          "table": "cytoBand",
+          "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/cytoBand.txt.gz"
+        }
+      ],
+      "ucsc": "hg38"
+    }
+  },
   "genes": {
     "ALDH2": {
       "acmg_sf": false,
@@ -2390,7 +2766,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "8d5c5ec7903b6c74bbeb230b3068c019e5c32255697c135be5574c9bab164a0b"
+    "sha256": "ca80829be8685ade277c4f1e64d2fd4b6cd64dd054e5cc36e732d94609195e58"
   },
   "schema_version": 2
 }

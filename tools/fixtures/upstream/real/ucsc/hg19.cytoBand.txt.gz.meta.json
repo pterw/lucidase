@@ -1,0 +1,9 @@
+{
+  "bytes": 6609,
+  "http_status": 200,
+  "method": "GET",
+  "request_body": null,
+  "retrieved_at": "2026-10-03T05:13:16Z",
+  "sha256_of_body": "f9b82309b2bca1eb9d91a5cb2c6aa0528351158e6e20b51d82cca36d01735cba",
+  "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz"
+}

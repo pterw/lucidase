@@ -20,6 +20,10 @@ const MODELS = ["autosomal_recessive", "autosomal_dominant", "risk_factor", "pha
 const DIPLOTYPES = ["e2/e2", "e2/e3", "e2/e4", "e3/e3", "e3/e4", "e4/e4"];
 const PER_SAMPLE_FIELDS = ["coverage_state", "sample_observation", "assay_coverage"];
 const BUILD_FIELDS = { GRCh37: "pos_grch37", GRCh38: "pos_grch38" };
+const UCSC_NAMES = { GRCh37: "hg19", GRCh38: "hg38" };
+
+const CHROMOSOME_NAMES = [...Array.from({ length: 22 }, (_, i) => String(i + 1)), "X", "Y"];
+const SOURCE_TABLES = ["chromInfo", "cytoBand"];
 
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const isStr = (v) => typeof v === "string" && v.length > 0;
@@ -123,6 +127,82 @@ function checkGene(symbol, gene, problems) {
   }
 }
 
+const isPosInt = (v) => Number.isInteger(v) && v > 0;
+
+/** Reference assembly geometry (K-C1). 1-based inclusive coordinates; `centromere` is [start, end]. */
+function checkAssemblies(assemblies, problems) {
+  if (!isObj(assemblies)) {
+    problems.push("assemblies: required object");
+    return;
+  }
+  const extraBuilds = Object.keys(assemblies).filter((b) => !hasOwn(BUILD_FIELDS, b));
+  if (extraBuilds.length) problems.push(`assemblies: unexpected builds ${extraBuilds.join(", ")}`);
+  for (const build of Object.keys(BUILD_FIELDS)) {
+    const p = `assemblies.${build}`;
+    const assembly = assemblies[build];
+    if (!isObj(assembly)) {
+      problems.push(`${p}: required object`);
+      continue;
+    }
+    if (!isStr(assembly.ucsc)) problems.push(`${p}.ucsc: required non-empty string`);
+    else if (assembly.ucsc !== UCSC_NAMES[build]) problems.push(`${p}.ucsc: must be "${UCSC_NAMES[build]}"`);
+    if (!Array.isArray(assembly.sources) || assembly.sources.length !== SOURCE_TABLES.length) {
+      problems.push(`${p}.sources: required array of ${SOURCE_TABLES.length} sources`);
+    } else {
+      assembly.sources.forEach((src, i) => {
+        const sp = `${p}.sources[${i}]`;
+        if (!isObj(src)) return problems.push(`${sp}: not an object`);
+        if (src.table !== SOURCE_TABLES[i]) problems.push(`${sp}.table: expected "${SOURCE_TABLES[i]}"`);
+        if (!isStr(src.url)) problems.push(`${sp}.url: required non-empty string`);
+        if (typeof src.retrieved !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(src.retrieved)) {
+          problems.push(`${sp}.retrieved: required YYYY-MM-DD`);
+        }
+        if (typeof src.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(src.sha256)) problems.push(`${sp}.sha256: required 64 hex characters`);
+      });
+    }
+    const chroms = assembly.chromosomes;
+    if (!isObj(chroms)) {
+      problems.push(`${p}.chromosomes: required object`);
+      continue;
+    }
+    for (const name of CHROMOSOME_NAMES) {
+      if (!hasOwn(chroms, name)) problems.push(`${p}.chromosomes: missing chromosome ${name}`);
+    }
+    for (const [name, chrom] of Object.entries(chroms)) {
+      const cp = `${p}.chromosomes.${name}`;
+      if (!CHROMOSOME_NAMES.includes(name)) {
+        problems.push(`${p}.chromosomes: unexpected chromosome ${name}`);
+        continue;
+      }
+      if (!isObj(chrom)) {
+        problems.push(`${cp}: not an object`);
+        continue;
+      }
+      if (!isPosInt(chrom.length)) problems.push(`${cp}.length: required positive integer`);
+      const c = chrom.centromere;
+      const pair = Array.isArray(c) && c.length === 2 && c.every(Number.isInteger);
+      if (!pair || !isPosInt(chrom.length) || !(c[0] >= 1 && c[0] <= c[1] && c[1] <= chrom.length)) {
+        problems.push(`${cp}.centromere: required integer pair with 1 <= start <= end <= length`);
+      }
+    }
+  }
+}
+
+/** Every locus lies within its chromosome's length in each build (called only when assemblies are well-formed). */
+function checkLocusBounds(loci, assemblies, problems) {
+  for (const [key, locus] of Object.entries(loci)) {
+    if (!isObj(locus) || !isStr(locus.chrom)) continue;
+    for (const [build, field] of Object.entries(BUILD_FIELDS)) {
+      const chroms = assemblies[build].chromosomes;
+      const chrom = Object.hasOwn(chroms, locus.chrom) ? chroms[locus.chrom] : undefined;
+      if (!chrom) problems.push(`loci.${key}.chrom: chromosome "${locus.chrom}" is not in the ${build} assembly`);
+      else if (Number.isInteger(locus[field]) && locus[field] > chrom.length) {
+        problems.push(`loci.${key}.${field}: ${locus[field]} is beyond the ${build} length ${chrom.length} of chromosome ${locus.chrom}`);
+      }
+    }
+  }
+}
+
 /** The KB holds no per-sample field anywhere (C2). */
 function scanPerSample(node, path, problems) {
   if (Array.isArray(node)) {
@@ -145,7 +225,7 @@ function deepFreeze(value) {
 
 /**
  * Validates a parsed KB (schema v2) and returns a frozen, indexed copy:
- *   { manifest, genes, loci (by rsid), lociList (KB order), byPosition: { GRCh37: Map("chrom:pos" -> rsid), GRCh38: Map } }.
+ *   { manifest, assemblies (reference geometry per build, K-C1), genes, loci (by rsid), lociList (KB order), byPosition: { GRCh37: Map("chrom:pos" -> rsid), GRCh38: Map } }.
  * Throws KbSchemaError listing every problem. The input is not modified.
  */
 export function validateKb(json) {
@@ -158,7 +238,12 @@ export function validateKb(json) {
   if (!isObj(json.genes)) problems.push("genes: required object");
   if (!isObj(json.loci)) problems.push("loci: required object");
 
+  const before = problems.length;
+  checkAssemblies(json.assemblies, problems);
+  const assembliesOk = problems.length === before;
+
   if (isObj(json.genes) && isObj(json.loci)) {
+    if (assembliesOk) checkLocusBounds(json.loci, json.assemblies, problems);
     for (const [symbol, gene] of Object.entries(json.genes)) checkGene(symbol, gene, problems);
     for (const [key, locus] of Object.entries(json.loci)) checkLocus(key, locus, json.genes, problems);
 
@@ -182,6 +267,7 @@ export function validateKb(json) {
   }
   return deepFreeze({
     manifest: kb.manifest,
+    assemblies: kb.assemblies,
     genes: kb.genes,
     loci: kb.loci,
     lociList: Object.values(kb.loci),

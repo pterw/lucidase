@@ -1,7 +1,9 @@
 """Capture the README screenshots (light and dark) of the Lucidase web app.
 
 Run `python tools/capture_readme_screenshot.py` to write
-`docs/assets/lucidase-screenshot-light.png` and `docs/assets/lucidase-screenshot-dark.png`.
+`docs/assets/lucidase-screenshot-light.png` and `docs/assets/lucidase-screenshot-dark.png`, and the
+karyogram page (karyogram.html, synthetic sample loaded) to `docs/assets/lucidase-karyogram-light.png` and
+`docs/assets/lucidase-karyogram-dark.png`.
 
 The script serves `web/` on an ephemeral localhost port, loads the bundled synthetic
 demo sample and captures the analysis results at 1440x900. It runs offline: the Typekit
@@ -96,6 +98,16 @@ def main() -> None:
                 page.evaluate(f"window.__lucidase.setTheme('{theme}')")
                 page.wait_for_timeout(300)
                 page.screenshot(path=str(OUT_DIR / f"lucidase-screenshot-{theme}.png"))
+            page.goto(f"{url}/karyogram.html", wait_until="networkidle")
+            page.click("#btn-load-karyogram-sample")
+            page.wait_for_selector("#karyogram-totals", state="visible")
+            page.mouse.move(0, 0)
+            for theme in ("light", "dark"):
+                if page.get_attribute("html", "data-theme") != theme:
+                    page.click("#btn-theme-toggle")
+                page.mouse.move(0, 0)
+                page.wait_for_timeout(300)
+                page.screenshot(path=str(OUT_DIR / f"lucidase-karyogram-{theme}.png"))
             browser.close()
     finally:
         server.shutdown()

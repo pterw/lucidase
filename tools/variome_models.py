@@ -114,6 +114,24 @@ class ImportProvenance:
 
 
 @dataclass(frozen=True)
+class ChromosomeGeometry:
+    """One primary chromosome of an assembly. Coordinates are 1-based inclusive."""
+    name: str                           # "1".."22", "X", "Y"
+    length: int
+    centromere_start: int
+    centromere_end: int
+
+
+@dataclass(frozen=True)
+class AssemblyGeometry:
+    """Reference geometry of one build. `sources` are the two UCSC tables (accession = table name)."""
+    build: str                          # GRCh37 | GRCh38
+    ucsc: str                           # hg19 | hg38
+    chromosomes: dict[str, ChromosomeGeometry]
+    sources: tuple[ImportProvenance, ...]
+
+
+@dataclass(frozen=True)
 class ClinVarRecord:
     """The ClinVar record selected for one locus. `accession` is None when the payload carries none."""
     accession: Optional[str]            # VCV000007105 (no version)

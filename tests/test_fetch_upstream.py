@@ -155,7 +155,8 @@ def test_committed_fixtures_match_their_sha256():
     checked = 0
     for meta_path in metas:
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        body_path = meta_path.with_name(meta_path.name[: -len(".meta.json")] + ".json")
+        stem = meta_path.name[: -len(".meta.json")]
+        body_path = meta_path.with_name(stem if stem.endswith(".gz") else stem + ".json")  # UCSC bodies are gzip
         if meta["sha256_of_body"] is None:
             assert not body_path.exists(), f"{body_path} exists but meta records no body"
             continue
@@ -443,3 +444,116 @@ def test_the_recorded_url_is_the_requested_url_on_disk(tmp_path):
     _quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, b"{}")).run("clinvar", "rs671.esearch", spec)
     meta = json.loads((tmp_path / "clinvar" / "rs671.esearch.meta.json").read_text())
     assert meta["url"] == spec["url"] and meta["url"].startswith("https://eutils.ncbi.nlm.nih.gov/")
+
+
+# ---------------------------------------------------------------------------
+# UCSC assembly geometry capture (karyogram K1)
+# ---------------------------------------------------------------------------
+UCSC_URLS = [
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/chromInfo.txt.gz",
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz",
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz",
+    "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/cytoBand.txt.gz",
+]
+
+
+def test_ucsc_capture_requests_exactly_the_four_approved_urls():
+    specs = fu.ucsc_requests()
+    assert [spec["url"] for _, spec in specs] == UCSC_URLS
+    assert [key for key, _ in specs] == [
+        "hg19.chromInfo.txt.gz",
+        "hg19.cytoBand.txt.gz",
+        "hg38.chromInfo.txt.gz",
+        "hg38.cytoBand.txt.gz",
+    ]
+    assert all(spec["method"] == "GET" and spec["body"] is None for _, spec in specs)
+
+
+def test_ucsc_capture_writes_the_gzip_body_verbatim_with_meta(tmp_path):
+    body = b"\x1f\x8b\x08\x00fake gzip bytes"
+    seen = []
+
+    def opener(req, timeout):
+        seen.append(req.full_url)
+        return FakeResp(200, body)
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    fu.capture_ucsc(cap)
+    assert seen == UCSC_URLS
+    written = tmp_path / "ucsc" / "hg19.chromInfo.txt.gz"
+    assert written.read_bytes() == body
+    meta = json.loads((tmp_path / "ucsc" / "hg19.chromInfo.txt.gz.meta.json").read_text(encoding="utf-8"))
+    assert meta["url"] == UCSC_URLS[0]
+    assert meta["sha256_of_body"] == hashlib.sha256(body).hexdigest()
+    assert meta["bytes"] == len(body) and meta["http_status"] == 200
+
+
+def test_ucsc_capture_fails_on_a_non_200_response(tmp_path):
+    seen = []
+
+    def opener(req, timeout):
+        seen.append(req.full_url)
+        return FakeResp(404, b"not found")
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    with pytest.raises(fu.UcscCaptureFailed, match="chromInfo.txt.gz: HTTP 404"):
+        fu.capture_ucsc(cap)
+    assert seen == UCSC_URLS[:1]  # stops at the first failure
+
+
+def test_ucsc_capture_names_an_empty_200_body_as_empty(tmp_path):
+    def opener(req, timeout):
+        return FakeResp(200, b"")
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    with pytest.raises(fu.UcscCaptureFailed, match="chromInfo.txt.gz: empty response body") as info:
+        fu.capture_ucsc(cap)
+    assert "HTTP 200" not in str(info.value)
+
+
+def test_ucsc_only_main_with_a_non_gzip_200_writes_nothing(tmp_path):
+    def opener(req, timeout):
+        return FakeResp(200, b"<html>")
+
+    assert fu.main(["--ucsc-only", "--out", str(tmp_path)], opener=opener, sleep=lambda s: None) != 0
+    assert not list(tmp_path.rglob("*.gz*"))
+    assert not (tmp_path / "ucsc").exists() or list((tmp_path / "ucsc").iterdir()) == []
+
+
+def test_clinvar_only_combined_with_gnomad_multiallelic_only_is_an_argparse_error(tmp_path, capsys):
+    with pytest.raises(SystemExit) as info:
+        fu.main(["--out", str(tmp_path), "--clinvar-only", "rs1", "--gnomad-multiallelic-only"])
+    assert info.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+
+
+def test_ucsc_only_cli_runs_only_the_ucsc_capture(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))
+    monkeypatch.setattr(fu, "capture_all", lambda cap: calls.append("all"))
+    assert fu.main(["--out", str(tmp_path), "--ucsc-only"]) == 0
+    assert calls == ["ucsc"]
+
+
+def test_ucsc_capture_rejects_a_200_body_that_is_not_gzip(tmp_path):
+    def opener(req, timeout):
+        return FakeResp(200, b"<html>captive portal</html>")
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    with pytest.raises(fu.UcscCaptureFailed, match="chromInfo.txt.gz: response body is not gzip") as info:
+        fu.capture_ucsc(cap)
+    assert "HTTP 200" not in str(info.value)
+    assert not (tmp_path / "ucsc").exists() or list((tmp_path / "ucsc").iterdir()) == []
+
+
+@pytest.mark.parametrize("other", [["--clinvar-only", "rs671"], ["--gnomad-multiallelic-only"]])
+def test_ucsc_only_combined_with_another_fetch_mode_is_an_argparse_error(tmp_path, monkeypatch, other, capsys):
+    calls = []
+    monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))
+    monkeypatch.setattr(fu, "capture_gnomad_multiallelic", lambda cap: calls.append("gnomad"))
+    monkeypatch.setattr(fu, "capture_clinvar", lambda cap, rsid: calls.append("clinvar"))
+    with pytest.raises(SystemExit) as info:
+        fu.main(["--out", str(tmp_path), "--ucsc-only", *other])
+    assert info.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+    assert calls == []
