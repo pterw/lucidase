@@ -703,5 +703,54 @@
         "called": 2
       }
     }
+  },
+  {
+    "id": "unsupported-json-padded-numbers",
+    "description": "JSON text with a space-padded numeric third field is not MyHeritage: no RSID header and no rs-row shape",
+    "input": {
+      "text": "{\"a\": \"b\", \"c\": [1, 2, 3]}\n",
+      "fileName": "data.txt"
+    },
+    "expected": {
+      "error": "UnsupportedFormatError"
+    }
+  },
+  {
+    "id": "23andme-double-bom",
+    "description": "Repeated leading BOMs are all stripped, so the first comment line stays a comment",
+    "input": {
+      "text": "\ufeff\ufeff# 23andMe\nrs1\t1\t5\tAA\nrs2\t1\t6\tCC\n",
+      "fileName": "raw.txt"
+    },
+    "expected": {
+      "format": "23andme",
+      "stats": {
+        "data_rows": 2,
+        "called": 2,
+        "skipped_malformed": 0
+      }
+    }
+  },
+  {
+    "id": "23andme-control-char-is-not-whitespace",
+    "description": "Only JavaScript whitespace is trimmed: U+001F is data, so it stays part of the rsid in both implementations",
+    "input": {
+      "text": "# 23andMe\n\u001frs1\t1\t5\tAA\n",
+      "fileName": "raw.txt"
+    },
+    "expected": {
+      "format": "23andme",
+      "calls": [
+        {
+          "rsid": "\u001frs1",
+          "chrom": "1",
+          "pos": 5,
+          "alleles": [
+            "A",
+            "A"
+          ]
+        }
+      ]
+    }
   }
 ]

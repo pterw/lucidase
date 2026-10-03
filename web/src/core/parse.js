@@ -60,15 +60,14 @@ function detectFormat(lines, fileName) {
   const firstData = head.find((l) => !l.startsWith("#"));
   if (firstData !== undefined) {
     const tabs = firstData.split("\t");
-    const commas = firstData.split(",");
     if (isColumnHeader(tabs[0]) && tabs.length >= 5) candidates.push("ancestry");
     else if (isExact23andMeHeader(tabs)) candidates.push("23andme");
-    else if (isColumnHeader(commas[0]) && commas.length >= 4 && !firstData.includes("\t")) candidates.push("myheritage");
+    else if (isMyHeritageHeader(splitCsv(firstData))) candidates.push("myheritage");
     else if (candidates.length === 0) {
       // No header signal at all: accept only a well-formed first data row.
       if (tabs.length >= 5 && parsePos(tabs[2]) !== null) candidates.push("ancestry");
       else if (tabs.length === 4 && parsePos(tabs[2]) !== null) candidates.push("23andme");
-      else if (commas.length >= 4 && parsePos(commas[2].replace(/"/g, "")) !== null) candidates.push("myheritage");
+      else if (isMyHeritageRow(splitCsv(firstData))) candidates.push("myheritage");
     }
   } else if (candidates.length > 0 && head.every((l) => l.startsWith("#"))) {
     // Comments only, no rows: nothing to parse.
@@ -80,6 +79,22 @@ function detectFormat(lines, fileName) {
   const name = String(fileName || "").toLowerCase();
   const byExt = candidates.find((c) => name.includes(c === "23andme" ? "23andme" : c));
   return byExt || candidates[0];
+}
+
+/** The exact MyHeritage column header `RSID,CHROMOSOME,POSITION,RESULT` (CSV, any case, quotes allowed). */
+function isMyHeritageHeader(cols) {
+  return cols.length === 4 && cols.map((c) => c.toLowerCase()).join(",") === "rsid,chromosome,position,result";
+}
+
+/** A headerless MyHeritage row: "rs<digits>", a chromosome, a digits position and a valid genotype code. */
+function isMyHeritageRow(cols) {
+  return (
+    cols.length >= 4 &&
+    /^rs\d+$/i.test(cols[0]) &&
+    cols[1] !== "" &&
+    /^\d+$/.test(cols[2]) &&
+    arrayAlleles(cols[3]) !== undefined
+  );
 }
 
 /** The exact column header `rsid chromosome position genotype` (tab-separated). */
@@ -254,7 +269,7 @@ function hasSampleColumn(lines) {
  */
 export function parseGenotypeFile(text, fileName = "") {
   if (typeof text !== "string") throw new TypeError("parseGenotypeFile: text must be a string");
-  const lines = text.replace(/^﻿/, "").split(/\r?\n/);
+  const lines = text.replace(/^﻿+/, "").split(/\r?\n/);
   if (lines.length > 0 && lines[lines.length - 1] === "") lines.pop();
 
   const format = detectFormat(lines, fileName);

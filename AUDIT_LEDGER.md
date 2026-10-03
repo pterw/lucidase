@@ -61,6 +61,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-022 | `tools/build_canonical_kb.py`, `tools/curation/kb_curation.json`, `web/src/knowledge-base.json` | Three divergent KBs (JS, Python dict, pipeline JSON); KB_MANIFEST sha drift. | PARTIAL (T4; remaining: T6, T10) |
 | P1-023 | `tools/build_canonical_kb.py`, `tools/curation/kb_curation.json` | Pipeline fabricated provenance: hand-coded evidence stamped MACHINE_IMPORTED with a fake retrieval time, pLI 0.0 x14, hard-coded "QC 100% PASSED", nondeterministic manifest date. | PARTIAL (T4; remaining: T5) |
 | P1-024 | `tools/coverage_taxonomy.py`, `tools/build_canonical_kb.py` | Evidence tier inert/inconsistent: KB had no evidence_tier. | PARTIAL (T4; remaining: T6, T9) |
+| P1-030 | `genomic_parser.py`, `tests/test_vectors.py` | Desktop parser collapsed ID "." records, split indels into 2-char alleles, doubled haploid calls, was case-sensitive, and guessed build and format. | PARTIAL (T10a; remaining: T10) |
 
 ---
 
@@ -95,6 +96,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 - **P1-022** (T4, partial): the pipeline JSON is now the curated single source, built from one curation file (`tools/curation/kb_curation.json`, schema v2 keyed by alt-allele count, plus-strand build-independent ref/alt); web switch is T6, desktop T10. 11 of 14 curated ClinVar accessions replaced with the verified ones (relates to P2-011).
 - **P1-023** (T4, partial): curated values are `manually_curated` with `retrieved_at` null, unknown pLI/LOEUF are null, `--verify-only` reports the real QC count and exits 1 on any QC error or difference, and the manifest carries no wall clock; adapter-sourced evidence is T5.
 - **P1-024** (T4, partial): `evidence_tier` and `evidence_sufficiency` are derived by rule per locus, from the source appropriate to the gene model (ClinVar stars for Mendelian genes, CPIC level for pharmacogenomic genes, curated tier with rationale and citation name for risk-factor and trait genes); web classify is T6, UI T9.
+- **P1-030** (T10a, partial): `genomic_parser.py` now implements contract C1 as a port of `web/src/core/parse.js` and `qc.js`: `parse_genotype_file` returns a `ParseResult` of `Call`s (a list, so ID `.` no longer collapses records), VCF alleles stay sequences (`C`/`CCT`), haploid stays haploid, format detection is content-first and case-insensitive, the AncestryDNA header row is not a call, the build is read from the header or is `unknown`, and unrecognised input, sites-only VCFs and JSON-like text raise `UnsupportedFormatError`. Ported the T3 fix-round behaviours (build aliases, `*` allele as no-call, uncommented 4-column 23andMe header, null VCF QC rates with `qc_note`). MyHeritage detection now needs its `RSID,CHROMOSOME,POSITION,RESULT` header or `rs...` rows with a valid genotype, in both parsers, and both strip only JavaScript whitespace and all leading BOMs. `tests/test_vectors.py` runs every `tests/vectors/*.json` (non-parse areas skip as pending T10). Remaining: `variant_annotator.py`, `segregation_engine.py`, `biotools_orchestrator.py` (T10).
 
 ### 2026-10-02
 
