@@ -310,7 +310,10 @@
 .kary-state-supported_not_observed .kary-core,
 .kary-state-not_tested_by_array .kary-core { fill: var(--bg-canvas); stroke-width: 1.75; }
 .kary-state-not_tested_by_array .kary-core { stroke-dasharray: 2 1.6; }
+/* Unclear: a half disc, the design system's "half" mark (the halo shows through the other half). */
+.kary-state-insufficient_evidence .kary-core { clip-path: inset(0 50% 0 0); }
 .kary-swatch { display: inline-block; flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: var(--radius-dot); background: var(--kary-fill); }
 .kary-swatch.kary-state-supported_not_observed { background: transparent; border: 2px solid var(--kary-fill); }
 .kary-swatch.kary-state-not_tested_by_array { background: transparent; border: 1.75px dashed var(--kary-fill); }
+.kary-swatch.kary-state-insufficient_evidence { background: linear-gradient(90deg, var(--kary-fill) 50%, transparent 50%); border: 1.75px solid var(--kary-fill); }
 #karyogram-figure svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }

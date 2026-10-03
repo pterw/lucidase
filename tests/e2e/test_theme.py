@@ -55,3 +55,27 @@ def test_the_stored_theme_applies_before_the_app_module_runs(page):
     page.goto(page.base_url, wait_until="load")
     expect(page.locator("html")).to_have_attribute("data-theme", "dark")
     assert page.evaluate("() => window.__lucidase") is None
+
+
+def test_a_legacy_light_value_does_not_pin_a_dark_device(page):
+    # Before the design system every first visit stored "light" without a choice, so an unversioned "light" is not
+    # an override. An unversioned "dark" was always a choice, and is kept.
+    page.emulate_media(color_scheme="dark")
+    page.goto(page.base_url + "/karyogram.html")  # same origin: seed storage as the old page left it
+    page.evaluate("() => { localStorage.clear(); localStorage.setItem('lucidase-theme', 'light'); }")
+    goto_ready(page, page.base_url)
+    expect(page.locator("html")).to_have_attribute("data-theme", "dark")
+    assert page.evaluate(STORED) is None
+    expect(page.locator("#btn-theme-system")).to_be_hidden()
+
+    page.evaluate("() => { localStorage.clear(); localStorage.setItem('lucidase-theme', 'dark'); }")
+    page.emulate_media(color_scheme="light")
+    goto_ready(page, page.base_url)
+    expect(page.locator("html")).to_have_attribute("data-theme", "dark")
+    assert page.evaluate(STORED) == "dark"
+
+    # After the migration, a light override chosen now is kept.
+    page.emulate_media(color_scheme="dark")
+    page.locator("#btn-theme-toggle").click()
+    goto_ready(page, page.base_url)
+    expect(page.locator("html")).to_have_attribute("data-theme", "light")

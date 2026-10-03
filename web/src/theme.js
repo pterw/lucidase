@@ -8,16 +8,21 @@
  */
 
 export const THEME_KEY = "lucidase-theme";
+// Marks a stored value as written by this version. theme-boot.js migrates unmarked values (see there): an unmarked
+// "light" was the old page's automatic default, not a choice.
+const THEME_VERSION_KEY = "lucidase-theme-v";
+const THEME_VERSION = "2";
 
 const DARK_QUERY = "(prefers-color-scheme: dark)";
 
 let override = null; // "light" | "dark" | null (follow the device)
 let current = "light";
 
-/** The stored override, or null when nothing valid is stored or storage throws. */
+/** The stored override, or null when nothing valid is stored, an unmarked legacy "light" is stored, or storage throws. */
 export function readStoredTheme() {
   try {
     const value = localStorage.getItem(THEME_KEY);
+    if (value === "light" && localStorage.getItem(THEME_VERSION_KEY) !== THEME_VERSION) return null;
     return value === "dark" || value === "light" ? value : null;
   } catch {
     return null;
@@ -26,6 +31,7 @@ export function readStoredTheme() {
 
 function writeStoredTheme(value) {
   try {
+    localStorage.setItem(THEME_VERSION_KEY, THEME_VERSION);
     if (value === null) localStorage.removeItem(THEME_KEY);
     else localStorage.setItem(THEME_KEY, value);
   } catch {
