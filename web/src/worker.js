@@ -97,7 +97,7 @@ async function analyzeGenotypeFile(text, fileName = "") {
     carrier_count: category("Carrier"),
     pgx_count: category("Pharmacogenomics"),
     risk_factor_count: category("Risk Factor"),
-    acmg_actionable_findings: observedFindings.filter((f) => f.acmg_sf).length,
+    acmg_actionable_findings: new Set(observedFindings.filter((f) => f.acmg_sf).map((f) => f.gene)).size,
     compound_heterozygotes_count: compoundHeterozygotes.length,
     independent_assortment_count: independentAssortment.length
   };

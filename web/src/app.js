@@ -614,6 +614,20 @@ const STATE_BADGE_CLASS = {
   insufficient_evidence: "bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
 };
 
+// The one neutral (slate) look: any category, tier or composite label the page has no explicit style for.
+const NEUTRAL_BADGE_COLOURS = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
+
+// Categories with an explicit style. A Carrier flag on the row also gets the carrier style. Everything else
+// (Trait, Not detected, a category added later) is neutral, never the benign (green) look.
+const CATEGORY_BADGE_CLASS = {
+  Pathogenic: "badge-pathogenic",
+  Carrier: "badge-carrier",
+  Pharmacogenomics: "badge-pgx",
+  "Risk Factor": "badge-risk"
+};
+const categoryBadgeClass = (r) =>
+  CATEGORY_BADGE_CLASS[r.category] ?? (r.isCarrier ? CATEGORY_BADGE_CLASS.Carrier : `border ${NEUTRAL_BADGE_COLOURS}`);
+
 const TIER_BADGE_CLASS = {
   "Tier A": "bg-sky-100 text-sky-800 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700",
   "Tier B": "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700",
@@ -679,16 +693,12 @@ function renderVariantsTable() {
     tr.className = "cursor-pointer border-b border-slate-200 dark:border-slate-800/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40";
     tr.onclick = () => openDrawer(r);
 
-    let categoryClass = "badge-benign";
-    if (r.category === "Pathogenic") categoryClass = "badge-pathogenic";
-    else if (r.category === "Carrier" || r.isCarrier) categoryClass = "badge-carrier";
-    else if (r.category === "Pharmacogenomics") categoryClass = "badge-pgx";
-    else if (r.category === "Risk Factor") categoryClass = "badge-risk";
+    const categoryClass = categoryBadgeClass(r);
 
     const stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${STATE_BADGE_CLASS[r.coverage_state]}">${escapeHtml(r.stateBadge)}</span>`;
     const tierBadge = r.tier === null
       ? `<span class="mr-1.5">${naHtml()}</span>`
-      : `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono ${TIER_BADGE_CLASS[r.tier] ?? TIER_BADGE_CLASS["Tier D"]} mr-1.5">${escapeHtml(r.tier)}</span>`;
+      : `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono ${TIER_BADGE_CLASS[r.tier] ?? `border ${NEUTRAL_BADGE_COLOURS}`} mr-1.5">${escapeHtml(r.tier)}</span>`;
     const categoryBadge = r.category === null
       ? naHtml()
       : `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${categoryClass}">${escapeHtml(r.category)}</span>`;
@@ -732,7 +742,7 @@ const TIER_DRAWER_CLASS = {
   "Tier B": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30",
   "Tier C": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30"
 };
-const TIER_DRAWER_NEUTRAL = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
+const TIER_DRAWER_NEUTRAL = `px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono ${NEUTRAL_BADGE_COLOURS}`;
 
 const COVERAGE_DRAWER_CLASS = {
   supported_and_observed: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30",

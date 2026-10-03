@@ -89,6 +89,50 @@ def test_filter_transitions(loaded_page):
         assert "Showing" in loaded_page.locator("#showing-count").text_content(), name
 
 
+# What each filter shows today. The Risk Factors filter keeps APOE through its e3/e4 and e4/e4 diplotype rule (S2-F6
+# owns that rule); the rest follow the KB category. The wild-type fixture has no observed variant, so every filter
+# is empty for it.
+DEMO_FILTER_ROWS = {
+    "all": {
+        "APOE (rs429358 + rs7412)", "rs3918290", "rs6025", "rs1799963", "rs4149056", "rs4244285",
+        "rs113993960", "rs9923231", "rs1800562", "rs4988235", "rs1799945", "rs1801133",
+    },
+    "pathogenic": set(),
+    "carrier": {"rs113993960", "rs1800562", "rs1799945"},
+    "pgx": {"rs3918290", "rs4149056", "rs4244285", "rs9923231"},
+    "risk": {"APOE (rs429358 + rs7412)", "rs6025", "rs1799963"},
+}
+
+
+def _shown_ids(page):
+    """The first-cell ids of the rows the table shows now (an empty filter shows no data row)."""
+    return set(
+        page.evaluate(
+            "() => [...document.querySelectorAll('#variants-tbody tr')]"
+            ".filter(r => r.children.length > 1).map(r => r.children[0].textContent.trim())"
+        )
+    )
+
+
+def _filter_sets(page):
+    shown = {}
+    for name in DEMO_FILTER_ROWS:
+        page.locator(f"[data-filter='{name}']").click()
+        shown[name] = _shown_ids(page)
+    return shown
+
+
+def test_each_filter_shows_the_exact_demo_rows(loaded_page):
+    _load_demo(loaded_page)
+    assert _filter_sets(loaded_page) == DEMO_FILTER_ROWS
+
+
+def test_each_filter_is_empty_for_the_wild_type_file(loaded_page):
+    loaded_page.set_input_files("#file-input", str(FIXTURES / "wildtype-23andme.txt"))
+    expect(loaded_page.locator("#results-section")).to_be_visible()
+    assert _filter_sets(loaded_page) == {name: set() for name in DEMO_FILTER_ROWS}
+
+
 def test_kb_provenance_badge_visible(loaded_page):
     _load_demo(loaded_page)
     badge = loaded_page.locator("#kb-provenance-badge")
