@@ -1,6 +1,6 @@
 """
 Lucidase coverage taxonomy and evidence rules
-================================================
+=============================================
 The KB describes loci and what each alt-allele count means (contract C2). Whatever
 depends on one person's sample is computed at analysis time and never stored in the KB.
 This module holds the pure rules shared by the build and the desktop tools:

@@ -1,5 +1,7 @@
 # Lucidase — Zero-Knowledge Clinical Variome Explorer
 
+See the [root README](../README.md) for an overview of Lucidase.
+
 A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 14 curated loci in 12 genes, in the browser, and nothing else.
 
 ---

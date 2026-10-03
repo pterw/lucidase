@@ -13,6 +13,7 @@ Do not route around it.
 | Desktop genomics | `genomic_parser.py`, `variant_annotator.py`, `segregation_engine.py`, `biotools_orchestrator.py`, `gui.py` | No (local tool) | Reference implementation of the same rules, which must match the web app. |
 | de Bruijn explorer | `graph_core.py`, `assembly.py`, `bio_engine.py`, `ml_engine.py`, `debruijn_explorer.py` | No (local tool) | Standalone assembly and graph teaching tool. |
 | Design tooling | `tools/font-kit-studio/`, `chrome-extension/` | No | Typography tooling. Never imported by the app. |
+| README assets | docs/assets/, tools/capture_readme_screenshot.py | No | Logo, banner and screenshots for the root README. |
 
 ## 2. Architecture and boundaries
 
@@ -158,6 +159,9 @@ from the current classes (regenerate it with the command in
 - Each remediated finding gets a row in `AUDIT_LEDGER.md` (next free
   `P0-/P1-/P2-` id) and a line in its Remediation Log.
 - Stage files by name. Never commit caches, `canonical_variome.db`,
-  screenshots or downloaded binaries (`bin/` is git-ignored).
+  ad-hoc or test screenshots, or downloaded binaries (`bin/` is git-ignored).
+  The README's logo, banner and screenshots in `docs/assets/` are the exception
+  (owner ruling 10); regenerate the screenshots with
+  `python tools/capture_readme_screenshot.py`.
 - Python ≥ 3.11 with type hints. ES modules in the browser (no bundler). No
   new runtime dependency without an owner decision.

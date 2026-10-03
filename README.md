@@ -1,0 +1,55 @@
+<p align="center"><img src="docs/assets/lucidase-banner.svg" alt="Lucidase: free, private analysis of your raw DNA file"></p>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lucidase-screenshot-dark.png">
+  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase analysis results for the bundled demo sample: summary counts, the APOE composite row and the inheritance section">
+</picture>
+
+*The bundled synthetic demo sample, analysed in the browser.*
+
+Lucidase reads a raw genotype file in your browser and interprets the 14 curated loci (12 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA and MyHeritage array files and VCF 4.2 files, and rejects any other format with a visible error. Formerly GenomePulse.
+
+## What it does
+
+- Parses the file in a Web Worker, in the page.
+- Compares alleles by alt-allele count against plus-strand ref/alt. A genotype that cannot be resolved unambiguously is never reported as a match.
+- Gives every curated locus one coverage state per sample: `supported_and_observed`, `supported_not_observed`, `not_tested_by_array`, `outside_coverage` or `insufficient_evidence`.
+- Shows APOE as one composite row built from rs429358 and rs7412.
+- Shows disease or recurrence figures for inheritance only at Mendelian disease loci. Other loci get allele-transmission figures only.
+- Exports Markdown and CSV reports.
+- Has light and dark themes.
+
+## What it does not do
+
+- It is not a diagnostic test and not medical advice. Absence of a finding does not imply absence of genetic risk.
+- It does not sequence whole genes. It cannot detect copy-number variations, balanced translocations or structural repeats.
+- A single-variant test of a multi-variant gene carries its limitation on the row, in the drawer and in every export.
+- Only the curated loci are interpreted. Other markers in your file are counted, not interpreted.
+
+See "Known limitations" in [`web/README.md`](web/README.md).
+
+## Privacy
+
+Your file is read and analysed in the browser and is never uploaded. The Content-Security-Policy sets `connect-src 'self'`. There are no accounts and no payments. The page currently loads its web fonts from Adobe Fonts (use.typekit.net); no genotype data is sent there.
+
+## Run it
+
+See [Deployment Options](web/README.md#-deployment-options) and its Local Development section in [`web/README.md`](web/README.md).
+
+## Repository map
+
+| Area | Path | Role |
+|---|---|---|
+| Web app | `web/` | Parses and classifies raw DNA files in the browser. |
+| Knowledge-base build | `tools/` | Builds the one curated knowledge base, `web/src/knowledge-base.json`. |
+| Desktop genomics | `genomic_parser.py`, `variant_annotator.py`, `segregation_engine.py`, `biotools_orchestrator.py`, `gui.py` | Local reference implementation of the same rules. |
+| de Bruijn explorer | `graph_core.py`, `assembly.py`, `bio_engine.py`, `ml_engine.py`, `debruijn_explorer.py` | Standalone assembly and graph teaching tool. |
+| Design tooling | `tools/font-kit-studio/`, `chrome-extension/` | Typography tooling, never imported by the app. |
+
+## Development
+
+Rules and gates are in [`AGENTS.md`](AGENTS.md). Working notes are in [`CLAUDE.md`](CLAUDE.md). The audit and its remediation history are in [`AUDIT_LEDGER.md`](AUDIT_LEDGER.md).
+
+## About the name
+
+Lucidase is *lucid* plus *-ase*, the enzyme suffix, as in Promethease. The arch from the c to the dot of the i in the wordmark is a ligature, and "ligature" and "ligase", the enzyme that joins DNA strands, share a root. The dot field in the banner is a stylised karyogram.
