@@ -132,7 +132,7 @@
           "significance": "Risk Factor / Carrier",
           "magnitude": 4.2,
           "repute": "Bad",
-          "phenotype": "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring ~3–4× elevated risk for late-onset Alzheimer's disease (~20–25% population prevalence; ~25–35% lifetime risk). Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
+          "phenotype": "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring a ~3–4× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease (~20–25% population prevalence); the absolute lifetime risk ~25–35% is a separate figure. Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
           "drug_response": null,
           "caveats": [
             "Relative risk: 3–4× Increased Risk",
@@ -158,7 +158,7 @@
           "significance": "Protective / Carrier",
           "magnitude": 2.2,
           "repute": "Good",
-          "phenotype": "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele (~10–15% population prevalence). Associated with ~40–50% lower lifetime risk of Alzheimer's disease and lower circulating LDL-cholesterol.",
+          "phenotype": "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele (~10–15% population prevalence). Associated with ~40–50% lower relative risk (versus ε3/ε3) of Alzheimer's disease (absolute lifetime risk ~5–8% is a separate figure) and lower circulating LDL-cholesterol.",
           "drug_response": null,
           "caveats": [
             "Relative risk: 0.6× (Protective Effect)",
@@ -184,7 +184,7 @@
           "significance": "Risk Factor / Carrier",
           "magnitude": 3.2,
           "repute": "Bad",
-          "phenotype": "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4.",
+          "phenotype": "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4 (relative risk ~1.5–2× versus ε3/ε3; absolute lifetime risk ~15–20% is a separate figure).",
           "drug_response": null,
           "caveats": [
             "Relative risk: 1.5–2× Intermediate Risk",
@@ -1057,8 +1057,8 @@
           "significance": "Drug Response",
           "magnitude": 3,
           "repute": "Bad",
-          "phenotype": "CYP2C19 Intermediate Metabolizer (*1/*2): Reduced clopidogrel activation; CPIC recommends alternative agent for acute coronary syndrome.",
-          "drug_response": "Clopidogrel: Intermediate Metabolizer (Reduced activation)",
+          "phenotype": "One CYP2C19*2 (rs4244285) allele detected. This variant is associated with reduced clopidogrel activation, and CPIC recommends an alternative agent for acute coronary syndrome in people with reduced CYP2C19 function. A metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Clopidogrel: Reduced activation (one *2 allele)",
           "caveats": []
         },
         "2": {
@@ -1066,8 +1066,8 @@
           "significance": "Drug Response",
           "magnitude": 4.5,
           "repute": "Bad",
-          "phenotype": "CYP2C19 Poor Metabolizer (*2/*2): Significantly impaired clopidogrel activation. Alternative antiplatelet (ticagrelor/prasugrel) strongly indicated by CPIC.",
-          "drug_response": "Clopidogrel: Poor Metabolizer (Alternative drug recommended)",
+          "phenotype": "Two CYP2C19*2 (rs4244285) alleles detected. Two copies of this variant are associated with significantly impaired clopidogrel activation, and CPIC indicates an alternative antiplatelet (ticagrelor/prasugrel). A metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Clopidogrel: Impaired activation (two *2 alleles; alternative drug recommended)",
           "caveats": []
         }
       },
@@ -1455,11 +1455,11 @@
       "limitation": "Single-variant test: this assay covers only the MCM6/LCT -13910C>T lactase-persistence variant. Other lactase-persistence variants exist in some populations, so a result without it does not establish lactase non-persistence.",
       "interpretations": {
         "0": {
-          "category": "Trait",
-          "significance": "Trait",
-          "magnitude": 1.5,
-          "repute": "Bad",
-          "phenotype": "Lactose non-persistent (primary adult hypolactasia): Susceptible to lactose intolerance symptoms.",
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No MCM6/LCT -13910T allele detected at this position. Lactase persistence from other variants is not excluded.",
           "drug_response": null,
           "caveats": [
             "Based on a single variant (-13910C>T); other lactase persistence variants exist in some populations."

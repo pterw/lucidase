@@ -435,14 +435,23 @@ class TestAnnotation(unittest.TestCase):
         self.assertEqual(sum(coverage[f"{s}_count"] for s in states), coverage["total_loci"])
 
     def test_a_wildtype_whose_kb_category_is_not_none_detected_is_still_not_counted_as_present(self):
+        # No shipped locus has a count-0 category other than "Not detected" any more, so one is built in memory.
+        data = pipeline_kb_json()
         rsid = next(
-            k for k, l in self.kb.loci.items()
-            if l["role"] == "standard" and l["interpretations"]["0"]["category"] in ("Trait", "Carrier", "Pathogenic")
+            k for k, l in data["loci"].items()
+            if l["role"] == "standard" and len(l["ref"]) == 1 and len(l["alt"]) == 1
         )
-        report = self.report({rsid: 0})
+        data["loci"][rsid]["interpretations"]["0"]["category"] = "Trait"
+        annotator = VariantAnnotator(kb=validate_kb(data))
+        self.assertEqual(annotator.kb.loci[rsid]["interpretations"]["0"]["category"], "Trait")
+        locus = annotator.kb.loci[rsid]
+        ref = locus["ref"]
+        text = f"# build 37\n{rsid}\t{locus['chrom']}\t{locus['pos_grch37']}\t{ref}{ref}\n"
+        report = annotator.annotate_genome(parse_genotype_file(text))
         row = self.record(report, rsid)
+        self.assertEqual(row.category, "Trait")
         self.assertFalse(row.variant_present)
-        summary = self.annotator.summarize_annotations(report)
+        summary = annotator.summarize_annotations(report)
         self.assertNotIn(row, summary["categories"][row.category])
 
     def test_possible_compound_heterozygosity_says_phase_unknown(self):

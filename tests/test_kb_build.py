@@ -221,14 +221,14 @@ def test_apoe_component_roles(built):
         ("rs113993960", "2", "ΔF508 homozygote"),  # old key DD
         ("rs113993960", "1", "heterozygote"),  # old key DI
         ("rs1801133", "2", "677TT"),
-        ("rs4244285", "2", "Poor Metabolizer"),
+        ("rs4244285", "2", "Two CYP2C19*2 (rs4244285) alleles detected"),
         ("rs429358", "2", "ε4/ε4 homozygote"),
         ("rs7412", "2", "ε2/ε2"),
         ("rs3918290", "2", "Complete Deficiency"),
         ("rs3918290", "1", "Partial Deficiency"),
         ("rs4988235", "2", "Lactase persistent: Capable"),  # old key AA
         ("rs4988235", "1", "Tolerates dairy lactose well"),  # old key AG
-        ("rs4988235", "0", "Lactose non-persistent"),  # old key GG
+        ("rs4988235", "0", "No MCM6/LCT -13910T allele detected"),  # old key GG
         ("rs671", "2", "ALDH2*2 homozygote"),
         ("rs671", "1", "ALDH2*2 heterozygote"),
         ("rs1799963", "2", "G20210A homozygote"),
@@ -248,11 +248,59 @@ def test_count_zero_never_claims_normality(built):
         text = (zero["phenotype"] + " " + zero["significance"]).lower()
         assert "normal" not in text, rsid
         assert "wild-type" not in text and "wild type" not in text, rsid
-        if rsid != "rs4988235":  # a real trait statement (lactase non-persistence), not an absence claim
-            assert zero["category"] == "Not detected", rsid
-            assert zero["magnitude"] == 0
-            assert zero["phenotype"].startswith("No "), rsid
-            assert "allele detected at this position" in zero["phenotype"], rsid
+        assert zero["category"] == "Not detected", rsid
+        assert zero["magnitude"] == 0
+        assert zero["repute"] == "Neutral", rsid
+        assert zero["phenotype"].startswith("No "), rsid
+        assert "allele detected at this position" in zero["phenotype"], rsid
+
+
+def test_lactase_count_zero_is_an_absence_not_a_phenotype(built):
+    """S3b-C-2: no -13910T allele does not establish lactase non-persistence (other persistence variants exist)."""
+    zero = built["loci"]["rs4988235"]["interpretations"]["0"]
+    assert zero["phenotype"] == (
+        "No MCM6/LCT -13910T allele detected at this position. "
+        "Lactase persistence from other variants is not excluded."
+    )
+    assert (zero["category"], zero["magnitude"], zero["repute"]) == ("Not detected", 0, "Neutral")
+    assert "non-persistent" not in zero["phenotype"] and "Susceptible" not in zero["phenotype"]
+
+
+def test_cyp2c19_states_one_snp_observation_and_assigns_no_metabolizer(built):
+    """S5a-C-3: a single rs4244285 call cannot establish *1/*2 or *2/*2, so no metabolizer label is shown."""
+    interps = built["loci"]["rs4244285"]["interpretations"]
+    assert interps["1"]["phenotype"].startswith("One CYP2C19*2 (rs4244285) allele detected.")
+    assert interps["2"]["phenotype"].startswith("Two CYP2C19*2 (rs4244285) alleles detected.")
+    for count, interp in interps.items():
+        text = interp["phenotype"] + " " + (interp["drug_response"] or "")
+        assert not re.search(r"Metabolizer\s*\(|\*1/\*2|\*2/\*2", text), (count, text)
+        assert not re.search(r"(Intermediate|Poor|Normal|Rapid|Ultrarapid) Metabolizer", text), (count, text)
+    for count in ("1", "2"):
+        assert "star-allele diplotyping" in interps[count]["phenotype"], count
+    assert built["loci"]["rs4244285"]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
+
+
+def test_apoe_wording_labels_relative_and_absolute_risk_apart(built):
+    """S2-F1 review Minor: a relative multiple is never read as an absolute lifetime figure. No figure changes."""
+    dips = built["genes"]["APOE"]["diplotypes"]
+    assert "~12–15× relative risk (versus ε3/ε3)" in dips["e4/e4"]["phenotype"]
+    expected = {
+        "e3/e4": ("~3–4× relative risk (versus ε3/ε3)", "absolute lifetime risk ~25–35%"),
+        "e2/e4": ("relative risk ~1.5–2× versus ε3/ε3", "absolute lifetime risk ~15–20%"),
+        "e2/e3": ("~40–50% lower relative risk (versus ε3/ε3)", "absolute lifetime risk ~5–8%"),
+    }
+    for key, (relative, absolute) in expected.items():
+        phenotype = dips[key]["phenotype"]
+        assert relative in phenotype and absolute in phenotype, (key, phenotype)
+        assert "elevated risk" not in phenotype and "lifetime risk)" not in phenotype, key
+    # The figures themselves are untouched: they still sit in the caveats as written.
+    assert "Relative risk: 3–4× Increased Risk" in dips["e3/e4"]["caveats"]
+    assert "Lifetime risk: 25–35% lifetime Alzheimer's risk" in dips["e3/e4"]["caveats"]
+    assert "Relative risk: 1.5–2× Intermediate Risk" in dips["e2/e4"]["caveats"]
+    assert "Lifetime risk: 15–20% lifetime Alzheimer's risk" in dips["e2/e4"]["caveats"]
+    assert built["loci"]["rs429358"]["interpretations"]["2"]["phenotype"] == (
+        "APOE ε4/ε4 homozygote: ~12-15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease."
+    )
 
 
 def test_missing_interpretations_were_authored(built):

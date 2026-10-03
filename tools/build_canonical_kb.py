@@ -494,6 +494,35 @@ def _clinvar_drift(rsid: str, curated: dict[str, Any], imported: Any) -> list[st
     return errors
 
 
+def _capture_problems(root: Path, rsid: str, gene: str, variant_id: str) -> list[str]:
+    """QC errors for every capture a curated locus needs that is missing or empty (S3b-C-5).
+
+    The expected files come from the locus alone: dbSNP, ClinVar, VEP, the gnomAD variant (its per-variant
+    file or the rsid file) and the gnomAD constraint of the gene. A missing or empty file would otherwise
+    switch its cross-check off without a word.
+    """
+    expected = [
+        (f"dbsnp/{rsid}.json",),
+        (f"clinvar/{rsid}.json",),
+        (f"ensembl/{rsid}.json",),
+        (f"gnomad/{rsid}.{variant_id}.json", f"gnomad/{rsid}.json"),
+        (f"gnomad/constraint_{gene}.json",),
+    ]
+    errors = []
+    for candidates in expected:
+        found = [rel for rel in candidates if (root / rel).is_file()]
+        if not found:
+            errors.append(f"{rsid}: the pinned capture {' or '.join(candidates)} is missing, so its cross-check cannot run")
+            continue
+        try:
+            body = json.loads((root / found[0]).read_bytes())
+        except ValueError:
+            continue  # unreadable JSON is reported by the adapter that parses it
+        if not body:
+            errors.append(f"{rsid}: the pinned capture {found[0]} is empty, so its cross-check cannot run")
+    return errors
+
+
 def _overlay_imported(rsid: str, locus: dict[str, Any], evidence: dict[str, Any], snapshot: UpstreamSnapshot) -> list[str]:
     """Replace curated evidence with adapter values where an adapter has them, and cross-check the rest.
 
@@ -504,6 +533,9 @@ def _overlay_imported(rsid: str, locus: dict[str, Any], evidence: dict[str, Any]
     errors: list[str] = []
     ref, alt, gene = locus["ref"], locus["alt"], locus["gene"]
     variant_id = f"{locus['chrom']}-{locus['pos_grch38']}-{ref}-{alt}"
+    errors.extend(_capture_problems(snapshot.root, rsid, gene, variant_id))
+    if errors:  # an adapter cannot read a capture that is not there or has no content
+        return errors
     try:
         dbsnp = snapshot.dbsnp(rsid)
         if dbsnp is not None:
@@ -546,13 +578,16 @@ def _overlay_imported(rsid: str, locus: dict[str, Any], evidence: dict[str, Any]
         if variant is not None and variant.refusal is not None:
             errors.append(f"{rsid}: gnomAD af cannot be imported: {variant.reasons['af']}")
             variant = None
-        if variant is not None and variant.variant_id not in (None, variant_id):
+        if variant is not None and variant.variant_id != variant_id:
             errors.append(f"{rsid}: gnomAD capture is for {variant.variant_id}, the locus is {variant_id}")
             variant = None
-        if constraint is not None and constraint.symbol not in (None, gene):
+        if constraint is not None and constraint.symbol != gene:
             errors.append(f"{rsid}: gnomAD constraint capture is for {constraint.symbol}, the locus gene is {gene}")
             constraint = None
         curated_af = (evidence.get("gnomad") or {}).get("af")
+        if variant is not None and variant.af is None and curated_af is not None:
+            errors.append(f"{rsid}: gnomAD af is unavailable ({variant.reasons.get('af')}) but curation holds "
+                          f"gnomad.af {curated_af!r}, which would stand unchecked")
         if variant is not None and variant.af is not None and curated_af is not None:
             if not _af_agrees(curated_af, variant.af):
                 errors.append(f"{rsid}: curated gnomad.af {curated_af!r} differs from the imported {variant.af!r} "
