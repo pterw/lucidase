@@ -1,0 +1,8 @@
+# 23andMe user upload test
+# build 37
+# rsid	chromosome	position	genotype
+rs429358	19	45411941	CT
+rs7412	19	45412079	CC
+rs1800562	6	26093141	AG
+rs113993960	7	117199644	DI
+rs4244285	10	96541604	AG

@@ -28,6 +28,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P0-001 | `web/api/enrich.js` | 139-213 | `generateFallbackEnrichment()` returned fabricated clinical data on every Redis cache miss: `evidence_tier: Tier 1 Verified` (false); `stars: 4` (false); `review_status: practice guideline` (false); `accession: VCV_rs...` (invalid - VCV accessions are numeric, not rsID-derived); `citation_count: 18` (hardcoded); `recent_pubmed_ids` (may not correspond to actual papers); `acmg_classification_rationale` (generic boilerplate). Header comment also falsely claimed misses query live upstream sources. | REMEDIATED |
 | P0-002 | `web/api/enrich.js` | 13 | `Access-Control-Allow-Origin: *` wildcard CORS on a clinical endpoint processing derived genomic identifiers. Frontend and /api are co-deployed on the same Vercel domain - CORS is not required; wildcard violates the zero-knowledge privacy posture. | REMEDIATED |
 | P0-003 | `web/src/redis-client.js` | 41-55 | Offline mock returned `evidence_tier: Tier 1 Verified` and `cached: true` for locally fabricated data. Misleads the UI into displaying a verified-tier badge for unverified fallback. | REMEDIATED |
+| P0-004 | `web/src/worker.js`, `web/src/app.js` | 210-253 | `worker.js` failed to parse (`if/else/else` in the no-call tracking), so the analysis worker never started and the progress bar hung forever with only a `console.error`. | REMEDIATED (stray `else` removed, no-call tracking moved into the `isNoCall` branch; worker failures now surface in `#analysis-error`; node and browser regression tests added) |
 
 ---
 
@@ -53,6 +54,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-016 | `tools/coverage_taxonomy.py`, `web/src/worker.js`, `web/src/app.js` | Scope Taxonomy | Formal 5-State Coverage Taxonomy & Cardinal Scope Guardrail ("Absence of a finding must never imply absence of genetic risk"). Strict classification into `supported_and_observed`, `supported_not_observed`, `not_tested_by_array`, `outside_coverage`, and `insufficient_evidence`. Enforced incomplete star-allele refusal on PGx loci and single-locus caveats on ACMG SF loci. | REMEDIATED |
 | P1-017 | `tools/source_adapters.py`, `tools/variome_models.py` | Upstream Ingestion | Upstream Ingestion Architecture with field-level provenance, curation mode (`machine_imported`, `derived`, `manually_curated`), and explicit redistribution license tracking across ClinVar, dbSNP, Ensembl, gnomAD, CPIC, AlphaFold DB, HPA, and ENCODE. | REMEDIATED |
 | P1-018 | `tools/build_canonical_kb.py`, `canonical_variome.db`, `web/src/knowledge-base.json` | 3-Layer Knowledge Architecture | Strict architectural separation into `IdentityLayer`, `EvidenceLayer`, and `InterpretationLayer`. Guaranteed that upstream evidence updates cannot overwrite curated interpretation semantics. Enforced 12 clinical QC invariants on build. | REMEDIATED |
+| P1-019 | `web/tests/`, `tests/e2e/`, `tests/` | No browser test seam: no collected test loads `worker.js` or the app; 5 `test_*.py` are uncollected scripts. | PARTIAL (T1; remaining: T10) |
 
 ---
 
@@ -72,6 +74,11 @@ Full static and dynamic audit of all repository files and runtime paths:
 ---
 
 ## Remediation Log
+
+### 2026-10-02 hardening pass (fix/genomepulse-hardening)
+
+- **P0-004** (T1): `worker.js` had `if (isNoCall) {...} else {...} else {...}` since 7ab8674, a parse error that stopped the worker from loading. Fixed the branch structure, and the worker and `app.js` now report failures (`{type: "error", message}`, `onerror`, `onmessageerror`) in a visible `#analysis-error` alert instead of hanging.
+- **P1-019** (T1, partial): added the Node seam (`web/tests/worker-load.test.mjs`) and the Playwright seam (`tests/e2e/conftest.py`, which fails any test on page or console errors). Converted the three browser scripts into collected tests under `tests/e2e/`. Remaining: the two Python scripts (T10).
 
 ### 2026-10-02
 

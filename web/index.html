@@ -128,6 +128,12 @@
       </div>
     </section>
 
+    <!-- Analysis failure (hidden until the worker fails) -->
+    <section id="analysis-error" role="alert" class="hidden mb-8 p-4 rounded-sm bg-red-50/90 dark:bg-red-950/40 border-l-4 border-red-500 border border-red-200 dark:border-red-900/60 shadow-sm text-xs">
+      <p class="font-bold text-red-800 dark:text-red-300">The analysis could not be completed. Nothing was uploaded, and no results are shown. Please try again, or try a different file.</p>
+      <p class="mt-1 font-mono text-red-700 dark:text-red-400">Technical detail: <span id="analysis-error-detail"></span></p>
+    </section>
+
     <!-- Results Section (Populated dynamically) -->
     <section id="results-section" class="hidden space-y-6">
       

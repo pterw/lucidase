@@ -84,21 +84,39 @@ function initWorker() {
   state.worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
 
   state.worker.onerror = (err) => {
-    console.error("Worker error:", err.message || err);
+    showAnalysisError((err && err.message) || "The analysis worker failed to start.");
+  };
+
+  state.worker.onmessageerror = () => {
+    showAnalysisError("The analysis worker sent a message the page could not read.");
   };
 
   state.worker.onmessage = (e) => {
     const data = e.data;
-    console.log("Worker message received:", data.type);
     if (data.type === "progress") {
       updateProgress(data.percent, data.status);
     } else if (data.type === "complete") {
       handleParseComplete(data);
     } else if (data.type === "error") {
-      console.error("Worker sent error:", data.error);
-      showError(data.error);
+      showAnalysisError(data.message);
     }
   };
+}
+
+function setInputsDisabled(disabled) {
+  const fileInput = document.getElementById("file-input");
+  const btnDemo = document.getElementById("btn-load-demo");
+  if (fileInput) fileInput.disabled = disabled;
+  if (btnDemo) btnDemo.disabled = disabled;
+}
+
+function showAnalysisError(message) {
+  document.getElementById("progress-section").classList.add("hidden");
+  const box = document.getElementById("analysis-error");
+  document.getElementById("analysis-error-detail").textContent =
+    String(message || "unknown error");
+  box.classList.remove("hidden");
+  setInputsDisabled(false);
 }
 
 function initEventListeners() {
@@ -220,6 +238,8 @@ function handleFileSelected(file) {
 }
 
 function processText(text, fileName) {
+  document.getElementById("analysis-error").classList.add("hidden");
+  setInputsDisabled(true);
   document.getElementById("progress-section").classList.remove("hidden");
   document.getElementById("results-section").classList.add("hidden");
   state.worker.postMessage({ action: "parse", text, fileName });
@@ -247,7 +267,9 @@ function handleParseComplete(data) {
   state.independentAssortment = data.independent_assortment || [];
 
   document.getElementById("progress-section").classList.add("hidden");
+  document.getElementById("analysis-error").classList.add("hidden");
   document.getElementById("results-section").classList.remove("hidden");
+  setInputsDisabled(false);
 
   renderQC();
   renderSummaryCards();

@@ -22,13 +22,13 @@ import {
 } from "./knowledge-base.js";
 
 self.onmessage = function (e) {
-  const { action, text, fileName } = e.data;
-  if (action === "parse") {
-    try {
+  try {
+    const { action, text, fileName } = e.data;
+    if (action === "parse") {
       parseGenomicText(text, fileName);
-    } catch (err) {
-      self.postMessage({ type: "error", error: err.message || String(err) });
     }
+  } catch (err) {
+    self.postMessage({ type: "error", message: String((err && err.message) || err) });
   }
 };
 
@@ -209,6 +209,15 @@ function parseGenomicText(text, fileName = "") {
 
     if (isNoCall) {
       nocallSnps++;
+      // If a curated locus had a no-call on the array, track it for gap reporting
+      if (CURATED_KB[rsid]) {
+        assayedCurated.set(rsid, {
+          chrom,
+          pos,
+          genotype: "--",
+          isNoCall: true
+        });
+      }
     } else {
       calledSnps++;
       const isHet = (genotype.length === 2 && genotype[0] !== genotype[1]);
@@ -238,16 +247,6 @@ function parseGenomicText(text, fileName = "") {
           pos,
           genotype,
           isNoCall: false
-        });
-      }
-    } else {
-      // If a curated locus had a no-call on the array, track it for gap reporting
-      if (CURATED_KB[rsid]) {
-        assayedCurated.set(rsid, {
-          chrom,
-          pos,
-          genotype: "--",
-          isNoCall: true
         });
       }
     }
