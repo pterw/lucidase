@@ -28,11 +28,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "pathogenic (Glu504Lys dominant negative)",
-          "alphamissense_pathogenicity": 0.912,
-          "canonical_transcript": "ENST00000261733 (MANE Select)",
           "ensg": "ENSG00000111275",
-          "loeuf": 0.61,
           "sift_prediction": "deleterious (0.00)"
         },
         "provenance": {
@@ -155,11 +151,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "likely_benign",
-          "alphamissense_pathogenicity": 0.0365,
-          "canonical_transcript": "ENST00000252486 (MANE Select)",
           "ensg": "ENSG00000130203",
-          "loeuf": 1.26,
           "sift_prediction": "tolerated (1.0)"
         },
         "provenance": {
@@ -201,11 +193,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "pathogenic (misfolding & ERAD degradation)",
-          "alphamissense_pathogenicity": 0.985,
-          "canonical_transcript": "ENST00000003084 (MANE Select)",
           "ensg": "ENSG00000001626",
-          "loeuf": 0.44,
           "sift_prediction": "inframe deletion (deltaF508)"
         },
         "provenance": {
@@ -245,11 +233,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "pathogenic (*2 splice defect / *3 stop)",
-          "alphamissense_pathogenicity": 0.941,
-          "canonical_transcript": "ENST00000371401 (MANE Select)",
           "ensg": "ENSG00000165841",
-          "loeuf": 0.72,
           "sift_prediction": "deleterious (0.00)"
         },
         "provenance": {
@@ -293,11 +277,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "pathogenic (*2A splice disruption)",
-          "alphamissense_pathogenicity": 0.965,
-          "canonical_transcript": "ENST00000370192 (MANE Select)",
           "ensg": "ENSG00000188641",
-          "loeuf": 0.58,
           "sift_prediction": "deleterious (0.00)"
         },
         "provenance": {
@@ -337,12 +317,8 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "N/A (elevates mRNA cleavage/polyadenylation)",
-          "alphamissense_pathogenicity": null,
-          "canonical_transcript": "ENST00000344445 (MANE Select)",
           "ensg": "ENSG00000188404",
-          "loeuf": 0.68,
-          "sift_prediction": "N/A (3' UTR regulatory variant)"
+          "sift_prediction": null
         },
         "provenance": {
           "accession": null,
@@ -382,11 +358,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "ambiguous / pathogenic (APC cleavage resistant)",
-          "alphamissense_pathogenicity": 0.612,
-          "canonical_transcript": "ENST00000367520 (MANE Select)",
           "ensg": "ENSG00000198734",
-          "loeuf": 0.74,
           "sift_prediction": "tolerated (0.28)"
         },
         "provenance": {
@@ -428,11 +400,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "likely_pathogenic",
-          "alphamissense_pathogenicity": 0.842,
-          "canonical_transcript": "ENST00000357618 (MANE Select)",
           "ensg": "ENSG00000010704",
-          "loeuf": 0.82,
           "sift_prediction": "deleterious (0.00)"
         },
         "provenance": {
@@ -484,11 +452,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "likely_benign (thermolabile modifier)",
-          "alphamissense_pathogenicity": 0.215,
-          "canonical_transcript": "ENST00000376585 (MANE Select)",
           "ensg": "ENSG00000185010",
-          "loeuf": 0.54,
           "sift_prediction": "tolerated (0.34)"
         },
         "provenance": {
@@ -529,11 +493,7 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "likely_pathogenic (Val174Ala)",
-          "alphamissense_pathogenicity": 0.792,
-          "canonical_transcript": "ENST00000256958 (MANE Select)",
           "ensg": "ENSG00000134538",
-          "loeuf": 0.62,
           "sift_prediction": "deleterious (0.02)"
         },
         "provenance": {
@@ -572,12 +532,8 @@
           }
         },
         "ensembl": {
-          "alphamissense_class": "N/A (Altered transcription factor binding)",
-          "alphamissense_pathogenicity": null,
-          "canonical_transcript": "ENST00000394985 (MANE Select)",
           "ensg": "ENSG00000167397",
-          "loeuf": 0.65,
-          "sift_prediction": "N/A (Promoter -1639G>A regulatory variant)"
+          "sift_prediction": null
         },
         "provenance": {
           "accession": null,
@@ -2434,7 +2390,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "043abc11111da0de959ff18f2453f3ebb37548a681527d0542ae57dddc0b9e60"
+    "sha256": "69f1e4237bcda62db952943af7cda281686a031e0da4ca4e79bfbf6fa1f47a87"
   },
   "schema_version": 2
 }

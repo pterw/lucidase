@@ -159,7 +159,6 @@ export function toViewModel(record, genes, testedCounts = {}) {
   const limitation = nonEmptyString(record.limitation);
   let caveats = interp ? [...interp.caveats] : [];
   const insights = insightsOf(gene);
-  const ensembl = (insights && insights.ensembl) ?? {};
   const alphafold = (insights && insights.alphafold) ?? {};
   const significanceValue = nonEmptyString(interp && interp.significance);
   let phenotype = interp ? nonEmptyString(interp.phenotype) : nonEmptyString(record.reason);
@@ -179,9 +178,9 @@ export function toViewModel(record, genes, testedCounts = {}) {
         : joinLabelled(evidenceParts, (p) => p.tier)
     : single.tier;
 
-  const amScore = numberOrNull(ensembl.alphamissense_pathogenicity ?? vep.alphamissense_score);
-  const amClass = nonEmptyString(ensembl.alphamissense_class ?? vep.alphamissense_class);
-  const loeuf = numberOrNull(ensembl.loeuf ?? gnomad.loeuf);
+  const amScore = numberOrNull(vep.alphamissense_score);
+  const amClass = nonEmptyString(vep.alphamissense_class);
+  const loeuf = numberOrNull(gnomad.loeuf);
 
   const vm = {
     ...record,
@@ -245,7 +244,7 @@ export function toViewModel(record, genes, testedCounts = {}) {
       status: nonEmptyString(alphafold.folding_status),
       domains: alphafold.domains ?? [],
       joints: nonEmptyString(alphafold.flexible_joints),
-      transcript: nonEmptyString(ensembl.canonical_transcript ?? vep.mane_select_ensembl),
+      transcript: nonEmptyString(vep.mane_select_ensembl),
       alphamissense:
         amClass !== null && amScore !== null
           ? `${amClass} (${amScore.toFixed(2)})`

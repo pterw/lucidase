@@ -185,6 +185,7 @@ def _validate_gene(symbol: str, gene: Any) -> list[str]:
             errors.append(f"{symbol}: insights must be an object or null")
         else:
             errors.extend(_check_provenance(gene.get("insights_provenance"), f"{symbol}: insights"))
+            errors.extend(_check_insights(insights, f"{symbol}: insights"))
     if "diplotypes" in gene:
         if symbol != "APOE":
             errors.append(f"{symbol}: only APOE carries diplotypes")
@@ -196,6 +197,31 @@ def _validate_gene(symbol: str, gene: Any) -> list[str]:
                 errors.extend(_check_interp(interp, f"{symbol}: diplotype {key}"))
     elif symbol == "APOE":
         errors.append("APOE: diplotypes missing")
+    return errors
+
+
+IMPORTED_ONLY_INSIGHT_KEYS = ("alphamissense_class", "alphamissense_pathogenicity", "loeuf", "canonical_transcript")
+PLACEHOLDER_STRINGS = ("n/a", "none", "unknown")
+
+
+def _is_placeholder_string(value: str) -> bool:
+    text = value.strip().lower()
+    return text in PLACEHOLDER_STRINGS or text.startswith("n/a")
+
+
+def _check_insights(node: Any, where: str) -> list[str]:
+    """Insights carry no placeholder strings, and nothing the pipeline imports per locus (S3b-C-1)."""
+    errors: list[str] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key in IMPORTED_ONLY_INSIGHT_KEYS:
+                errors.append(f"{where}/{key}: this value is imported per locus (VEP, gnomAD); a curated copy is not allowed")
+            errors.extend(_check_insights(value, f"{where}/{key}"))
+    elif isinstance(node, list):
+        for i, value in enumerate(node):
+            errors.extend(_check_insights(value, f"{where}[{i}]"))
+    elif isinstance(node, str) and _is_placeholder_string(node):
+        errors.append(f"{where}: {node!r} is a placeholder; unknown values must be null")
     return errors
 
 
@@ -552,6 +578,22 @@ def _overlay_imported(rsid: str, locus: dict[str, Any], evidence: dict[str, Any]
             }
     except (AdapterError, ValueError) as exc:
         errors.append(f"{rsid}: upstream payload cannot be imported: {exc}")
+    errors.extend(_check_imported_ranges(rsid, evidence.get("gnomad")))
+    return errors
+
+
+def _check_imported_ranges(rsid: str, gnomad: Optional[dict[str, Any]]) -> list[str]:
+    """The finished KB obeys the same range rules as curation: af in [0, 1], pLI and LOEUF non-negative (S3b-C-8)."""
+    if not gnomad:
+        return []
+    errors = []
+    af = gnomad.get("af")
+    if af is not None and (not _is_number(af) or not 0.0 <= af <= 1.0):
+        errors.append(f"{rsid}: imported gnomad.af {af!r} is outside [0, 1]")
+    for key in ("pli", "loeuf"):
+        value = gnomad.get(key)
+        if value is not None and (not _is_number(value) or value < 0):
+            errors.append(f"{rsid}: imported gnomad.{key} {value!r} is negative or not a number")
     return errors
 
 

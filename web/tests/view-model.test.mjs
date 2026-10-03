@@ -117,6 +117,29 @@ test("a record with null evidence fields shows Not available, never a fallback v
   assert.match(csv.Missing_Fields, /evidence_tier/);
 });
 
+test("the drawer shows the imported AlphaMissense, LOEUF and transcript; no curated value can win", () => {
+  const { vms, kb } = analyse(DEMO);
+  const rec = structuredClone(vms.find((v) => v.id === "rs1801133"));
+  rec.evidence.vep = { ...rec.evidence.vep, alphamissense_class: "likely_pathogenic", alphamissense_score: 0.6324,
+    mane_select_ensembl: "ENST00000376590" };
+  rec.evidence.gnomad = { ...rec.evidence.gnomad, loeuf: 1.19 };
+  const curated = { alphamissense_class: "likely_benign", alphamissense_pathogenicity: 0.215, loeuf: 0.44,
+    canonical_transcript: "ENST00000376585 (MANE Select)" };
+  const genes = { ...kb.genes, MTHFR: { ...kb.genes.MTHFR, insights: { ...kb.genes.MTHFR.insights, ensembl: curated } } };
+  const vm = toViewModel(rec, genes);
+  assert.equal(vm.biotools.alphamissense, "likely_pathogenic (0.63)");
+  assert.equal(vm.biotools.transcript, "ENST00000376590");
+  assert.equal(vm.biotools.constraint, "gnomAD LOEUF 1.19");
+
+  const bare = structuredClone(rec);
+  bare.evidence.vep = null;
+  bare.evidence.gnomad = { af: 0.3 };
+  const none = toViewModel(bare, genes);
+  assert.equal(none.biotools.alphamissense, null);
+  assert.equal(none.biotools.transcript, null);
+  assert.equal(none.biotools.constraint, null);
+});
+
 test("a not-tested record has no undefined, null or NaN in any field, and shows its state label and reason", () => {
   const { vms, kb } = analyse(DEMO.replace(/^rs6025[^\n]*\r?\n/m, ""));
   const gap = vms.find((v) => v.id === "rs6025");

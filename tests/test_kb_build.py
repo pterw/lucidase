@@ -18,6 +18,7 @@ import pytest
 
 from tools.build_canonical_kb import (
     DEFAULT_CURATION_PATH,
+    _check_imported_ranges,
     build_kb,
     load_curation,
     render_kb,
@@ -147,11 +148,15 @@ def test_unknown_evidence_is_null_never_a_placeholder(built):
         assert "pli" in gnomad and "loeuf" in gnomad
         for key in ("pli", "loeuf"):
             assert gnomad[key] is None or gnomad[key] > 0.0, (rsid, key)
-    for path, key, value in walk(built["loci"]):
-        if key in ("pli", "loeuf"):
-            assert value != 0.0
-        if path.endswith("/evidence") or "/evidence/" in path:
-            assert value not in ("", "N/A", "unknown", "Unknown"), (path, key)
+    for section in ("genes", "loci"):
+        for path, key, value in walk(built[section], f"/{section}"):
+            if key in ("pli", "loeuf"):
+                assert value != 0.0, path
+            if section == "loci" and (path.endswith("/evidence") or "/evidence/" in path):
+                assert value not in ("", "N/A", "unknown", "Unknown"), (path, key)
+            if section == "genes" and isinstance(value, str):
+                assert value.strip().lower() not in ("", "n/a", "none", "unknown"), (path, key)
+                assert not value.lower().startswith("n/a"), (path, key, value)
 
 
 def test_manually_curated_provenance_has_no_retrieval_time(built):
@@ -839,3 +844,36 @@ def test_drift_curated_clinvar_review_status_and_stars_must_equal_the_imported_o
     result = _drift(tmp_path, good_kb, curation, "rs671", mutate)
     assert result.returncode == 1
     assert "rs671" in result.stdout and "clinvar.review_status" in result.stdout and "clinvar.stars" in result.stdout
+
+
+IMPORTED_KEYS = ("alphamissense_class", "alphamissense_pathogenicity", "loeuf", "canonical_transcript")
+
+
+def test_no_gene_insight_carries_a_value_the_pipeline_imports(built):
+    for symbol, gene in built["genes"].items():
+        ensembl = (gene["insights"] or {}).get("ensembl", {})
+        assert not set(IMPORTED_KEYS) & set(ensembl), symbol
+
+
+@pytest.mark.parametrize("key,value", [("loeuf", 0.44), ("alphamissense_class", "likely_benign"),
+                                       ("alphamissense_pathogenicity", 0.1), ("canonical_transcript", "ENST1 (MANE Select)")])
+def test_qc_rejects_a_curated_copy_of_an_imported_value(curation, key, value):
+    errors = mutated(curation, lambda d: d["genes"]["HFE"]["insights"]["ensembl"].update({key: value}))
+    assert has_error(errors, "HFE") and has_error(errors, key)
+
+
+@pytest.mark.parametrize("text", ["N/A (3' UTR)", "n/a", "N/A", "None", "UNKNOWN", "none"])
+def test_qc_rejects_a_placeholder_insight_string(curation, text):
+    errors = mutated(curation, lambda d: d["genes"]["HFE"]["insights"]["ensembl"].update({"sift_prediction": text}))
+    assert has_error(errors, "HFE") and has_error(errors, "placeholder")
+
+
+@pytest.mark.parametrize("gnomad,fragment", [({"af": 1.5, "pli": None, "loeuf": None}, "af"),
+                                             ({"af": -0.1, "pli": None, "loeuf": None}, "af"),
+                                             ({"af": 0.1, "pli": -1.0, "loeuf": None}, "pli"),
+                                             ({"af": 0.1, "pli": None, "loeuf": -0.2}, "loeuf")])
+def test_imported_values_are_range_checked_after_the_overlay(gnomad, fragment):
+    errors = _check_imported_ranges("rs1", gnomad)
+    assert errors and fragment in errors[0]
+    assert _check_imported_ranges("rs1", {"af": 0.0, "pli": 0.9, "loeuf": 0.5}) == []
+    assert _check_imported_ranges("rs1", None) == []
