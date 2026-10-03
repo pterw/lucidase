@@ -526,6 +526,14 @@ def _component_summary(components: list[dict]) -> str:
     return ", ".join(f"{c['rsid']}:{c['genotype_display'] if c.get('genotype_display') is not None else '--'}" for c in components)
 
 
+def e4_count_for_diplotype(diplotype: Optional[str]) -> Optional[int]:
+    """Number of e4 alleles in a resolved diplotype (e2/e2 ... e4/e4), else None (atypical, None, anything else).
+    It is not the rs429358 alt count: an e1 allele also carries rs429358-C."""
+    if not isinstance(diplotype, str) or diplotype == ATYPICAL or diplotype not in set(_DIPLOTYPE_BY_COUNTS.values()):
+        return None
+    return diplotype.split("/").count("e4")
+
+
 def resolve_apoe(component_records: list[dict], kb: Any) -> dict:
     """Builds the single APOE finding from the two classified component records (any order).
     `kb` needs `.genes` and `.loci`. A diplotype is asserted only when both components resolve:
@@ -710,10 +718,10 @@ def _segregation(rec: dict, kb: KnowledgeBase) -> Optional[dict]:
     gnomad = (rec["evidence"].get("gnomad") or {})
     af = gnomad.get("af")
     if rec["rsid"] == APOE_ROW_ID:
-        # APOE transmits e4 by its e4 copy count (rs429358), so e4/e4 transmits e4 with probability 1.
-        if rec.get("diplotype") in (None, ATYPICAL):
+        # APOE transmits e4 by the e4 count of its resolved diplotype, so e4/e4 transmits e4 with probability 1.
+        e4_count = e4_count_for_diplotype(rec.get("diplotype"))
+        if e4_count is None:
             return None
-        e4_count = rec["components"][0]["altCount"]
         alt_count, allele = e4_count, "e4"
     else:
         if rec["altCount"] is None:

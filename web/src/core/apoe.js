@@ -31,6 +31,17 @@ const DIPLOTYPE_BY_COUNTS = {
   "2,2": ATYPICAL,
 };
 
+/**
+ * The number of e4 alleles in a RESOLVED diplotype (e2/e2, e2/e3, e2/e4, e3/e3, e3/e4, e4/e4), else null.
+ * Null for ATYPICAL, null or anything else: no diplotype means no e4 transmission figures (fail closed).
+ * It is not the rs429358 alt count: an e1 allele also carries rs429358-C.
+ */
+export function e4CountForDiplotype(diplotype) {
+  if (typeof diplotype !== "string" || !Object.values(DIPLOTYPE_BY_COUNTS).includes(diplotype)) return null;
+  if (diplotype === ATYPICAL) return null;
+  return diplotype.split("/").filter((allele) => allele === "e4").length;
+}
+
 /** Display form of a diplotype key, e.g. "e3/e4" gives "ε3/ε4". */
 export const displayDiplotype = (diplotype) => diplotype.replace(/e/g, "ε");
 

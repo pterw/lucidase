@@ -1361,5 +1361,155 @@
     "expected": {
       "findings": []
     }
+  },
+  {
+    "id": "apoe-e1e4-no-segregation",
+    "description": "e1/e4 (rs429358 C/C with rs7412 C/T) is atypical: no e4 count, so no offspring figures (the e4 count is 1, not the rs429358 alt count 2)",
+    "input": {
+      "fn": "apoe_e4",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "diplotype": "atypical",
+      "partner": "wildtype",
+      "af": 0.14852,
+      "allele": "e4"
+    },
+    "expected": {
+      "e4_count": null,
+      "absent": [
+        "dist",
+        "outcome"
+      ]
+    }
+  },
+  {
+    "id": "apoe-unresolved-no-segregation",
+    "description": "rs429358 C/T with rs7412 missing has no diplotype: no e4 count and no offspring figures",
+    "input": {
+      "fn": "apoe_e4",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "diplotype": null,
+      "partner": "wildtype",
+      "af": 0.14852,
+      "allele": "e4"
+    },
+    "expected": {
+      "e4_count": null,
+      "absent": [
+        "dist",
+        "outcome"
+      ]
+    }
+  },
+  {
+    "id": "apoe-e3e4-x-wildtype",
+    "description": "e3/e4 x wild-type partner: e4 count 1, a child inherits e4 with probability 0.5",
+    "input": {
+      "fn": "apoe_e4",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "diplotype": "e3/e4",
+      "partner": "wildtype",
+      "af": 0.14852,
+      "allele": "e4"
+    },
+    "expected": {
+      "e4_count": 1,
+      "dist": {
+        "p0": 0.5,
+        "p1": 0.5,
+        "p2": 0.0
+      },
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 0.5
+      }
+    }
+  },
+  {
+    "id": "apoe-e2e4-x-wildtype",
+    "description": "e2/e4 x wild-type partner: e4 count 1, a child inherits e4 with probability 0.5",
+    "input": {
+      "fn": "apoe_e4",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "diplotype": "e2/e4",
+      "partner": "wildtype",
+      "af": 0.14852,
+      "allele": "e4"
+    },
+    "expected": {
+      "e4_count": 1,
+      "dist": {
+        "p0": 0.5,
+        "p1": 0.5,
+        "p2": 0.0
+      },
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 0.5
+      }
+    }
+  },
+  {
+    "id": "apoe-e4e4-count-x-wildtype",
+    "description": "e4/e4 x wild-type partner: e4 count 2, every child inherits e4",
+    "input": {
+      "fn": "apoe_e4",
+      "gene": {
+        "inheritance": {
+          "model": "risk_factor",
+          "mendelian_disease": false,
+          "penetrance": null,
+          "disease": "x",
+          "omim": null
+        }
+      },
+      "diplotype": "e4/e4",
+      "partner": "wildtype",
+      "af": 0.14852,
+      "allele": "e4"
+    },
+    "expected": {
+      "e4_count": 2,
+      "dist": {
+        "p0": 0,
+        "p1": 1,
+        "p2": 0
+      },
+      "outcome": {
+        "kind": "transmission",
+        "inherits_allele": 1
+      }
+    }
   }
 ]

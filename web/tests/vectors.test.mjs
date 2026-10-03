@@ -103,7 +103,7 @@ const HANDLERS = {
     }
   },
 
-  // input: { fn: "scenario" | "status" | "multi_locus" | "compound", ... }. Numbers compare within
+  // input: { fn: "scenario" | "status" | "multi_locus" | "compound" | "apoe_e4", ... }. Numbers compare within
   // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
   // lower-cased JSON of the result (scenario, multi_locus, compound).
   "inheritance.json": async (vector) => {
@@ -119,6 +119,15 @@ const HANDLERS = {
       result = { findings: inh.detectMultiLocus(records, genes) };
     } else if (fn === "compound") {
       result = { findings: inh.detectCompoundHeterozygosity(records, genes) };
+    } else if (fn === "apoe_e4") {
+      // The APOE row's offspring figures: the e4 count comes from the diplotype; no count, no figures.
+      const { e4CountForDiplotype } = await import("../src/core/apoe.js");
+      const e4Count = e4CountForDiplotype(vector.input.diplotype);
+      result = { e4_count: e4Count };
+      if (e4Count !== null) {
+        const dist = inh.offspringDistribution(e4Count, partner, af);
+        result = { ...result, dist, outcome: inh.geneOutcome(gene, dist, allele) };
+      }
     } else {
       assert.fail(`${vector.id}: unknown fn ${fn}`);
     }

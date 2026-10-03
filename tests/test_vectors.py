@@ -144,6 +144,14 @@ def _run_inheritance(vector):
         result = {"findings": seg.detect_multi_locus(inp["records"], inp["genes"])}
     elif fn == "compound":
         result = {"findings": seg.detect_compound_heterozygosity(inp["records"], inp["genes"])}
+    elif fn == "apoe_e4":
+        from variant_annotator import e4_count_for_diplotype
+
+        e4_count = e4_count_for_diplotype(inp["diplotype"])
+        result = {"e4_count": e4_count}
+        if e4_count is not None:
+            dist = seg.offspring_distribution(e4_count, inp["partner"], inp.get("af"))
+            result.update(dist=dist, outcome=seg.gene_outcome(inp["gene"], dist, inp["allele"]))
     else:
         pytest.fail(f"{vector['id']}: unknown fn {fn}")
     facts = {k: v for k, v in vector["expected"].items() if k not in ("absent", "text_includes", "text_excludes")}

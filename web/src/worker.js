@@ -12,7 +12,7 @@ import { parseGenotypeFile } from "./core/parse.js";
 import { computeQc } from "./core/qc.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { classify } from "./core/classify.js";
-import { assembleFindings } from "./core/apoe.js";
+import { assembleFindings, e4CountForDiplotype } from "./core/apoe.js";
 import { COVERAGE_STATES, SAMPLE_OBSERVATION } from "./core/coverage.js";
 import { describeSegregation, detectMultiLocus, detectCompoundHeterozygosity } from "./core/inheritance.js";
 
@@ -63,10 +63,10 @@ async function analyzeGenotypeFile(text, fileName = "") {
 
   // The two APOE component loci become one APOE finding (core/apoe.js), counted once in the coverage summary.
   const { listed, apoe: apoeFinding, summary: coverage } = assembleFindings(records, kb, rawCoverage.outside_coverage_count);
-  // The e4 allele is the rs429358 alt allele, so its count and frequency drive the APOE offspring figures.
+  // The APOE offspring figures use the e4 count of the resolved diplotype (not the rs429358 alt count: e1 also
+  // carries rs429358-C) and the rs429358 alt allele frequency. No resolved diplotype, no figures.
   if (apoeFinding) {
-    const e4 = records.find((r) => r.rsid === "rs429358");
-    apoeFinding.segregation = segregationFor(apoeFinding, kb, e4.altCount, "rs429358");
+    apoeFinding.segregation = segregationFor(apoeFinding, kb, e4CountForDiplotype(apoeFinding.diplotype), "rs429358");
   }
 
   // Group by the UI's lists. Component loci are not listed on their own (no double counting).
