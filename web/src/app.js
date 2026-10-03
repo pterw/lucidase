@@ -1,5 +1,5 @@
 /**
- * GenomePulse - Main Frontend Application Logic
+ * Lucidase - Main Frontend Application Logic
  * =============================================
  * Orchestrates Web Worker file parsing, reactive UI updates,
  * compound APOE diplotype synthesis, light/dark mode theming,
@@ -53,7 +53,7 @@ const state = {
   searchQuery: "",
   sortBy: "magnitude",
   // Not a clinical field: a missing stored preference means the light theme.
-  theme: localStorage.getItem("genomepulse-theme") || "light"
+  theme: localStorage.getItem("lucidase-theme") || "light"
 };
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
@@ -62,7 +62,7 @@ function initApp() {
   initTheme();
   initEventListeners();
   loadManifest();
-  window.__genomePulse = {
+  window.__lucidase = {
     state,
     processText,
     exportMarkdownReport,
@@ -90,7 +90,7 @@ function initTheme() {
 
 function setTheme(theme) {
   state.theme = theme;
-  localStorage.setItem("genomepulse-theme", theme);
+  localStorage.setItem("lucidase-theme", theme);
   document.documentElement.setAttribute("data-theme", theme);
 
   const icon = document.getElementById("theme-toggle-icon");
@@ -1132,13 +1132,13 @@ function exportMarkdownReport() {
     insufficientEvidence: state.insufficientEvidence
   });
   const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
-  downloadBlob(blob, `GenomePulse_Report_${Date.now()}.md`);
+  downloadBlob(blob, `Lucidase_Report_${Date.now()}.md`);
 }
 
 function exportCsvReport() {
   if (!state.qc) return;
   const blob = new Blob([csvReport(allRows(), state.genes)], { type: "text/csv;charset=utf-8" });
-  downloadBlob(blob, `GenomePulse_Variants_${Date.now()}.csv`);
+  downloadBlob(blob, `Lucidase_Variants_${Date.now()}.csv`);
 }
 
 function downloadBlob(blob, filename) {

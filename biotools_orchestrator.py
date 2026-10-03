@@ -16,19 +16,19 @@ Unified orchestrator integrating 5 premier computational biology tools & databas
 5. AlphaGenome Deep Learning (/alphagenome-single-variant-analysis):
    - Splicing and regulatory disruption inference with safe credentials protocol integration.
 
-PRIVACY: unlike the GenomePulse web app, which never transmits variant identifiers,
+PRIVACY: unlike the Lucidase web app, which never transmits variant identifiers,
 this desktop tool SENDS rsIDs (and gene symbols) to NCBI (ClinVar) and Ensembl (VEP),
 and gene symbols to AlphaFold and ENCODE, through the skill scripts. Use it only when
 you accept that. Nothing is sent until an enrichment method is called.
 
 Configuration (environment variables; nothing is hard-coded to one machine):
-- GENOMEPULSE_BIOTOOLS_SKILLS_DIR: directory holding the skill folders
+- LUCIDASE_BIOTOOLS_SKILLS_DIR: directory holding the skill folders
   (clinvar_database, ensembl_database, alphafold_database_fetch_and_analyze,
   encode_ccres_database). Unset means every skill-backed query returns an
   {"error": ...} dict saying so.
-- GENOMEPULSE_CACHE_DIR: where query results are cached (default ~/.cache/genomepulse).
-- GENOMEPULSE_UV_BIN: path to the `uv` executable (default: `uv` found on PATH).
-- GENOMEPULSE_HTTP_USER_AGENT: User-Agent for the skill scripts (default GenomePulse/1.0).
+- LUCIDASE_CACHE_DIR: where query results are cached (default ~/.cache/lucidase).
+- LUCIDASE_UV_BIN: path to the `uv` executable (default: `uv` found on PATH).
+- LUCIDASE_HTTP_USER_AGENT: User-Agent for the skill scripts (default Lucidase/1.0).
 
 Constructing a BiotoolsOrchestrator does no I/O, and neither does importing this
 module. The cache directory is created on the first query that runs a script.
@@ -45,10 +45,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-ENV_SKILLS_DIR = "GENOMEPULSE_BIOTOOLS_SKILLS_DIR"
-ENV_CACHE_DIR = "GENOMEPULSE_CACHE_DIR"
-ENV_UV_BIN = "GENOMEPULSE_UV_BIN"
-ENV_USER_AGENT = "GENOMEPULSE_HTTP_USER_AGENT"
+ENV_SKILLS_DIR = "LUCIDASE_BIOTOOLS_SKILLS_DIR"
+ENV_CACHE_DIR = "LUCIDASE_CACHE_DIR"
+ENV_UV_BIN = "LUCIDASE_UV_BIN"
+ENV_USER_AGENT = "LUCIDASE_HTTP_USER_AGENT"
 
 # Skill script locations, relative to the skills directory.
 SKILL_SCRIPTS: dict[str, tuple[str, ...]] = {
@@ -62,14 +62,14 @@ SKILL_SCRIPTS: dict[str, tuple[str, ...]] = {
 
 
 def skills_dir() -> Optional[Path]:
-    """The configured skills directory, or None when GENOMEPULSE_BIOTOOLS_SKILLS_DIR is unset."""
+    """The configured skills directory, or None when LUCIDASE_BIOTOOLS_SKILLS_DIR is unset."""
     value = os.environ.get(ENV_SKILLS_DIR, "").strip()
     return Path(value).expanduser() if value else None
 
 
 def default_cache_dir() -> Path:
     value = os.environ.get(ENV_CACHE_DIR, "").strip()
-    return Path(value).expanduser() if value else Path.home() / ".cache" / "genomepulse"
+    return Path(value).expanduser() if value else Path.home() / ".cache" / "lucidase"
 
 
 def uv_binary() -> str:
@@ -164,7 +164,7 @@ class BiotoolsOrchestrator:
             *args,
         ]
         env = os.environ.copy()
-        env["POLITE_HTTP_USER_AGENT"] = env.get(ENV_USER_AGENT) or "GenomePulse/1.0"
+        env["POLITE_HTTP_USER_AGENT"] = env.get(ENV_USER_AGENT) or "Lucidase/1.0"
         env["UV_CACHE_DIR"] = str(self.cache_dir / "uv")
 
         return subprocess.run(

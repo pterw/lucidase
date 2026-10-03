@@ -1,4 +1,4 @@
-# GenomePulse Multi-Stage Production Container
+# Lucidase Multi-Stage Production Container
 # ============================================
 
 # Stage 1: Static Asset Server (Nginx Alpine)

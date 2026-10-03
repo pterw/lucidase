@@ -438,7 +438,7 @@ export function markdownReport(data) {
   const { qc, manifest, coverage: cov, apoe } = data;
   const listed = new Set();
   const unseen = (vms) => vms.filter((vm) => !listed.has(vm.id) && listed.add(vm.id));
-  let md = `# GenomePulse Variome Clinical Report\n\n`;
+  let md = `# Lucidase Variome Clinical Report\n\n`;
   md += `> **CARDINAL SCOPE GUARDRAIL**: ${manifest.guardrail}\n\n`;
   md += `**Sample**: ${data.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
   md += `**Markers**: ${qc.total_snps.toLocaleString("en-US")} | **Call Rate**: ${formatRate(qc.call_rate)} | **Heterozygosity**: ${formatRate(qc.heterozygosity_rate)}\n\n`;

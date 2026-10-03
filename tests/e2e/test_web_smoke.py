@@ -78,7 +78,7 @@ def test_retry_with_still_failing_worker_shows_error_again(page):
 def test_silent_worker_times_out_visibly(page):
     _serve_worker(page, SILENT_WORKER)
     page.goto(page.base_url, wait_until="networkidle")
-    page.evaluate("window.__genomePulse.state.workerTimeoutMs = 500")
+    page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
     expect(page.locator("#progress-section")).to_be_hidden()
@@ -106,7 +106,7 @@ self.onmessage = () => {
 def test_worker_stall_after_progress_times_out_visibly(page):
     _serve_worker(page, STALLING_WORKER)
     page.goto(page.base_url, wait_until="networkidle")
-    page.evaluate("window.__genomePulse.state.workerTimeoutMs = 500")
+    page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
     expect(page.locator("#progress-section")).to_be_hidden()
@@ -116,7 +116,7 @@ def test_worker_stall_after_progress_times_out_visibly(page):
 def test_watchdog_does_not_fire_during_healthy_progress(page):
     _serve_worker(page, SLOW_HEALTHY_WORKER)
     page.goto(page.base_url, wait_until="networkidle")
-    page.evaluate("window.__genomePulse.state.workerTimeoutMs = 500")
+    page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
     expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
     # The alert must be the worker's own message, not the watchdog's.

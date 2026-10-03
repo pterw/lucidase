@@ -19,7 +19,7 @@ async function buildManifest() {
   const m = kb.manifest;
   return {
     status: "ok",
-    service: "GenomePulse Canonical Knowledge Base",
+    service: "Lucidase Canonical Knowledge Base",
     release_version: m.release,
     variant_count: m.locus_count,
     sha256: m.sha256,

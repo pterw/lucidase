@@ -24,7 +24,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-USER_AGENT = "GenomePulse-KB-builder/1.0 (fixture capture)"
+USER_AGENT = "Lucidase-KB-builder/1.0 (fixture capture)"
 TIMEOUT_S = 30
 MIN_INTERVAL_S = 0.5  # >= 0.4 s between NCBI requests; applied to every host
 MAX_TOTAL_BYTES = 20 * 1024 * 1024  # owner-approved cap

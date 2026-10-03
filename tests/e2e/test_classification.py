@@ -23,7 +23,7 @@ def _analyse(page, path):
 
 
 def _rsids(page, group):
-    return page.evaluate(f"() => window.__genomePulse.state.{group}.map(r => r.rsid)")
+    return page.evaluate(f"() => window.__lucidase.state.{group}.map(r => r.rsid)")
 
 
 def _row_for(page, rsid):
@@ -43,13 +43,13 @@ def test_wildtype_loci_are_not_observed_findings(loaded_page):
 def test_wildtype_coverage_states_are_supported_not_observed(loaded_page):
     _analyse(loaded_page, WILDTYPE)
     negatives = loaded_page.evaluate(
-        "() => Object.fromEntries(window.__genomePulse.state.negativeChecks.map(r => [r.rsid, r.coverage_state]))"
+        "() => Object.fromEntries(window.__lucidase.state.negativeChecks.map(r => [r.rsid, r.coverage_state]))"
     )
     for rsid in ("rs9923231", "rs4149056"):
         assert negatives.get(rsid) == "supported_not_observed", negatives
     # H63D has insufficient evidence (Tier D): wild-type there is reported as insufficient_evidence.
     insufficient = loaded_page.evaluate(
-        "() => Object.fromEntries(window.__genomePulse.state.insufficientEvidence.map(r => [r.rsid, r.sample_observation]))"
+        "() => Object.fromEntries(window.__lucidase.state.insufficientEvidence.map(r => [r.rsid, r.sample_observation]))"
     )
     assert insufficient.get("rs1799945") == "wild_type", insufficient
     gaps = _rsids(loaded_page, "arrayGaps")
@@ -59,7 +59,7 @@ def test_wildtype_coverage_states_are_supported_not_observed(loaded_page):
 def test_each_locus_is_counted_in_exactly_one_state(loaded_page):
     _analyse(loaded_page, WILDTYPE)
     counts = loaded_page.evaluate(
-        "() => { const c = window.__genomePulse.state.coverageSummary; "
+        "() => { const c = window.__lucidase.state.coverageSummary; "
         "return [c.supported_and_observed_count, c.supported_not_observed_count, "
         "c.not_tested_by_array_count, c.insufficient_evidence_count, c.total_loci]; }"
     )

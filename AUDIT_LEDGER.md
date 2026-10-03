@@ -1,4 +1,4 @@
-# GenomePulse - Architecture & Ground Truth Audit Ledger
+# Lucidase (formerly GenomePulse) - Architecture & Ground Truth Audit Ledger
 
 > **Deployment target:** Vercel (static frontend + serverless `/api/manifest`)
 > **Privacy model:** Local-First / Client-Side Only - raw genotyping data never leaves the browser

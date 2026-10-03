@@ -10,7 +10,7 @@
 - `update_font_studio.py` & `upgrade_font_kit_studio.py`: Automation and maintenance scripts.
 
 ## Usage
-To use Font Kit Studio with GenomePulse or any web application:
+To use Font Kit Studio with Lucidase or any web application:
 1. Start your local web server (e.g. `npx serve web` or Python HTTP server on port 8788).
 2. Open `font_kit_studio_v0.1.1.html` in your browser.
 3. Enter your web app's URL (e.g. `http://localhost:8788`) in the Target URL composer input.

@@ -23,13 +23,13 @@ def _analyse(page, path):
 
 
 def _apoe(page):
-    return page.evaluate("() => window.__genomePulse.state.apoe")
+    return page.evaluate("() => window.__lucidase.state.apoe")
 
 
 def _apoe_rows(page):
     return page.evaluate(
         "() => ['records','negativeChecks','arrayGaps','insufficientEvidence']"
-        ".flatMap(g => window.__genomePulse.state[g]).filter(r => r.gene === 'APOE').length"
+        ".flatMap(g => window.__lucidase.state[g]).filter(r => r.gene === 'APOE').length"
     )
 
 
@@ -89,13 +89,13 @@ def test_apoe_numbers_come_from_the_knowledge_base(loaded_page):
 def test_coverage_cards_count_apoe_once(loaded_page):
     _analyse(loaded_page, E3E4)
     counts = loaded_page.evaluate(
-        "() => { const c = window.__genomePulse.state.coverageSummary; "
+        "() => { const c = window.__lucidase.state.coverageSummary; "
         "return [c.supported_and_observed_count, c.supported_not_observed_count, "
         "c.not_tested_by_array_count, c.insufficient_evidence_count, c.total_loci]; }"
     )
     assert sum(counts[:4]) == counts[4], counts
     listed = loaded_page.evaluate(
         "() => ['records','negativeChecks','arrayGaps','insufficientEvidence']"
-        ".reduce((n, g) => n + window.__genomePulse.state[g].length, 0)"
+        ".reduce((n, g) => n + window.__lucidase.state[g].length, 0)"
     )
     assert listed == counts[4], (listed, counts)

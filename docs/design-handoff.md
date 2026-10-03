@@ -1,4 +1,4 @@
-# Handoff Spec: GenomePulse web app (provisional UI)
+# Handoff Spec: Lucidase web app (provisional UI)
 
 > **BANNER - READ FIRST.** This document records the **current, provisional UI as built** on branch `fix/genomepulse-hardening`, plus the behavioural, state and clinical-honesty requirements any future design system must satisfy.
 > Owner ruling (verbatim): *"Webdev and identity haven't been established so when tailwind and daisy ui land properly and install design of this is within a system that is yet to be authored."*
@@ -18,7 +18,7 @@ Single-page, client-only analysis of raw DNA files (23andMe, AncestryDNA, MyHeri
 | **Load-bearing link order** | `daisyui` -> `src/styles.css` -> `vendor/tailwind.css` (I:12-17). Utilities must come last so they beat equal-specificity app rules. Do not reorder. Guarded by `tests/e2e/test_cascade.py` (dashed dropzone, accent borders, `text-[13px]` over `.font-serif`, `dark:` over `.glass-panel`). |
 | External hosts | Only Typekit (fonts), I:9. CSP `script-src 'self'`, `connect-src 'self'` (`test_csp.py`). No third-party script. |
 | task.md status | Its typography/brand sections (Gotham / Attribute Mono / Orpheus Pro / Neuzeit, "High-Tech - Clinical - Crisp", sharp corners) are **PROVISIONAL**, not an established identity. |
-| Test hook | `window.__genomePulse` exposes `state`, `processText`, exports, `setTheme` (A:65-71). Tests read `state.records`, `negativeChecks`, `arrayGaps`, `insufficientEvidence`, `coverageSummary`. |
+| Test hook | `window.__lucidase` exposes `state`, `processText`, exports, `setTheme` (A:65-71). Tests read `state.records`, `negativeChecks`, `arrayGaps`, `insufficientEvidence`, `coverageSummary`. |
 
 ## Layout
 
@@ -84,7 +84,7 @@ Sizes in use: `text-[9px]`, `[10px]`, `[11px]`, `[13px]`, `text-xs`, `text-sm`, 
 | Table viewport | `max-h-[600px] overflow-y-auto`, sticky `thead` |
 | Icons | Emoji characters only (no icon system) |
 
-Dark-mode mechanism: `data-theme` on `<html>` + Tailwind `darkMode: ['selector','[data-theme="dark"]']` (T:7) + the CSS variables above. Persisted in `localStorage["genomepulse-theme"]` (A:56, 93). Default `light` (I:2 and A:56).
+Dark-mode mechanism: `data-theme` on `<html>` + Tailwind `darkMode: ['selector','[data-theme="dark"]']` (T:7) + the CSS variables above. Persisted in `localStorage["lucidase-theme"]` (A:56, 93). Default `light` (I:2 and A:56).
 
 ## Components
 
@@ -236,8 +236,8 @@ Hidden when 0 findings (A:502-505). Badge `N Multi-Locus Finding(s)` (A:509). Ca
 |---|---|
 | Control | daisyUI `dropdown dropdown-end`; trigger `div tabindex=0 role=button` "Export ▾"; `ul.menu` with `<a>` items **without `href`** (Markdown Report, CSV Dataset); opens via CSS focus (daisyUI) |
 | States | D/H (`hover:bg-slate-100`)/F (daisyUI focus-within); X: **NI**, handlers silently return if there is no QC result (A:1120, 1139), not visually disabled; L/E/Em: NI; control exists only inside `#results-section` |
-| Markdown (V:437-533) | Title, guardrail text from `state.manifest.guardrail` (V:442), sample/QC line, 5-state summary, APOE section (diplotype, state, caveat, limitation, underlying loci, V:453-468), possible compound heterozygotes (phase unknown), co-occurring alleles on unlinked loci, then tables for observed findings, tested wild-type, array gaps and insufficient evidence. Each table has a Limitation and a Missing fields column. A not-detected row reads "<allele> not detected (N variants tested in <gene>)" (V:76-83). File `GenomePulse_Report_<ts>.md` |
-| CSV (V:358-364, 391-420) | 22 columns incl. Coverage_State, Evidence_Tier, Inheritance_Mode, three offspring columns (child inherits the allele with a wild-type partner and with an unscreened partner; child affected with an unscreened partner), Result_Statement, Limitation, Caveats, Missing_Fields. Rows = every row once: records, negativeChecks, arrayGaps and insufficientEvidence (A:1113-1117). A missing value is an empty cell named in Missing_Fields; "N/A" appears only for the affected cell of a non-Mendelian gene (V:372-387). APOE exports as one row with both rsIDs joined by ";" (V:179). File `GenomePulse_Variants_<ts>.csv` |
+| Markdown (V:437-533) | Title, guardrail text from `state.manifest.guardrail` (V:442), sample/QC line, 5-state summary, APOE section (diplotype, state, caveat, limitation, underlying loci, V:453-468), possible compound heterozygotes (phase unknown), co-occurring alleles on unlinked loci, then tables for observed findings, tested wild-type, array gaps and insufficient evidence. Each table has a Limitation and a Missing fields column. A not-detected row reads "<allele> not detected (N variants tested in <gene>)" (V:76-83). File `Lucidase_Report_<ts>.md` |
+| CSV (V:358-364, 391-420) | 22 columns incl. Coverage_State, Evidence_Tier, Inheritance_Mode, three offspring columns (child inherits the allele with a wild-type partner and with an unscreened partner; child affected with an unscreened partner), Result_Statement, Limitation, Caveats, Missing_Fields. Rows = every row once: records, negativeChecks, arrayGaps and insufficientEvidence (A:1113-1117). A missing value is an empty cell named in Missing_Fields; "N/A" appears only for the affected cell of a non-Mendelian gene (V:372-387). APOE exports as one row with both rsIDs joined by ";" (V:179). File `Lucidase_Variants_<ts>.csv` |
 | Required (AGENTS.md 4.6) | Single-variant-test limitations appear in every export: the CSV Limitation and Caveats columns (V:413-414) and the Markdown Limitation columns (V:492-530) |
 
 ### 13. Dark mode ("Dark HUD")
@@ -246,7 +246,7 @@ Hidden when 0 findings (A:502-505). Badge `N Multi-Locus Finding(s)` (A:509). Ca
 |---|---|
 | Trigger | `#btn-theme-toggle`; icon/label swap (🌙 "Dark HUD" <-> ☀️ "Light Mode") |
 | Mechanism | `data-theme` on `<html>`; Tailwind `dark:` variants (selector strategy); CSS variable block `[data-theme="dark"]` |
-| Persistence | `localStorage` key `genomepulse-theme`; **no `prefers-color-scheme` handling**; read/write not wrapped in try/catch (A:56, 93) |
+| Persistence | `localStorage` key `lucidase-theme`; **no `prefers-color-scheme` handling**; read/write not wrapped in try/catch (A:56, 93) |
 | Transition | `body` colour 0.2s ease; `#dropzone` `transition-all duration-200` (test waits 600 ms) |
 | Test coverage | `test_theme_toggle_round_trip`; `test_dark_utilities_beat_glass_panel` (dropzone alpha 0.4, not `.glass-panel` 0.75) |
 

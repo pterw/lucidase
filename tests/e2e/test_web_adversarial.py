@@ -46,7 +46,7 @@ def _wait_outcome(page):
 
 
 def test_page_title(loaded_page):
-    assert "GenomePulse" in loaded_page.title()
+    assert "Lucidase" in loaded_page.title()
 
 
 def test_demo_qc_numbers_present(loaded_page):
@@ -138,8 +138,8 @@ def test_corrupt_binary_garbage_is_survived(loaded_page):
 
 def test_export_handlers_run(loaded_page):
     _load_demo(loaded_page)
-    loaded_page.evaluate("window.__genomePulse.exportMarkdownReport()")
-    loaded_page.evaluate("window.__genomePulse.exportCsvReport()")
+    loaded_page.evaluate("window.__lucidase.exportMarkdownReport()")
+    loaded_page.evaluate("window.__lucidase.exportCsvReport()")
 
 
 def test_apoe_e3e4_upload_and_inspect(loaded_page):

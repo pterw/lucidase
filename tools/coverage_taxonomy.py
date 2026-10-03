@@ -1,5 +1,5 @@
 """
-GenomePulse coverage taxonomy and evidence rules
+Lucidase coverage taxonomy and evidence rules
 ================================================
 The KB describes loci and what each alt-allele count means (contract C2). Whatever
 depends on one person's sample is computed at analysis time and never stored in the KB.
@@ -147,7 +147,7 @@ class CurationMode(str, Enum):
 # =============================================================================
 ABSENCE_OF_FINDING_GUARDRAIL: Final[str] = (
     "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. "
-    "GenomePulse analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. "
+    "Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. "
     "It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, "
     "and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats."
 )

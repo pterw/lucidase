@@ -1,4 +1,4 @@
-# GenomePulse — Zero-Knowledge Clinical Variome Explorer
+# Lucidase — Zero-Knowledge Clinical Variome Explorer
 
 A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 14 curated loci in 12 genes, in the browser, and nothing else.
 
@@ -180,7 +180,7 @@ Visual design and brand identity have not been established, and the design syste
 Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studio/` and is **not bundled** in the production clinical app.
 
 - **Standalone Workbench:** Open `tools/font-kit-studio/font_kit_studio_v0.1.1.html` directly in your browser.
-- **External Previewing:** Point Font Kit Studio's Target URL at your running GenomePulse local instance to inspect typography tokens externally.
+- **External Previewing:** Point Font Kit Studio's Target URL at your running Lucidase local instance to inspect typography tokens externally.
 
 ---
 

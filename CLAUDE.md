@@ -1,4 +1,4 @@
-# CLAUDE.md: GenomePulse (this repository)
+# CLAUDE.md: Lucidase, formerly GenomePulse (this repository)
 
 Read `AGENTS.md` first. It holds the engineering rules (SoC, SRP, KISS, fail fast, Anti-Corruption Layer),
 the clinical honesty and privacy invariants, the testing rules and the gates. This file adds only what an agent

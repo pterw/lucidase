@@ -2426,7 +2426,7 @@
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
     "gene_count": 12,
-    "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. GenomePulse analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
+    "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
     "locus_count": 14,
     "privacy": {
       "genomic_uploads": false,

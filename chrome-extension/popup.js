@@ -1,5 +1,5 @@
 /**
- * GenomePulse Font Studio - Extension Popup Logic
+ * Lucidase Font Studio - Extension Popup Logic
  */
 
 const PRESETS = {
@@ -115,13 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
           document.documentElement.style.setProperty("--font-mono", cfg.mono);
           document.documentElement.style.setProperty("--font-display", cfg.display);
           // If FontStudio instance exists on window
-          if (window.__genomePulse?.fontStudio) {
-            window.__genomePulse.fontStudio.config = {
-              ...window.__genomePulse.fontStudio.config,
+          if (window.__lucidase?.fontStudio) {
+            window.__lucidase.fontStudio.config = {
+              ...window.__lucidase.fontStudio.config,
               ...cfg
             };
-            window.__genomePulse.fontStudio.applyConfig();
-            window.__genomePulse.fontStudio.updateDropdowns();
+            window.__lucidase.fontStudio.applyConfig();
+            window.__lucidase.fontStudio.updateDropdowns();
           }
         },
         args: [config]

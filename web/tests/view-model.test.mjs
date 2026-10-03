@@ -205,6 +205,7 @@ test("the APOE row never presents one component's evidence as its own", () => {
   assert.equal(csv.Gnomad_AF, `${round(e4.gnomad.af)};${round(e2.gnomad.af)}`);
   assert.equal(csv.Evidence_Tier, "Tier A;Tier A");
   const md = markdownReport(reportData(a));
+  assert.equal(md.split("\n")[0], "# Lucidase Variome Clinical Report");
   assert.ok(md.includes("★;★★★"), "Markdown ClinVar column joins the component values");
   // The tier is shown once when both components agree, and per component otherwise.
   assert.equal(apoe.tier, "Tier A");

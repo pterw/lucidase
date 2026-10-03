@@ -1,8 +1,8 @@
 /**
- * GenomePulse - Design Bridge Protocol v1 Runtime
+ * Lucidase - Design Bridge Protocol v1 Runtime
  * ================================================
  * Implements the Design Bridge Protocol v1 for bidirectional communication
- * between Font Kit Studio (host or iframe) and GenomePulse.
+ * between Font Kit Studio (host or iframe) and Lucidase.
  *
  * Authoritative for target rendering, capability reporting,
  * and live CSS variable / typography patching.
@@ -166,15 +166,15 @@ export class DesignBridge {
     }
 
     // Synchronize in-page fontStudio if present
-    if (window.__genomePulse?.fontStudio) {
-      window.__genomePulse.fontStudio.config = {
-        ...window.__genomePulse.fontStudio.config,
-        sans: appliedTokens["--font-sans"] || window.__genomePulse.fontStudio.config.sans,
-        serif: appliedTokens["--font-serif"] || window.__genomePulse.fontStudio.config.serif,
-        mono: appliedTokens["--font-mono"] || window.__genomePulse.fontStudio.config.mono,
-        display: appliedTokens["--font-display"] || window.__genomePulse.fontStudio.config.display
+    if (window.__lucidase?.fontStudio) {
+      window.__lucidase.fontStudio.config = {
+        ...window.__lucidase.fontStudio.config,
+        sans: appliedTokens["--font-sans"] || window.__lucidase.fontStudio.config.sans,
+        serif: appliedTokens["--font-serif"] || window.__lucidase.fontStudio.config.serif,
+        mono: appliedTokens["--font-mono"] || window.__lucidase.fontStudio.config.mono,
+        display: appliedTokens["--font-display"] || window.__lucidase.fontStudio.config.display
       };
-      window.__genomePulse.fontStudio.updateDropdowns();
+      window.__lucidase.fontStudio.updateDropdowns();
     }
   }
 

@@ -1,5 +1,5 @@
 /**
- * GenomePulse - High-Performance Genomic Web Worker
+ * Lucidase - High-Performance Genomic Web Worker
  * =================================================
  * Runs off the main UI thread to parse 1,000,000-line raw genotyping files
  * (23andMe, AncestryDNA, MyHeritage, VCF) without freezing the browser.

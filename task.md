@@ -1,4 +1,4 @@
-# GenomePulse — Engineering & Design Specification
+# Lucidase — Engineering & Design Specification
 
 ## Design Context
 

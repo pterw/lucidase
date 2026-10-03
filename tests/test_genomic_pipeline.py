@@ -520,29 +520,29 @@ class TestBiotoolsPortability(unittest.TestCase):
 
     def test_module_documents_the_environment_variables_and_the_privacy_difference(self):
         doc = biotools_orchestrator.__doc__
-        for name in ("GENOMEPULSE_BIOTOOLS_SKILLS_DIR", "GENOMEPULSE_CACHE_DIR"):
+        for name in ("LUCIDASE_BIOTOOLS_SKILLS_DIR", "LUCIDASE_CACHE_DIR"):
             self.assertIn(name, doc)
         self.assertIn("NCBI", doc)
         self.assertIn("Ensembl", doc)
-        self.assertIn("unlike the GenomePulse web app", doc)
+        self.assertIn("unlike the Lucidase web app", doc)
 
     def test_cache_dir_comes_from_the_environment_and_is_created_lazily(self):
         with tempfile.TemporaryDirectory() as tmp:
             cache = Path(tmp) / "not" / "yet" / "there"
-            with mock.patch.dict(os.environ, {"GENOMEPULSE_CACHE_DIR": str(cache)}):
-                os.environ.pop("GENOMEPULSE_BIOTOOLS_SKILLS_DIR", None)
+            with mock.patch.dict(os.environ, {"LUCIDASE_CACHE_DIR": str(cache)}):
+                os.environ.pop("LUCIDASE_BIOTOOLS_SKILLS_DIR", None)
                 orch = biotools_orchestrator.BiotoolsOrchestrator()
                 self.assertEqual(orch.cache_dir, cache)
                 self.assertFalse(cache.exists(), "constructing must not create the cache directory")
                 result = orch.query_clinvar("rs1")
-            self.assertIn("GENOMEPULSE_BIOTOOLS_SKILLS_DIR", result["error"])
+            self.assertIn("LUCIDASE_BIOTOOLS_SKILLS_DIR", result["error"])
             self.assertFalse(cache.exists(), "a query that cannot run a script must not create it either")
 
     def test_default_cache_dir_is_under_the_home_directory(self):
         with mock.patch.dict(os.environ):
-            os.environ.pop("GENOMEPULSE_CACHE_DIR", None)
+            os.environ.pop("LUCIDASE_CACHE_DIR", None)
             self.assertEqual(
-                biotools_orchestrator.BiotoolsOrchestrator().cache_dir, Path.home() / ".cache" / "genomepulse"
+                biotools_orchestrator.BiotoolsOrchestrator().cache_dir, Path.home() / ".cache" / "lucidase"
             )
 
     def test_biotools_exposes_its_query_methods(self):

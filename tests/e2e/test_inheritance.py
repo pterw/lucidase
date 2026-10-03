@@ -70,7 +70,7 @@ def test_csv_has_no_half_risk_for_wildtype_loci(loaded_page, tmp_path):
     page = loaded_page
     _analyse(page, _wildtype_f5_file(tmp_path))
     with page.expect_download(timeout=5000) as info:
-        page.evaluate("() => window.__genomePulse.exportCsvReport()")
+        page.evaluate("() => window.__lucidase.exportCsvReport()")
     rows = list(csv.DictReader(Path(info.value.path()).read_text(encoding="utf-8").splitlines()))
     wildtype = {r["rsID"]: r for r in rows if r["rsID"] in ("rs6025", "rs1799945", "rs1800562", "rs1799963")}
     assert set(wildtype) == {"rs6025", "rs1799945", "rs1800562", "rs1799963"}

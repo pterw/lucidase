@@ -8,7 +8,7 @@ Do not route around it.
 
 | Area | Path | Ships to users? | Role |
 |---|---|---|---|
-| GenomePulse web app | `web/` | **Yes** (Vercel static + `api/manifest.js`) | Parses raw DNA files and classifies them **in the browser**. |
+| Lucidase web app | `web/` | **Yes** (Vercel static + `api/manifest.js`) | Parses raw DNA files and classifies them **in the browser**. |
 | Knowledge-base build | `tools/` | No (build time) | Builds the one curated knowledge base, `web/src/knowledge-base.json`. |
 | Desktop genomics | `genomic_parser.py`, `variant_annotator.py`, `segregation_engine.py`, `biotools_orchestrator.py`, `gui.py` | No (local tool) | Reference implementation of the same rules, which must match the web app. |
 | de Bruijn explorer | `graph_core.py`, `assembly.py`, `bio_engine.py`, `ml_engine.py`, `debruijn_explorer.py` | No (local tool) | Standalone assembly and graph teaching tool. |

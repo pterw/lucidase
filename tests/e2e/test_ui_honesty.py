@@ -61,8 +61,27 @@ def _sparse_file(tmp_path):
 
 def _export(page, fn):
     with page.expect_download(timeout=5000) as info:
-        page.evaluate(f"() => window.__genomePulse.{fn}()")
+        page.evaluate(f"() => window.__lucidase.{fn}()")
     return Path(info.value.path()).read_text(encoding="utf-8")
+
+
+def test_product_name_is_lucidase_everywhere_the_user_sees_it(loaded_page):
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    assert page.locator('[data-design-id="brand.wordmark"]').inner_text().strip() == "Lucidase"
+    assert "Lucidase" in page.locator("footer").inner_text()
+    assert "genomepulse" not in page.locator("body").inner_text().lower().replace(" ", "")
+    names = []
+    texts = []
+    for fn in ("exportMarkdownReport", "exportCsvReport"):
+        with page.expect_download(timeout=5000) as info:
+            page.evaluate(f"() => window.__lucidase.{fn}()")
+        names.append(info.value.suggested_filename)
+        texts.append(Path(info.value.path()).read_text(encoding="utf-8"))
+    assert texts[0].splitlines()[0] == "# Lucidase Variome Clinical Report"
+    assert names[0].startswith("Lucidase_Report_")
+    assert names[1].startswith("Lucidase_Variants_")
 
 
 def _screens(page) -> str:
