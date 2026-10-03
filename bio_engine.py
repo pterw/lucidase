@@ -239,12 +239,15 @@ def evaluate_assembly_against_reference(contigs: list[dict], ref_seq: str) -> di
         if len(seq) < 5:
             continue
         try:
-            alignments = aligner.align(ref_u, seq)
-            if not alignments:
+            # A canonical contig may be either strand of the reference: keep the better one.
+            best = None
+            for cand in (seq, revcomp(seq)):
+                alignments = aligner.align(ref_u, cand)
+                if alignments and (best is None or alignments[0].score > best.score):
+                    best, seq_used = alignments[0], cand
+            if best is None or best.score <= 0:
                 continue
-            best = alignments[0]
-            if best.score <= 0:
-                continue
+            seq = seq_used
             t_coords = best.aligned[0]
             q_coords = best.aligned[1]
             matches, aln_len = _count_matches(ref_u, seq, t_coords, q_coords)

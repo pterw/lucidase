@@ -83,6 +83,7 @@ from assembly import (  # noqa: E402
 )
 from bio_engine import (  # noqa: E402
     _gc_content,
+    alignment_basis_text,
     contigs_to_seqrecords,
     evaluate_assembly_against_reference,
     find_orfs,
@@ -97,6 +98,7 @@ from graph_core import (  # noqa: E402
     EDGE,
     FUTURE,
     FUTURE_TXT,
+    DEFAULT_K,
     INK,
     LEMON,
     LIME,
@@ -130,7 +132,9 @@ from genomic_parser import (  # noqa: E402
     read_genotype_text,
 )
 from ml_engine import (  # noqa: E402
+    OUTLIER_FRACTION,
     bin_contigs,
+    binning_caveat_lines,
     coverage_summary,
     estimate_error_threshold,
     extract_kmer_features,
@@ -144,8 +148,7 @@ from variant_annotator import (  # noqa: E402
 )
 
 
-# One default k for the Python API and the CLI (matches the GUI's default).
-DEFAULT_K = 3
+# DEFAULT_K lives in graph_core, so the GUI, the Python API and the CLI share one value.
 
 
 # ===========================================================================
@@ -199,7 +202,7 @@ def assemble(
     >>> print(f"Contigs: {len(result['contigs'])}, N50: {result['metrics']['n50']}")
     """
     kmers, notes = collect_kmers(text, mode, k, both_strands, unique)
-    m = analyze(kmers, notes, ref_seq=ref_seq)
+    m = analyze(kmers, notes, ref_seq=ref_seq, both=both_strands)
     return {
         "contigs": m.contigs,
         "records": m.records,
@@ -315,7 +318,7 @@ def run_headless(args) -> int:
                 ref_seq = args.ref.strip().upper()
 
         kmers, notes = collect_kmers(text, mode, args.k, args.both_strands, args.unique)
-        m = analyze(kmers, notes, ref_seq=ref_seq)
+        m = analyze(kmers, notes, ref_seq=ref_seq, both=args.both_strands)
     except (ValueError, OSError) as err:
         print(f"Error: {err}", file=sys.stderr)
         return 1
@@ -364,15 +367,17 @@ def run_headless(args) -> int:
             print(f"  ... ({len(m.contigs) - 20} more)")
 
     if args.binning:
-        print("\n--- Scikit-Learn Contig Binning & PCA ---")
+        print("\n--- Contig Binning & PCA (heuristic, exploratory) ---")
         bs = m.binning_summary
+        for line in binning_caveat_lines(bs):
+            print(f"  {line}")
         print(f"  Clusters (KMeans Bins):... {bs.get('n_bins', 1)}")
         if bs.get("pca_variance_ratio"):
             vars_str = ", ".join(
                 f"PC{i+1}: {v*100:.1f}%" for i, v in enumerate(bs["pca_variance_ratio"])
             )
             print(f"  PCA Explained Variance:... {vars_str}")
-        print(f"  Potential Outliers:....... {bs.get('outlier_count', 0)}")
+        print(f"  Flagged by {OUTLIER_FRACTION:.0%} rule:...... {bs.get('outlier_count', 0)}")
         for b_name, b_data in bs.get("clusters", {}).items():
             print(
                 f"  {b_name}: {b_data.get('contigs')} contigs, {b_data.get('total_bp'):,} bp, "
@@ -396,10 +401,11 @@ def run_headless(args) -> int:
         print(
             f"  Mean Alignment Identity:.. {m.ref_eval.get('mean_identity', 0)*100:.2f}%"
         )
+        print(f"  ({alignment_basis_text()})")
         print(f"  Aligned Contigs:.......... {m.ref_eval.get('aligned_contigs')}")
 
     if args.gfa:
-        write_gfa(m.contigs, args.gfa, m.k)
+        write_gfa(m.contigs, args.gfa, m.k, both=m.both)
         print(f"Wrote GFA to {args.gfa} ({len(m.contigs)} contigs)")
     if args.contigs:
         write_contigs_fasta(m.contigs, args.contigs)

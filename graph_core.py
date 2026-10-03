@@ -62,6 +62,7 @@ FUTURE_TXT = "#B3A678"
 PANEL = "#FFF1BF"
 TRAIL_COLORS = ["#2F7D32", "#D9480F", "#C2255C", "#1C7ED6", "#9C36B5", "#8C6D1F"]
 
+DEFAULT_K = 3  # the one default k for the GUI, the Python API and the CLI
 MAX_KMERS = 500_000  # cap for total k-mers (raised for real assembly use)
 MAX_DRAW_NODES = 400  # above this the graph is not drawn (tables still work)
 MAX_TABLE_ROWS = 2000
@@ -139,15 +140,6 @@ def collect_kmers(text: str, mode: str, k: int, both: bool, unique: bool):
         if before != len(kmers):
             notes.append(f"Deduplicated {before} k-mers down to {len(kmers)} unique.")
     return kmers, notes
-
-
-def _is_strand_symmetric(kmers: list[str]) -> bool:
-    """True when the k-mer set is closed under reverse complement (DNA only),
-    which is what the both-strands option produces."""
-    seen = set(kmers)
-    if any(set(x) - set("ACGT") for x in seen):
-        return False
-    return all(revcomp(x) in seen for x in seen)
 
 
 def build_graph(kmers: list[str]) -> nx.MultiDiGraph:
@@ -355,13 +347,16 @@ class Model:
     binning_summary: dict = field(default_factory=dict)
     gmm_stats: dict = field(default_factory=dict)
     ref_eval: dict | None = None
+    both: bool = False
 
 
 def analyze(
     kmers: list[str],
     notes: list[str] | None = None,
     ref_seq: str | None = None,
+    both: bool = False,
 ) -> Model:
+    """Build the full model. ``both`` must be the flag the k-mers were collected with."""
     g = build_graph(kmers)
     k = len(kmers[0])
     trails = trail_cover(g)
@@ -427,8 +422,14 @@ def analyze(
     ag = build_assembly_graph(kmers)
     err_thresh, gmm_stats = fit_kmer_error_model(spectrum)
     ag, simp_notes = simplify_graph(ag, k, min_cov=err_thresh)
-    # A strand-symmetric k-mer set (both strands on) yields every contig twice.
-    contigs = extract_contigs(ag, k, canonical=_is_strand_symmetric(kmers))
+    # Both strands on yields every contig twice (N included: revcomp(N) = N), so the
+    # explicit flag, not the data, decides whether the twins are merged.
+    contigs = extract_contigs(ag, k, canonical=both)
+    if both:
+        simp_notes.append(
+            "Both strands: reported one contig per strand pair (the smaller strand "
+            "in string order is kept, which may be the reverse complement of the input)."
+        )
     metrics = assembly_metrics(contigs)
 
     # ---- Scikit-learn: Metagenomic Contig Binning, PCA, Anomaly Detection ----
@@ -496,6 +497,7 @@ def analyze(
         binning_summary=binning_summary,
         gmm_stats=gmm_stats,
         ref_eval=ref_eval,
+        both=both,
     )
 
 

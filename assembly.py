@@ -295,8 +295,46 @@ def assembly_metrics(contigs: list[dict]) -> dict:
     }
 
 
-def write_gfa(contigs: list[dict], path: str, k: int) -> None:
-    """Write assembly in GFA 1.0 format (Bandage, gfatools, vg compatible)."""
+def _flip(orient: str) -> str:
+    return "-" if orient == "+" else "+"
+
+
+def gfa_links(contigs: list[dict], k: int, both: bool = False) -> list[tuple[int, str, int, str]]:
+    """Overlap links ``(from_id, from_orient, to_id, to_orient)`` between contigs.
+
+    A link joins two oriented contigs when the last k-1 bases of the first equal the
+    first k-1 of the second. With ``both`` (both strands were assembled, so each kept
+    contig stands for its reverse complement too) either strand of every contig can
+    take part, and ``-`` marks the reverse complement. A link and its mirror image
+    (``b- -> a-`` for ``a+ -> b+``) are the same GFA edge, so only one is written."""
+    orients = ("+", "-") if both else ("+",)
+    seqs = {(c["id"], o): c["sequence"] if o == "+" else revcomp(c["sequence"])
+            for c in contigs for o in orients}
+    circular = {c["id"]: bool(c.get("circular")) for c in contigs}
+    n = k - 1
+    by_prefix: dict[str, list[tuple[int, str]]] = {}
+    for key, seq in seqs.items():
+        by_prefix.setdefault(seq[:n], []).append(key)
+    links: list[tuple[int, str, int, str]] = []
+    seen: set[tuple[int, str, int, str]] = set()
+    for (a, ao), seq in seqs.items():
+        for b, bo in by_prefix.get(seq[-n:], []):
+            if (a, ao) == (b, bo) and not circular[a]:
+                continue
+            mirror = (b, _flip(bo), a, _flip(ao))
+            if mirror in seen:
+                continue
+            link = (a, ao, b, bo)
+            seen.add(link)
+            links.append(link)
+    return links
+
+
+def write_gfa(contigs: list[dict], path: str, k: int, both: bool = False) -> None:
+    """Write assembly in GFA 1.0 format (Bandage, gfatools, vg compatible).
+
+    Pass ``both=True`` when the contigs are canonical (one per strand pair) so the
+    links may use either strand of a contig."""
     with open(path, "w", encoding="utf-8") as f:
         f.write("H\tVN:Z:1.0\n")
         for c in contigs:
@@ -305,13 +343,6 @@ def write_gfa(contigs: list[dict], path: str, k: int) -> None:
                 f"S\tctg{c['id']}\t{c['sequence']}\t"
                 f"LN:i:{c['length']}\tRC:i:{c['edges']}\tDP:i:{dp}\n"
             )
-        suffix_map: dict[str, list[int]] = {}
-        for c in contigs:
-            sfx = c["sequence"][-(k - 1) :]
-            suffix_map.setdefault(sfx, []).append(c["id"])
         overlap = k - 1
-        for c in contigs:
-            pfx = c["sequence"][: k - 1]
-            for src_id in suffix_map.get(pfx, []):
-                if src_id != c["id"] or c.get("circular"):
-                    f.write(f"L\tctg{src_id}\t+\tctg{c['id']}\t+\t{overlap}M\n")
+        for a, ao, b, bo in gfa_links(contigs, k, both):
+            f.write(f"L\tctg{a}\t{ao}\tctg{b}\t{bo}\t{overlap}M\n")

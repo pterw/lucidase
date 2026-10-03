@@ -43,6 +43,7 @@ from genomic_parser import (
 from ml_engine import binning_caveat_lines
 from variant_annotator import APOE_ROW_ID, AnnotationRecord, AnnotationReport, VariantAnnotator
 from graph_core import (
+    DEFAULT_K,
     EDGE,
     FUTURE,
     FUTURE_TXT,
@@ -308,7 +309,7 @@ class ExplorerApp:
         self._style()
 
         self.mode = tk.StringVar(value="seq")
-        self.k = tk.IntVar(value=3)
+        self.k = tk.IntVar(value=DEFAULT_K)
         self.both = tk.BooleanVar(value=False)
         self.unique = tk.BooleanVar(value=False)
 
@@ -726,7 +727,7 @@ class ExplorerApp:
                 self.both.get(),
                 self.unique.get(),
             )
-            self.model = analyze(kmers, notes)
+            self.model = analyze(kmers, notes, both=self.both.get())
         except ValueError as err:
             self.set_status(str(err), error=True)
             return
@@ -982,7 +983,7 @@ class ExplorerApp:
             filetypes=[("GFA", "*.gfa")],
         )
         if path:
-            if not self._write_or_report("the GFA file", lambda: write_gfa(self.model.contigs, path, self.model.k)):
+            if not self._write_or_report("the GFA file", lambda: write_gfa(self.model.contigs, path, self.model.k, both=self.model.both)):
                 return
             self.set_status(
                 f"Saved {os.path.basename(path)} ({len(self.model.contigs)} contigs)"
