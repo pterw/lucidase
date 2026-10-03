@@ -247,8 +247,21 @@ def test_transient_worker_module_failure_is_retried_once(page):
     assert len(aborted) == 1
 
 
+COUNT_WORKERS = """(() => {
+  const Real = window.Worker;
+  window.__workerCount = 0;
+  window.Worker = class extends Real {
+    constructor(...args) {
+      super(...args);
+      window.__workerCount += 1;
+    }
+  };
+})();"""
+
+
 @pytest.mark.allow_console_errors
 def test_persistent_worker_module_failure_shows_the_error_and_frees_the_inputs(page):
+    page.add_init_script(COUNT_WORKERS)
     _open(page)
     page.route("**/src/core/classify.js", lambda route: route.abort("connectionreset"))
     page.locator("#btn-load-karyogram-sample").click()
@@ -256,3 +269,45 @@ def test_persistent_worker_module_failure_shows_the_error_and_frees_the_inputs(p
     expect(page.locator("#karyogram-totals")).to_be_hidden()
     expect(page.locator("#karyogram-file-input")).to_be_enabled()
     expect(page.locator("#btn-load-karyogram-sample")).to_be_enabled()
+    # Exactly one retry: the first worker plus one fresh one, never a third and never just one.
+    assert page.evaluate("window.__workerCount") == 2
+
+
+def test_a_worker_that_cannot_start_shows_the_error_from_the_demo_button(page):
+    # The demo button reaches startWorker through loadSample's try/catch rather than the FileReader callback.
+    page.add_init_script("window.Worker = function () { throw new Error('worker blocked'); };")
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-error")).to_be_visible()
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("worker blocked")
+    expect(page.locator("#karyogram-file-input")).to_be_enabled()
+    expect(page.locator("#btn-load-karyogram-sample")).to_be_enabled()
+    assert page.locator("#karyogram-figure .kary-col").count() == 24
+
+
+# The page cannot be handed an unknown state through its public surface, so the worker's answer is tampered with:
+# the real worker runs, and its layout reaches the page with one observation set to a state the page does not know.
+TAMPER_OBSERVATION = """(() => {
+  const Real = window.Worker;
+  window.Worker = class extends Real {
+    set onmessage(fn) {
+      super.onmessage = (e) => {
+        const obs = e.data && e.data.layout && e.data.layout.sample && e.data.layout.sample.observations;
+        if (obs) obs[Object.keys(obs)[0]] = 'bogus_state';
+        fn(e);
+      };
+    }
+  };
+})();"""
+
+
+def test_an_unknown_locus_state_fails_fast_to_the_error_alert(page):
+    page.add_init_script(TAMPER_OBSERVATION)
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-error")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("bogus_state")
+    expect(page.locator("#karyogram-totals")).to_be_hidden()
+    expect(page.locator("#karyogram-file-input")).to_be_enabled()
+    assert page.locator("#karyogram-figure .kary-col").count() == 24
+    assert set(page.evaluate(LOCUS_STATES).values()) == {"reference"}

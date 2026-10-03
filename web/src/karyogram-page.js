@@ -51,8 +51,13 @@ function hideTotals() {
   $("karyogram-density-notice").classList.add("hidden");
 }
 
+/** The state of one locus; an unknown state is a bug upstream, so it throws instead of rendering NaN or a raw key. */
 function stateOf(layout, rsid) {
-  return layout.sample ? layout.sample.observations[rsid] : "reference";
+  const state = layout.sample ? layout.sample.observations[rsid] : "reference";
+  if (!Object.hasOwn(labels, state) || !LEGEND_ORDER.includes(state)) {
+    throw new Error(`Unknown karyogram state "${state}" for ${rsid}.`);
+  }
+  return state;
 }
 
 function renderLegend(layout) {
@@ -99,7 +104,7 @@ function renderLoci(layout) {
         `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
         `<td>${escapeHtml(l.gene)}</td><td>${escapeHtml(l.rsid)}</td>` +
         `<td>${escapeHtml(l.chrom)}:${escapeHtml(fmt(l.pos))}</td>` +
-        `<td>${escapeHtml(labels[state] ?? state)}</td></tr>`
+        `<td>${escapeHtml(labels[state])}</td></tr>`
       );
     })
     .join("");
