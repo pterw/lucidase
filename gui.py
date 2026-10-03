@@ -10,6 +10,7 @@ Provides the desktop graphical interface:
 
 from __future__ import annotations
 
+import csv
 import gzip
 import os
 import sys
@@ -105,7 +106,7 @@ EXAMPLES = {
         unique=False,
         text=">orgA_r1\nATGAAACCCGGGTTTTAACCGG\n>orgA_r2\nCCGGTTTTAACCCGGGTTTTAA\n>orgB_r1\nATATATATATATATATAAATTT\n>orgB_r2\nATATAAATTTTTTTTTATATAT",
     ),
-    "23andMe Genotype Sample (ClinVar, HPA, PGx)": dict(
+    "23andMe Genotype Sample (ClinVar, PGx, tissue notes)": dict(
         mode="genome",
         k=3,
         both=False,
@@ -133,6 +134,107 @@ def _coordinate_text(r: AnnotationRecord) -> str:
         parts = "; ".join(one(c["rsid"], c["chrom"], c["pos"]) for c in r.raw["components"])
         return f"{parts} ({r.build})"
     return f"{one('', r.chrom, r.pos).strip()} ({r.build})"
+
+
+# ---------------------------------------------------------------------------
+# Pure helpers behind the genome table, the detail pane and both exports (testable without Tk)
+# ---------------------------------------------------------------------------
+GENOME_COLUMNS = (
+    "rsid", "gene", "genotype", "category", "stars", "significance", "phenotype", "drug", "limitation",
+)
+PREVIEW_LIMIT = 500_000  # characters of a loaded file shown in the text box; analysis never uses this prefix
+CSV_COLUMNS = (
+    "source_file", "kb_release", "rsid", "gene", "genotype", "category", "review_stars", "significance",
+    "magnitude", "repute", "phenotype", "limitation", "caveats", "drug_response", "acmg_actionable",
+    "gnomad_af", "hpa_tissues", "hpa_subcellular", "hpa_provenance", "coverage_state", "evidence_tier",
+)
+NOT_AVAILABLE = "not available"
+
+
+def _stars_text(r: AnnotationRecord) -> str:
+    """ClinVar review stars. Zero is a value ("0 stars"); only None is "not available"."""
+    if r.review_stars is None:
+        return NOT_AVAILABLE
+    return "★" * r.review_stars if r.review_stars else "0 stars"
+
+
+def _hpa_provenance(r: AnnotationRecord) -> str:
+    """The KB's own provenance text for the tissue entries (hand-entered, not verified against HPA)."""
+    prov = ((r.raw.get("evidence") or {}).get("hpa") or {}).get("provenance") or {}
+    return prov.get("source") or NOT_AVAILABLE
+
+
+def _table_values(r: AnnotationRecord) -> tuple:
+    return (
+        _row_label(r),
+        r.gene,
+        r.genotype,
+        r.category,
+        _stars_text(r),
+        r.clinical_significance,
+        r.phenotype,
+        r.drug_response or "—",
+        r.limitation or "—",
+    )
+
+
+def _md_cell(text) -> str:
+    cell = str(text if text not in (None, "") else "—")
+    return cell.replace("|", "\\|").replace("\n", " ")
+
+
+def write_clinical_csv(path: str, records: list[AnnotationRecord], source: str, kb_release: str) -> None:
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(CSV_COLUMNS)
+        for r in records:
+            writer.writerow([
+                source, kb_release, _row_label(r), r.gene, r.genotype, r.category, r.review_stars,
+                r.clinical_significance, r.magnitude, r.repute, r.phenotype, r.limitation or "",
+                " | ".join(r.caveats), r.drug_response, r.acmg_actionable, r.gnomad_af,
+                str(r.hpa_tissues), ";".join(r.hpa_subcellular), _hpa_provenance(r),
+                r.coverage_state, r.evidence_tier,
+            ])
+
+
+def write_clinical_markdown(
+    path: str, records: list[AnnotationRecord], result: ParseResult, qc: dict, source: str, kb_release: str
+) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("# Clinical & Proteomic Genomic Analysis Report\n\n")
+        f.write(f"- **Source file**: `{source or 'pasted text'}`\n")
+        f.write(f"- **Knowledge base release**: `{kb_release}`\n\n")
+        f.write("### Sample Quality Control & Sequencing Metrics\n\n")
+        f.write(f"- **File Format**: `{result.format.upper()}`\n")
+        f.write(f"- **Genome Assembly**: `{result.build}`\n")
+        f.write(f"- **Total Markers Evaluated**: `{len(result.calls):,}`\n")
+        f.write(f"- **Call Rate**: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
+        f.write(f"- **Sex-chromosome QC**: `{qc['sex_signal']}`\n\n")
+        f.write("Absence of a finding does not imply absence of genetic risk.\n\n")
+        f.write("### High-Impact Clinical & Pharmacogenomic Findings\n\n")
+        f.write("| rsID | Gene | Genotype | Category | Stars | Clinical Significance | Phenotype | Limitation | Caveats |\n")
+        f.write("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
+        for r in records:
+            f.write(
+                f"| **{_md_cell(_row_label(r))}** | `{r.gene}` | `{r.genotype}` | {_md_cell(r.category)} | "
+                f"{_stars_text(r)} | {_md_cell(r.clinical_significance)} | {_md_cell(r.phenotype)} | "
+                f"{_md_cell(r.limitation)} | {_md_cell(' | '.join(r.caveats))} |\n"
+            )
+
+
+def read_preview(path: str, limit: int = PREVIEW_LIMIT) -> str:
+    """The first `limit` characters of a (possibly gzipped) file, with a final line saying so when cut.
+    This is for display only: analysis always reads the whole file."""
+    opener = gzip.open if path.endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8", errors="ignore", newline="") as f:
+        content = f.read(limit + 1)
+    if len(content) <= limit:
+        return content
+    return (
+        content[:limit]
+        + f"\n\n# [preview: only the first {limit:,} characters are shown here; "
+        "analysis uses the whole loaded file, not this text box]\n"
+    )
 
 
 # ===========================================================================
@@ -283,9 +385,9 @@ class ExplorerApp:
         ttk.Button(tb, text="Export GenBank…", command=self.export_genbank).pack(
             side="right", padx=4
         )
-        ttk.Button(tb, text="Export Clinical…", command=self.export_clinical_report).pack(
-            side="right", padx=4
-        )
+        self.export_clinical_btn = ttk.Button(tb, text="Export Clinical…", command=self.export_clinical_report)
+        self.export_clinical_btn.pack(side="right", padx=4)
+        self.export_clinical_btn.state(["disabled"])  # enabled by a successful genome analysis
         ttk.Button(tb, text="Export CSV…", command=self.export_csv).pack(side="right")
 
         ctl = ttk.Frame(right)
@@ -390,8 +492,10 @@ class ExplorerApp:
         self.genome_tree = self._tree(
             nb,
             "🧬 Genotypes",
-            ("rsid", "gene", "genotype", "category", "stars", "significance", "phenotype", "drug"),
+            GENOME_COLUMNS,
         )
+        for col, width in (("phenotype", 420), ("limitation", 420), ("significance", 160), ("drug", 140)):
+            self.genome_tree.column(col, width=width, anchor="w", stretch=True)
         self.genome_tree.bind("<<TreeviewSelect>>", self._genome_row_selected)
         gf = ttk.Frame(nb)
         nb.add(gf, text="🧬 Proteomic & Clinical Detail")
@@ -409,6 +513,10 @@ class ExplorerApp:
         self.genome_records: list[AnnotationRecord] = []
         self.sample_qc: dict | None = None  # compute_qc output for the loaded file
         self.sample_parse: ParseResult | None = None
+        self.genome_source = ""  # file name the results belong to ("" for pasted text or an example)
+        self.genome_kb_release = ""
+        self.genome_path: str | None = None  # the loaded genotype file; analysis always reads this, not the text box
+        self.genome_preview = ""  # what the text box held after the load, to tell an edit from the preview
 
         self._resize_job = None
         self.canvas.get_tk_widget().bind("<Configure>", self._on_resize, add="+")
@@ -477,6 +585,8 @@ class ExplorerApp:
         self.k.set(ex["k"])
         self.both.set(ex["both"])
         self.unique.set(ex["unique"])
+        self.genome_path = None
+        self.genome_preview = ""
         self._mode_changed()
         self.build()
 
@@ -493,31 +603,37 @@ class ExplorerApp:
         )
         if not path:
             return
-        # Auto-detect DTC genome / VCF
+        # A recognised genotype file is analysed whole; the text box only previews it. A read error is shown,
+        # never swallowed, and only "not a genotype format" falls through to the sequence readers.
+        not_genotype = ""
         try:
-            opener = gzip.open if path.endswith(".gz") else open
-            with opener(path, "rt", encoding="utf-8", errors="ignore") as f:
-                head_lines = [f.readline() for _ in range(30)]
-            try:
-                fmt = parse_genotype_file("".join(head_lines)).format
-            except UnsupportedFormatError:
-                fmt = "unknown"
-            if fmt != "unknown":
-                with opener(path, "rt", encoding="utf-8", errors="ignore") as f:
-                    content = f.read(500_000)
-                self.text.delete("1.0", "end")
-                self.text.insert("1.0", content)
-                self.mode.set("genome")
-                self._mode_changed()
-                self._build_genome_file(path, prefix=f"Loaded {os.path.basename(path)} ({fmt.upper()})")
-                return
-        except Exception:
-            pass
+            result, report = self._analyse_file(path)
+        except UnsupportedFormatError as err:
+            not_genotype = str(err)
+        except Exception as err:
+            self._clear_genome_results()
+            self.set_status(f"Could not read {os.path.basename(path)}: {err}", error=True)
+            return
+        else:
+            preview = read_preview(path)
+            self.text.delete("1.0", "end")
+            self.text.insert("1.0", preview)
+            self.genome_path = path
+            self.genome_preview = preview.strip()
+            self.mode.set("genome")
+            self._mode_changed()
+            prefix = f"Loaded {os.path.basename(path)} ({result.format.upper()})"
+            if "# [preview:" in preview:
+                prefix += f"; the text box previews only the first {PREVIEW_LIMIT:,} characters"
+            self._populate_genome_results(result, report, prefix, os.path.basename(path))
+            return
 
+        self.genome_path = None
+        self.genome_preview = ""
         try:
             fasta, note = load_sequences_as_fasta(path)
         except Exception as err:
-            self.set_status(f"Could not read file: {err}", error=True)
+            self.set_status(f"Could not read file: {err} (not a genotype file either: {not_genotype})", error=True)
             return
         self.text.delete("1.0", "end")
         self.text.insert("1.0", fasta)
@@ -541,7 +657,12 @@ class ExplorerApp:
         )
 
         if is_genome:
-            self._build_genome_text(raw_text, prefix)
+            if self.genome_path and raw_text == self.genome_preview:
+                # Unedited preview of a loaded file: analyse the file itself, never the cut-off text.
+                self._build_genome_file(self.genome_path, prefix)
+            else:
+                self.genome_path = None
+                self._build_genome_text(raw_text, prefix)
             return
 
         try:
@@ -774,8 +895,9 @@ class ExplorerApp:
             defaultextension=".png",
             filetypes=[("PNG", "*.png"), ("SVG", "*.svg"), ("PDF", "*.pdf")],
         )
-        if path:
-            self.fig.savefig(path, dpi=200, facecolor=self.fig.get_facecolor())
+        if path and self._write_or_report(
+            "the figure", lambda: self.fig.savefig(path, dpi=200, facecolor=self.fig.get_facecolor())
+        ):
             self.set_status(f"Saved {os.path.basename(path)}")
 
     def export_csv(self):
@@ -788,10 +910,15 @@ class ExplorerApp:
         )
         if path:
             base = os.path.splitext(path)[0]
-            self.model.edges_df.to_csv(f"{base}_edges.csv", index=False)
-            self.model.nodes_df.to_csv(f"{base}_nodes.csv", index=False)
-            if self.model.contigs_df is not None and not self.model.contigs_df.empty:
-                self.model.contigs_df.to_csv(f"{base}_contigs_ml.csv", index=False)
+
+            def write():
+                self.model.edges_df.to_csv(f"{base}_edges.csv", index=False)
+                self.model.nodes_df.to_csv(f"{base}_nodes.csv", index=False)
+                if self.model.contigs_df is not None and not self.model.contigs_df.empty:
+                    self.model.contigs_df.to_csv(f"{base}_contigs_ml.csv", index=False)
+
+            if not self._write_or_report("the CSV files", write):
+                return
             self.set_status(
                 f"Wrote {os.path.basename(base)}_edges.csv, _nodes.csv, and _contigs_ml.csv"
             )
@@ -805,7 +932,8 @@ class ExplorerApp:
             filetypes=[("GFA", "*.gfa")],
         )
         if path:
-            write_gfa(self.model.contigs, path, self.model.k)
+            if not self._write_or_report("the GFA file", lambda: write_gfa(self.model.contigs, path, self.model.k)):
+                return
             self.set_status(
                 f"Saved {os.path.basename(path)} ({len(self.model.contigs)} contigs)"
             )
@@ -819,7 +947,8 @@ class ExplorerApp:
             filetypes=[("FASTA", "*.fasta *.fa"), ("All", "*.*")],
         )
         if path:
-            write_contigs_fasta(self.model.contigs, path)
+            if not self._write_or_report("the FASTA file", lambda: write_contigs_fasta(self.model.contigs, path)):
+                return
             self.set_status(
                 f"Saved {os.path.basename(path)} ({len(self.model.contigs)} contigs)"
             )
@@ -833,7 +962,8 @@ class ExplorerApp:
             filetypes=[("GenBank", "*.gb *.gbk *.genbank"), ("All", "*.*")],
         )
         if path:
-            write_contigs_genbank(self.model.contigs, path)
+            if not self._write_or_report("the GenBank file", lambda: write_contigs_genbank(self.model.contigs, path)):
+                return
             self.set_status(
                 f"Saved {os.path.basename(path)} ({len(self.model.contigs)} contigs with annotations)"
             )
@@ -843,54 +973,73 @@ class ExplorerApp:
         try:
             result = parse_genotype_file(raw_text)
             report = VariantAnnotator().annotate_genome(result)
-            self._populate_genome_results(result, report, prefix)
         except Exception as err:
-            self.set_status(f"Error parsing genomic text: {err}", error=True)
+            self._clear_genome_results()
+            self.set_status(f"Error parsing genomic text: {err}. Previous results were cleared.", error=True)
+            return
+        self._populate_genome_results(result, report, prefix, "")
+
+    def _analyse_file(self, path: str) -> tuple[ParseResult, AnnotationReport]:
+        result = parse_genotype_file(read_genotype_text(path), os.path.basename(path))
+        return result, VariantAnnotator().annotate_genome(result)
 
     def _build_genome_file(self, path: str, prefix: str = ""):
         try:
-            result = parse_genotype_file(read_genotype_text(path), os.path.basename(path))
-            report = VariantAnnotator().annotate_genome(result)
-            self._populate_genome_results(result, report, prefix)
+            result, report = self._analyse_file(path)
         except Exception as err:
-            self.set_status(f"Error parsing genomic file: {err}", error=True)
+            self._clear_genome_results()
+            self.set_status(f"Error parsing genomic file: {err}. Previous results were cleared.", error=True)
+            return
+        self._populate_genome_results(result, report, prefix, os.path.basename(path))
+
+    def _clear_genome_results(self):
+        """A failed analysis leaves no earlier file's findings to view or export."""
+        self.genome_records = []
+        self.sample_qc = None
+        self.sample_parse = None
+        self.genome_source = ""
+        self.genome_kb_release = ""
+        self.genome_tree.delete(*self.genome_tree.get_children())
+        self.genome_detail_text.configure(state="normal")
+        self.genome_detail_text.delete("1.0", "end")
+        self.genome_detail_text.configure(state="disabled")
+        self.export_clinical_btn.state(["disabled"])
+
+    def _write_or_report(self, what: str, write) -> bool:
+        """Run a file write; a failure reaches the user in the status line instead of stderr only."""
+        try:
+            write()
+        except (OSError, ValueError) as err:
+            self.set_status(f"Could not save {what}: {err}", error=True)
+            return False
+        return True
 
     def _populate_genome_results(
-        self, result: ParseResult, report: AnnotationReport, prefix: str = ""
+        self, result: ParseResult, report: AnnotationReport, prefix: str = "", source: str = ""
     ):
         qc = compute_qc(result)
         records = report.records
         self.sample_qc = qc
         self.sample_parse = result
         self.genome_records = records
+        self.genome_source = source
+        self.genome_kb_release = report.kb_release
+        self.export_clinical_btn.state(["!disabled"])
         summary = VariantAnnotator().summarize_annotations(report)
         coverage = summary["coverage"]
 
         # Populate tree
         self.genome_tree.delete(*self.genome_tree.get_children())
         for r in records:
-            stars_str = "★" * r.review_stars if r.review_stars else "—"
-            short_pheno = r.phenotype[:40] + ("…" if len(r.phenotype) > 40 else "")
-            self.genome_tree.insert(
-                "",
-                "end",
-                values=(
-                    _row_label(r),
-                    r.gene,
-                    r.genotype,
-                    r.category,
-                    stars_str,
-                    r.clinical_significance,
-                    short_pheno,
-                    r.drug_response or "—",
-                ),
-            )
+            self.genome_tree.insert("", "end", values=_table_values(r))
 
         # Populate details text banner
         self.genome_detail_text.configure(state="normal")
         self.genome_detail_text.delete("1.0", "end")
         lines = [
             "═" * 3 + " Quality Control & Sequencing Metrics " + "═" * 3 + "\n",
+            f"  Source:................. {source or 'pasted text'}\n",
+            f"  Knowledge Base Release:. {report.kb_release}\n",
             f"  Format Detected:........ {result.format.upper()}\n",
             f"  Genome Assembly:........ {result.build}\n",
             f"  Total Markers:.......... {len(result.calls):,} SNPs\n",
@@ -906,7 +1055,7 @@ class ExplorerApp:
             f"  Not tested by this file: {coverage['not_tested_by_array_count']} of {coverage['total_loci']} loci\n",
             f"  Insufficient evidence:.. {coverage['insufficient_evidence_count']}\n\n",
             "Absence of a finding does not imply absence of genetic risk.\n\n",
-            "Select any variant row in the table above to inspect ClinVar review criteria, OMIM/MedGen phenotypes, and Human Protein Atlas (HPA) tissue protein abundance.\n",
+            "Select any variant row in the table above to inspect ClinVar review stars, the phenotype, the limitation and caveats, and the tissue notes (hand-entered; the provenance is shown with them).\n",
         ]
         self.genome_detail_text.insert("end", "".join(lines))
         self.genome_detail_text.configure(state="disabled")
@@ -947,15 +1096,17 @@ class ExplorerApp:
             f"  Category:............... {r.category}\n",
             f"  Clinical Significance:.. {r.clinical_significance}\n",
             "  ClinVar Review Stars:... "
-            + (f"{'★' * r.review_stars} ({r.review_stars} / 4 stars)" if r.review_stars is not None else "not available")
+            + (f"{'★' * r.review_stars} ({r.review_stars} / 4 stars)".strip() if r.review_stars is not None else "not available")
             + "\n",
             f"  Evidence Tier:.......... {r.evidence_tier}\n",
-            "  Promethease Magnitude:.. "
+            "  Magnitude:.............. "
             + (f"{r.magnitude:.1f} / 10.0 (Repute: {r.repute})" if r.magnitude is not None else "not available")
             + "\n",
         ]
         if r.limitation:
             lines.append(f"  Limitation:............. {r.limitation}\n")
+        for caveat in r.caveats:
+            lines.append(f"  Caveat:................. {caveat}\n")
         if r.acmg_actionable:
             lines.append("  ACMG Actionable:........ YES (Designated ACMG Secondary Findings v3.2 Gene)\n")
         if r.drug_response:
@@ -968,12 +1119,13 @@ class ExplorerApp:
         lines.append("═" * 3 + " Clinical Condition & Phenotype " + "═" * 3 + "\n")
         lines.append(f"  {r.phenotype}\n\n")
 
-        lines.append("═" * 3 + " Human Protein Atlas (HPA) Tissue Abundance " + "═" * 3 + "\n")
+        lines.append("═" * 3 + " Tissue Abundance (hand-entered) " + "═" * 3 + "\n")
+        lines.append(f"  Provenance:............. {_hpa_provenance(r)}\n")
         if r.hpa_tissues:
             for tissue, level in r.hpa_tissues.items():
                 lines.append(f"  {tissue.title():.<26s} {level}\n")
         else:
-            lines.append("  Wild-type protein expression widely distributed.\n")
+            lines.append(f"  Tissues:................ {NOT_AVAILABLE}\n")
         if r.hpa_subcellular:
             lines.append(f"  Subcellular Location:... {', '.join(r.hpa_subcellular)}\n")
 
@@ -994,37 +1146,15 @@ class ExplorerApp:
 
         qc, result = self.sample_qc, self.sample_parse
         if path.endswith(".csv"):
-            import csv
-            with open(path, "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow([
-                    "rsid", "gene", "genotype", "category", "review_stars", "significance",
-                    "magnitude", "repute", "phenotype", "drug_response", "acmg_actionable",
-                    "gnomad_af", "hpa_tissues", "hpa_subcellular", "coverage_state", "evidence_tier"
-                ])
-                for r in self.genome_records:
-                    writer.writerow([
-                        _row_label(r), r.gene, r.genotype, r.category, r.review_stars,
-                        r.clinical_significance, r.magnitude, r.repute, r.phenotype,
-                        r.drug_response, r.acmg_actionable, r.gnomad_af,
-                        str(r.hpa_tissues), ";".join(r.hpa_subcellular), r.coverage_state, r.evidence_tier
-                    ])
+            write = lambda: write_clinical_csv(  # noqa: E731
+                path, self.genome_records, self.genome_source, self.genome_kb_release
+            )
         else:
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(f"# Clinical & Proteomic Genomic Analysis Report\n\n")
-                f.write(f"### Sample Quality Control & Sequencing Metrics\n\n")
-                f.write(f"- **File Format**: `{result.format.upper()}`\n")
-                f.write(f"- **Genome Assembly**: `{result.build}`\n")
-                f.write(f"- **Total Markers Evaluated**: `{len(result.calls):,}`\n")
-                f.write(f"- **Call Rate**: `{_rate_text(qc['call_rate'], qc['qc_note'])}`\n")
-                f.write(f"- **Sex-chromosome QC**: `{qc['sex_signal']}`\n\n")
-                f.write("Absence of a finding does not imply absence of genetic risk.\n\n")
-                f.write(f"### High-Impact Clinical & Pharmacogenomic Findings\n\n")
-                f.write(f"| rsID | Gene | Genotype | Category | Stars | Clinical Significance | Phenotype |\n")
-                f.write(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
-                for r in self.genome_records:
-                    stars_str = "★" * r.review_stars if r.review_stars else "—"
-                    f.write(f"| **{_row_label(r)}** | `{r.gene}` | `{r.genotype}` | {r.category} | {stars_str} | {r.clinical_significance} | {r.phenotype} |\n")
+            write = lambda: write_clinical_markdown(  # noqa: E731
+                path, self.genome_records, result, qc, self.genome_source, self.genome_kb_release
+            )
+        if not self._write_or_report("the clinical report", write):
+            return
         self.set_status(f"Saved clinical report to {os.path.basename(path)}")
 
 
