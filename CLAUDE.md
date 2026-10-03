@@ -14,6 +14,12 @@ untracked workspace `.superpowers/sdd/2026-10-02-genomepulse-hardening/`. Before
 The branch is pushed to the private repo `pterw/genomepulse`, with draft PR #1. The controller pushes only commits
 that passed gate-runner, by explicit SHA, with `git push --atomic`. Implementers never push.
 
+Every plan task (T1-T13 and T10a) has landed. What remains, in order:
+1. the rename and README branding (owner ruling 10, below);
+2. a whole-branch review, one section at a time;
+3. a Chrome inspection;
+4. the final report, after which PR #1 leaves draft.
+
 ## Owner rulings that bind every change
 
 - Single source of genomic knowledge: `web/src/knowledge-base.json`. It is built by `tools/build_canonical_kb.py`
@@ -23,6 +29,14 @@ that passed gate-runner, by explicit SHA, with `git push --atomic`. Implementers
 - Visual design and identity are NOT established. Make no design decisions (colours, fonts, themes, components).
   Reproduce the current look exactly. Styling config lives only in `web/tailwind.config.js` plus
   `web/src/tailwind.input.css`. A design system will be authored later.
+- Owner ruling 10 (2026-10-02) makes exceptions to that:
+  - the product gets a new one-word name, chosen in the style of "Promethease" and shown in the UI. Proposed:
+    Lucidase;
+  - the README opens with a screenshot and a styled SVG that works in light and dark mode.
+
+  Nothing else changes the look until the owner's design system.
+- Product goal: "a real useful tool that does not charge for analyzing uploaded docs". Docs and UI describe only
+  shipped behaviour, and the README stays faithful.
 - Network access is allowed only when the owner approves it for a specific task. Tests are always offline.
 
 ## Gates (all five, in order)
@@ -45,5 +59,6 @@ python tools/check_vendored_css.py
 - Parallel code phases use detached worktrees at `C:/ssw/t<N>` (short paths for MAX_PATH). Landings are serial in
   the main worktree.
 - Line endings: `core.autocrlf=true`. Pinned upstream fixtures are `-text` (`.gitattributes`) so their sha256 holds.
-- The worker loads the KB with a JSON module import, not `fetch`: `tests/test_zero_knowledge_privacy.py` forbids
-  `fetch(` in the worker.
+- The worker and the page load the KB through one validating loader, `web/src/kb-loader.js`. It uses a JSON module
+  import, not `fetch`. `tests/test_zero_knowledge_privacy.py` forbids `fetch(` in `worker.js`, and scans the loader
+  and every `web/src/core/*.js` for telemetry hosts.
