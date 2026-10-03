@@ -3,10 +3,31 @@
  * =============================================
  * Orchestrates Web Worker file parsing, reactive UI updates,
  * compound APOE diplotype synthesis, light/dark mode theming,
- * filtering, sorting, variant inspection drawer, and Redis enrichment.
+ * filtering, sorting and the variant inspection drawer.
+ *
+ * Every table row, drawer field and export value comes from view-model.js (one display model per
+ * record); this file owns the DOM only. Any record or KB value placed in an innerHTML string goes
+ * through escapeHtml.
  */
 
 import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
+import {
+  NOT_AVAILABLE,
+  acmgVersionLabel,
+  apoeCardModel,
+  csvReport,
+  drawerTierText,
+  escapeHtml,
+  fmtPct,
+  formatRate,
+  heroScopeText,
+  kbBadge,
+  markdownReport,
+  partnerModelNote,
+  testedVariantCounts,
+  toViewModel,
+  MODEL_LABELS,
+} from "./view-model.js";
 
 // Global Application State
 const state = {
@@ -30,7 +51,7 @@ const state = {
   filterCategory: "all",
   searchQuery: "",
   sortBy: "magnitude",
-  redisStats: null,
+  // Not a clinical field: a missing stored preference means the light theme.
   theme: localStorage.getItem("genomepulse-theme") || "light"
 };
 
@@ -39,6 +60,7 @@ function initApp() {
   console.log("initApp executed, readyState:", document.readyState);
   initTheme();
   initEventListeners();
+  loadManifest();
   window.__genomePulse = {
     state,
     processText,
@@ -83,6 +105,48 @@ function setTheme(theme) {
   }
 }
 
+// A value the record or the KB does not carry is shown as "Not available" in a muted style, never as a placeholder.
+const MUTED = "text-slate-500 dark:text-slate-400 italic";
+const naHtml = (text = NOT_AVAILABLE) => `<span class="${MUTED}">${escapeHtml(text)}</span>`;
+const valueHtml = (value, naText) => (value === null || value === undefined ? naHtml(naText) : escapeHtml(value));
+
+function setValue(el, value, naText = NOT_AVAILABLE) {
+  if (!el) return;
+  if (value === null || value === undefined) {
+    const span = document.createElement("span");
+    span.className = MUTED;
+    span.textContent = naText;
+    el.replaceChildren(span);
+  } else {
+    el.textContent = value;
+  }
+}
+
+/** The KB claims on the page (release badge, ACMG SF scope) come from the KB manifest, never from literals. */
+function renderKbClaims(manifest) {
+  const badge = kbBadge(manifest);
+  const badgeEl = document.getElementById("kb-provenance-badge");
+  const textEl = document.getElementById("kb-provenance-text");
+  if (badgeEl) badgeEl.title = badge.title;
+  if (textEl) textEl.textContent = badge.text;
+  const hero = document.getElementById("hero-scope");
+  if (hero) hero.textContent = heroScopeText(manifest);
+  document.querySelectorAll("[data-acmg-version]").forEach((el) => {
+    el.textContent = acmgVersionLabel(manifest);
+  });
+}
+
+/** Reads the manifest from the same KB JSON the worker validates, so the page claims match the analysis. */
+async function loadManifest() {
+  try {
+    const mod = await import("./knowledge-base.json", { with: { type: "json" } });
+    renderKbClaims(mod.default.manifest);
+  } catch {
+    // The page claims then read "Not available". The analysis itself reports the KB failure when a file is run.
+    renderKbClaims(null);
+  }
+}
+
 // One worker per analysis run: a worker that failed (or never answers) is
 // terminated and the next run starts fresh, so a retry can never hang on a dead one.
 function startWorker() {
@@ -110,7 +174,11 @@ function startWorker() {
       updateProgress(data.percent, data.status);
     } else if (data.type === "complete") {
       stopWorker();
-      handleParseComplete(data);
+      try {
+        handleParseComplete(data);
+      } catch (err) {
+        showAnalysisError((err && err.message) || err);
+      }
     } else if (data.type === "error") {
       fail(data.message);
     }
@@ -147,8 +215,10 @@ function setInputsDisabled(disabled) {
   if (btnDemo) btnDemo.disabled = disabled;
 }
 
+// The one error path: every failure (worker, KB, file read, demo fetch) shows the #analysis-error alert and no results.
 function showAnalysisError(message) {
   document.getElementById("progress-section").classList.add("hidden");
+  document.getElementById("results-section").classList.add("hidden");
   const box = document.getElementById("analysis-error");
   document.getElementById("analysis-error-detail").textContent =
     String(message || "unknown error");
@@ -214,7 +284,7 @@ function initEventListeners() {
         state.fileName = "sample-23andme.txt";
         processText(text, state.fileName);
       } catch (err) {
-        showError(err.message);
+        showAnalysisError(err.message);
       }
     });
   }
@@ -269,7 +339,7 @@ function handleFileSelected(file) {
     processText(e.target.result, file.name);
   };
   reader.onerror = () => {
-    showError("Failed to read file from disk.");
+    showAnalysisError("Failed to read file from disk.");
   };
   reader.readAsText(file);
 }
@@ -291,73 +361,36 @@ function updateProgress(percent, message) {
   if (pct) pct.textContent = `${percent}%`;
 }
 
-/**
- * Flattens a classified record (core/classify.js) into the fields the table, drawer and exports
- * read. Everything comes from the record or the knowledge base; a locus with no interpretation
- * (not tested, not interpretable) shows its reason where a phenotype would be.
- */
-function toViewRecord(rec) {
-  const interp = rec.interpretation;
-  const clinvar = (rec.evidence && rec.evidence.clinvar) || {};
-  const gnomad = (rec.evidence && rec.evidence.gnomad) || {};
-  const hpa = (rec.evidence && rec.evidence.hpa) || {};
-  return {
-    ...rec,
-    genotype: rec.genotype_display,
-    category: interp ? interp.category : null,
-    significance: interp ? interp.significance : rec.reason,
-    magnitude: interp ? interp.magnitude : null,
-    repute: interp ? interp.repute : null,
-    phenotype: interp ? interp.phenotype : rec.reason,
-    drug_response: interp ? interp.drug_response : null,
-    caveats: interp ? interp.caveats : [],
-    isCarrier: Boolean(interp && interp.category === "Carrier"),
-    clinvar_stars: clinvar.stars ?? null,
-    clinvar_id: clinvar.accession ?? null,
-    gnomad_af: gnomad.af ?? null,
-    gnomad_loeuf: gnomad.loeuf ?? null,
-    hpa_tissues: hpa.tissues || {},
-    hpa_subcellular: hpa.subcellular || [],
-    acmg_actionable: rec.acmg_sf,
-    refusal_notices: rec.limitation ? [rec.limitation] : []
-  };
-}
-
-/** Gene drawer content from the knowledge base; an empty insights object counts as none. */
-function geneInsights(gene) {
-  const insights = state.genes[gene] && state.genes[gene].insights;
-  return insights && Object.keys(insights).length > 0 ? insights : null;
-}
-
 function handleParseComplete(data) {
+  const listed = [...data.records, ...data.negative_checks, ...data.array_gaps, ...data.insufficient_evidence];
+  if (data.apoe) listed.push(data.apoe);
+  const testedCounts = testedVariantCounts(listed);
+  const toVm = (record) => toViewModel(record, data.genes, testedCounts);
+
   state.manifest = data.manifest;
   state.genes = data.genes;
   state.qc = data.qc;
-  state.records = data.records.map(toViewRecord);
-  state.negativeChecks = (data.negative_checks || []).map(toViewRecord);
-  state.arrayGaps = (data.array_gaps || []).map(toViewRecord);
-  state.insufficientEvidence = (data.insufficient_evidence || []).map(toViewRecord);
-  state.coverageSummary = data.coverage_taxonomy || {};
+  state.records = data.records.map(toVm);
+  state.negativeChecks = data.negative_checks.map(toVm);
+  state.arrayGaps = data.array_gaps.map(toVm);
+  state.insufficientEvidence = data.insufficient_evidence.map(toVm);
+  state.coverageSummary = data.coverage_taxonomy;
   state.summary = data.summary;
-  state.apoe = data.apoe ? toViewRecord(data.apoe) : null;
-  state.compoundHeterozygotes = data.compound_heterozygotes || [];
-  state.independentAssortment = data.independent_assortment || [];
+  state.apoe = data.apoe ? toVm(data.apoe) : null;
+  state.compoundHeterozygotes = data.compound_heterozygotes;
+  state.independentAssortment = data.independent_assortment;
 
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("analysis-error").classList.add("hidden");
   document.getElementById("results-section").classList.remove("hidden");
   setInputsDisabled(false);
 
+  renderKbClaims(state.manifest);
   renderQC();
   renderSummaryCards();
   renderApoeCard();
   renderAssortmentSection();
   renderVariantsTable();
-}
-
-/** A null rate (variants-only VCF) is shown as "Not available", with the QC note as a tooltip. */
-function formatRate(rate) {
-  return rate === null ? "Not available" : `${(rate * 100).toFixed(2)}%`;
 }
 
 function renderQC() {
@@ -367,9 +400,10 @@ function renderQC() {
   document.getElementById("qc-filename").textContent = state.fileName;
   document.getElementById("qc-format").textContent = `${qc.format_name.toUpperCase()} (${qc.build})`;
   document.getElementById("qc-total-snps").textContent = qc.total_snps.toLocaleString();
-  document.getElementById("qc-call-rate").textContent = formatRate(qc.call_rate);
-  document.getElementById("qc-het-rate").textContent = formatRate(qc.heterozygosity_rate);
-  for (const id of ["qc-call-rate", "qc-het-rate"]) document.getElementById(id).title = qc.qc_note || "";
+  // A null rate (variants-only VCF) is shown as "Not available", with the QC note as a tooltip.
+  setValue(document.getElementById("qc-call-rate"), qc.call_rate === null ? null : formatRate(qc.call_rate));
+  setValue(document.getElementById("qc-het-rate"), qc.heterozygosity_rate === null ? null : formatRate(qc.heterozygosity_rate));
+  for (const id of ["qc-call-rate", "qc-het-rate"]) document.getElementById(id).title = qc.qc_note ?? "";
 
   // The badge shows the QC signal verbatim; it makes no sex or karyotype claim.
   const sexBadge = document.getElementById("qc-inferred-sex");
@@ -378,48 +412,29 @@ function renderQC() {
   sexBadge.className = "inline-flex items-center px-3 py-1 rounded-sm text-xs font-semibold bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
 }
 
+/** Every card shows the worker's own figure: the category cards and the coverage cards are not recounted here. */
 function renderSummaryCards() {
   const sum = state.summary;
-  if (!sum) return;
+  const cov = state.coverageSummary;
+  if (!sum || !cov) return;
+  const figure = (value) => (typeof value === "number" ? value.toLocaleString() : NOT_AVAILABLE);
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = figure(value);
+  };
 
-  document.getElementById("count-pathogenic").textContent = sum.pathogenic_count;
-  document.getElementById("count-carrier").textContent = sum.carrier_count;
-  document.getElementById("count-pgx").textContent = sum.pgx_count;
-  document.getElementById("count-risk").textContent = sum.risk_factor_count;
-  document.getElementById("count-acmg").textContent = sum.acmg_actionable_findings;
+  set("count-pathogenic", sum.pathogenic_count);
+  set("count-carrier", sum.carrier_count);
+  set("count-pgx", sum.pgx_count);
+  set("count-risk", sum.risk_factor_count);
+  set("count-acmg", sum.acmg_actionable_findings);
 
-  const cov = state.coverageSummary || {};
-  const elObs = document.getElementById("count-state-observed");
-  if (elObs) elObs.textContent = (cov.supported_and_observed_count ?? state.records.length);
-
-  const elNeg = document.getElementById("count-state-negative");
-  if (elNeg) elNeg.textContent = (cov.supported_not_observed_count ?? state.negativeChecks.length);
-
-  const elGaps = document.getElementById("count-state-gaps");
-  if (elGaps) elGaps.textContent = (cov.not_tested_by_array_count ?? state.arrayGaps.length);
-
-  const elOut = document.getElementById("count-state-outside");
-  if (elOut) elOut.textContent = (cov.outside_coverage_count ?? 0).toLocaleString();
-
-  const elIns = document.getElementById("count-state-insufficient");
-  if (elIns) elIns.textContent = (cov.insufficient_evidence_count ?? state.insufficientEvidence.length);
+  set("count-state-observed", cov.supported_and_observed_count);
+  set("count-state-negative", cov.supported_not_observed_count);
+  set("count-state-gaps", cov.not_tested_by_array_count);
+  set("count-state-outside", cov.outside_coverage_count);
+  set("count-state-insufficient", cov.insufficient_evidence_count);
 }
-
-/** "ε3/ε4" for the KB key "e3/e4". */
-const apoeDisplay = (diplotype) => diplotype.replace(/e/g, "ε");
-
-/** The KB's "Relative risk: ..." / "Lifetime risk: ..." caveat text for a diplotype, or null. */
-function apoeKbCaveat(apoe, prefix) {
-  const hit = apoe.caveats.find((c) => c.startsWith(prefix));
-  return hit ? hit.slice(prefix.length) : null;
-}
-
-const APOE_STATE_LABEL = {
-  supported_and_observed: "Observed",
-  supported_not_observed: "Not detected",
-  not_tested_by_array: "Not tested by array",
-  insufficient_evidence: "Insufficient evidence"
-};
 
 const APOE_NEUTRAL_BADGE = "bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30";
 
@@ -433,7 +448,7 @@ function renderApoeCard() {
   }
 
   card.classList.remove("hidden");
-  const apoe = state.apoe;
+  const model = apoeCardModel(state.apoe);
 
   const titleEl = document.getElementById("apoe-diplotype-title");
   const riskRatioEl = document.getElementById("apoe-risk-ratio");
@@ -441,22 +456,19 @@ function renderApoeCard() {
   const rawLociEl = document.getElementById("apoe-raw-loci");
   const lifetimeEl = document.getElementById("apoe-lifetime-stat");
   const pillEl = document.getElementById("apoe-carrier-pill");
-
-  const resolved = apoe.diplotype !== null && apoe.diplotype !== "atypical";
-  const stateLabel = APOE_STATE_LABEL[apoe.coverage_state];
-  titleEl.textContent = resolved ? `APOE ${apoeDisplay(apoe.diplotype)}` : `APOE: ${apoe.diplotype === null ? "no diplotype" : apoe.diplotype}`;
-  rawLociEl.textContent = apoe.components.map(c => `${c.rsid}: ${c.genotype_display ?? "—"}`).join(" · ");
+  const hpaEl = document.getElementById("apoe-hpa-desc");
 
   // Everything below is KB text; an unresolved APOE shows the reason and no numbers.
-  const parts = [resolved ? apoe.phenotype : apoe.reason];
-  if (apoe.caveat) parts.push(`Caveat: ${apoe.caveat}.`);
-  descEl.textContent = parts.join(" ");
-  riskRatioEl.textContent = (resolved && apoeKbCaveat(apoe, "Relative risk: ")) || stateLabel;
-  lifetimeEl.textContent = (resolved && apoeKbCaveat(apoe, "Lifetime risk: ")) || "Not available";
-  pillEl.textContent = resolved ? `${stateLabel} · ${apoe.significance}` : stateLabel;
+  titleEl.textContent = model.title;
+  rawLociEl.textContent = model.rawLoci;
+  setValue(descEl, model.description);
+  setValue(riskRatioEl, model.riskBadge);
+  setValue(lifetimeEl, model.lifetime);
+  pillEl.textContent = model.pill;
+  setValue(hpaEl, model.hpaSummary);
 
   // Visual accents depending on risk profile (existing classes only)
-  const diplotype = resolved ? apoeDisplay(apoe.diplotype) : "";
+  const diplotype = model.diplotype ?? "";
   let accent = null;
   if (diplotype === "ε4/ε4") accent = { border: "border-rose-500", badge: "badge-pathogenic" };
   else if (diplotype.includes("ε4")) accent = { border: "border-amber-500", badge: "badge-carrier" };
@@ -481,8 +493,8 @@ function renderAssortmentSection() {
   const badge = document.getElementById("assortment-findings-count-badge");
   if (!section || !container) return;
 
-  const compounds = state.compoundHeterozygotes || [];
-  const assortments = state.independentAssortment || [];
+  const compounds = state.compoundHeterozygotes;
+  const assortments = state.independentAssortment;
   const totalFindings = compounds.length + assortments.length;
 
   if (totalFindings === 0) {
@@ -496,7 +508,7 @@ function renderAssortmentSection() {
   }
   container.innerHTML = "";
 
-  // Render Compound Heterozygotes (e.g. HFE C282Y / H63D)
+  // Render Compound Heterozygotes (e.g. HFE C282Y / H63D). Every interpolated value is escaped.
   compounds.forEach(ch => {
     const card = document.createElement("div");
     card.className = "p-4 rounded-sm bg-slate-50 dark:bg-slate-900/50 border border-indigo-200 dark:border-indigo-900/60 space-y-3";
@@ -504,20 +516,20 @@ function renderAssortmentSection() {
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <span class="text-xs uppercase font-bold tracking-wider text-indigo-700 dark:text-indigo-400 font-mono">Possible Compound Heterozygote · Phase Unknown</span>
-          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-pathogenic">${ch.significance}</span>
+          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-pathogenic">${escapeHtml(ch.significance)}</span>
         </div>
-        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${ch.gene}</span>
+        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${escapeHtml(ch.gene)}</span>
       </div>
       <div>
-        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">${ch.title}</h4>
-        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-1">${ch.summary}</p>
+        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">${escapeHtml(ch.title)}</h4>
+        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-1">${escapeHtml(ch.summary)}</p>
       </div>
       <div class="p-2.5 rounded-sm bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 text-[11px] font-mono text-indigo-900 dark:text-indigo-300">
-        ⚖️ <strong>Segregation:</strong> ${ch.segregation_notes}
+        ⚖️ <strong>Segregation:</strong> ${escapeHtml(ch.segregation_notes)}
       </div>
       <div class="flex justify-end pt-1">
-        <button type="button" class="btn btn-xs btn-outline border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/10 rounded-sm font-mono text-[11px] btn-inspect-gene" data-gene="${ch.gene}">
-          🔬 Inspect ${ch.gene} Locus ↗
+        <button type="button" class="btn btn-xs btn-outline border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/10 rounded-sm font-mono text-[11px] btn-inspect-gene" data-gene="${escapeHtml(ch.gene)}">
+          🔬 Inspect ${escapeHtml(ch.gene)} Locus ↗
         </button>
       </div>
     `;
@@ -534,26 +546,26 @@ function renderAssortmentSection() {
           <span class="text-xs uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400 font-mono">Co-occurring Variant Alleles</span>
           <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-risk">Multi-Locus</span>
         </div>
-        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${ia.genes.join(" + ")}</span>
+        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${escapeHtml(ia.genes.join(" + "))}</span>
       </div>
       <div>
-        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">${ia.type}</h4>
-        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-1">${ia.description}</p>
+        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">${escapeHtml(ia.type)}</h4>
+        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif mt-1">${escapeHtml(ia.description)}</p>
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs font-mono">
         <div class="p-2 rounded-sm bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/40">
           <span class="text-[9px] uppercase text-slate-400 block">Loci on Different Chromosomes</span>
-          <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">${ia.loci.join(" · ")}</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">${escapeHtml(ia.loci.join(" · "))}</span>
         </div>
         <div class="p-2 rounded-sm bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/40">
           <span class="text-[9px] uppercase text-slate-400 block">Child Inherits All Listed Alleles</span>
-          <span class="font-bold text-amber-600 dark:text-amber-400 mt-0.5 block" title="${ia.assumption}">${Math.round(ia.joint_transmission_prob * 100)}%</span>
+          <span class="font-bold text-amber-600 dark:text-amber-400 mt-0.5 block" title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</span>
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-1">
         ${ia.genes.map(g => `
-          <button type="button" class="btn btn-xs btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-500 rounded-sm font-mono text-[11px] btn-inspect-gene" data-gene="${g}">
-            Inspect ${g} ↗
+          <button type="button" class="btn btn-xs btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-500 rounded-sm font-mono text-[11px] btn-inspect-gene" data-gene="${escapeHtml(g)}">
+            Inspect ${escapeHtml(g)} ↗
           </button>
         `).join("")}
       </div>
@@ -570,6 +582,20 @@ function renderAssortmentSection() {
     });
   });
 }
+
+const STATE_BADGE_CLASS = {
+  supported_and_observed: "bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30",
+  supported_not_observed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30",
+  not_tested_by_array: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30",
+  insufficient_evidence: "bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
+};
+
+const TIER_BADGE_CLASS = {
+  "Tier A": "bg-sky-100 text-sky-800 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700",
+  "Tier B": "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700",
+  "Tier C": "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700",
+  "Tier D": "bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+};
 
 function renderVariantsTable() {
   const tbody = document.getElementById("variants-tbody");
@@ -595,16 +621,8 @@ function renderVariantsTable() {
     // Search query
     if (state.searchQuery) {
       const q = state.searchQuery;
-      const match = (
-        r.rsid.toLowerCase().includes(q) ||
-        r.gene.toLowerCase().includes(q) ||
-        (r.phenotype && r.phenotype.toLowerCase().includes(q)) ||
-        (r.genotype && r.genotype.toLowerCase().includes(q)) ||
-        (r.category && r.category.toLowerCase().includes(q)) ||
-        (r.significance && r.significance.toLowerCase().includes(q)) ||
-        (r.drug_response && r.drug_response.toLowerCase().includes(q)) ||
-        (r.diplotype && (r.diplotype.toLowerCase().includes(q) || apoeDisplay(r.diplotype).toLowerCase().includes(q)))
-      );
+      const match = [r.id, r.gene, r.phenotype, r.genotype, r.category, r.significance, r.drug_response, r.diplotype, r.diplotypeDisplay]
+        .some(field => typeof field === "string" && field.toLowerCase().includes(q));
       if (!match) return false;
     }
     return true;
@@ -643,131 +661,101 @@ function renderVariantsTable() {
     else if (r.category === "Pharmacogenomics") categoryClass = "badge-pgx";
     else if (r.category === "Risk Factor") categoryClass = "badge-risk";
 
-    // Coverage State badge
-    let stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30">Observed</span>`;
-    if (r.coverage_state === "supported_not_observed") {
-      stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">Tested WT</span>`;
-    } else if (r.coverage_state === "not_tested_by_array") {
-      stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Array Gap</span>`;
-    } else if (r.coverage_state === "insufficient_evidence") {
-      stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30">Conflicting</span>`;
-    }
+    const stateBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${STATE_BADGE_CLASS[r.coverage_state]}">${escapeHtml(r.stateBadge)}</span>`;
+    const tierBadge = r.tier === null
+      ? `<span class="mr-1.5">${naHtml()}</span>`
+      : `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono ${TIER_BADGE_CLASS[r.tier] ?? TIER_BADGE_CLASS["Tier D"]} mr-1.5">${escapeHtml(r.tier)}</span>`;
+    const categoryBadge = r.category === null
+      ? naHtml()
+      : `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${categoryClass}">${escapeHtml(r.category)}</span>`;
 
-    // Evidence Tier badge
-    let tierBadge = "";
-    const tier = r.evidence_tier || "Tier B";
-    if (tier === "Tier A") {
-      tierBadge = `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono bg-sky-100 text-sky-800 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700 mr-1.5">Tier A</span>`;
-    } else if (tier === "Tier B") {
-      tierBadge = `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700 mr-1.5">Tier B</span>`;
-    } else if (tier === "Tier C") {
-      tierBadge = `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700 mr-1.5">Tier C</span>`;
-    } else if (tier === "Tier D") {
-      tierBadge = `<span class="px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 mr-1.5">Tier D</span>`;
-    }
-
-    const starsHtml = r.clinvar_stars ? "★".repeat(r.clinvar_stars) : "—";
-    const acmgPill = r.acmg_actionable 
-      ? `<span class="ml-1.5 px-1.5 py-0.5 text-[10px] uppercase font-bold rounded-sm bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30">ACMG</span>` 
+    const acmgPill = r.acmg_actionable
+      ? `<span class="ml-1.5 px-1.5 py-0.5 text-[10px] uppercase font-bold rounded-sm bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30">ACMG</span>`
       : "";
+    // The limitation (and any caveats) travel with the row, as a badge with the full text as its tooltip.
+    const limitationBadge = r.limitationTooltip === null
+      ? ""
+      : `<span data-role="limitation" class="ml-1.5 px-1.5 py-0.5 text-[10px] uppercase font-bold rounded-sm bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30" title="${escapeHtml(r.limitationTooltip)}">${r.limitation === null ? "Caveats" : "Limitation"}</span>`;
 
-    const magnitudeDisplay = typeof r.magnitude === "number" ? r.magnitude.toFixed(1) : "—";
-    const reputeDisplay = r.repute ? `(${r.repute})` : "";
+    const guidance = r.statement ?? r.phenotype ?? r.significance;
+    const guidanceTitle = [r.statement, r.phenotype, r.limitationTooltip].filter(part => part !== null).join(" ");
 
     tr.innerHTML = `
-      <td class="py-3 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">${r.rsid}</td>
+      <td class="py-3 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">${escapeHtml(r.id)}</td>
       <td class="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
-        ${r.gene} ${acmgPill}
+        ${escapeHtml(r.gene)} ${acmgPill} ${limitationBadge}
       </td>
-      <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">${r.genotype || '—'}</td>
+      <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">${valueHtml(r.genotype)}</td>
       <td class="py-3 px-4">${stateBadge}</td>
       <td class="py-3 px-4 flex items-center">
         ${tierBadge}
-        <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${categoryClass}">
-          ${r.category || 'Curated'}
-        </span>
+        ${categoryBadge}
       </td>
-      <td class="py-3 px-4 text-amber-500 text-xs font-mono tracking-wider">${starsHtml}</td>
-      <td class="py-3 px-4 font-semibold text-xs ${typeof r.magnitude === 'number' && r.magnitude >= 4 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">
-        ${magnitudeDisplay} <span class="text-[10px] text-slate-400">${reputeDisplay}</span>
+      <td class="py-3 px-4 text-amber-500 text-xs font-mono tracking-wider">${r.starsMuted ? naHtml(r.starsText) : escapeHtml(r.starsText)}</td>
+      <td class="py-3 px-4 font-semibold text-xs ${r.magnitude !== null && r.magnitude >= 4 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">
+        ${valueHtml(r.magnitudeShort)} <span class="text-[10px] text-slate-400">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
       </td>
-      <td class="py-3 px-4 text-xs text-slate-700 dark:text-slate-300 max-w-md truncate" title="${r.phenotype || r.significance}">
-        ${r.phenotype || r.significance}
+      <td class="py-3 px-4 text-xs text-slate-700 dark:text-slate-300 max-w-md truncate" title="${escapeHtml(guidanceTitle)}">
+        ${escapeHtml(guidance)}
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
+const TIER_DRAWER_CLASS = {
+  "Tier A": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30",
+  "Tier B": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30",
+  "Tier C": "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30"
+};
+const TIER_DRAWER_NEUTRAL = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
+
+const COVERAGE_DRAWER_CLASS = {
+  supported_and_observed: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30",
+  supported_not_observed: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30",
+  not_tested_by_array: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30",
+  insufficient_evidence: "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/30"
+};
+
 function openDrawer(record) {
   state.selectedVariant = record;
   const drawer = document.getElementById("variant-drawer");
   if (!drawer) return;
 
-  document.getElementById("drawer-rsid").textContent = record.rsid;
+  document.getElementById("drawer-rsid").textContent = record.id;
   document.getElementById("drawer-gene").textContent = record.gene;
-  document.getElementById("drawer-genotype").textContent = record.genotype || "—";
-  document.getElementById("drawer-coord").textContent = `chr${record.chrom}:${record.pos ? record.pos.toLocaleString() : '—'}`;
+  setValue(document.getElementById("drawer-genotype"), record.genotype);
+  setValue(document.getElementById("drawer-coord"), record.positionText);
   document.getElementById("drawer-significance").textContent = record.significance;
-  document.getElementById("drawer-phenotype").textContent = record.phenotype;
-  const stars = record.clinvar_stars ?? 0;
-  document.getElementById("drawer-stars").textContent = stars > 0 ? `${"★".repeat(stars)} (${stars} / 4 stars)` : "— (0 / 4 stars)";
-  document.getElementById("drawer-magnitude").textContent = `${typeof record.magnitude === 'number' ? record.magnitude.toFixed(1) : '—'} / 10.0 (${record.repute || 'Neutral'})`;
-  const afEl = document.getElementById("drawer-af");
-  if (afEl) {
-    if (record.gnomad_af !== null && record.gnomad_af !== undefined && !isNaN(record.gnomad_af)) {
-      afEl.textContent = `${(record.gnomad_af * 100).toFixed(2)}%`;
-    } else {
-      afEl.textContent = "N/A (Not characterized)";
-    }
-  }
+  setValue(
+    document.getElementById("drawer-phenotype"),
+    [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null
+  );
+  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsDetail, record.starsText);
+  setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
+  setValue(document.getElementById("drawer-af"), record.afText);
 
   // Tier and Coverage State badges
   const tierBadgeEl = document.getElementById("drawer-tier-badge");
   const covBadgeEl = document.getElementById("drawer-coverage-state-badge");
   if (tierBadgeEl) {
-    const tier = record.evidence_tier || "Tier D";
-    tierBadgeEl.textContent = tier;
-    if (tier === "Tier A") {
-      tierBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30";
-    } else if (tier === "Tier B") {
-      tierBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30";
-    } else if (tier === "Tier C") {
-      tierBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30";
-    } else {
-      tierBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700";
-    }
+    setValue(tierBadgeEl, record.tier);
+    tierBadgeEl.className = TIER_DRAWER_CLASS[record.tier] ?? TIER_DRAWER_NEUTRAL;
   }
+  setValue(document.getElementById("drawer-footer-tier"), drawerTierText(record));
 
   if (covBadgeEl) {
-    const cov = record.coverage_state || "supported_and_observed";
-    if (cov === "supported_and_observed") {
-      covBadgeEl.textContent = "Supported & Observed";
-      covBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/30";
-    } else if (cov === "supported_not_observed") {
-      covBadgeEl.textContent = "Tested Wild-Type (State 2)";
-      covBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30";
-    } else if (cov === "not_tested_by_array") {
-      covBadgeEl.textContent = "Array Gap (State 3)";
-      covBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30";
-    } else if (cov === "insufficient_evidence") {
-      covBadgeEl.textContent = "Conflicting Evidence (State 5)";
-      covBadgeEl.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border font-mono bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/30";
-    } else {
-      covBadgeEl.textContent = cov;
-    }
+    covBadgeEl.textContent = record.stateLabel;
+    covBadgeEl.className = COVERAGE_DRAWER_CLASS[record.coverage_state];
   }
 
-  // Refusal notices (e.g. Star-Allele refusal)
+  // Limitation (e.g. the star-allele refusal or a single-variant test): from the KB, on every row that has one.
   const refusalBox = document.getElementById("drawer-refusal-box");
   const refusalText = document.getElementById("drawer-refusal-text");
   if (refusalBox && refusalText) {
-    if (record.refusal_notices && record.refusal_notices.length > 0) {
+    if (record.limitation !== null) {
       refusalBox.classList.remove("hidden");
-      refusalText.textContent = record.refusal_notices.join(" ");
-    } else if (record.category === "Pharmacogenomics") {
-      refusalBox.classList.remove("hidden");
-      refusalText.textContent = "Incomplete star-allele coverage refusal: Interrogating an isolated single SNP cannot rule out other functional star alleles (*3, *17, etc.). A complete CPIC metabolizer phenotype cannot be inferred from a single variant call.";
+      refusalText.textContent = record.limitation;
     } else {
       refusalBox.classList.add("hidden");
     }
@@ -777,10 +765,9 @@ function openDrawer(record) {
   const caveatsBox = document.getElementById("drawer-caveats-box");
   const caveatsList = document.getElementById("drawer-caveats-list");
   if (caveatsBox && caveatsList) {
-    const caveats = record.caveats || [];
-    if (caveats.length > 0) {
+    if (record.caveats.length > 0) {
       caveatsBox.classList.remove("hidden");
-      caveatsList.innerHTML = caveats.map(c => `<li>${c}</li>`).join("");
+      caveatsList.innerHTML = record.caveats.map(c => `<li>${escapeHtml(c)}</li>`).join("");
     } else {
       caveatsBox.classList.add("hidden");
       caveatsList.innerHTML = "";
@@ -798,17 +785,17 @@ function openDrawer(record) {
   // CPIC drug response
   const drugBox = document.getElementById("drawer-drug-box");
   const drugText = document.getElementById("drawer-drug-text");
-  if (record.drug_response) {
+  if (record.drug_response !== null) {
     drugBox.classList.remove("hidden");
     drugText.textContent = record.drug_response;
   } else {
     drugBox.classList.add("hidden");
   }
 
-  // ClinVar external link
+  // ClinVar external link: only for an accession that was machine-imported.
   const clinvarLink = document.getElementById("drawer-clinvar-link");
-  if (record.clinvar_id) {
-    clinvarLink.href = `https://www.ncbi.nlm.nih.gov/clinvar/variation/${record.clinvar_id.replace(/\D/g, "")}`;
+  if (record.clinvarUrl !== null) {
+    clinvarLink.href = record.clinvarUrl;
     clinvarLink.classList.remove("hidden");
   } else {
     clinvarLink.classList.add("hidden");
@@ -823,8 +810,9 @@ function openDrawer(record) {
   // Human Protein Atlas tissues
   const tissuesContainer = document.getElementById("drawer-hpa-tissues");
   tissuesContainer.innerHTML = "";
-  if (record.hpa_tissues && Object.keys(record.hpa_tissues).length > 0) {
-    Object.entries(record.hpa_tissues).forEach(([tissue, level]) => {
+  const tissueEntries = Object.entries(record.hpa_tissues);
+  if (tissueEntries.length > 0) {
+    tissueEntries.forEach(([tissue, level]) => {
       let colorClass = "bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-500/30";
       if (level === "High") colorClass = "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30";
       else if (level === "Medium") colorClass = "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30";
@@ -832,19 +820,19 @@ function openDrawer(record) {
       const div = document.createElement("div");
       div.className = "flex items-center justify-between p-2 rounded-sm bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 text-xs";
       div.innerHTML = `
-        <span class="capitalize text-slate-800 dark:text-slate-200 font-medium">${tissue}</span>
-        <span class="px-2 py-0.5 rounded-sm text-[11px] font-semibold border ${colorClass}">${level}</span>
+        <span class="capitalize text-slate-800 dark:text-slate-200 font-medium">${escapeHtml(tissue)}</span>
+        <span class="px-2 py-0.5 rounded-sm text-[11px] font-semibold border ${colorClass}">${escapeHtml(level)}</span>
       `;
       tissuesContainer.appendChild(div);
     });
   } else {
-    tissuesContainer.innerHTML = `<p class="text-xs text-slate-500 dark:text-slate-400">Normal protein abundance widely expressed across human tissues.</p>`;
+    tissuesContainer.innerHTML = `<p class="text-xs">${naHtml()}</p>`;
   }
 
   // Subcellular localization
   const subcellContainer = document.getElementById("drawer-hpa-subcell");
   subcellContainer.innerHTML = "";
-  if (record.hpa_subcellular && record.hpa_subcellular.length > 0) {
+  if (record.hpa_subcellular.length > 0) {
     record.hpa_subcellular.forEach(loc => {
       const span = document.createElement("span");
       span.className = "px-2.5 py-1 rounded-sm text-xs font-medium bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 font-mono";
@@ -852,7 +840,7 @@ function openDrawer(record) {
       subcellContainer.appendChild(span);
     });
   } else {
-    subcellContainer.innerHTML = `<span class="text-xs text-slate-500 dark:text-slate-400">Cytosol / Nucleus</span>`;
+    subcellContainer.innerHTML = `<span class="text-xs">${naHtml()}</span>`;
   }
 
   // Show drawer
@@ -861,7 +849,7 @@ function openDrawer(record) {
 
 function renderDrawerSegregation(record) {
   // No segregation inputs exist for a locus with no interpretable genotype (not tested, no-call).
-  const seg = record.segregation || null;
+  const seg = record.segregation ?? null;
   const modeBadge = document.getElementById("drawer-seg-mode-badge");
   const priorEl = document.getElementById("drawer-seg-carrier-prior");
   const penetranceEl = document.getElementById("drawer-seg-penetrance");
@@ -871,13 +859,21 @@ function renderDrawerSegregation(record) {
   const header = container ? container.querySelector("span.tracking-wider") : null;
   const simTitle = container ? container.querySelector("#drawer-partner-buttons").previousElementSibling : null;
   const mendelian = Boolean(seg && seg.mendelian_disease);
+  const recessive = Boolean(seg && seg.model === "autosomal_recessive");
 
   // Wording follows the gene's inheritance model: disease and recurrence language is for Mendelian genes only.
+  // For a recessive gene the headline figure is the genotype probability (two copies), before any penetrance.
   setLabel(header, mendelian ? null : "Allele Transmission");
   setLabel(header && header.nextElementSibling, mendelian ? null : "Chance a child inherits the allele, from the patient genotype");
   setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele Frequency (gnomAD)");
-  setLabel(riskUnscreenedEl.previousElementSibling, mendelian ? null : "Child Inherits vs Unscreened Partner");
-  setLabel(riskCarrierEl.previousElementSibling, mendelian ? null : "Child Inherits vs Wild-Type Partner");
+  setLabel(
+    riskUnscreenedEl.previousElementSibling,
+    !mendelian ? "Child Inherits vs Unscreened Partner" : recessive ? "Risk vs Unscreened Partner (genotype probability)" : null
+  );
+  setLabel(
+    riskCarrierEl.previousElementSibling,
+    !mendelian ? "Child Inherits vs Wild-Type Partner" : recessive ? "Risk vs Carrier Partner (genotype probability)" : null
+  );
   setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring Allele Simulator:");
   setLabel(simTitle && simTitle.lastElementChild, "Select Partner Genotype");
   document.querySelectorAll(".partner-sim-btn").forEach(b => {
@@ -885,21 +881,22 @@ function renderDrawerSegregation(record) {
   });
 
   if (!seg) {
-    if (modeBadge) modeBadge.textContent = "Not available";
-    if (priorEl) priorEl.textContent = "Not available";
-    if (penetranceEl) penetranceEl.textContent = "Not available";
-    if (riskUnscreenedEl) riskUnscreenedEl.textContent = "Not available";
-    if (riskCarrierEl) riskCarrierEl.textContent = "Not available";
+    setValue(modeBadge, null);
+    setValue(priorEl, null);
+    setValue(penetranceEl, null);
+    setValue(riskUnscreenedEl, null);
+    setValue(riskCarrierEl, null);
     document.querySelectorAll(".partner-sim-btn").forEach(btn => { btn.onclick = null; });
     renderSimulator(null, null);
+    renderPartnerNote(null, null);
     return;
   }
 
   const outcomeFor = (partner) => geneOutcome(state.genes[seg.gene], offspringDistribution(seg.altCount, partner, seg.af), seg.allele);
-  const headline = (out) => (!out.available ? "Not available" : fmtPct(mendelian ? out.affected : out.inherits_allele));
+  const headline = (out) => (!out.available ? null : fmtPct(mendelian ? out.affected : out.inherits_allele));
 
   if (modeBadge) {
-    modeBadge.textContent = MODEL_LABELS[seg.model] || seg.model;
+    modeBadge.textContent = MODEL_LABELS[seg.model] ?? seg.model;
     if (seg.model === "autosomal_recessive") {
       modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30 font-mono";
     } else if (seg.model === "autosomal_dominant") {
@@ -910,16 +907,19 @@ function renderDrawerSegregation(record) {
   }
 
   if (seg.af === null) {
-    priorEl.textContent = "Not available";
+    setValue(priorEl, null);
   } else if (mendelian) {
     const carrierFreq = 2 * seg.af * (1 - seg.af);
-    priorEl.textContent = carrierFreq > 0 ? `1 in ${Math.round(1 / carrierFreq)} (${fmtPct(carrierFreq)})` : "Not available";
+    setValue(priorEl, carrierFreq > 0 ? `1 in ${Math.round(1 / carrierFreq)} (${fmtPct(carrierFreq)})` : null);
   } else {
     priorEl.textContent = fmtPct(seg.af);
   }
-  if (penetranceEl) penetranceEl.textContent = !mendelian ? "Not applicable" : seg.penetrance === null ? "Not available" : fmtPct(seg.penetrance);
-  if (riskUnscreenedEl) riskUnscreenedEl.textContent = headline(outcomeFor("unscreened"));
-  if (riskCarrierEl) riskCarrierEl.textContent = headline(outcomeFor(mendelian ? "heterozygous" : "wildtype"));
+  if (penetranceEl) {
+    if (!mendelian) penetranceEl.textContent = "Not applicable";
+    else setValue(penetranceEl, seg.penetrance === null ? null : fmtPct(seg.penetrance));
+  }
+  if (riskUnscreenedEl) setValue(riskUnscreenedEl, headline(outcomeFor("unscreened")));
+  if (riskCarrierEl) setValue(riskCarrierEl, headline(outcomeFor(mendelian ? "heterozygous" : "wildtype")));
 
   // Setup simulator partner buttons
   const buttons = document.querySelectorAll(".partner-sim-btn");
@@ -943,18 +943,6 @@ function renderDrawerSegregation(record) {
 // The buttons keep their data-partner keys; each maps to a partner genotype model.
 const SIM_PARTNER_MODEL = { unscreened: "unscreened", carrier: "heterozygous", affected: "homozygous", wildtype: "wildtype" };
 const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "Heterozygous", affected: "Homozygous", wildtype: "Wild-Type" };
-const MODEL_LABELS = {
-  autosomal_recessive: "Autosomal Recessive",
-  autosomal_dominant: "Autosomal Dominant",
-  risk_factor: "Risk Factor (allele transmission)",
-  pharmacogenomic: "Pharmacogenomic (allele transmission)",
-  trait: "Trait (allele transmission)"
-};
-
-/** Percentage with at most one decimal: 0.25 gives "25%", 0.0066 gives "0.7%". */
-function fmtPct(fraction) {
-  return `${Math.round(fraction * 1000) / 10}%`;
-}
 
 /** Sets an element's text, remembering the original so a later null restores it. */
 function setLabel(el, text) {
@@ -963,10 +951,18 @@ function setLabel(el, text) {
   el.textContent = text === null ? el.dataset.origText : text;
 }
 
+/** Says in words which partner model produced the figures on screen. */
+function renderPartnerNote(partnerKey, seg) {
+  const note = document.getElementById("drawer-partner-model-note");
+  if (!note) return;
+  note.textContent = seg ? partnerModelNote(SIM_PARTNER_MODEL[partnerKey], seg.af) : "";
+}
+
 function updateSimulator(partnerKey, record) {
   const seg = record.segregation;
   const dist = offspringDistribution(seg.altCount, SIM_PARTNER_MODEL[partnerKey], seg.af);
   renderSimulator(geneOutcome(state.genes[seg.gene], dist, seg.allele), seg);
+  renderPartnerNote(partnerKey, seg);
 }
 
 /** Three probability rows and the effective-penetrance line; a null outcome (no genotype) shows "Not available". */
@@ -988,10 +984,12 @@ function renderSimulator(out, seg) {
     effective = "Not applicable";
     effectiveLabel = "Clinical Penetrance:";
   } else if (out && seg.model === "autosomal_recessive") {
-    rows[0].value = out.affected;
+    // Two different "affected" figures: the genotype probability (two copies), and that probability times the stated penetrance.
+    rows[0] = { id: "affected", label: "Affected Genotype Probability (two copies):", value: out.affected };
     rows[1].value = out.carrier;
     rows[2].value = out.p0;
-    effective = seg.penetrance === null ? "Not available" : fmtPct(out.affected * seg.penetrance);
+    effectiveLabel = "Affected Probability (adjusted for stated penetrance):";
+    effective = seg.penetrance === null ? null : fmtPct(out.affected * seg.penetrance);
   } else if (out) {
     rows[0] = { id: "affected", label: "Affected Probability (penetrance-adjusted):", value: out.affected };
     rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.p1 };
@@ -1003,7 +1001,7 @@ function renderSimulator(out, seg) {
     const barEl = document.getElementById(`sim-bar-${row.id}`);
     setLabel(valueEl && valueEl.previousElementSibling, out ? row.label : null);
     if (valueEl) {
-      valueEl.textContent = row.value === null ? "Not available" : fmtPct(row.value);
+      setValue(valueEl, row.value === null ? null : fmtPct(row.value));
       valueEl.title = reason;
     }
     if (barEl) barEl.style.width = row.value === null ? "0%" : `${Math.min(100, Math.max(0, row.value * 100))}%`;
@@ -1011,134 +1009,75 @@ function renderSimulator(out, seg) {
   const effEl = document.getElementById("sim-effective-risk");
   if (effEl) {
     setLabel(effEl.previousElementSibling, effectiveLabel);
-    effEl.textContent = effective === null ? "Not available" : effective;
+    setValue(effEl, effective);
   }
 }
 
+function plddtClass(value) {
+  if (value >= 85) return "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30";
+  if (value >= 70) return "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30";
+  return "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30";
+}
+
 function renderDrawerBiotools(record) {
-  const gene = record.gene;
-  const biotools = geneInsights(gene);
+  const b = record.biotools;
   const geneBadge = document.getElementById("drawer-biotool-gene-badge");
-
-  if (geneBadge) geneBadge.textContent = gene;
-
-  if (!biotools) {
-    const uniprotEl = document.getElementById("drawer-af-uniprot");
-    const plddtEl = document.getElementById("drawer-af-plddt");
-    const statusEl = document.getElementById("drawer-af-status");
-    const domainsEl = document.getElementById("drawer-af-domains");
-    const jointsEl = document.getElementById("drawer-af-joints");
-    const transEl = document.getElementById("drawer-ens-transcript");
-    const amEl = document.getElementById("drawer-ens-alphamissense");
-    const loeufEl = document.getElementById("drawer-ens-loeuf");
-    const encodeEl = document.getElementById("drawer-encode-tissues");
-
-    if (uniprotEl) uniprotEl.textContent = "UniProt Search";
-    if (plddtEl) plddtEl.textContent = "N/A";
-    if (statusEl) statusEl.textContent = "Structural prediction available via AlphaFold Protein Structure Database.";
-    if (domainsEl) domainsEl.innerHTML = `<div class="text-xs text-slate-500">Query AlphaFold DB for ${gene} residue coordinates.</div>`;
-    if (jointsEl) jointsEl.textContent = "Flexible joints computed dynamically.";
-
-    if (transEl) transEl.textContent = "MANE Select Pending";
-    if (amEl) amEl.textContent = "Score Available in API";
-    if (loeufEl) loeufEl.textContent = "Constraint Available";
-
-    if (encodeEl) encodeEl.innerHTML = `<div class="text-xs text-slate-500">ENCODE cCREs RNA-seq available for major human cell types.</div>`;
-    return;
-  }
+  if (geneBadge) geneBadge.textContent = record.gene;
 
   // AlphaFold
-  const uniprotEl = document.getElementById("drawer-af-uniprot");
-  if (uniprotEl) uniprotEl.textContent = `UniProt ${biotools.uniprot_id}`;
+  setValue(document.getElementById("drawer-af-uniprot"), b.uniprot);
 
   const plddtEl = document.getElementById("drawer-af-plddt");
   if (plddtEl) {
-    const plddtVal = biotools.alphafold?.global_plddt ?? record.alphafold_plddt;
-    if (plddtVal !== null && plddtVal !== undefined && !isNaN(plddtVal)) {
-      plddtEl.textContent = Number(plddtVal).toFixed(1);
-      if (plddtVal >= 85) {
-        plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30";
-      } else if (plddtVal >= 70) {
-        plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30";
-      } else {
-        plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30";
-      }
-    } else {
-      plddtEl.textContent = "N/A";
-      plddtEl.className = "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700";
-    }
+    setValue(plddtEl, b.plddt === null ? null : b.plddt.toFixed(1));
+    plddtEl.className = b.plddt === null
+      ? "font-bold font-mono px-2 py-0.5 rounded-sm text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
+      : plddtClass(b.plddt);
   }
 
-  const statusEl = document.getElementById("drawer-af-status");
-  if (statusEl) statusEl.textContent = biotools.alphafold?.folding_status || "Structural prediction available in AlphaFold DB.";
+  setValue(document.getElementById("drawer-af-status"), b.status);
 
   const domainsEl = document.getElementById("drawer-af-domains");
   if (domainsEl) {
     domainsEl.innerHTML = "";
-    const domains = biotools.alphafold?.domains || [];
-    if (domains.length > 0) {
-      domains.forEach(d => {
+    if (b.domains.length > 0) {
+      b.domains.forEach(d => {
         const div = document.createElement("div");
         div.className = "p-1.5 rounded-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]";
         div.textContent = `📍 ${d}`;
         domainsEl.appendChild(div);
       });
     } else {
-      domainsEl.innerHTML = `<div class="text-xs text-slate-500">Domain boundaries computed from PAE matrix.</div>`;
+      domainsEl.innerHTML = `<div class="text-xs">${naHtml()}</div>`;
     }
   }
 
-  const jointsEl = document.getElementById("drawer-af-joints");
-  if (jointsEl) jointsEl.textContent = biotools.alphafold?.flexible_joints ? `⚡ ${biotools.alphafold.flexible_joints}` : "Flexible inter-domain links";
+  setValue(document.getElementById("drawer-af-joints"), b.joints === null ? null : `⚡ ${b.joints}`);
 
   // Ensembl VEP
-  const transEl = document.getElementById("drawer-ens-transcript");
-  if (transEl) transEl.textContent = biotools.ensembl?.canonical_transcript || record.mane_transcript || "MANE Select Transcript";
-
-  const amEl = document.getElementById("drawer-ens-alphamissense");
-  if (amEl) {
-    const amScore = biotools.ensembl?.alphamissense_pathogenicity ?? record.alphamissense_score;
-    const amClass = biotools.ensembl?.alphamissense_class ?? record.alphamissense_class;
-    if (amScore !== null && amScore !== undefined && !isNaN(amScore)) {
-      amEl.textContent = `${amClass || 'Scored'} (${Number(amScore).toFixed(2)})`;
-    } else if (amClass) {
-      amEl.textContent = amClass;
-    } else {
-      amEl.textContent = "N/A (Non-missense)";
-    }
-  }
-
-  const loeufEl = document.getElementById("drawer-ens-loeuf");
-  if (loeufEl) {
-    const loeufVal = biotools.ensembl?.loeuf ?? record.gnomad_loeuf;
-    if (loeufVal !== null && loeufVal !== undefined && !isNaN(loeufVal)) {
-      const loeufNum = Number(loeufVal);
-      const loeufText = loeufNum < 0.35 
-        ? `${loeufNum.toFixed(2)} (Extremely Constrained)` 
-        : loeufNum < 0.75 
-        ? `${loeufNum.toFixed(2)} (Constrained)` 
-        : `${loeufNum.toFixed(2)} (Tolerant)`;
-      loeufEl.textContent = `LOEUF ${loeufText}`;
-    } else {
-      loeufEl.textContent = "Constraint N/A";
-    }
-  }
+  setValue(document.getElementById("drawer-ens-transcript"), b.transcript);
+  setValue(document.getElementById("drawer-ens-alphamissense"), b.alphamissense);
+  setValue(document.getElementById("drawer-ens-loeuf"), b.constraint);
 
   // ENCODE cCREs
   const encodeEl = document.getElementById("drawer-encode-tissues");
   if (encodeEl) {
     encodeEl.innerHTML = "";
-    const tissues = biotools.encode.top_tissues || {};
-    const maxTpm = Math.max(...Object.values(tissues), 100);
+    if (b.tissues.length === 0) {
+      encodeEl.innerHTML = `<div class="text-xs">${naHtml()}</div>`;
+      return;
+    }
+    // The bars are scaled to the largest value, with a floor of 100 TPM so a small value does not fill the bar.
+    const maxTpm = Math.max(...b.tissues.map(([, tpm]) => tpm), 100);
 
-    Object.entries(tissues).forEach(([tissue, tpm]) => {
+    b.tissues.forEach(([tissue, tpm]) => {
       const pct = Math.round((tpm / maxTpm) * 100);
       const row = document.createElement("div");
       row.className = "space-y-0.5";
       row.innerHTML = `
         <div class="flex justify-between items-center text-[10px]">
-          <span class="capitalize text-slate-700 dark:text-slate-300 font-medium">${tissue}</span>
-          <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">${tpm.toLocaleString()} TPM</span>
+          <span class="capitalize text-slate-700 dark:text-slate-300 font-medium">${escapeHtml(tissue)}</span>
+          <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">${escapeHtml(tpm.toLocaleString())} TPM</span>
         </div>
         <div class="w-full bg-slate-200 dark:bg-slate-800 h-1 rounded-none overflow-hidden">
           <div class="bg-emerald-500 h-1" style="width: ${pct}%"></div>
@@ -1154,156 +1093,36 @@ function closeDrawer() {
   if (drawer) drawer.classList.add("translate-x-full");
 }
 
+/** Every row the file produced, once each: observed findings first, then wild-type, gaps and insufficient evidence. */
+function allRows() {
+  const seen = new Set();
+  return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence]
+    .filter((vm) => !seen.has(vm.id) && seen.add(vm.id));
+}
+
 function exportMarkdownReport() {
-  if (!state.records || state.records.length === 0) return;
-  const qc = state.qc;
-  const apoe = state.apoe;
-  const cov = state.coverageSummary || {};
-
-  let md = `# GenomePulse Variome Clinical Report\n\n`;
-  md += `> **CARDINAL SCOPE GUARDRAIL**: ${state.manifest.guardrail}\n\n`;
-  md += `**Sample**: ${state.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
-  md += `**Markers**: ${qc.total_snps.toLocaleString()} | **Call Rate**: ${formatRate(qc.call_rate)} | **Heterozygosity**: ${formatRate(qc.heterozygosity_rate)}\n\n`;
-
-  md += `## Coverage Taxonomy (5-State Summary)\n\n`;
-  md += `- **Supported & Observed (State 1)**: ${cov.supported_and_observed_count ?? state.records.length} findings\n`;
-  md += `- **Tested Wild-Type / Supported Not Observed (State 2)**: ${cov.supported_not_observed_count ?? state.negativeChecks.length} loci\n`;
-  md += `- **Microarray Gaps / Not Tested by Chip (State 3)**: ${cov.not_tested_by_array_count ?? state.arrayGaps.length} loci\n`;
-  md += `- **Outside Coverage Scope (State 4)**: ${(cov.outside_coverage_count ?? 0).toLocaleString()} markers\n`;
-  md += `- **Conflicting / Insufficient Evidence (State 5)**: ${cov.insufficient_evidence_count ?? state.insufficientEvidence.length} loci\n\n`;
-
-  if (apoe) {
-    md += `## APOE Neuro-Genomic Status\n`;
-    const resolved = apoe.diplotype !== null && apoe.diplotype !== "atypical";
-    md += `- **Diplotype**: ${resolved ? `APOE ${apoeDisplay(apoe.diplotype)}` : "none asserted"}
-`;
-    md += `- **State**: ${APOE_STATE_LABEL[apoe.coverage_state]}${apoe.reason ? ` (${apoe.reason})` : ""}
-`;
-    if (resolved) {
-      md += `- **Risk Ratio**: ${apoeKbCaveat(apoe, "Relative risk: ") ?? "Not available"}
-`;
-      md += `- **Estimated Lifetime Risk**: ${apoeKbCaveat(apoe, "Lifetime risk: ") ?? "Not available"}
-`;
-    }
-    if (apoe.caveat) md += `- **Caveat**: ${apoe.caveat}
-`;
-    md += `- **Underlying Loci**: ${apoe.components.map(c => `${c.rsid}: ${c.genotype_display ?? "--"}`).join(", ")}
-`;
-    if (resolved) md += `- **Clinical Guidance**: ${apoe.phenotype}
-`;
-    md += `
-`;
-  }
-
-  if (state.compoundHeterozygotes && state.compoundHeterozygotes.length > 0) {
-    md += `## Possible Compound Heterozygotes (Phase Unknown)\n\n`;
-    state.compoundHeterozygotes.forEach(ch => {
-      md += `### ${ch.title} (${ch.gene})\n`;
-      md += `- **Significance**: ${ch.significance}\n`;
-      md += `- **Clinical Summary**: ${ch.summary}\n`;
-      md += `- **Segregation**: ${ch.segregation_notes}\n\n`;
-    });
-  }
-
-  if (state.independentAssortment && state.independentAssortment.length > 0) {
-    md += `## Co-occurring Variant Alleles on Unlinked Loci\n\n`;
-    state.independentAssortment.forEach(ia => {
-      md += `### ${ia.type} (${ia.genes.join(" + ")})\n`;
-      md += `- **Loci**: ${ia.loci.join(" · ")}\n`;
-      md += `- **Chance a child inherits all listed alleles**: ${(ia.joint_transmission_prob * 100).toFixed(0)}% (${ia.assumption})\n`;
-      md += `- **Note**: ${ia.description}\n\n`;
-    });
-  }
-
-  md += `## Observed Clinical Findings (State 1)\n\n`;
-  md += `| rsID | Gene | Genotype | State | Tier | Category | ClinVar | Magnitude | Phenotype / Guidance |\n`;
-  md += `| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n`;
-
-  state.records.forEach(r => {
-    const stars = "★".repeat(r.clinvar_stars || 1);
-    const tier = r.evidence_tier || "Tier B";
-    md += `| ${r.rsid} | ${r.gene} | ${r.genotype || '—'} | ${r.coverage_state || 'supported_and_observed'} | ${tier} | ${r.category} | ${stars} | ${typeof r.magnitude === 'number' ? r.magnitude.toFixed(1) : '—'} | ${r.phenotype ? r.phenotype.replace(/\|/g, "/") : ''} |\n`;
+  if (!state.qc) return;
+  const md = markdownReport({
+    fileName: state.fileName,
+    qc: state.qc,
+    manifest: state.manifest,
+    coverage: state.coverageSummary,
+    apoe: state.apoe,
+    compoundHeterozygotes: state.compoundHeterozygotes,
+    independentAssortment: state.independentAssortment,
+    records: state.records,
+    negativeChecks: state.negativeChecks,
+    arrayGaps: state.arrayGaps,
+    insufficientEvidence: state.insufficientEvidence
   });
-
-  if (state.negativeChecks && state.negativeChecks.length > 0) {
-    md += `\n## Tested Wild-Type Loci (State 2: Supported but Not Observed)\n\n`;
-    md += `| rsID | Gene | Genotype | State | Tier | Condition | Clinical Interpretation |\n`;
-    md += `| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n`;
-    state.negativeChecks.forEach(r => {
-      const tier = r.evidence_tier || "Tier B";
-      md += `| ${r.rsid} | ${r.gene} | ${r.genotype || '—'} | ${r.coverage_state} | ${tier} | ${r.condition || r.gene} | ${r.significance || 'Tested Wild-Type (Tested Normal)'} |\n`;
-    });
-  }
-
-  if (state.arrayGaps && state.arrayGaps.length > 0) {
-    md += `\n## Microarray Gaps (State 3: Not Tested by Chip)\n\n`;
-    md += `| rsID | Gene | Build Coordinates | State | Clinical Significance / Locus Role |\n`;
-    md += `| :--- | :--- | :--- | :--- | :--- |\n`;
-    state.arrayGaps.forEach(r => {
-      md += `| ${r.rsid} | ${r.gene} | chr${r.chrom}:${r.pos} | ${r.coverage_state} | ${r.significance || 'Array Gap (Locus not present on microarray)'} |\n`;
-    });
-  }
-
   const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
   downloadBlob(blob, `GenomePulse_Report_${Date.now()}.md`);
 }
 
 function exportCsvReport() {
-  if (!state.records || state.records.length === 0) return;
-
-  const headers = [
-    "rsID", "Gene", "Genotype", "Chromosome", "Position", "Coverage_State", "Evidence_Tier",
-    "Category", "Significance", "Magnitude", "Repute", "ClinVar_Stars", 
-    "Inheritance_Mode", "Gnomad_AF", "Child_Inherits_Allele_Wildtype_Partner", "Child_Inherits_Allele_Unscreened_Partner",
-    "Child_Affected_Unscreened_Partner",
-    "Condition_Phenotype", "Refusal_Notices", "Caveats"
-  ];
-  const rows = [headers.join(",")];
-
-  const allExportRecords = [
-    ...(state.records || []),
-    ...(state.negativeChecks || []),
-    ...(state.arrayGaps || [])
-  ];
-
-  allExportRecords.forEach(r => {
-    const seg = r.segregation;
-    const row = [
-      `"${r.rsid}"`,
-      `"${r.gene}"`,
-      `"${r.genotype || '—'}"`,
-      `"${r.chrom}"`,
-      r.pos,
-      `"${r.coverage_state || 'supported_and_observed'}"`,
-      `"${r.evidence_tier || 'Tier B'}"`,
-      `"${r.category || 'Curated'}"`,
-      `"${r.significance || ''}"`,
-      typeof r.magnitude === "number" ? r.magnitude : 0,
-      `"${r.repute || 'Neutral'}"`,
-      r.clinvar_stars || 0,
-      `"${seg ? (MODEL_LABELS[seg.model] || seg.model) : 'N/A'}"`,
-      ...csvInheritanceCells(seg),
-      `"${(r.phenotype || '').replace(/"/g, '""')}"`,
-      `"${(r.refusal_notices || []).join('; ').replace(/"/g, '""')}"`,
-      `"${(r.caveats || []).join('; ').replace(/"/g, '""')}"`
-    ];
-    rows.push(row.join(","));
-  });
-
-  const blob = new Blob([rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  if (!state.qc) return;
+  const blob = new Blob([csvReport(allRows(), state.genes)], { type: "text/csv;charset=utf-8" });
   downloadBlob(blob, `GenomePulse_Variants_${Date.now()}.csv`);
-}
-
-/** Gnomad_AF, wild-type-partner transmission, unscreened-partner transmission, unscreened-partner affected. */
-function csvInheritanceCells(seg) {
-  if (!seg) return ["N/A", "N/A", "N/A", "N/A"];
-  const num = (v) => (v === null || v === undefined ? "N/A" : Math.round(v * 1e6) / 1e6);
-  const gene = state.genes[seg.gene];
-  const wildtypePartner = geneOutcome(gene, offspringDistribution(seg.altCount, "wildtype", seg.af), seg.allele);
-  const unscreened = geneOutcome(gene, offspringDistribution(seg.altCount, "unscreened", seg.af), seg.allele);
-  const transmits = (out) => (out.available ? num(out.p1 + out.p2) : "N/A");
-  const affected = unscreened.available && seg.mendelian_disease ? num(unscreened.affected) : "N/A";
-  return [num(seg.af), transmits(wildtypePartner), transmits(unscreened), affected];
 }
 
 function downloadBlob(blob, filename) {
@@ -1315,8 +1134,4 @@ function downloadBlob(blob, filename) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-function showError(msg) {
-  alert(`GenomePulse Processing Notice: ${msg}`);
 }
