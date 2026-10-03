@@ -7,15 +7,18 @@ import { deriveCoverageState, summarizeCoverage } from "./coverage.js";
 
 const POSITION_FIELD = { GRCh37: "pos_grch37", GRCh38: "pos_grch38" };
 
-/** Calls matched to KB loci: by rsID, or by chrom:pos for the file's build when the call has no rsID. */
+/**
+ * Calls matched to KB loci. A call whose rsID is a KB key matches that locus and is never re-matched by
+ * position. Any other call (no rsID, or an rsID the KB lacks) matches by chrom:pos for the file's build.
+ */
 function matchCalls(parseResult, kb) {
   const byRsid = new Map();
   let matched = 0;
   const positions = kb.byPosition[parseResult.build];
   for (const call of parseResult.calls) {
     let rsid = null;
-    if (call.rsid !== null) {
-      if (Object.hasOwn(kb.loci, call.rsid)) rsid = call.rsid;
+    if (call.rsid !== null && Object.hasOwn(kb.loci, call.rsid)) {
+      rsid = call.rsid;
     } else if (positions && call.pos !== null) {
       rsid = positions.get(`${call.chrom}:${call.pos}`) ?? null;
     }
@@ -45,7 +48,7 @@ export function classify(parseResult, kb) {
     let resolution;
     if (call && call.alleles !== null) {
       // Two calls for one locus that disagree are never guessed between.
-      resolution = conflicting ? { ok: false, reason: "unresolvable" } : resolveAltCount(locus, call.alleles);
+      resolution = conflicting ? { ok: false, reason: "unresolvable" } : resolveAltCount(locus, call.alleles, parseResult.assay);
     }
     const state = deriveCoverageState({
       assay: parseResult.assay,

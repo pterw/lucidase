@@ -311,8 +311,9 @@ def _count_alts(alleles: list[str], ref: str, alt: str) -> Optional[int]:
     return n
 
 
-def resolve_alt_count(locus: dict, alleles: list[str] | None) -> dict:
-    """locus: {ref, alt, allele_codes, chrom}; alleles: list of tokens or None.
+def resolve_alt_count(locus: dict, alleles: list[str] | None, assay: str) -> dict:
+    """locus: {ref, alt, allele_codes, chrom}; alleles: list of tokens or None; assay: "array" | "vcf".
+    VCF alleles are plus-strand by definition, so only a non-VCF assay may strand-complement.
 
     Returns {"ok": True, "altCount": 0|1|2, "strandFlipped": bool} or
     {"ok": False, "reason": "no_call" | "unresolvable"}. "palindromic_ambiguous" is in the
@@ -339,7 +340,9 @@ def resolve_alt_count(locus: dict, alleles: list[str] | None) -> dict:
     direct = _count_alts(called, ref, alt)
     if direct is not None:
         return {"ok": True, "altCount": direct, "strandFlipped": False}
-    if _is_base(ref) and _is_base(alt) and not is_palindromic(ref, alt) and all(_is_base(a) for a in called):
+    # Only an array may complement; a VCF's alleles are plus-strand, so a foreign alt stays unresolvable.
+    can_complement = assay != "vcf" and _is_base(ref) and _is_base(alt) and not is_palindromic(ref, alt)
+    if can_complement and all(_is_base(a) for a in called):
         flipped = _count_alts([_COMPLEMENT[a] for a in called], ref, alt)
         if flipped is not None:
             return {"ok": True, "altCount": flipped, "strandFlipped": True}
@@ -408,15 +411,15 @@ def summarize_coverage(records: list[dict], outside_count: int = 0) -> dict:
 
 
 def _match_calls(parse: ParseResult, kb: KnowledgeBase) -> tuple[dict[str, list], int]:
-    """Calls matched to KB loci: by rsID, or by chrom:pos for the file's build when the call has no rsID."""
+    """Calls matched to KB loci. A call whose rsID is a KB key matches that locus and is never re-matched
+    by position. Any other call (no rsID, or an rsID the KB lacks) matches by chrom:pos for the file's build."""
     by_rsid: dict[str, list] = {}
     matched = 0
     positions = kb.by_position.get(parse.build)
     for call in parse.calls:
         rsid = None
-        if call.rsid is not None:
-            if call.rsid in kb.loci:
-                rsid = call.rsid
+        if call.rsid is not None and call.rsid in kb.loci:
+            rsid = call.rsid
         elif positions is not None and call.pos is not None:
             rsid = positions.get(f"{call.chrom}:{call.pos}")
         if rsid is None:
@@ -450,9 +453,10 @@ def classify(parse: ParseResult, kb: KnowledgeBase) -> dict:
         resolution = None
         if call is not None and call.alleles is not None:
             # Two calls for one locus that disagree are never guessed between.
-            resolution = (
-                {"ok": False, "reason": "unresolvable"} if conflicting else resolve_alt_count(locus, call.alleles)
-            )
+            if conflicting:
+                resolution = {"ok": False, "reason": "unresolvable"}
+            else:
+                resolution = resolve_alt_count(locus, call.alleles, parse.assay)
         state = _derive_state(parse.assay, call, resolution, locus["evidence_sufficiency"])
 
         resolved = resolution is not None and resolution["ok"]

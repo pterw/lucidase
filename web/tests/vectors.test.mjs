@@ -73,7 +73,7 @@ const HANDLERS = {
   // input: { locus: {ref, alt, allele_codes, chrom}, alleles }; expected is a subset of the result.
   "alleles.json": async (vector) => {
     const { resolveAltCount } = await import("../src/core/alleles.js");
-    const result = resolveAltCount(vector.input.locus, vector.input.alleles);
+    const result = resolveAltCount(vector.input.locus, vector.input.alleles, vector.input.assay);
     assertSubset(result, vector.expected, vector.id);
   },
 

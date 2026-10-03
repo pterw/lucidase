@@ -92,7 +92,7 @@ def _assert_text_and_absent(result, expected, vector_id):
 def _run_alleles(vector):
     from variant_annotator import resolve_alt_count
 
-    result = resolve_alt_count(vector["input"]["locus"], vector["input"]["alleles"])
+    result = resolve_alt_count(vector["input"]["locus"], vector["input"]["alleles"], vector["input"].get("assay", "array"))
     _assert_close(result, vector["expected"], vector["id"])
 
 

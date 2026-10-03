@@ -69,9 +69,32 @@ test("an unknown build never matches by position", () => {
   assert.equal(out.records.find((r) => r.rsid === "rs4244285").coverage_state, COVERAGE_STATES.NOT_TESTED_BY_ARRAY);
 });
 
-test("an rsID call takes precedence over a position match", () => {
-  const out = classify(parse([call("rs4244285", "10", 1, ["G", "A"])]), kb());
-  assert.equal(out.records.find((r) => r.rsid === "rs4244285").altCount, 1);
+test("an rsID that is a KB key is never re-matched by position", () => {
+  // rs1801133's rsID at rs4244285's chrom:pos: only rs1801133 may claim the call.
+  const out = classify(parse([call("rs1801133", "10", 96541616, ["G", "G"])]), kb());
+  const at = (rsid) => out.records.find((r) => r.rsid === rsid);
+  assert.equal(at("rs1801133").genotype_display, "G/G");
+  assert.equal(at("rs4244285").genotype_display, null);
+  assert.equal(at("rs4244285").coverage_state, COVERAGE_STATES.NOT_TESTED_BY_ARRAY);
+  assert.equal(out.summary.outside_coverage_count, 0);
+});
+
+test("an rsID the KB lacks falls back to the chrom:pos match", () => {
+  const out = classify(parse([call("rs999999999", "10", 96541616, ["G", "A"])]), kb());
+  const rec = out.records.find((r) => r.rsid === "rs4244285");
+  assert.equal(rec.genotype_display, "G/A");
+  assert.equal(rec.altCount, 1);
+  assert.equal(out.summary.outside_coverage_count, 0);
+});
+
+test("a VCF call is never strand-complemented, an array call is", () => {
+  const foreign = (assay) => classify(parse([call("rs4244285", "10", 96541616, ["C", "C"])], { assay }), kb());
+  const vcf = foreign("vcf").records.find((r) => r.rsid === "rs4244285");
+  assert.equal(vcf.altCount, null);
+  assert.equal(vcf.coverage_state, COVERAGE_STATES.INSUFFICIENT_EVIDENCE);
+  const array = foreign("array").records.find((r) => r.rsid === "rs4244285");
+  assert.equal(array.altCount, 0);
+  assert.equal(array.strandFlipped, true);
 });
 
 test("deriveCoverageState follows the C4 order", () => {
