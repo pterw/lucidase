@@ -6,22 +6,9 @@ working here needs on top of that.
 
 ## Active work
 
-The private repo is `pterw/lucidase` (renamed from `genomepulse` with the owner's OK; GitHub redirects the old URLs).
-The controller pushes only commits that passed gate-runner, by explicit SHA, with `git push --atomic`. Implementers
-never push. There is no CI: the five local gates are the check.
-
-- **PR #1** (`fix/genomepulse-hardening`) was merged into `main` at `abeaaa3`, before its last 27 commits were
-  pushed. Those commits (`abeaaa3..18a7821`: the review fix rounds, the rename, the fonts, the README) are on the
-  branch but **not in `main`**. A follow-up PR from that branch into `main` waits on the owner.
-  - Its workspace `.superpowers/sdd/2026-10-02-genomepulse-hardening/` is finished and kept for reference.
-- **PR #2 (draft)**, branch `feat/karyogram`, based on `fix/genomepulse-hardening`, worked only in the worktree
-  `C:/ssw/kary`. It adds the karyogram data-visualisation page (owner rulings 13 and 14) and carries the merge of PR
-  #1's branch.
-  - Its state of truth is the untracked workspace `.superpowers/sdd/2026-10-03-karyogram/`. Before acting, read the
-    last `## RESUME HERE` block of `ledger.md`, then `constraints.md`, `contracts.md` (K-C1..K-C5, with the
-    2026-10-03 amendments to K-C3) and `plan.md`.
-  - The geometry comes from UCSC tables, fetched once and pinned under `tools/fixtures/upstream/real/ucsc/`.
-  - The whole-PR review is done, and its findings have landed. The open owner decisions are listed in the PR body.
+All pull requests are merged (#1, #3, #2; `main` at `30602b2`). The current state, the open items and the design-system
+notes are in `docs/HANDOFF.md`; read it after `AGENTS.md`. The controller pushes only commits that passed all five
+gates, by explicit SHA, with `git push --atomic`. Implementers never push. There is no CI.
 
 Two untracked items at the repo root belong to the owner, and both are excluded locally in `.git/info/exclude`:
 - `workspace/`: the owner's separate Gemini agent's research database. Never edit, stage or plug it in. It has real
