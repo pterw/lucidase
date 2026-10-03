@@ -270,10 +270,16 @@ def _parse_myheritage_line(line: str):
     return _array_call(cols[0], cols[1], cols[2], _array_alleles(cols[3]))
 
 
+# A VCF allele we carry: A/C/G/T sequences (SNPs and indels) or the single codes I/D. Symbolic
+# `<DEL>`, `=1+1` and markup are untrusted file content and are never kept.
+_VCF_ALLELE = re.compile(r"(?:[ACGT]+|[ID])", re.IGNORECASE)
+
+
 def _vcf_alleles(gt: str, table: list[str]):
     """GT string and allele table to alleles: None = no-call, _MALFORMED = bad GT."""
     out: list[str] = []
-    missing = False
+    # REF is checked for every row; an ALT only when the GT selects it.
+    missing = table[0] != "*" and not _VCF_ALLELE.fullmatch(table[0])
     for t in re.split(r"[/|]", gt):
         if t == ".":
             missing = True
@@ -285,6 +291,9 @@ def _vcf_alleles(gt: str, table: list[str]):
             return _MALFORMED
         # "*" is a spanning deletion, not a base: the position has no usable call.
         if table[idx] == "*":
+            missing = True
+            continue
+        if not _VCF_ALLELE.fullmatch(table[idx]):
             missing = True
             continue
         out.append(table[idx].upper())

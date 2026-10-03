@@ -11,6 +11,7 @@
  * not be parsed), called / no_calls (counted per Call, so a VCF line with two
  * `;`-joined IDs adds two), filtered (VCF calls whose FILTER is neither PASS nor `.`;
  * they are no-calls, so they are also in no_calls; always 0 for array formats).
+ * A VCF row whose REF, or a GT-selected ALT, is not A/C/G/T sequence or I/D is a no-call too (in no_calls, not filtered).
  */
 
 export class UnsupportedFormatError extends Error {
@@ -199,11 +200,18 @@ function parseMyHeritageLine(line) {
   return arrayCall(cols[0], cols[1], cols[2], arrayAlleles(cols[3]));
 }
 
+/**
+ * A VCF allele we will carry: A/C/G/T sequences (SNPs and indel sequences) or the single codes I/D.
+ * Anything else (symbolic `<DEL>`, `=1+1`, markup) is untrusted file content and is never kept.
+ */
+const VCF_ALLELE = /^(?:[ACGT]+|[ID])$/i;
+
 /** GT string and allele table to alleles: null = no-call, undefined = malformed. */
 function vcfAlleles(gt, table) {
   const tokens = gt.split(/[/|]/);
   const out = [];
-  let missing = false;
+  // REF is checked for every row; an ALT only when the GT selects it.
+  let missing = table[0] !== "*" && !VCF_ALLELE.test(table[0]);
   for (const t of tokens) {
     if (t === ".") {
       missing = true;
@@ -214,6 +222,10 @@ function vcfAlleles(gt, table) {
     if (idx >= table.length) return undefined;
     // "*" is a spanning deletion, not a base: the position has no usable call.
     if (table[idx] === "*") {
+      missing = true;
+      continue;
+    }
+    if (!VCF_ALLELE.test(table[idx])) {
       missing = true;
       continue;
     }
