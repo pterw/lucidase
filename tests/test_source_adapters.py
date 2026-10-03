@@ -6,11 +6,13 @@ Tests whose names start with `test_synthetic_` use a small hand-built dict for a
 real captures do not contain. Their docstrings say so; they never stand in for real data.
 """
 
+import ast
 import copy
 import hashlib
 import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -21,8 +23,12 @@ from tools.source_adapters import (
     REVIEW_STATUS_STARS,
     AdapterError,
     PayloadIntegrityError,
+    TruncatedSearch,
     UpstreamSnapshot,
     check_clinvar_search_complete,
+    esearch_uids,
+    gnomad_variant_ids_from_dbsnp,
+    is_multiple_variants_refusal,
     load_pinned,
     parse_dbsnp,
     parse_gnomad_constraint,
@@ -480,20 +486,94 @@ def test_missing_directory_is_an_error(tmp_path):
 # ---------------------------------------------------------------------------
 # Anti-corruption layer: structure
 # ---------------------------------------------------------------------------
-UPSTREAM_FIELD_NAMES = (
-    "germline_classification", "placements_with_allele", "transcript_consequences",
-    "gnomad_constraint", "canonical_spdi", "am_pathogenicity", "oe_lof_upper",
-)
+# Keys the adapters read that name no upstream payload field. Each group says why it is excluded.
+_NOT_UPSTREAM_FIELDS = frozenset({
+    # the capture meta format fetch_upstream.py writes and the adapters read back (our own file, not a payload)
+    "bytes", "http_status", "request_body", "retrieved_at", "sha256_of_body", "url",
+    # words that occur as ordinary identifiers, dict keys of our own models and CLI text everywhere
+    "id", "data", "result", "errors", "message", "count", "gene", "symbol", "title", "description",
+    "position", "variant", "uid", "uids", "allele", "alleles", "af", "pli", "loeuf",
+    "significance", "accession", "alphamissense_class", "alphamissense_score",
+    # our own build labels, keys of our DbsnpRecord.placements
+    "GRCh37", "GRCh38",
+    # a field of our own KB and models (contracts C2: evidence.clinvar.review_status)
+    "review_status",
+})
+
+
+def _string_keys_read_by(path):
+    """Every string constant used as a subscript or as the first argument of `.get(...)` in a module."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    keys = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
+            keys.add(node.slice.value)
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+            and isinstance(node.args[0].value, str)
+        ):
+            keys.add(node.args[0].value)
+    return keys
+
+
+def _forbidden_upstream_names():
+    return _string_keys_read_by(ROOT / "tools" / "source_adapters.py") - _NOT_UPSTREAM_FIELDS
+
+
+# The desktop VEP parser is a known second reader of the payload (review S3a-C-2); S4 owns its removal.
+_KNOWN_LEAKS = {"biotools_orchestrator.py": "review S3a-C-2, owned by S4"}
+
+
+def _tracked_python_files():
+    out = subprocess.run(["git", "ls-files", "*.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    for name in out.splitlines():
+        path = ROOT / name
+        parts = Path(name).parts
+        if path.name == "source_adapters.py" or parts[0] == "tests" or "fixtures" in parts:
+            continue
+        yield path
+
+
+def _leaks(path, forbidden):
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return sorted({n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)} & forbidden)
+
+
+def test_forbidden_names_are_derived_from_the_adapters():
+    names = _forbidden_upstream_names()
+    for name in ("variation_set", "esearchresult", "idlist", "primary_snapshot_data", "placement_annot",
+                 "seq_id_traits_by_assembly", "variant_allele", "mane_select", "am_class", "germline_classification"):
+        assert name in names
+    assert len(names) >= 25
 
 
 def test_only_source_adapters_names_upstream_fields():
-    """AGENTS.md section 2: no other module under tools/ may know a payload field."""
-    for path in sorted((ROOT / "tools").rglob("*.py")):
-        if path.name in ("source_adapters.py", "fetch_upstream.py"):
+    """AGENTS.md section 2: no tracked module outside the adapters and the tests may know a payload field."""
+    forbidden = _forbidden_upstream_names()
+    scanned = [path.name for path in _tracked_python_files()]
+    assert "fetch_upstream.py" in scanned and "build_canonical_kb.py" in scanned and "genomic_parser.py" in scanned
+    for path in _tracked_python_files():
+        found = _leaks(path, forbidden)
+        if path.name in _KNOWN_LEAKS:
             continue
-        text = path.read_text(encoding="utf-8")
-        for name in UPSTREAM_FIELD_NAMES:
-            assert name not in text, f"{path.relative_to(ROOT)} names upstream field {name}"
+        assert not found, f"{path.relative_to(ROOT)} names upstream fields {found}"
+
+
+def test_the_guard_flags_a_leak(tmp_path):
+    leaky = tmp_path / "leaky.py"
+    leaky.write_text('def f(raw):\n    return raw["variation_set"]\n', encoding="utf-8")
+    assert _leaks(leaky, _forbidden_upstream_names()) == ["variation_set"]
+
+
+def test_known_leaks_are_listed_and_still_leak():
+    """The allow-list must not outlive the leak: when S4 removes the second VEP parser this fails."""
+    forbidden = _forbidden_upstream_names()
+    for name in _KNOWN_LEAKS:
+        assert _leaks(ROOT / name, forbidden), f"{name} no longer leaks: drop it from _KNOWN_LEAKS"
 
 
 def test_adapters_exist_only_for_sources_with_real_payloads():
@@ -502,3 +582,68 @@ def test_adapters_exist_only_for_sources_with_real_payloads():
     assert not hasattr(source_adapters, "derive_evidence_tier"), "one tier function lives in coverage_taxonomy (CR-3)"
     for source in ("alphafold", "cpic", "encode", "hpa"):
         assert not (REAL.parent / source).exists()
+
+
+# ---------------------------------------------------------------------------
+# Capture-script helpers (S3-F2a): payload knowledge lives here, not in fetch_upstream.py
+# ---------------------------------------------------------------------------
+def _real_body(source, key):
+    return (REAL / source / f"{key}.json").read_bytes()
+
+
+def test_esearch_uids_reads_a_real_capture_and_accepts_zero_hits():
+    body = _real_body("clinvar", "rs4244285.esearch")
+    assert esearch_uids(body) == [str(u) for u in json.loads(body)["esearchresult"]["idlist"]]
+    assert len(esearch_uids(body)) > 1
+    assert esearch_uids(b'{"esearchresult": {"count": "0", "idlist": []}}') == []
+
+
+def test_esearch_uids_is_the_one_completeness_rule():
+    truncated = b'{"esearchresult": {"count": "37", "idlist": ["1", "2"]}}'
+    with pytest.raises(TruncatedSearch, match="truncated"):
+        esearch_uids(truncated)
+    assert issubclass(TruncatedSearch, AdapterError)
+    with pytest.raises(AdapterError, match="truncated"):
+        check_clinvar_search_complete(json.loads(truncated), {"result": {"uids": ["1", "2"]}})
+
+
+@pytest.mark.parametrize("body", [
+    b"{}", b"not json", b'{"esearchresult": {}}',
+    b'{"esearchresult": {"count": "x", "idlist": []}}', b'{"esearchresult": {"count": "1", "idlist": 5}}',
+])
+def test_esearch_uids_raises_on_a_malformed_body_instead_of_returning_nothing(body):
+    with pytest.raises(AdapterError):
+        esearch_uids(body)
+
+
+_GNOMAD_IDS = {
+    "rs429358": ["19-44908684-T-C"], "rs7412": ["19-44908822-C-T"],
+    "rs1800562": ["6-26092913-G-A", "6-26092913-G-T"], "rs1799945": ["6-26090951-C-G", "6-26090951-C-T"],
+    "rs6025": ["1-169549811-C-A", "1-169549811-C-G", "1-169549811-C-T"], "rs1799963": ["11-46739505-G-A"],
+    "rs4244285": ["10-94781859-G-A", "10-94781859-G-C", "10-94781859-G-T"],
+    "rs9923231": ["16-31096368-C-A", "16-31096368-C-G", "16-31096368-C-T"],
+    "rs4149056": ["12-21178615-T-A", "12-21178615-T-C"],
+    "rs3918290": ["1-97450058-C-A", "1-97450058-C-G", "1-97450058-C-T"],
+    "rs1801133": ["1-11796321-G-A", "1-11796321-G-C", "1-11796321-G-T"],
+    "rs4988235": ["2-135851076-G-A", "2-135851076-G-C", "2-135851076-G-T"],
+    "rs671": ["12-111803962-G-A"], "rs113993960": ["7-117559591-TCTT-T", "7-117559591-TCTT-TCTTCTT"],
+}
+
+
+@pytest.mark.parametrize("rsid", sorted(_GNOMAD_IDS))
+def test_gnomad_variant_ids_from_each_real_dbsnp_capture(rsid):
+    assert gnomad_variant_ids_from_dbsnp(json.loads(_real_body("dbsnp", rsid))) == _GNOMAD_IDS[rsid]
+
+
+def test_synthetic_dbsnp_without_a_grch38_placement_raises():
+    """Synthetic: a refsnp with no chromosome placement must not give an empty id list."""
+    with pytest.raises(AdapterError, match="GRCh38"):
+        gnomad_variant_ids_from_dbsnp({"refsnp_id": "1", "primary_snapshot_data": {"placements_with_allele": []}})
+
+
+def test_gnomad_multiple_variants_refusal_is_recognised_through_the_parser():
+    assert is_multiple_variants_refusal(_real_body("gnomad", "rs4244285")) is True
+    assert is_multiple_variants_refusal(_real_body("gnomad", "rs671")) is False
+    assert is_multiple_variants_refusal({"errors": [{"message": "Multiple variants found, x"}]}) is True
+    with pytest.raises(AdapterError):
+        is_multiple_variants_refusal(b"<html>502</html>")

@@ -145,12 +145,31 @@ def _dbsnp_numbers(variation: dict[str, Any]) -> set[str]:
     return {x.get("db_id") for x in variation.get("variation_xrefs", []) if x.get("db_source") == "dbSNP"}
 
 
+class TruncatedSearch(AdapterError):
+    """An esearch reports more hits (count) than it returned (idlist)."""
+
+
+def esearch_uids(esearch: bytes | dict[str, Any]) -> list[str]:
+    """Uids of an esearch (raw body or parsed). The one completeness rule: count must equal len(idlist).
+
+    An esearch with no hits is a valid answer (count 0, empty idlist). A body that is not an esearch
+    result raises `AdapterError`; a truncated one raises `TruncatedSearch`. Never an empty list by default.
+    """
+    try:
+        raw = json.loads(esearch) if isinstance(esearch, (bytes, str)) else esearch
+        result = raw["esearchresult"]
+        ids = [str(uid) for uid in result["idlist"]]
+        count = int(result["count"])
+    except (ValueError, KeyError, TypeError) as exc:
+        raise AdapterError(f"ClinVar esearch body is not a readable esearch result ({exc!r})") from exc
+    if count != len(ids):
+        raise TruncatedSearch(f"ClinVar esearch is truncated: count {count} but {len(ids)} ids; raise retmax")
+    return ids
+
+
 def check_clinvar_search_complete(esearch: dict[str, Any], esummary: dict[str, Any]) -> None:
     """Raise unless the esearch was complete (count == len(idlist)) and esummary covers exactly its ids (L2)."""
-    result = esearch.get("esearchresult", {})
-    ids = result.get("idlist", [])
-    if int(result.get("count", -1)) != len(ids):
-        raise AdapterError(f"ClinVar esearch is truncated: count {result.get('count')} but {len(ids)} ids")
+    ids = esearch_uids(esearch)
     if set(ids) != set(esummary.get("result", {}).get("uids", [])):
         raise AdapterError("ClinVar esummary does not cover exactly the esearch ids")
 
@@ -260,6 +279,26 @@ def parse_dbsnp(raw: dict[str, Any], provenance: Optional[ImportProvenance] = No
     )
 
 
+_CHROMOSOME_ACCESSION = re.compile(r"NC_0000(\d\d)\.\d+")
+
+
+def gnomad_variant_ids_from_dbsnp(raw: dict[str, Any]) -> list[str]:
+    """gnomAD variant ids (`chrom-pos-ref-alt`, plus strand, GRCh38, 1-based) of a refsnp's variant alleles.
+
+    Reads the placements through `parse_dbsnp`. An allele whose deleted and inserted sequences are equal is
+    the reference allele and gives no id. A payload without a GRCh38 chromosome placement raises.
+    """
+    placement = parse_dbsnp(raw).placements.get("GRCh38")
+    if placement is None:
+        raise AdapterError(f"rs{raw.get('refsnp_id')}: the dbSNP payload has no GRCh38 chromosome placement")
+    found = _CHROMOSOME_ACCESSION.fullmatch(placement.seq_id)
+    if found is None:
+        raise AdapterError(f"unexpected GRCh38 sequence accession {placement.seq_id!r}")
+    number = int(found.group(1))
+    chrom = {23: "X", 24: "Y"}.get(number, str(number))
+    return [f"{chrom}-{pos + 1}-{deleted}-{inserted}" for pos, deleted, inserted in placement.alleles if deleted != inserted]
+
+
 # =============================================================================
 # Ensembl VEP
 # =============================================================================
@@ -347,6 +386,17 @@ def parse_gnomad_variant(raw: dict[str, Any], provenance: Optional[ImportProvena
     else:
         reasons["af"] = "no exome or genome record with an > 0"
     return GnomadVariant(variant.get("variant_id"), af, reasons, provenance)
+
+
+def is_multiple_variants_refusal(body: bytes | dict[str, Any]) -> bool:
+    """True when a gnomAD rsid response is the "Multiple variants found" refusal (a multiallelic rsID)."""
+    try:
+        raw = json.loads(body) if isinstance(body, (bytes, str)) else body
+    except ValueError as exc:
+        raise AdapterError(f"gnomAD body is not JSON ({exc})") from exc
+    if not isinstance(raw, dict):
+        raise AdapterError("gnomAD body is not a JSON object")
+    return parse_gnomad_variant(raw).refusal == GNOMAD_REFUSAL_MULTIPLE_VARIANTS
 
 
 def parse_gnomad_constraint(raw: dict[str, Any], provenance: Optional[ImportProvenance] = None) -> GnomadConstraint:
