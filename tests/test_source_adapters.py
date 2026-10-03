@@ -1222,6 +1222,20 @@ def _synthetic(chrom_info_rows, cytoband_rows):
     return parse_ucsc_assembly("GRCh38", payload(chrom_info_rows), payload(cytoband_rows))
 
 
+def test_ucsc_non_ascii_digit_is_an_adapter_error_not_a_value_error():
+    info, bands = _good_rows()
+    info[0] = ("chr1", "\u00b2", "/x")  # "\u00b2".isdigit() is True but int() raises ValueError
+    with pytest.raises(AdapterError, match="not a non-negative integer"):
+        _synthetic(info, bands)
+
+
+@pytest.mark.parametrize("data", [b"\x1f\x8b\x08\x00" + b"\xff" * 16, gzip.compress(b"chr1\t1\n" * 50)[:-12]])
+def test_ucsc_corrupt_gzip_stream_is_an_adapter_error(data):
+    bad = PinnedPayload(Path("bad.txt.gz"), data, {"url": "u", "retrieved_at": "2026-01-02T00:00:00Z", "sha256_of_body": "0" * 64})
+    with pytest.raises(AdapterError, match="not a readable gzip"):
+        parse_ucsc_assembly("GRCh38", bad, bad)
+
+
 def _good_rows():
     info = [(f"chr{n}", 1000, "/x") for n in PRIMARY] + [("chrM", 16, "/x"), ("chr1_alt", 5, "/x")]
     bands = [(f"chr{n}", 400, 600, "p11.1", "acen") for n in PRIMARY] + [("chr1_alt", 0, 9, "p1", "acen")]

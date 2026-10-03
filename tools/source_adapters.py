@@ -23,6 +23,7 @@ import gzip
 import hashlib
 import json
 import re
+import zlib
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Optional
@@ -184,13 +185,13 @@ UCSC_NAMES = {"GRCh37": "hg19", "GRCh38": "hg38"}
 def _ucsc_rows(payload: PinnedPayload, table: str, columns: int) -> list[list[str]]:
     try:
         text = gzip.decompress(payload.data).decode("utf-8")
-    except (OSError, EOFError, UnicodeDecodeError, TypeError) as exc:
+    except (OSError, EOFError, zlib.error, UnicodeDecodeError, TypeError) as exc:
         raise AdapterError(f"UCSC {table}: not a readable gzip text table ({exc})") from exc
     rows = []
     for number, line in enumerate(text.splitlines(), 1):
         if not line.strip():
             continue
-        fields = line.split("	")
+        fields = line.split("\t")
         if len(fields) < columns or not fields[0]:
             raise AdapterError(f"UCSC {table}: malformed row {number}: {line[:80]!r}")
         rows.append(fields)
@@ -198,7 +199,7 @@ def _ucsc_rows(payload: PinnedPayload, table: str, columns: int) -> list[list[st
 
 
 def _ucsc_int(value: str, table: str, line: list[str]) -> int:
-    if not value.isdigit():
+    if not (value.isascii() and value.isdigit()):
         raise AdapterError(f"UCSC {table}: malformed row {line[:5]!r}: {value!r} is not a non-negative integer")
     return int(value)
 

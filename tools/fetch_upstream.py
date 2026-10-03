@@ -362,7 +362,8 @@ def capture_ucsc(cap: Capturer) -> None:
         try:
             cap.run("ucsc", key, spec, body_ext="")
         except CaptureFailed as exc:
-            raise UcscCaptureFailed(f"{spec['url']}: HTTP {exc.status}") from exc
+            reason = "empty response body" if exc.status == 200 else f"HTTP {exc.status}"
+            raise UcscCaptureFailed(f"{spec['url']}: {reason}") from exc
 
 
 def main(argv=None, opener=None, sleep=time.sleep) -> int:

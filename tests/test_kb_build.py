@@ -974,7 +974,6 @@ def test_verify_only_reports_an_assemblies_difference(good_kb):
     assert "assemblies: GRCh37 differs in chromosomes" in result.stdout
 
 
-
 IMPORTED_KEYS = ("alphamissense_class", "alphamissense_pathogenicity", "loeuf", "canonical_transcript")
 
 

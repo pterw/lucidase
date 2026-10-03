@@ -20,8 +20,8 @@ Do not route around it.
 **Single source of truth.** All curated genomic knowledge (loci, alleles,
 genotype interpretations, evidence, inheritance, gene insights) and the
 reference assembly geometry (chromosome lengths and centromeres, GRCh37 and
-GRCh38) live in `web/src/knowledge-base.json`. Only `tools/build_canonical_kb.py` writes
-it, and nobody edits it by hand. The build's hand-edited input is
+GRCh38) live in `web/src/knowledge-base.json`. Only `tools/build_canonical_kb.py`
+writes it, and nobody edits it by hand. The build's hand-edited input is
 `tools/curation/kb_curation.json`: change curated knowledge there, then
 rebuild. The web app and the desktop tools both *load* the KB. No second
 copy of the data may exist in JS or Python source.

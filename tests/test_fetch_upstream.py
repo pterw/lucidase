@@ -501,6 +501,16 @@ def test_ucsc_capture_fails_on_a_non_200_response(tmp_path):
     assert seen == UCSC_URLS[:1]  # stops at the first failure
 
 
+def test_ucsc_capture_names_an_empty_200_body_as_empty(tmp_path):
+    def opener(req, timeout):
+        return FakeResp(200, b"")
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    with pytest.raises(fu.UcscCaptureFailed, match="chromInfo.txt.gz: empty response body") as info:
+        fu.capture_ucsc(cap)
+    assert "HTTP 200" not in str(info.value)
+
+
 def test_ucsc_only_cli_runs_only_the_ucsc_capture(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))
