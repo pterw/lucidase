@@ -134,3 +134,32 @@ def test_watchdog_does_not_fire_during_healthy_progress(page):
     expect(page.locator("#analysis-error")).to_be_visible()
     # The alert must be the worker's own message, not the watchdog's.
     assert "finished healthy run" in page.locator("#analysis-error-detail").inner_text()
+
+
+@pytest.mark.allow_console_errors
+def test_transient_module_load_failure_is_retried_once(loaded_page):
+    # A worker whose module graph fails to load (the machine ran out of socket buffers,
+    # the network dropped a request) raises an error event with no message. That is a
+    # transient start failure: the run starts a fresh worker once instead of failing.
+    aborted = []
+
+    def flaky(route):
+        if aborted:
+            route.continue_()
+        else:
+            aborted.append(route.request.url)
+            route.abort("connectionreset")
+
+    loaded_page.route("**/src/core/classify.js", flaky)
+    loaded_page.locator("#btn-load-demo").click()
+    expect(loaded_page.locator("#results-section")).to_be_visible()
+    assert len(aborted) == 1
+
+
+@pytest.mark.allow_console_errors
+def test_persistent_module_load_failure_still_shows_the_alert(loaded_page):
+    loaded_page.route("**/src/core/classify.js", lambda route: route.abort("connectionreset"))
+    loaded_page.locator("#btn-load-demo").click()
+    expect(loaded_page.locator("#analysis-error")).to_be_visible()
+    expect(loaded_page.locator("#results-section")).to_be_hidden()
+    expect(loaded_page.locator("#btn-load-demo")).to_be_enabled()

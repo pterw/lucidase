@@ -164,10 +164,15 @@ async function loadManifest() {
 
 // One worker per analysis run: a worker that failed (or never answers) is
 // terminated and the next run starts fresh, so a retry can never hang on a dead one.
-function startWorker() {
+// A worker whose module graph fails to load (a dropped request, a machine out of socket buffers)
+// raises an error event with no message before it has answered anything. That is a transient start
+// failure, so the run starts one fresh worker with the same job; a worker that throws, or fails
+// twice, takes the error path.
+function startWorker(job, canRetry = true) {
   stopWorker();
   const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
   state.worker = worker;
+  let answered = false;
   const fail = (message) => {
     if (state.worker !== worker) return;
     stopWorker();
@@ -175,6 +180,16 @@ function startWorker() {
   };
 
   worker.onerror = (err) => {
+    if (canRetry && !answered && state.worker === worker && !(err && err.message)) {
+      try {
+        startWorker(job, false).postMessage(job);
+        return;
+      } catch (retryErr) {
+        stopWorker();
+        showAnalysisError((retryErr && retryErr.message) || "The analysis worker failed to start.");
+        return;
+      }
+    }
     fail((err && err.message) || "The analysis worker failed to start.");
   };
   worker.onmessageerror = () => {
@@ -182,6 +197,7 @@ function startWorker() {
   };
   worker.onmessage = (e) => {
     if (state.worker !== worker) return;
+    answered = true;
     clearWatchdog();
     const data = e.data;
     if (data.type === "progress") {
@@ -369,7 +385,8 @@ function processText(text, fileName) {
     setInputsDisabled(true);
     document.getElementById("progress-section").classList.remove("hidden");
     document.getElementById("results-section").classList.add("hidden");
-    startWorker().postMessage({ action: "parse", text, fileName });
+    const job = { action: "parse", text, fileName };
+    startWorker(job).postMessage(job);
   } catch (err) {
     stopWorker();
     showAnalysisError((err && err.message) || err);
