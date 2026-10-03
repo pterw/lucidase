@@ -207,7 +207,11 @@ def parse_ucsc_assembly(build: str, chrom_info: PinnedPayload, cytoband: PinnedP
             raise AdapterError(f"UCSC cytoBand has no row for {ucsc_name}")
         if ucsc_name not in spans:
             raise AdapterError(f"UCSC cytoBand has no acen band for {ucsc_name}")
-        start, end = min(s for s, _ in spans[ucsc_name]), max(e for _, e in spans[ucsc_name])
+        ordered = sorted(spans[ucsc_name])
+        for (_, previous_end), (next_start, _) in zip(ordered, ordered[1:]):
+            if next_start != previous_end + 1:  # 1-based inclusive: the next row starts right after the previous ends
+                raise AdapterError(f"UCSC cytoBand: the acen rows of {ucsc_name} are not contiguous (gap or overlap at {previous_end}/{next_start})")
+        start, end = ordered[0][0], ordered[-1][1]
         if end > lengths[ucsc_name]:
             raise AdapterError(f"UCSC cytoBand: the acen band of {ucsc_name} ends at {end}, beyond its length {lengths[ucsc_name]}")
         chromosomes[name] = ChromosomeGeometry(name, lengths[ucsc_name], start, end)

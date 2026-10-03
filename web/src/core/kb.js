@@ -20,6 +20,7 @@ const MODELS = ["autosomal_recessive", "autosomal_dominant", "risk_factor", "pha
 const DIPLOTYPES = ["e2/e2", "e2/e3", "e2/e4", "e3/e3", "e3/e4", "e4/e4"];
 const PER_SAMPLE_FIELDS = ["coverage_state", "sample_observation", "assay_coverage"];
 const BUILD_FIELDS = { GRCh37: "pos_grch37", GRCh38: "pos_grch38" };
+const UCSC_NAMES = { GRCh37: "hg19", GRCh38: "hg38" };
 
 const CHROMOSOME_NAMES = [...Array.from({ length: 22 }, (_, i) => String(i + 1)), "X", "Y"];
 const SOURCE_TABLES = ["chromInfo", "cytoBand"];
@@ -144,6 +145,7 @@ function checkAssemblies(assemblies, problems) {
       continue;
     }
     if (!isStr(assembly.ucsc)) problems.push(`${p}.ucsc: required non-empty string`);
+    else if (assembly.ucsc !== UCSC_NAMES[build]) problems.push(`${p}.ucsc: must be "${UCSC_NAMES[build]}"`);
     if (!Array.isArray(assembly.sources) || assembly.sources.length !== SOURCE_TABLES.length) {
       problems.push(`${p}.sources: required array of ${SOURCE_TABLES.length} sources`);
     } else {

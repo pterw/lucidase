@@ -59,7 +59,7 @@ def test_rows_are_the_original_rows_plus_exactly_15000_background_rows():
     assert sorted(kept) == sorted(_original_rows())  # verbatim; the file is position-sorted
     assert len(lines) - len(kept) == 15_000
     assert [r[0] for r in _background()] == [f"i9{n:07d}" for n in range(1, 15_001)]
-    assert "\r" not in gen.OUTPUT_PATH.read_bytes().decode("utf-8")
+    assert "\r" not in gen.build_sample_text()  # generated text, not the autocrlf-dependent checkout
 
 
 def test_background_positions_obey_the_allowed_position_rules():

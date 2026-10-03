@@ -171,6 +171,14 @@ test("assemblies are required", () => {
   assert.match(problemsOf(kb).join("\n"), /assemblies: required object/);
 });
 
+test("each build must carry its own UCSC name (GRCh37 is hg19, GRCh38 is hg38)", () => {
+  for (const [build, wrong, expected] of [["GRCh37", "hg38", "hg19"], ["GRCh38", "hg19", "hg38"], ["GRCh37", "other", "hg19"]]) {
+    const kb = goodKb();
+    kb.assemblies[build].ucsc = wrong;
+    assert.ok(problemsOf(kb).some((m) => m.startsWith(`assemblies.${build}.ucsc`) && m.includes(expected)), `${build} as ${wrong}`);
+  }
+});
+
 test("a build missing from assemblies is rejected", () => {
   const kb = goodKb();
   delete kb.assemblies.GRCh38;

@@ -201,7 +201,13 @@ function handleFileSelected(file) {
   $("karyogram-progress").classList.remove("hidden");
   updateProgress(5, `Reading ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)...`);
   const reader = new FileReader();
-  reader.onload = (e) => processText(e.target.result, file.name);
+  reader.onload = (e) => {
+    try {
+      processText(e.target.result, file.name);
+    } catch (err) {
+      showError((err && err.message) || err);
+    }
+  };
   reader.onerror = () => showError("Failed to read file from disk.");
   reader.readAsText(file);
 }

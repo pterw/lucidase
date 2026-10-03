@@ -598,6 +598,22 @@ def test_synthetic_acen_beyond_length_raises():
         _synthetic(info, bands)
 
 
+def test_synthetic_non_contiguous_acen_rows_raise():
+    info, bands = _good_rows()
+    bands = [b for b in bands if b[0] != "chr7"]
+    bands += [("chr7", 400, 500, "p11.1", "acen"), ("chr7", 520, 600, "q11.1", "acen")]  # a 20 bp gap
+    with pytest.raises(AdapterError, match="chr7.*not contiguous"):
+        _synthetic(info, bands)
+
+
+def test_synthetic_contiguous_acen_rows_are_united():
+    info, bands = _good_rows()
+    bands = [b for b in bands if b[0] != "chr7"]
+    bands += [("chr7", 400, 500, "p11.1", "acen"), ("chr7", 500, 600, "q11.1", "acen")]
+    centromere = _synthetic(info, bands).chromosomes["7"]
+    assert (centromere.centromere_start, centromere.centromere_end) == (401, 600)
+
+
 def test_synthetic_malformed_row_raises():
     info, bands = _good_rows()
     bands[2] = ("chr3", "four", 600, "p11.1", "acen")

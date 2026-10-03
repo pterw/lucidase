@@ -322,6 +322,19 @@ def test_ucsc_capture_writes_the_gzip_body_verbatim_with_meta(tmp_path):
     assert meta["bytes"] == len(body) and meta["http_status"] == 200
 
 
+def test_ucsc_capture_fails_on_a_non_200_response(tmp_path):
+    seen = []
+
+    def opener(req, timeout):
+        seen.append(req.full_url)
+        return FakeResp(404, b"not found")
+
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=lambda m: None)
+    with pytest.raises(fu.UcscCaptureFailed, match="chromInfo.txt.gz: HTTP 404"):
+        fu.capture_ucsc(cap)
+    assert seen == UCSC_URLS[:1]  # stops at the first failure
+
+
 def test_ucsc_only_cli_runs_only_the_ucsc_capture(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(fu, "capture_ucsc", lambda cap: calls.append("ucsc"))

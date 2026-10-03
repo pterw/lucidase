@@ -182,6 +182,17 @@ def test_page_works_when_storage_throws(page):
     _wait_result(page)
 
 
+def test_a_worker_that_cannot_start_shows_the_error_and_re_enables_the_inputs(page):
+    page.add_init_script("window.Worker = function () { throw new Error('worker blocked'); };")
+    _open(page)
+    page.set_input_files("#karyogram-file-input", str(DEMO_FILE))
+    expect(page.locator("#karyogram-error")).to_be_visible()
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("worker blocked")
+    expect(page.locator("#karyogram-file-input")).to_be_enabled()
+    expect(page.locator("#btn-load-karyogram-sample")).to_be_enabled()
+    assert page.locator("#karyogram-figure .kary-col").count() == 24
+
+
 def test_file_input_and_demo_button_are_reachable_by_tab(page):
     _open(page)
     reached = []
