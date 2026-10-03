@@ -69,6 +69,21 @@ def original_lines():
     return text.replace("\r\n", "\n").split("\n")
 
 
+def select_header(lines):
+    """The two header lines copied from the original demo. A line that is not found raises."""
+    wanted = (
+        ("a line starting '# This data file'", lambda l: l.startswith("# This data file")),
+        ("the line '# build 37'", lambda l: l.strip() == "# build 37"),
+    )
+    picked = []
+    for description, matches in wanted:
+        found = [l for l in lines if matches(l)]
+        if not found:
+            raise ValueError(f"{ORIGINAL_PATH.name}: header line not found: {description}")
+        picked.extend(found)
+    return [l for l in lines if l in picked]
+
+
 def genotype(rng, pair):
     r = rng.random()
     if r < P_HOM_REF:
@@ -84,7 +99,7 @@ def build_sample_text():
     counts = allocate(chromosomes)
 
     lines = original_lines()
-    header = [l for l in lines if l.startswith("# This data file") or l.strip() == "# build 37"]
+    header = select_header(lines)
     column_header = next(l for l in lines if l.startswith("# rsid"))
     original_rows = [l for l in lines if l and not l.startswith("#")]
 

@@ -29,6 +29,19 @@ const STATE_TEXT = {
   insufficient_evidence: { badge: "Conflicting", label: "Conflicting Evidence (State 5)" },
 };
 
+/** The reference-only marker state on the karyogram: the locus has a position but no sample is loaded. */
+const REFERENCE_STATE_LABEL = "Reference position (no sample)";
+
+/**
+ * Human label per karyogram marker state: the four per-locus coverage states reuse the analysis labels above, plus
+ * "reference" for the page before a file is loaded. A fresh object each call.
+ */
+export function karyogramStateLabels() {
+  const labels = { reference: REFERENCE_STATE_LABEL };
+  for (const [state, text] of Object.entries(STATE_TEXT)) labels[state] = text.label;
+  return labels;
+}
+
 /** The APOE card's wording per state. */
 const APOE_STATE_LABEL = {
   supported_and_observed: "Observed",

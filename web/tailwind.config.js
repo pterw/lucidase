@@ -2,7 +2,7 @@
 module.exports = {
   content: {
     relative: true,
-    files: ["./index.html", "./src/**/*.js"],
+    files: ["./index.html", "./karyogram.html", "./src/**/*.js"],
   },
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {

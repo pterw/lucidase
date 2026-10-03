@@ -66,3 +66,65 @@ test("co-located loci get distinct x positions", () => {
   assert.notEqual(xOf("rs1799945"), xOf("rs1800562"));
   assert.notEqual(xOf("rs429358"), xOf("rs7412"));
 });
+
+const STATES = ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"];
+const mixedObservations = Object.fromEntries(kb.lociList.map((l, i) => [l.rsid, STATES[i % STATES.length]]));
+const mixedLayout = (calls = []) =>
+  layoutKaryogram({ kb, sample: { build: "GRCh37", calls, observations: mixedObservations } });
+
+test("with a sample, each locus group carries its observed state as data-state and class", () => {
+  const svg = renderKaryogramSvg(mixedLayout());
+  assert.equal(count(svg, /class="kary-locus /g), 14);
+  assert.equal(count(svg, /data-state="reference"/g), 0);
+  for (const [rsid, state] of Object.entries(mixedObservations)) {
+    assert.match(
+      svg,
+      new RegExp(`<g class="kary-locus kary-state-${state}" data-rsid="${rsid}" data-state="${state}">`),
+      rsid,
+    );
+  }
+});
+
+test("the desc counts loci per state from the sample", () => {
+  const labels = {
+    supported_and_observed: "L-obs",
+    supported_not_observed: "L-wt",
+    not_tested_by_array: "L-gap",
+    insufficient_evidence: "L-ins",
+  };
+  const svg = renderKaryogramSvg(mixedLayout(), { stateLabels: labels });
+  const per = Object.fromEntries(STATES.map((s) => [s, Object.values(mixedObservations).filter((o) => o === s).length]));
+  assert.equal(Object.values(per).reduce((a, b) => a + b, 0), 14);
+  for (const s of STATES) assert.ok(svg.includes(`${labels[s]}: ${per[s]}`), `${s}: ${per[s]}`);
+});
+
+test("markers inside a centromere band are drawn as dots, and the busiest such bin reaches r=3.2", () => {
+  const [cenStart, cenEnd] = kb.assemblies.GRCh37.chromosomes["2"].centromere;
+  const inBand = [cenStart, cenStart + 1, cenStart + 2, cenStart + 3].map((p) => call("2", p));
+  const svg = renderKaryogramSvg(sampleLayout([...inBand, call("2", cenEnd + 5_000_000)]));
+  const chr2 = svg.match(/<g class="kary-col" data-chrom="2">[\s\S]*?<\/g>/)[0];
+  assert.equal(count(chr2, /class="kary-bin" [^>]*r="3\.2"/g), 1);
+  assert.equal(count(chr2, /class="kary-bin" /g), 2);
+});
+
+test("a centromere bin with no markers, no sample, or unavailable density keeps the tick", () => {
+  const ticks = (svg) => count(svg.match(/<g class="kary-col" data-chrom="2">[\s\S]*?<\/g>/)[0], /class="kary-cen"/g);
+  // No sample and an unknown build both use the GRCh38 geometry; a GRCh37 sample uses GRCh37.
+  const grch38 = ticks(renderKaryogramSvg(layoutKaryogram({ kb })));
+  assert.ok(grch38 > 0);
+  assert.equal(ticks(renderKaryogramSvg(sampleLayout([call("2", 5_000_001)], "unknown"))), grch38);
+  const grch37 = ticks(renderKaryogramSvg(sampleLayout([])));
+  assert.ok(grch37 > 0);
+  const [cenStart] = kb.assemblies.GRCh37.chromosomes["2"].centromere;
+  assert.equal(ticks(renderKaryogramSvg(sampleLayout([call("2", cenStart)]))), grch37 - 1);
+});
+
+test("the karyogram state labels reuse the analysis labels and add the reference label", async () => {
+  const { karyogramStateLabels } = await import("../src/view-model.js");
+  const labels = karyogramStateLabels();
+  assert.deepEqual(Object.keys(labels).sort(), ["insufficient_evidence", "not_tested_by_array", "reference", "supported_and_observed", "supported_not_observed"]);
+  assert.equal(labels.supported_and_observed, "Supported & Observed");
+  assert.equal(labels.not_tested_by_array, "Array Gap (State 3)");
+  labels.reference = "changed";
+  assert.notEqual(karyogramStateLabels().reference, "changed");
+});

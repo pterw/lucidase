@@ -12,6 +12,7 @@
 
 import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
+import { initTheme, setTheme } from "./theme.js";
 import {
   NOT_AVAILABLE,
   acmgVersionLabel,
@@ -51,9 +52,7 @@ const state = {
   selectedVariant: null,
   filterCategory: "all",
   searchQuery: "",
-  sortBy: "magnitude",
-  // Not a clinical field: a missing stored preference means the light theme.
-  theme: localStorage.getItem("lucidase-theme") || "light"
+  sortBy: "magnitude"
 };
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
@@ -75,35 +74,6 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initApp);
 } else {
   initApp();
-}
-
-function initTheme() {
-  setTheme(state.theme);
-  const btnToggle = document.getElementById("btn-theme-toggle");
-  if (btnToggle) {
-    btnToggle.addEventListener("click", () => {
-      const nextTheme = state.theme === "light" ? "dark" : "light";
-      setTheme(nextTheme);
-    });
-  }
-}
-
-function setTheme(theme) {
-  state.theme = theme;
-  localStorage.setItem("lucidase-theme", theme);
-  document.documentElement.setAttribute("data-theme", theme);
-
-  const icon = document.getElementById("theme-toggle-icon");
-  const text = document.getElementById("theme-toggle-text");
-  if (icon && text) {
-    if (theme === "dark") {
-      icon.textContent = "☀️";
-      text.textContent = "Light Mode";
-    } else {
-      icon.textContent = "🌙";
-      text.textContent = "Dark HUD";
-    }
-  }
 }
 
 // A value the record or the KB does not carry is shown as "Not available" in a muted style, never as a placeholder.

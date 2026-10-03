@@ -240,3 +240,34 @@ tbody tr:hover {
   border-color: var(--border-subtle);
   color: var(--text-main);
 }
+
+/* Karyogram page (karyogram-view.js emits these classes). Colours are the existing theme variables, the same hues
+   as the coverage-state cards: observed sky, tested-not-detected emerald, array gap amber, outside coverage slate,
+   insufficient evidence rose, reference neutral slate. No inline fills. */
+.kary-state-supported_and_observed { --kary-fill: var(--accent-cyan); }
+.kary-state-supported_not_observed { --kary-fill: var(--accent-emerald); }
+.kary-state-not_tested_by_array { --kary-fill: var(--accent-amber); }
+.kary-state-outside_coverage { --kary-fill: var(--border-strong); }
+.kary-state-insufficient_evidence { --kary-fill: var(--accent-ruby); }
+.kary-state-reference { --kary-fill: var(--text-subtle); }
+
+.kary-bin { fill: var(--text-subtle); fill-opacity: 0.7; }
+.kary-bin-empty { fill: var(--border-strong); fill-opacity: 0.45; }
+.kary-cen { stroke: var(--text-subtle); stroke-width: 1.5; }
+.kary-label { fill: var(--text-muted); font-family: var(--font-mono); }
+.kary-halo { fill: var(--kary-fill); fill-opacity: 0.22; }
+.kary-core { fill: var(--kary-fill); stroke: var(--bg-surface-elevated); stroke-width: 1; }
+.kary-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px !important;
+  background: var(--kary-fill);
+}
+#karyogram-figure svg {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  margin: 0 auto;
+}

@@ -50,13 +50,14 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
     const g = [`<g class="kary-col" data-chrom="${esc(c.name)}">`];
     for (let i = 0; i < c.nBins; i++) {
       const y = binY(c, i);
-      if (i >= c.cenBin && i <= c.cenLast) {
+      const count = drawDensity ? sample.bins[c.name][i] : 0;
+      // A centromere bin draws the tick only when it holds no markers; a bin with markers is a dot like any other.
+      if (i >= c.cenBin && i <= c.cenLast && count === 0) {
         g.push(
           `<line class="kary-cen" x1="${f(c.x - CEN_TICK / 2)}" y1="${f(y)}" x2="${f(c.x + CEN_TICK / 2)}" y2="${f(y)}"/>`,
         );
         continue;
       }
-      const count = drawDensity ? sample.bins[c.name][i] : 0;
       if (count > 0) {
         const r = R_MIN + R_SPAN * Math.sqrt(count / maxCount);
         g.push(`<circle class="kary-bin" cx="${f(c.x)}" cy="${f(y)}" r="${f(r)}"/>`);

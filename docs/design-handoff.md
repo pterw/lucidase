@@ -361,6 +361,18 @@ Factual audit from code; "to verify" = cannot be proven without rendering.
 | Tooltips | `title` on QC rates, sex badge, KB badge (A:131), limitation badge (A:680), truncated phenotype | Not available to keyboard/touch |
 | External link | `rel="noopener noreferrer"` | n/a |
 
+## Karyogram page
+
+`web/karyogram.html` is a second page (header link "Analysis" back to `index.html`; `index.html` links to it), built from the same classes and theme variables as the analysis page. It is the owner-requested exception to the "no visual design yet" rule, kept minimal. The main element carries `data-karyogram-state`; the states the design system must provide are:
+
+1. **Reference-only** (`reference-only`): on load, before any file. 24 chromosome columns of faint dots with the 14 curated loci in the neutral "reference" style; the legend counts all loci as reference; no totals panel.
+2. **Loading** (`loading`): the progress bar and status line, the same pattern as the analysis page. The file input and the demo button are disabled.
+3. **Result** (`result`): density dots sized by marker count, loci coloured by coverage state (observed sky, tested not detected emerald, array gap amber, insufficient evidence rose, reference neutral slate), the legend with counts, the totals panel (rows, placed, MT, unplaced by name, out of bounds, not placed because the build is unknown, density) and the loci table.
+4. **Density unavailable** (a notice inside the result): the file's genome build is unknown, so no marker is placed by position; every dot is faint and the loci keep their states.
+5. **Error** (`error`): `#karyogram-error`, the same alert pattern as the analysis error; the figure falls back to the reference-only drawing and the totals panel is hidden.
+
+The marker colours live in `src/styles.css` (`.kary-*`) as references to the existing theme variables. The figure scales with its container (760 px at most).
+
 ## Pending changes
 
 None. T7 (APOE card states), T8 (offspring simulator inputs, wording and multi-locus scope) and T9 (single view model, "Not available", limitation badges, one error path) landed on this branch. Their behaviour is described in the sections above, with `file:line` cites, and is no longer pending.

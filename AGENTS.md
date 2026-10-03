@@ -30,13 +30,18 @@ copy of the data may exist in JS or Python source.
 
 ```
 web/src/app.js, index.html     UI: renders view models, owns DOM, no genetics
+web/src/karyogram-page.js,     UI of the karyogram page: owns its DOM, calls
+  karyogram.html               the worker's "karyogram" action
+web/src/karyogram-view.js      pure SVG view of a karyogram layout
+web/src/theme.js               light/dark theme shared by both pages
 web/src/view-model.js          pure display model: one view model per record
                                feeds the table, drawer, Markdown and CSV
 web/src/worker.js              adapter: message in -> core -> message out
 web/src/kb-loader.js           the one KB loader (JSON module import), used
                                by the worker and the page
 web/src/core/*.js              pure domain: parse, alleles, classify,
-                               coverage, apoe, inheritance, qc, kb. No DOM,
+                               coverage, apoe, inheritance, qc, kb,
+                               karyogram. No DOM,
                                no worker globals, no fetch. Unit-tested in Node.
 web/src/knowledge-base.json    data, validated against a schema on load
 ```
