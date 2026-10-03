@@ -106,11 +106,15 @@ def test_xss_payloads_in_rsids_do_not_execute(loaded_page):
     assert not executed, "XSS payload executed in the page context"
 
 
-def test_empty_file_has_no_nan(loaded_page):
+def test_empty_file_is_rejected_without_nan(loaded_page):
     loaded_page.set_input_files(
         "#file-input", files=[{"name": "empty.txt", "mimeType": "text/plain", "buffer": b""}]
     )
     _wait_outcome(loaded_page)
+    alert = loaded_page.locator("#analysis-error")
+    expect(alert).to_be_visible()
+    assert loaded_page.locator("#analysis-error-detail").inner_text().strip() != ""
+    expect(loaded_page.locator("#results-section")).to_be_hidden()
     shown = loaded_page.locator("#qc-call-rate").text_content()
     assert "NaN" not in shown and "Infinity" not in shown
 

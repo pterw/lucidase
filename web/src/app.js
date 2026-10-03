@@ -52,9 +52,18 @@ const state = {
   filterCategory: "all",
   searchQuery: "",
   sortBy: "magnitude",
-  // Not a clinical field: a missing stored preference means the light theme.
-  theme: localStorage.getItem("lucidase-theme") || "light"
+  // Not a clinical field: a missing or unreadable stored preference means the light theme.
+  theme: readStoredTheme()
 };
+
+// localStorage throws when site data is blocked; the theme is not a clinical field, so that means light.
+function readStoredTheme() {
+  try {
+    return localStorage.getItem("lucidase-theme") || "light";
+  } catch {
+    return "light";
+  }
+}
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
 function initApp() {
@@ -90,7 +99,11 @@ function initTheme() {
 
 function setTheme(theme) {
   state.theme = theme;
-  localStorage.setItem("lucidase-theme", theme);
+  try {
+    localStorage.setItem("lucidase-theme", theme);
+  } catch {
+    // Blocked or full storage: the theme still applies for this session.
+  }
   document.documentElement.setAttribute("data-theme", theme);
 
   const icon = document.getElementById("theme-toggle-icon");
@@ -219,6 +232,7 @@ function setInputsDisabled(disabled) {
 
 // The one error path: every failure (worker, KB, file read, demo fetch) shows the #analysis-error alert and no results.
 function showAnalysisError(message) {
+  closeDrawer();
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("results-section").classList.add("hidden");
   const box = document.getElementById("analysis-error");
@@ -346,12 +360,20 @@ function handleFileSelected(file) {
   reader.readAsText(file);
 }
 
+// Both entry points (file and demo) start here, so a synchronous start failure (a throwing
+// Worker constructor or postMessage) takes the one error path instead of leaving inputs disabled.
 function processText(text, fileName) {
-  document.getElementById("analysis-error").classList.add("hidden");
-  setInputsDisabled(true);
-  document.getElementById("progress-section").classList.remove("hidden");
-  document.getElementById("results-section").classList.add("hidden");
-  startWorker().postMessage({ action: "parse", text, fileName });
+  try {
+    closeDrawer();
+    document.getElementById("analysis-error").classList.add("hidden");
+    setInputsDisabled(true);
+    document.getElementById("progress-section").classList.remove("hidden");
+    document.getElementById("results-section").classList.add("hidden");
+    startWorker().postMessage({ action: "parse", text, fileName });
+  } catch (err) {
+    stopWorker();
+    showAnalysisError((err && err.message) || err);
+  }
 }
 
 function updateProgress(percent, message) {
@@ -1107,6 +1129,7 @@ function renderDrawerBiotools(record) {
 function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
   if (drawer) drawer.classList.add("translate-x-full");
+  state.selectedVariant = null;
 }
 
 /** Every row the file produced, once each: observed findings first, then wild-type, gaps and insufficient evidence. */

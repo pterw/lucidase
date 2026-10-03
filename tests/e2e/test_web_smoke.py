@@ -65,13 +65,21 @@ def test_retry_after_worker_failure_recovers(page):
 
 @pytest.mark.allow_console_errors
 def test_retry_with_still_failing_worker_shows_error_again(page):
+    worker_requests = []
+    page.on(
+        "request",
+        lambda req: worker_requests.append(req.url) if req.url.endswith("/src/worker.js") else None,
+    )
     _serve_worker(page, FAILING_WORKER)
     goto_ready(page, page.base_url)
-    for _ in range(2):
-        page.locator("#btn-load-demo").click()
+    for run in (1, 2):
+        # Run N has demonstrably started once its worker has been requested; processText
+        # clears the previous alert before that, so a visible alert after it is run N's own.
+        with page.expect_request(lambda req: req.url.endswith("/src/worker.js")):
+            page.locator("#btn-load-demo").click()
+        assert len(worker_requests) >= run, f"run {run} never started a worker"
         expect(page.locator("#analysis-error")).to_be_visible()
         expect(page.locator("#progress-section")).to_be_hidden()
-        # The alert is cleared at run start, so a visible alert is a fresh one.
         page.wait_for_function("() => !document.getElementById('btn-load-demo').disabled")
 
 
