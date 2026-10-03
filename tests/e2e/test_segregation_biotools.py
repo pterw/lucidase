@@ -15,7 +15,7 @@ from conftest import wait_drawer_open
 
 def _open_hfe_drawer(page):
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     page.locator("button.btn-inspect-gene[data-gene='HFE']").first.click()
     wait_drawer_open(page)
 

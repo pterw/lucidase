@@ -18,8 +18,8 @@ E3E4 = FIXTURES / "apoe-e3e4-23andme.txt"
 
 def _analyse(page, path):
     page.set_input_files("#file-input", str(path))
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
-    expect(page.locator("#apoe-status-card")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
+    expect(page.locator("#apoe-status-card")).to_be_visible()
 
 
 def _apoe(page):
@@ -62,7 +62,7 @@ def test_single_component_is_not_tested_with_no_diplotype(loaded_page):
 
 def test_demo_still_shows_e4_e4(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
-    expect(loaded_page.locator("#apoe-status-card")).to_be_visible(timeout=10000)
+    expect(loaded_page.locator("#apoe-status-card")).to_be_visible()
     expect(loaded_page.locator("#apoe-diplotype-title")).to_contain_text("ε4/ε4")
     assert _apoe(loaded_page)["coverage_state"] == "supported_and_observed"
 

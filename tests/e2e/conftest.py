@@ -9,14 +9,21 @@ from __future__ import annotations
 
 import functools
 import http.server
+import os
 import threading
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WEB_DIR = REPO_ROOT / "web"
+# One generous ceiling for every wait. Each wait returns as soon as its outcome
+# holds, so a healthy run pays nothing; a loaded machine (worker start, parse,
+# classify, render) gets time, and a real bug still fails, just later.
+WAIT_TIMEOUT_MS = 20_000
+expect.set_options(timeout=WAIT_TIMEOUT_MS)
+
 DEMO_FILE = WEB_DIR / "demo-data" / "sample-23andme.txt"
 
 class _QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -66,12 +73,18 @@ def _stub_external(route):
 @pytest.fixture
 def page(browser, base_url, request):
     context = browser.new_context(viewport={"width": 1440, "height": 900})
+    context.set_default_timeout(WAIT_TIMEOUT_MS)
     context.route(
         lambda url: not url.startswith(("http://127.0.0.1", "data:", "blob:")),
         _stub_external,
     )
     pg = context.new_page()
     pg.base_url = base_url
+    # Stress seam (tests/e2e/stress_loop.py): slow the page's CPU to model a loaded machine.
+    throttle = float(os.environ.get("E2E_CPU_THROTTLE", "1"))
+    if throttle > 1:
+        cdp = context.new_cdp_session(pg)
+        cdp.send("Emulation.setCPUThrottlingRate", {"rate": throttle})
     problems: list[str] = []
     pg.on("pageerror", lambda exc: problems.append(f"pageerror: {exc}"))
 
@@ -92,6 +105,9 @@ def page(browser, base_url, request):
 @pytest.fixture
 def loaded_page(page):
     page.goto(page.base_url, wait_until="networkidle")
+    # initApp binds every handler, then publishes window.__lucidase: an event sent
+    # before that (an upload, a click) would be lost, so wait for the outcome.
+    page.wait_for_function("() => window.__lucidase !== undefined")
     return page
 
 
@@ -115,9 +131,9 @@ def _wait_drawer(page, want, timeout):
     page.wait_for_function(_DRAWER_SETTLED, arg=want, polling="raf", timeout=timeout)
 
 
-def wait_drawer_open(page, timeout=3000):
+def wait_drawer_open(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "open", timeout)
 
 
-def wait_drawer_closed(page, timeout=3000):
+def wait_drawer_closed(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "closed", timeout)

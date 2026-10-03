@@ -7,7 +7,7 @@ from conftest import DEMO_FILE
 
 
 def _assert_results_shown(page):
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     assert page.locator("#variants-tbody tr").count() > 0
 
 
@@ -42,7 +42,7 @@ def test_worker_failure_is_visible(page):
     # Causality: nothing is shown until the user starts an analysis.
     expect(alert).to_be_hidden()
     page.locator("#btn-load-demo").click()
-    expect(alert).to_be_visible(timeout=10000)
+    expect(alert).to_be_visible()
     assert alert.get_attribute("role") == "alert"
     assert alert.inner_text().strip() != ""
     expect(page.locator("#progress-section")).to_be_hidden()
@@ -54,7 +54,7 @@ def test_retry_after_worker_failure_recovers(page):
     _serve_worker(page, FAILING_WORKER)
     page.goto(page.base_url, wait_until="networkidle")
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#analysis-error")).to_be_visible()
     page.unroute("**/src/worker.js")
     page.locator("#btn-load-demo").click()
     _assert_results_shown(page)
@@ -67,12 +67,10 @@ def test_retry_with_still_failing_worker_shows_error_again(page):
     page.goto(page.base_url, wait_until="networkidle")
     for _ in range(2):
         page.locator("#btn-load-demo").click()
-        expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+        expect(page.locator("#analysis-error")).to_be_visible()
         expect(page.locator("#progress-section")).to_be_hidden()
         # The alert is cleared at run start, so a visible alert is a fresh one.
-        page.wait_for_function(
-            "() => !document.getElementById('btn-load-demo').disabled", timeout=5000
-        )
+        page.wait_for_function("() => !document.getElementById('btn-load-demo').disabled")
 
 
 def test_silent_worker_times_out_visibly(page):
@@ -80,7 +78,7 @@ def test_silent_worker_times_out_visibly(page):
     page.goto(page.base_url, wait_until="networkidle")
     page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#analysis-error")).to_be_visible()
     expect(page.locator("#progress-section")).to_be_hidden()
 
 
@@ -108,7 +106,7 @@ def test_worker_stall_after_progress_times_out_visibly(page):
     page.goto(page.base_url, wait_until="networkidle")
     page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#analysis-error")).to_be_visible()
     expect(page.locator("#progress-section")).to_be_hidden()
 
 
@@ -118,6 +116,6 @@ def test_watchdog_does_not_fire_during_healthy_progress(page):
     page.goto(page.base_url, wait_until="networkidle")
     page.evaluate("window.__lucidase.state.workerTimeoutMs = 500")
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#analysis-error")).to_be_visible()
     # The alert must be the worker's own message, not the watchdog's.
     assert "finished healthy run" in page.locator("#analysis-error-detail").inner_text()

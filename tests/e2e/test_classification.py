@@ -19,7 +19,7 @@ WILDTYPE = FIXTURES / "wildtype-23andme.txt"
 
 def _analyse(page, path):
     page.set_input_files("#file-input", str(path))
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
 
 
 def _rsids(page, group):
@@ -68,7 +68,7 @@ def test_each_locus_is_counted_in_exactly_one_state(loaded_page):
 
 def test_demo_mthfr_het_is_an_observed_finding(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
-    expect(loaded_page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(loaded_page.locator("#results-section")).to_be_visible()
     assert "rs1801133" in _rsids(loaded_page, "records")
     assert "rs1801133" not in _rsids(loaded_page, "negativeChecks")
     row = _row_for(loaded_page, "rs1801133")
@@ -79,7 +79,7 @@ def test_demo_mthfr_het_is_an_observed_finding(loaded_page):
 
 def test_apoe_components_are_not_separate_finding_rows(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
-    expect(loaded_page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(loaded_page.locator("#results-section")).to_be_visible()
     for rsid in ("rs429358", "rs7412"):
         expect(_row_for(loaded_page, rsid)).to_have_count(0)
         assert rsid not in _rsids(loaded_page, "records")
@@ -96,6 +96,6 @@ def test_knowledge_base_fetch_failure_is_visible(page):
     page.goto(page.base_url, wait_until="networkidle")
     expect(page.locator("#analysis-error")).to_be_hidden()
     page.set_input_files("#file-input", str(DEMO_FILE))
-    expect(page.locator("#analysis-error")).to_be_visible(timeout=10000)
+    expect(page.locator("#analysis-error")).to_be_visible()
     expect(page.locator("#results-section")).to_be_hidden()
     expect(page.locator("#progress-section")).to_be_hidden()

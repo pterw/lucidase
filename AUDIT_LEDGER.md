@@ -76,6 +76,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-033 | `web/src/core/classify.js`, `variant_annotator.py` | An rsID absent from the KB was never position-matched, so a carrier read as "not tested". | REMEDIATED (chrom:pos fallback for any non-KB rsID) |
 | P1-034 | `web/tests/classify.test.mjs` | The precedence test could not fail for the bug it names. | REMEDIATED (rs1801133-at-rs4244285-position test plus unknown-rsID test) |
 | P1-037 | `tests/test_zero_knowledge_privacy.py` | Network-primitive ban covered only `worker.js` and only substrings; `kb-loader.js` and `core/*.js` were unguarded. | REMEDIATED (one comment-stripped regex scan over worker, loader and core; `import()` allow-listed to the one literal KB load) |
+| P1-053 | `tests/e2e/conftest.py`, `tests/e2e/test_*.py` | The e2e suite failed intermittently under CPU load: bare 5 s waits, and an upload or click sent before the page had bound its handlers was lost. | REMEDIATED (one shared 20 s wait ceiling, `loaded_page` waits for `window.__lucidase`, fixed sleeps replaced by outcome waits) |
 
 ---
 
@@ -142,6 +143,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 - **P0-009** (S1-F1): VCF alleles are plus-strand by definition, so `resolveAltCount`/`resolve_alt_count` take the assay and run the complement step (C3 step 3) only for non-VCF assays; a foreign alt at a non-palindromic site is `unresolvable`. Vectors: `tests/vectors/alleles.json` (`vcf-foreign-alt-c`, `vcf-foreign-alt-t`, array pins).
 - **P1-033** (S1-F1): matching is by KB rsID key first (never re-matched by position), then by chrom:pos for any other call on a known build, in `classify.js` and `variant_annotator.py`. Vectors: `tests/vectors/classify.json` (`vcf-unknown-rsid-position-match`, `vcf-unknown-rsid-foreign-alt`).
 - **P1-034** (S1-F1): the weak precedence test in `web/tests/classify.test.mjs` is replaced by an rs1801133-at-rs4244285-position test and an unknown-rsID position test.
+- **P1-053** (E2E-STAB): reproduced with `tests/e2e/stress_loop.py` (`E2E_CPU_THROTTLE=8`): 5 of 5 runs red. Raising the wait ceiling alone stayed red (5 of 6); the cause was a lost upload event when a test acted before `initApp` had bound its handlers, so `loaded_page` now waits for `window.__lucidase`. Every wait shares `WAIT_TIMEOUT_MS` (20 s, `expect.set_options` plus the context default), the drawer helpers use it, and the fixed sleeps wait on outcomes. 8 of 8 runs green under the same throttle.
 
 ### 2026-10-02
 

@@ -31,7 +31,7 @@ def _wildtype_f5_file(tmp_path):
 
 def _analyse(page, path):
     page.set_input_files("#file-input", str(path))
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
 
 
 def _seg_text(page):
@@ -41,7 +41,7 @@ def _seg_text(page):
 def test_demo_apoe_e4e4_drawer_says_every_child_inherits_e4(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     page.locator("#btn-inspect-apoe").click()
     wait_drawer_open(page)
     page.locator(".partner-sim-btn[data-partner='wildtype']").click()
@@ -69,7 +69,7 @@ def test_wildtype_f5_drawer_has_no_affected_status_and_no_fifty_percent(loaded_p
 def test_csv_has_no_half_risk_for_wildtype_loci(loaded_page, tmp_path):
     page = loaded_page
     _analyse(page, _wildtype_f5_file(tmp_path))
-    with page.expect_download(timeout=5000) as info:
+    with page.expect_download() as info:
         page.evaluate("() => window.__lucidase.exportCsvReport()")
     rows = list(csv.DictReader(Path(info.value.path()).read_text(encoding="utf-8").splitlines()))
     wildtype = {r["rsID"]: r for r in rows if r["rsID"] in ("rs6025", "rs1799945", "rs1800562", "rs1799963")}
@@ -89,7 +89,7 @@ def test_csv_has_no_half_risk_for_wildtype_loci(loaded_page, tmp_path):
 def test_demo_hfe_double_het_is_phase_unknown(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     section = page.locator("#assortment-cards-container").inner_text().lower()
     assert "possible compound heterozygote" in section, section
     assert "phase unknown" in section, section

@@ -32,9 +32,9 @@ def test_utilities_beat_app_styles_in_light_mode(loaded_page):
 
 def test_accent_border_survives_after_results(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
-    expect(loaded_page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(loaded_page.locator("#results-section")).to_be_visible()
     card = "#apoe-status-card"
-    expect(loaded_page.locator(card)).to_be_visible(timeout=10000)
+    expect(loaded_page.locator(card)).to_be_visible()
     width, color = _style(loaded_page, card, "borderLeftWidth", "borderLeftColor")
     assert width == "4px", width
     assert color != SLATE_300, f"accent border colour lost: {color}"
@@ -42,8 +42,10 @@ def test_accent_border_survives_after_results(loaded_page):
 
 def test_dark_utilities_beat_glass_panel(loaded_page):
     loaded_page.locator("#btn-theme-toggle").click()
-    # Let the 200 ms colour transition finish before reading the computed value.
-    loaded_page.wait_for_timeout(600)
+    # Let the colour transition finish before reading the computed value.
+    loaded_page.wait_for_function(
+        "() => document.getElementById('dropzone').getAnimations().length === 0"
+    )
     (background,) = _style(loaded_page, "#dropzone", "backgroundColor")
     # dark:bg-slate-900/40 -> alpha 0.4; .glass-panel would give 0.75
     assert background.endswith("0.4)"), background

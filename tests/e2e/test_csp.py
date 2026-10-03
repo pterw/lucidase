@@ -118,7 +118,7 @@ def test_demo_renders_under_production_csp(browser, vercel_url):
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     page.goto(vercel_url, wait_until="networkidle")
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
     assert page.locator("#variants-tbody tr").count() > 0
     violations = page.evaluate("window.__cspViolations")
     context.close()

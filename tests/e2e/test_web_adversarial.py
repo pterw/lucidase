@@ -33,7 +33,7 @@ EVIL_QUERIES = [
 
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(page.locator("#results-section")).to_be_visible()
 
 
 def _wait_outcome(page):
@@ -41,7 +41,6 @@ def _wait_outcome(page):
     page.wait_for_function(
         "() => ['results-section', 'analysis-error'].some("
         "id => document.getElementById(id).getBoundingClientRect().height > 0)",
-        timeout=10000,
     )
 
 
@@ -100,7 +99,7 @@ def test_kb_provenance_badge_visible(loaded_page):
 def test_xss_payloads_in_rsids_do_not_execute(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "xss-23andme.txt"))
     # A valid 23andMe file: results must render, an error would be a failure here.
-    expect(loaded_page.locator("#results-section")).to_be_visible(timeout=10000)
+    expect(loaded_page.locator("#results-section")).to_be_visible()
     executed = loaded_page.evaluate(
         "() => Boolean(window.__xss_rsid || window.__xss_img || window.__xss_gt)"
     )
@@ -144,7 +143,7 @@ def test_export_handlers_run(loaded_page):
 
 def test_apoe_e3e4_upload_and_inspect(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "apoe-e3e4-23andme.txt"))
-    loaded_page.locator("#apoe-status-card").wait_for(state="visible", timeout=10000)
+    loaded_page.locator("#apoe-status-card").wait_for(state="visible")
     assert "ε3/ε4" in loaded_page.locator("#apoe-diplotype-title").text_content()
     assert "3–4×" in loaded_page.locator("#apoe-risk-ratio").text_content()
     loaded_page.locator("#btn-inspect-apoe").click()
