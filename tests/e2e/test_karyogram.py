@@ -6,6 +6,7 @@ import json
 import re
 from urllib.parse import urlsplit
 
+import pytest
 from playwright.sync_api import expect
 
 from conftest import DEMO_FILE, REPO_ROOT, WAIT_TIMEOUT_MS, WEB_DIR, goto_ready
@@ -215,3 +216,43 @@ def test_the_page_has_no_inline_script():
     scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", html, flags=re.S)
     assert scripts and all(s.strip() == "" for s in scripts)
     assert 'type="module" src="src/karyogram-page.js"' in html
+
+
+def test_karyogram_page_loads_the_owners_font_kit_like_the_main_page():
+    html = (WEB_DIR / "karyogram.html").read_text(encoding="utf-8")
+    index = (WEB_DIR / "index.html").read_text(encoding="utf-8")
+    link = '<link rel="stylesheet" href="https://use.typekit.net/gfe3vcu.css" id="typekit-stylesheet">'
+    assert link in html and link in index
+    assert html.count("use.typekit.net") == 1  # no second kit
+
+
+@pytest.mark.allow_console_errors
+def test_transient_worker_module_failure_is_retried_once(page):
+    # Same rule as the main page: a worker whose module graph fails to load raises a message-less error event.
+    # That is a transient start failure, so the page starts one fresh worker with the same job.
+    aborted = []
+
+    def flaky(route):
+        if aborted:
+            route.continue_()
+        else:
+            aborted.append(route.request.url)
+            route.abort("connectionreset")
+
+    _open(page)
+    page.route("**/src/core/classify.js", flaky)
+    page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-totals")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
+    expect(page.locator("#karyogram-error")).to_be_hidden()
+    assert len(aborted) == 1
+
+
+@pytest.mark.allow_console_errors
+def test_persistent_worker_module_failure_shows_the_error_and_frees_the_inputs(page):
+    _open(page)
+    page.route("**/src/core/classify.js", lambda route: route.abort("connectionreset"))
+    page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-error")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
+    expect(page.locator("#karyogram-totals")).to_be_hidden()
+    expect(page.locator("#karyogram-file-input")).to_be_enabled()
+    expect(page.locator("#btn-load-karyogram-sample")).to_be_enabled()

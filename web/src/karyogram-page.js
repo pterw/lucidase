@@ -154,17 +154,33 @@ function armWatchdog(fail) {
   view.watchdog = setTimeout(() => fail("The analysis worker stopped responding."), WORKER_TIMEOUT_MS);
 }
 
-function startWorker() {
+// A worker whose module graph fails to load (a dropped request, a machine out of socket buffers) raises an
+// error event with no message before it has answered anything. That is a transient start failure, so the page
+// starts one fresh worker with the same job, like app.js; a worker that throws, or fails twice, takes the error path.
+function startWorker(job, canRetry = true) {
   stopWorker();
   const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
   view.worker = worker;
+  let answered = false;
   const fail = (message) => {
     if (view.worker === worker) showError(message);
   };
-  worker.onerror = (err) => fail((err && err.message) || "The analysis worker failed to start.");
+  worker.onerror = (err) => {
+    if (canRetry && !answered && view.worker === worker && !(err && err.message)) {
+      try {
+        startWorker(job, false).postMessage(job);
+        return;
+      } catch (retryErr) {
+        showError((retryErr && retryErr.message) || "The analysis worker failed to start.");
+        return;
+      }
+    }
+    fail((err && err.message) || "The analysis worker failed to start.");
+  };
   worker.onmessageerror = () => fail("The analysis worker sent a message the page could not read.");
   worker.onmessage = (e) => {
     if (view.worker !== worker) return;
+    answered = true;
     const data = e.data;
     if (data.type === "progress") {
       armWatchdog(fail);
@@ -192,7 +208,8 @@ function processText(text, fileName) {
   setInputsDisabled(true);
   setViewState("loading");
   $("karyogram-progress").classList.remove("hidden");
-  startWorker().postMessage({ action: "karyogram", text, fileName });
+  const job = { action: "karyogram", text, fileName };
+  startWorker(job).postMessage(job);
 }
 
 function handleFileSelected(file) {
