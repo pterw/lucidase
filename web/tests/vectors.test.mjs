@@ -25,6 +25,23 @@ function assertSubset(actual, expected, path) {
   }
 }
 
+// Subset comparison where numbers match within 1e-12 and arrays match element by element.
+function assertClose(actual, expected, path) {
+  if (typeof expected === "number") {
+    assert.equal(typeof actual, "number", `${path}: expected a number, got ${JSON.stringify(actual)}`);
+    assert.ok(Math.abs(actual - expected) <= 1e-12, `${path}: ${actual} != ${expected}`);
+  } else if (Array.isArray(expected)) {
+    assert.ok(Array.isArray(actual), `${path}: expected an array`);
+    assert.equal(actual.length, expected.length, `${path}: length`);
+    expected.forEach((e, i) => assertClose(actual[i], e, `${path}[${i}]`));
+  } else if (expected !== null && typeof expected === "object") {
+    assert.ok(actual !== null && typeof actual === "object", `${path}: expected an object`);
+    for (const [k, v] of Object.entries(expected)) assertClose(actual[k], v, `${path}.${k}`);
+  } else {
+    assert.deepEqual(actual, expected, path);
+  }
+}
+
 const HANDLERS = {
   "parse.json": async (vector) => {
     const { parseGenotypeFile } = await import("../src/core/parse.js");
@@ -84,6 +101,36 @@ const HANDLERS = {
     for (const want of caveats || []) {
       assert.ok(rec.interpretation.caveats.includes(want), `${vector.id}: missing caveat "${want}"`);
     }
+  },
+
+  // input: { fn: "scenario" | "status" | "multi_locus" | "compound", ... }. Numbers compare within
+  // 1e-12; `absent` lists dotted paths that must not exist; `text_includes` / `text_excludes` check the
+  // lower-cased JSON of the result (scenario, multi_locus, compound).
+  "inheritance.json": async (vector) => {
+    const inh = await import("../src/core/inheritance.js");
+    const { fn, gene, altCount, partner, af, allele, genes, records } = vector.input;
+    let result;
+    if (fn === "scenario") {
+      const dist = inh.offspringDistribution(altCount, partner, af);
+      result = { dist, outcome: inh.geneOutcome(gene, dist, allele) };
+    } else if (fn === "status") {
+      result = { status: inh.patientStatus(gene, altCount) };
+    } else if (fn === "multi_locus") {
+      result = { findings: inh.detectMultiLocus(records, genes) };
+    } else if (fn === "compound") {
+      result = { findings: inh.detectCompoundHeterozygosity(records, genes) };
+    } else {
+      assert.fail(`${vector.id}: unknown fn ${fn}`);
+    }
+    const { absent = [], text_includes = [], text_excludes = [], ...facts } = vector.expected;
+    assertClose(result, facts, vector.id);
+    for (const path of absent) {
+      const value = path.split(".").reduce((o, k) => (o === undefined || o === null ? undefined : o[k]), result);
+      assert.equal(value, undefined, `${vector.id}: ${path} must be absent`);
+    }
+    const text = JSON.stringify(result).toLowerCase();
+    for (const t of text_includes) assert.ok(text.includes(t.toLowerCase()), `${vector.id}: missing "${t}"`);
+    for (const t of text_excludes) assert.ok(!text.includes(t.toLowerCase()), `${vector.id}: must not contain "${t}"`);
   },
 };
 

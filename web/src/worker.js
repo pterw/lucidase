@@ -8,18 +8,13 @@
  * per worker and cached. Classification is by alt-allele count (core/classify.js).
  */
 
-import {
-  computeSegregationReport,
-  detectCompoundHeterozygosity,
-  computeIndependentAssortment
-} from "./knowledge-base.js";
-
 import { parseGenotypeFile } from "./core/parse.js";
 import { computeQc } from "./core/qc.js";
 import { validateKb } from "./core/kb.js";
 import { classify } from "./core/classify.js";
 import { assembleFindings } from "./core/apoe.js";
-import { COVERAGE_STATES, REASONS, SAMPLE_OBSERVATION } from "./core/coverage.js";
+import { COVERAGE_STATES, SAMPLE_OBSERVATION } from "./core/coverage.js";
+import { describeSegregation, detectMultiLocus, detectCompoundHeterozygosity } from "./core/inheritance.js";
 
 self.onmessage = async function (e) {
   try {
@@ -53,14 +48,17 @@ function loadKnowledgeBase() {
 }
 
 /**
- * Transitional (until T8): the existing segregation functions take a genotype string. An alt
- * count of 0 passes an empty string, so a wild-type result is neither carrier nor affected.
+ * Inheritance inputs for one locus, from its alt-allele count and the KB (gene inheritance model,
+ * gnomAD allele frequency). `afRsid` names the locus whose allele frequency applies when it
+ * differs from the record's own (the APOE e4 allele is the rs429358 alt allele).
  */
-function segregationFor(rec) {
-  if (rec.altCount === null) return null;
-  const pseudoGenotype = ["", "RV", "VV"][rec.altCount];
-  const seg = computeSegregationReport(rec.gene, pseudoGenotype, rec.interpretation.category, rec.interpretation.significance);
-  return seg;
+function segregationFor(rec, kb, altCount = rec.altCount, afRsid = rec.rsid) {
+  if (altCount === null || altCount === undefined) return null;
+  const locus = kb.loci[afRsid];
+  const gnomad = locus.evidence && locus.evidence.gnomad;
+  const af = gnomad && typeof gnomad.af === "number" ? gnomad.af : null;
+  const allele = afRsid === "rs429358" ? "e4" : locus.alt;
+  return describeSegregation(rec.gene, kb.genes[rec.gene], altCount, af, allele);
 }
 
 async function analyzeGenotypeFile(text, fileName = "") {
@@ -81,10 +79,15 @@ async function analyzeGenotypeFile(text, fileName = "") {
   const qcMetrics = computeQc(parsed);
   const { records, summary: rawCoverage } = classify(parsed, kb);
 
-  for (const rec of records) rec.segregation = segregationFor(rec);
+  for (const rec of records) rec.segregation = segregationFor(rec, kb);
 
   // The two APOE component loci become one APOE finding (core/apoe.js), counted once in the coverage summary.
   const { listed, apoe: apoeFinding, summary: coverage } = assembleFindings(records, kb, rawCoverage.outside_coverage_count);
+  // The e4 allele is the rs429358 alt allele, so its count and frequency drive the APOE offspring figures.
+  if (apoeFinding) {
+    const e4 = records.find((r) => r.rsid === "rs429358");
+    apoeFinding.segregation = segregationFor(apoeFinding, kb, e4.altCount, "rs429358");
+  }
 
   // Group by the UI's lists. Component loci are not listed on their own (no double counting).
   const isObserved = (r) =>
@@ -103,10 +106,9 @@ async function analyzeGenotypeFile(text, fileName = "") {
   // Sort observed findings by clinical priority (magnitude descending)
   observedFindings.sort((a, b) => (b.interpretation.magnitude - a.interpretation.magnitude));
 
-  // Transitional (until T8): the multi-locus functions read a "genotype" string and an rsid.
-  const legacy = (r) => ({ rsid: r.rsid, genotype: r.genotype_display ? r.genotype_display.replace("/", "") : "" });
-  const compoundHeterozygotes = detectCompoundHeterozygosity(observedFindings.map(legacy));
-  const independentAssortment = computeIndependentAssortment(observedFindings.map(legacy));
+  // Multi-locus findings come from alt counts and KB inheritance models, never genotype strings.
+  const compoundHeterozygotes = detectCompoundHeterozygosity(observedFindings, kb.genes);
+  const independentAssortment = detectMultiLocus(observedFindings, kb.genes);
 
   const category = (c) => observedFindings.filter((f) => f.interpretation.category === c).length;
   const summary = {

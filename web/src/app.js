@@ -6,7 +6,7 @@
  * filtering, sorting, variant inspection drawer, and Redis enrichment.
  */
 
-import { simulateOffspringPedigree } from "./knowledge-base.js";
+import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
 
 // Global Application State
 const state = {
@@ -503,7 +503,7 @@ function renderAssortmentSection() {
     card.innerHTML = `
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
-          <span class="text-xs uppercase font-bold tracking-wider text-indigo-700 dark:text-indigo-400 font-mono">Trans Phase Compound Heterozygote</span>
+          <span class="text-xs uppercase font-bold tracking-wider text-indigo-700 dark:text-indigo-400 font-mono">Possible Compound Heterozygote · Phase Unknown</span>
           <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-pathogenic">${ch.significance}</span>
         </div>
         <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${ch.gene}</span>
@@ -524,15 +524,15 @@ function renderAssortmentSection() {
     container.appendChild(card);
   });
 
-  // Render Independent Assortment Pairs (e.g. F5 Chr 1 + F2 Chr 11)
+  // Render co-occurring variant alleles on unlinked loci (e.g. F5 Chr 1 + F2 Chr 11)
   assortments.forEach(ia => {
     const card = document.createElement("div");
     card.className = "p-4 rounded-sm bg-slate-50 dark:bg-slate-900/50 border border-amber-200 dark:border-amber-900/60 space-y-3";
     card.innerHTML = `
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
-          <span class="text-xs uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400 font-mono">Independent Assortment · Mendel's 2nd Law</span>
-          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-risk">Joint Multi-Locus Risk</span>
+          <span class="text-xs uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400 font-mono">Co-occurring Variant Alleles</span>
+          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border badge-risk">Multi-Locus</span>
         </div>
         <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${ia.genes.join(" + ")}</span>
       </div>
@@ -542,12 +542,12 @@ function renderAssortmentSection() {
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs font-mono">
         <div class="p-2 rounded-sm bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/40">
-          <span class="text-[9px] uppercase text-slate-400 block">Loci Unlinked Chromosomes</span>
+          <span class="text-[9px] uppercase text-slate-400 block">Loci on Different Chromosomes</span>
           <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">${ia.loci.join(" · ")}</span>
         </div>
         <div class="p-2 rounded-sm bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/40">
-          <span class="text-[9px] uppercase text-slate-400 block">Offspring Joint Probability</span>
-          <span class="font-bold text-amber-600 dark:text-amber-400 mt-0.5 block">${Math.round(ia.joint_transmission_prob * 100)}% (0.50 × 0.50)</span>
+          <span class="text-[9px] uppercase text-slate-400 block">Child Inherits All Listed Alleles</span>
+          <span class="font-bold text-amber-600 dark:text-amber-400 mt-0.5 block" title="${ia.assumption}">${Math.round(ia.joint_transmission_prob * 100)}%</span>
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-1">
@@ -860,93 +860,159 @@ function openDrawer(record) {
 }
 
 function renderDrawerSegregation(record) {
-  // No segregation report exists for a locus with no interpretable genotype (not tested, no-call).
+  // No segregation inputs exist for a locus with no interpretable genotype (not tested, no-call).
   const seg = record.segregation || null;
   const modeBadge = document.getElementById("drawer-seg-mode-badge");
   const priorEl = document.getElementById("drawer-seg-carrier-prior");
   const penetranceEl = document.getElementById("drawer-seg-penetrance");
   const riskUnscreenedEl = document.getElementById("drawer-seg-risk-unscreened");
   const riskCarrierEl = document.getElementById("drawer-seg-risk-carrier");
+  const container = document.getElementById("drawer-segregation-container");
+  const header = container ? container.querySelector("span.tracking-wider") : null;
+  const simTitle = container ? container.querySelector("#drawer-partner-buttons").previousElementSibling : null;
+  const mendelian = Boolean(seg && seg.mendelian_disease);
+
+  // Wording follows the gene's inheritance model: disease and recurrence language is for Mendelian genes only.
+  setLabel(header, mendelian ? null : "Allele Transmission");
+  setLabel(header && header.nextElementSibling, mendelian ? null : "Chance a child inherits the allele, from the patient genotype");
+  setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele Frequency (gnomAD)");
+  setLabel(riskUnscreenedEl.previousElementSibling, mendelian ? null : "Child Inherits vs Unscreened Partner");
+  setLabel(riskCarrierEl.previousElementSibling, mendelian ? null : "Child Inherits vs Wild-Type Partner");
+  setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring Allele Simulator:");
+  setLabel(simTitle && simTitle.lastElementChild, "Select Partner Genotype");
+  document.querySelectorAll(".partner-sim-btn").forEach(b => {
+    setLabel(b, mendelian ? null : SIM_BUTTON_LABELS[b.getAttribute("data-partner")]);
+  });
 
   if (!seg) {
-    if (modeBadge) modeBadge.textContent = "Complex";
-    if (priorEl) priorEl.textContent = "N/A";
-    if (penetranceEl) penetranceEl.textContent = "Variable";
-    if (riskUnscreenedEl) riskUnscreenedEl.textContent = "N/A";
-    if (riskCarrierEl) riskCarrierEl.textContent = "N/A";
-    updateSimulator("unscreened", record.gene);
+    if (modeBadge) modeBadge.textContent = "Not available";
+    if (priorEl) priorEl.textContent = "Not available";
+    if (penetranceEl) penetranceEl.textContent = "Not available";
+    if (riskUnscreenedEl) riskUnscreenedEl.textContent = "Not available";
+    if (riskCarrierEl) riskCarrierEl.textContent = "Not available";
+    document.querySelectorAll(".partner-sim-btn").forEach(btn => { btn.onclick = null; });
+    renderSimulator(null, null);
     return;
   }
 
+  const outcomeFor = (partner) => geneOutcome(state.genes[seg.gene], offspringDistribution(seg.altCount, partner, seg.af), seg.allele);
+  const headline = (out) => (!out.available ? "Not available" : fmtPct(mendelian ? out.affected : out.inherits_allele));
+
   if (modeBadge) {
-    modeBadge.textContent = seg.mode;
-    if (seg.mode.includes("Recessive")) {
+    modeBadge.textContent = MODEL_LABELS[seg.model] || seg.model;
+    if (seg.model === "autosomal_recessive") {
       modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30 font-mono";
-    } else if (seg.mode.includes("Dominant")) {
+    } else if (seg.model === "autosomal_dominant") {
       modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-rose-50 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-500/30 font-mono";
     } else {
       modeBadge.className = "px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm border bg-purple-50 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30 font-mono";
     }
   }
 
-  const priorPct = (seg.partner_carrier_prior * 100).toFixed(1);
-  const priorFraction = Math.round(1 / (seg.partner_carrier_prior || 0.02));
-  if (priorEl) priorEl.textContent = `1 in ${priorFraction} (${priorPct}%)`;
-  if (penetranceEl) penetranceEl.textContent = `${Math.round((seg.penetrance || 1.0) * 100)}%`;
-
-  const unscreenedPct = (seg.offspring_risk_unscreened * 100).toFixed(1);
-  const unscreenedFraction = seg.offspring_risk_unscreened > 0 ? Math.round(1 / seg.offspring_risk_unscreened) : 0;
-  if (riskUnscreenedEl) riskUnscreenedEl.textContent = unscreenedFraction > 0 ? `${unscreenedPct}% (1 in ${unscreenedFraction})` : "Baseline";
-
-  const carrierPct = (seg.offspring_risk_carrier * 100).toFixed(1);
-  const carrierFraction = seg.offspring_risk_carrier > 0 ? Math.round(1 / seg.offspring_risk_carrier) : 0;
-  if (riskCarrierEl) riskCarrierEl.textContent = carrierFraction > 0 ? `${carrierPct}% (1 in ${carrierFraction})` : "N/A";
+  if (seg.af === null) {
+    priorEl.textContent = "Not available";
+  } else if (mendelian) {
+    const carrierFreq = 2 * seg.af * (1 - seg.af);
+    priorEl.textContent = carrierFreq > 0 ? `1 in ${Math.round(1 / carrierFreq)} (${fmtPct(carrierFreq)})` : "Not available";
+  } else {
+    priorEl.textContent = fmtPct(seg.af);
+  }
+  if (penetranceEl) penetranceEl.textContent = !mendelian ? "Not applicable" : seg.penetrance === null ? "Not available" : fmtPct(seg.penetrance);
+  if (riskUnscreenedEl) riskUnscreenedEl.textContent = headline(outcomeFor("unscreened"));
+  if (riskCarrierEl) riskCarrierEl.textContent = headline(outcomeFor(mendelian ? "heterozygous" : "wildtype"));
 
   // Setup simulator partner buttons
   const buttons = document.querySelectorAll(".partner-sim-btn");
+  const setActive = (active) => buttons.forEach(b => {
+    b.className = b === active
+      ? "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-sky-600 text-white border border-sky-600 shadow-sm transition-all"
+      : "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all";
+  });
   buttons.forEach(btn => {
     btn.onclick = () => {
-      buttons.forEach(b => {
-        b.className = "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all";
-      });
-      btn.className = "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-sky-600 text-white border border-sky-600 shadow-sm transition-all";
-      const partner = btn.getAttribute("data-partner");
-      updateSimulator(partner, record.gene);
+      setActive(btn);
+      updateSimulator(btn.getAttribute("data-partner"), record);
     };
   });
 
   // Reset to unscreened active button
-  buttons.forEach(b => {
-    if (b.getAttribute("data-partner") === "unscreened") {
-      b.className = "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-sky-600 text-white border border-sky-600 shadow-sm transition-all";
-    } else {
-      b.className = "partner-sim-btn px-2 py-1.5 rounded-sm text-center font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:border-sky-500 transition-all";
-    }
-  });
-
-  updateSimulator("unscreened", record.gene);
+  setActive([...buttons].find(b => b.getAttribute("data-partner") === "unscreened"));
+  updateSimulator("unscreened", record);
 }
 
-function updateSimulator(partner, gene) {
-  const sim = simulateOffspringPedigree(gene, partner);
+// The buttons keep their data-partner keys; each maps to a partner genotype model.
+const SIM_PARTNER_MODEL = { unscreened: "unscreened", carrier: "heterozygous", affected: "homozygous", wildtype: "wildtype" };
+const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "Heterozygous", affected: "Homozygous", wildtype: "Wild-Type" };
+const MODEL_LABELS = {
+  autosomal_recessive: "Autosomal Recessive",
+  autosomal_dominant: "Autosomal Dominant",
+  risk_factor: "Risk Factor (allele transmission)",
+  pharmacogenomic: "Pharmacogenomic (allele transmission)",
+  trait: "Trait (allele transmission)"
+};
 
-  const affEl = document.getElementById("sim-p-affected");
-  const barAffEl = document.getElementById("sim-bar-affected");
-  if (affEl) affEl.textContent = `${sim.pAffected}%`;
-  if (barAffEl) barAffEl.style.width = `${Math.min(100, Math.max(1, sim.pAffected))}%`;
+/** Percentage with at most one decimal: 0.25 gives "25%", 0.0066 gives "0.7%". */
+function fmtPct(fraction) {
+  return `${Math.round(fraction * 1000) / 10}%`;
+}
 
-  const carrEl = document.getElementById("sim-p-carrier");
-  const barCarrEl = document.getElementById("sim-bar-carrier");
-  if (carrEl) carrEl.textContent = `${sim.pCarrier}%`;
-  if (barCarrEl) barCarrEl.style.width = `${Math.min(100, Math.max(1, sim.pCarrier))}%`;
+/** Sets an element's text, remembering the original so a later null restores it. */
+function setLabel(el, text) {
+  if (!el) return;
+  if (el.dataset.origText === undefined) el.dataset.origText = el.textContent;
+  el.textContent = text === null ? el.dataset.origText : text;
+}
 
-  const wtEl = document.getElementById("sim-p-wildtype");
-  const barWtEl = document.getElementById("sim-bar-wildtype");
-  if (wtEl) wtEl.textContent = `${sim.pWildtype}%`;
-  if (barWtEl) barWtEl.style.width = `${Math.min(100, Math.max(1, sim.pWildtype))}%`;
+function updateSimulator(partnerKey, record) {
+  const seg = record.segregation;
+  const dist = offspringDistribution(seg.altCount, SIM_PARTNER_MODEL[partnerKey], seg.af);
+  renderSimulator(geneOutcome(state.genes[seg.gene], dist, seg.allele), seg);
+}
 
+/** Three probability rows and the effective-penetrance line; a null outcome (no genotype) shows "Not available". */
+function renderSimulator(out, seg) {
+  const rows = [
+    { id: "affected", label: "Affected Probability:", value: null },
+    { id: "carrier", label: "Carrier Probability:", value: null },
+    { id: "wildtype", label: "Wild-Type / Non-Carrier:", value: null }
+  ];
+  let effective = null;
+  let effectiveLabel = "Effective Penetrance Adjusted:";
+  let reason = "";
+  if (out && !out.available) {
+    reason = out.reason;
+  } else if (out && out.kind === "transmission") {
+    rows[0] = { id: "affected", label: `${out.label}:`, value: out.inherits_allele };
+    rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.one_copy };
+    rows[2] = { id: "wildtype", label: "Inherits No Copy:", value: out.none };
+    effective = "Not applicable";
+    effectiveLabel = "Clinical Penetrance:";
+  } else if (out && seg.model === "autosomal_recessive") {
+    rows[0].value = out.affected;
+    rows[1].value = out.carrier;
+    rows[2].value = out.p0;
+    effective = seg.penetrance === null ? "Not available" : fmtPct(out.affected * seg.penetrance);
+  } else if (out) {
+    rows[0] = { id: "affected", label: "Affected Probability (penetrance-adjusted):", value: out.affected };
+    rows[1] = { id: "carrier", label: "Inherits One Copy:", value: out.p1 };
+    rows[2] = { id: "wildtype", label: "Does Not Inherit:", value: out.p0 };
+    effective = fmtPct(out.affected);
+  }
+  for (const row of rows) {
+    const valueEl = document.getElementById(`sim-p-${row.id}`);
+    const barEl = document.getElementById(`sim-bar-${row.id}`);
+    setLabel(valueEl && valueEl.previousElementSibling, out ? row.label : null);
+    if (valueEl) {
+      valueEl.textContent = row.value === null ? "Not available" : fmtPct(row.value);
+      valueEl.title = reason;
+    }
+    if (barEl) barEl.style.width = row.value === null ? "0%" : `${Math.min(100, Math.max(0, row.value * 100))}%`;
+  }
   const effEl = document.getElementById("sim-effective-risk");
-  if (effEl) effEl.textContent = `${sim.effectiveClinicalRisk}% (${sim.mode})`;
+  if (effEl) {
+    setLabel(effEl.previousElementSibling, effectiveLabel);
+    effEl.textContent = effective === null ? "Not available" : effective;
+  }
 }
 
 function renderDrawerBiotools(record) {
@@ -1130,7 +1196,7 @@ function exportMarkdownReport() {
   }
 
   if (state.compoundHeterozygotes && state.compoundHeterozygotes.length > 0) {
-    md += `## Multi-Locus Compound Heterozygotes (Trans Phase)\n\n`;
+    md += `## Possible Compound Heterozygotes (Phase Unknown)\n\n`;
     state.compoundHeterozygotes.forEach(ch => {
       md += `### ${ch.title} (${ch.gene})\n`;
       md += `- **Significance**: ${ch.significance}\n`;
@@ -1140,12 +1206,12 @@ function exportMarkdownReport() {
   }
 
   if (state.independentAssortment && state.independentAssortment.length > 0) {
-    md += `## Multi-Locus Independent Assortment (Mendel's 2nd Law)\n\n`;
+    md += `## Co-occurring Variant Alleles on Unlinked Loci\n\n`;
     state.independentAssortment.forEach(ia => {
       md += `### ${ia.type} (${ia.genes.join(" + ")})\n`;
       md += `- **Loci**: ${ia.loci.join(" · ")}\n`;
-      md += `- **Joint Offspring Probability**: ${(ia.joint_transmission_prob * 100).toFixed(0)}%\n`;
-      md += `- **Epistatic Interaction**: ${ia.description}\n\n`;
+      md += `- **Chance a child inherits all listed alleles**: ${(ia.joint_transmission_prob * 100).toFixed(0)}% (${ia.assumption})\n`;
+      md += `- **Note**: ${ia.description}\n\n`;
     });
   }
 
@@ -1188,7 +1254,8 @@ function exportCsvReport() {
   const headers = [
     "rsID", "Gene", "Genotype", "Chromosome", "Position", "Coverage_State", "Evidence_Tier",
     "Category", "Significance", "Magnitude", "Repute", "ClinVar_Stars", 
-    "Inheritance_Mode", "Carrier_Prior_2pq", "Offspring_Risk_Unscreened", "Offspring_Risk_Carrier",
+    "Inheritance_Mode", "Gnomad_AF", "Child_Inherits_Allele_Wildtype_Partner", "Child_Inherits_Allele_Unscreened_Partner",
+    "Child_Affected_Unscreened_Partner",
     "Condition_Phenotype", "Refusal_Notices", "Caveats"
   ];
   const rows = [headers.join(",")];
@@ -1214,10 +1281,8 @@ function exportCsvReport() {
       typeof r.magnitude === "number" ? r.magnitude : 0,
       `"${r.repute || 'Neutral'}"`,
       r.clinvar_stars || 0,
-      `"${seg?.mode || 'N/A'}"`,
-      seg ? seg.partner_carrier_prior : "N/A",
-      seg ? seg.offspring_risk_unscreened : "N/A",
-      seg ? seg.offspring_risk_carrier : "N/A",
+      `"${seg ? (MODEL_LABELS[seg.model] || seg.model) : 'N/A'}"`,
+      ...csvInheritanceCells(seg),
       `"${(r.phenotype || '').replace(/"/g, '""')}"`,
       `"${(r.refusal_notices || []).join('; ').replace(/"/g, '""')}"`,
       `"${(r.caveats || []).join('; ').replace(/"/g, '""')}"`
@@ -1227,6 +1292,18 @@ function exportCsvReport() {
 
   const blob = new Blob([rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
   downloadBlob(blob, `GenomePulse_Variants_${Date.now()}.csv`);
+}
+
+/** Gnomad_AF, wild-type-partner transmission, unscreened-partner transmission, unscreened-partner affected. */
+function csvInheritanceCells(seg) {
+  if (!seg) return ["N/A", "N/A", "N/A", "N/A"];
+  const num = (v) => (v === null || v === undefined ? "N/A" : Math.round(v * 1e6) / 1e6);
+  const gene = state.genes[seg.gene];
+  const wildtypePartner = geneOutcome(gene, offspringDistribution(seg.altCount, "wildtype", seg.af), seg.allele);
+  const unscreened = geneOutcome(gene, offspringDistribution(seg.altCount, "unscreened", seg.af), seg.allele);
+  const transmits = (out) => (out.available ? num(out.p1 + out.p2) : "N/A");
+  const affected = unscreened.available && seg.mendelian_disease ? num(unscreened.affected) : "N/A";
+  return [num(seg.af), transmits(wildtypePartner), transmits(unscreened), affected];
 }
 
 function downloadBlob(blob, filename) {
