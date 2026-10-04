@@ -266,7 +266,7 @@ button.lds-step-item { cursor: pointer; }
 
 /* Tag (badge): 2px corners, one tone triple each. Colour is never the only signal; the text always says it. */
 .lds-tag { display: inline-flex; align-items: center; gap: 6px; min-height: 22px; padding: 0 7px; border: 1px solid; border-radius: var(--radius-badge);
-  font: 700 12px/1.2 var(--font-sans); white-space: nowrap; vertical-align: middle; }
+  font: 700 12px/1.2 var(--font-sans); max-width: 100%; white-space: normal; vertical-align: middle; }
 .lds-tag-neutral { color: var(--state-outside-ink); background: var(--state-outside-wash); border-color: var(--state-outside-line); }
 .lds-tag-accent { color: var(--accent-ink); background: var(--accent-wash); border-color: var(--accent-line); }
 .lds-tag-notice { color: var(--notice-ink); background: var(--notice-wash); border-color: var(--notice-line); }

@@ -47,8 +47,7 @@ def _no_horizontal_scroll(page):
 def _fits_viewport(page, selectors):
     """Each region (and everything in it) ends inside the viewport.
 
-    Used in the results phase, where the page as a whole still scrolls sideways at 390px because of two nowrap tags
-    outside these regions (#qc-inferred-sex, #apoe-risk-ratio; present before this change).
+    Names the region that overflows, which the page-wide check alone does not.
     """
     for selector in selectors:
         right = page.locator(selector).evaluate(
@@ -217,6 +216,7 @@ def test_narrow_stepnav_shows_the_current_step_and_a_back_link(page):
     expect(back.locator(".lds-icon.lds-i-arrow-left")).to_have_count(1)
     assert "←" not in back.inner_text()
     _fits_viewport(page, ["header.lds-header", "nav.lds-stepnav", "#results-h", "#btn-use-another-file", "section#save"])
+    _no_horizontal_scroll(page)  # the whole results page, long tags included (#qc-inferred-sex, #apoe-risk-ratio)
 
     page.locator("#btn-goto-save").click()
     expect(compact.locator(".lds-stepnav-count")).to_have_text("Step 3 of 3")
