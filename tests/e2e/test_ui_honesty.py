@@ -86,6 +86,46 @@ def test_product_name_is_lucidase_everywhere_the_user_sees_it(loaded_page):
     assert names[1].startswith("Lucidase_Variants_")
 
 
+# The per-locus result words, each with the summary strip's count element.
+STATE_WORDS = {
+    "Found": "count-state-observed",
+    "Not found": "count-state-negative",
+    "Not on your chip": "count-state-gaps",
+    "Unclear": "count-state-insufficient",
+}
+
+
+def _markdown_sections(markdown: str) -> dict[str, list[dict[str, str]]]:
+    """Each "## " section's table as rows keyed by column header (a section with no table maps to [])."""
+    sections = {}
+    for chunk in markdown.split("\n## ")[1:]:
+        heading, _, body = chunk.partition("\n")
+        table = [line for line in body.splitlines() if line.startswith("| ")]
+        cells = [[c.strip() for c in re.split(r"(?<!\\)\|", line)[1:-1]] for line in table]
+        sections[heading] = [dict(zip(cells[0], row)) for row in cells[2:]] if cells else []
+    return sections
+
+
+@pytest.mark.parametrize("sample", ["demo", "wildtype"])
+def test_exports_list_each_check_once_under_its_own_word(loaded_page, sample):
+    page = loaded_page
+    _analyse(page, DEMO_FILE if sample == "demo" else WILDTYPE)
+    strip = {word: int(page.locator(f"#{el}").text_content().replace(",", "")) for word, el in STATE_WORDS.items()}
+    assert strip["Unclear"] == 2, "both files have two unclear checks, each also in another worker list"
+    sections = _markdown_sections(_export(page, "exportMarkdownReport"))
+    ids = []
+    for word, count in strip.items():
+        rows = sections.get(word, [])
+        assert len(rows) == count, f"## {word}: {len(rows)} rows, the summary strip says {count}"
+        assert [row["Result"] for row in rows] == [word] * count, f"## {word}: {rows}"
+        ids += [row["rsID"] for row in rows]
+    assert len(ids) == len(set(ids)) == sum(strip.values()), ids
+    rows = list(csv.DictReader(_export(page, "exportCsvReport").splitlines()))
+    assert len(rows) == len({row["rsID"] for row in rows}) == sum(strip.values()), [row["rsID"] for row in rows]
+    for word, count in strip.items():
+        assert sum(row["Result"] == word for row in rows) == count, word
+
+
 def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
     show_table(page)

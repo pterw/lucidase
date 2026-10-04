@@ -23,11 +23,13 @@ import {
   escapeHtml,
   fmtPct,
   formatRate,
+  foundCategoryCounts,
   groupedReport,
   heroScopeText,
   kbBadge,
   markdownReport,
   partnerModelNote,
+  rowsByState,
   testedVariantCounts,
   toViewModel,
   MODEL_LABELS,
@@ -617,22 +619,25 @@ function renderQC() {
   sexBadge.className = `lds-tag ${NEUTRAL_TAG}`;
 }
 
-/** Every card shows the worker's own figure: the category cards and the coverage cards are not recounted here. */
+/**
+ * The result counts are the worker's coverage figures. The category counts sit under "What was found", so the view
+ * model counts them over the Found checks only (the worker's summary also counts unclear variant readings).
+ */
 function renderSummaryCards() {
-  const sum = state.summary;
   const cov = state.coverageSummary;
-  if (!sum || !cov) return;
+  if (!state.summary || !cov) return;
   const figure = (value) => (typeof value === "number" ? value.toLocaleString() : NOT_AVAILABLE);
   const set = (id, value) => {
     const el = document.getElementById(id);
     if (el) el.textContent = figure(value);
   };
 
-  set("count-pathogenic", sum.pathogenic_count);
-  set("count-carrier", sum.carrier_count);
-  set("count-pgx", sum.pgx_count);
-  set("count-risk", sum.risk_factor_count);
-  set("count-acmg", sum.acmg_actionable_findings);
+  const found = foundCategoryCounts(listedRows());
+  set("count-pathogenic", found.pathogenic);
+  set("count-carrier", found.carrier);
+  set("count-pgx", found.pgx);
+  set("count-risk", found.risk);
+  set("count-acmg", found.acmg);
 
   set("count-state-observed", cov.supported_and_observed_count);
   set("count-state-negative", cov.supported_not_observed_count);
@@ -805,21 +810,29 @@ const categoryTagClass = (r) =>
 // Evidence tiers are text in one neutral tone: a tier is not a result, so it gets no result colour.
 const TIER_TAG_CLASS = `lds-tag ${NEUTRAL_TAG} lds-data`;
 
+// The table's tabs named by a result word, and the state each lists. Every other tab is a category of Found checks.
+const STATE_TABS = {
+  all: "supported_and_observed",
+  negative: "supported_not_observed",
+  gaps: "not_tested_by_array",
+  insufficient: "insufficient_evidence"
+};
+
+/** The worker's lists as view models, as received: they overlap (an unclear check is in two). */
+function listedRows() {
+  return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence];
+}
+
 function renderVariantsTable() {
   const tbody = document.getElementById("variants-tbody");
   tbody.innerHTML = "";
 
-  let dataset = state.records;
-  if (state.filterCategory === "negative") {
-    dataset = state.negativeChecks;
-  } else if (state.filterCategory === "gaps") {
-    dataset = state.arrayGaps;
-  } else if (state.filterCategory === "insufficient") {
-    dataset = state.insufficientEvidence;
-  }
+  // A tab named by a result word lists exactly the checks with that word; the category tabs narrow the Found ones.
+  const byState = rowsByState(listedRows());
+  const dataset = byState[Object.hasOwn(STATE_TABS, state.filterCategory) ? STATE_TABS[state.filterCategory] : "supported_and_observed"];
 
   const filtered = dataset.filter(r => {
-    // Category filter for subcategories of observed findings
+    // Category filter for subcategories of the Found checks
     if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
     if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
     if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
@@ -836,7 +849,7 @@ function renderVariantsTable() {
     return true;
   });
 
-  let countLabel = `Showing ${filtered.length} of ${state.records.length} findings`;
+  let countLabel = `Showing ${filtered.length} of ${byState.supported_and_observed.length} findings`;
   if (state.filterCategory === "negative") {
     countLabel = `Showing ${filtered.length} loci checked where the variant was not found`;
   } else if (state.filterCategory === "gaps") {
@@ -1290,8 +1303,7 @@ function closeDrawer() {
 /** Every row the file produced, once each: observed findings first, then wild-type, gaps and insufficient evidence. */
 function allRows() {
   const seen = new Set();
-  return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence]
-    .filter((vm) => !seen.has(vm.id) && seen.add(vm.id));
+  return listedRows().filter((vm) => !seen.has(vm.id) && seen.add(vm.id));
 }
 
 function exportMarkdownReport() {

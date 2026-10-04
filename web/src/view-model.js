@@ -133,6 +133,44 @@ export function groupedReport(viewModels, genes) {
 }
 
 /**
+ * The checks under each per-locus result word, keyed by state in the design system's order. Every list or section
+ * named by a result word (the table's state tabs, the Markdown sections) shows exactly one of these, so a row is
+ * always under its own word.
+ *
+ * `viewModels` are in the worker's lists, which are split by sample observation and overlap (an unclear check is
+ * in two), so each check is kept once, by id, in the order first seen. A component locus on its own is never a row.
+ * A state outside RECORD_STATES throws (fail fast).
+ */
+export function rowsByState(viewModels) {
+  const byState = Object.fromEntries(RECORD_STATES.map((state) => [state, []]));
+  const seen = new Set();
+  for (const vm of viewModels) {
+    if (!Object.hasOwn(byState, vm.coverage_state)) throw new Error(`unknown coverage state "${vm.coverage_state}" on ${vm.id}`);
+    if (vm.role === "apoe_component" || seen.has(vm.id)) continue;
+    seen.add(vm.id);
+    byState[vm.coverage_state].push(vm);
+  }
+  return byState;
+}
+
+/**
+ * The page's "What was found, by category" counts, over the Found checks only: an unclear reading of a variant is
+ * not a finding. The categories are the worker's (KB interpretation category); `acmg` counts ACMG SF genes, so two
+ * Found variants in one gene count once.
+ */
+export function foundCategoryCounts(viewModels) {
+  const found = rowsByState(viewModels).supported_and_observed;
+  const count = (category) => found.filter((vm) => vm.category === category).length;
+  return {
+    pathogenic: count("Pathogenic"),
+    carrier: count("Carrier"),
+    pgx: count("Pharmacogenomics"),
+    risk: count("Risk Factor"),
+    acmg: new Set(found.filter((vm) => vm.acmg_sf).map((vm) => vm.gene)).size,
+  };
+}
+
+/**
  * One FindingRow: topic (KB gene topic), gene, state and its plain word, the statement the table shows, the
  * limitation and caveats, and the technical line "<rsid> · <genotype>" per locus ("No reading" when there is none).
  * `key` is the record's rsids joined by "-", safe in an element id. `markers` names them for the Details button, since
@@ -593,8 +631,6 @@ const countText = (value) => (typeof value === "number" ? value.toLocaleString("
  */
 export function markdownReport(data) {
   const { qc, manifest, coverage: cov, apoe } = data;
-  const listed = new Set();
-  const unseen = (vms) => vms.filter((vm) => !listed.has(vm.id) && listed.add(vm.id));
   let md = `# Lucidase variome clinical report\n\n`;
   md += `> **Cardinal scope guardrail**: ${manifest.guardrail}\n\n`;
   md += `**Sample**: ${data.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
@@ -644,20 +680,22 @@ export function markdownReport(data) {
     }
   }
 
-  // One section per state: the plain word as the heading, its one-line help, then the table.
+  // One section per state: the plain word as the heading, its one-line help, then the table of exactly the checks
+  // in that state (the worker's lists overlap, so they are regrouped by each check's own state).
   const section = (state) => `## ${RESULT_WORDS[state].label}\n\n${RESULT_WORDS[state].help}\n\n`;
+  const byState = rowsByState([...data.records, ...data.negativeChecks, ...data.arrayGaps, ...data.insufficientEvidence]);
+  const magnitudeCell = (r) => (r.magnitude === null ? null : r.magnitude.toFixed(1));
 
   md += section("supported_and_observed");
   md += mdTable(
     ["rsID", "Gene", "Genotype", "Position", "Result", "Tier", "Category", "ClinVar", "Magnitude", "Limitation", "Phenotype / guidance", "Missing fields"],
-    unseen(data.records).map((r) => [
+    byState.supported_and_observed.map((r) => [
       r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.stateLabel, r.tierExport, r.category,
-      r.starsExportText, r.magnitude === null ? null : r.magnitude.toFixed(1),
-      r.limitationTooltip, r.phenotype, r.missing_fields.join("; "),
+      r.starsExportText, magnitudeCell(r), r.limitationTooltip, r.phenotype, r.missing_fields.join("; "),
     ])
   );
 
-  const negatives = unseen(data.negativeChecks);
+  const negatives = byState.supported_not_observed;
   if (negatives.length > 0) {
     md += `\n${section("supported_not_observed")}`;
     md += mdTable(
@@ -669,7 +707,7 @@ export function markdownReport(data) {
     );
   }
 
-  const gaps = unseen(data.arrayGaps);
+  const gaps = byState.not_tested_by_array;
   if (gaps.length > 0) {
     md += `\n${section("not_tested_by_array")}`;
     md += mdTable(
@@ -678,13 +716,17 @@ export function markdownReport(data) {
     );
   }
 
-  const insufficient = unseen(data.insufficientEvidence);
+  // An unclear check keeps everything it carries: its reason, the not-detected statement of a wild-type reading,
+  // and, when the KB interprets the reading, that interpretation (category, ClinVar, magnitude, phenotype).
+  const insufficient = byState.insufficient_evidence;
   if (insufficient.length > 0) {
     md += `\n${section("insufficient_evidence")}`;
     md += mdTable(
-      ["rsID", "Gene", "Genotype", "Position", "Result", "Tier", "Reason", "Limitation", "Missing fields"],
+      ["rsID", "Gene", "Genotype", "Position", "Result", "Tier", "Category", "ClinVar", "Magnitude", "Reason", "Statement",
+        "Phenotype / guidance", "Limitation", "Missing fields"],
       insufficient.map((r) => [
-        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.stateLabel, r.tierExport, r.phenotype, r.limitationTooltip,
+        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.stateLabel, r.tierExport, r.category, r.starsExportText,
+        magnitudeCell(r), nonEmptyString(r.reason), r.statement, r.interpretation ? r.phenotype : null, r.limitationTooltip,
         r.missing_fields.join("; "),
       ])
     );

@@ -67,16 +67,22 @@ def test_each_locus_is_counted_in_exactly_one_state(loaded_page):
     assert sum(counts[:4]) == counts[4], counts
 
 
-def test_demo_mthfr_het_is_an_observed_finding(loaded_page):
+def test_demo_mthfr_het_is_a_variant_reading_listed_under_its_own_word(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
     expect(loaded_page.locator("#results-section")).to_be_visible()
+    # The worker lists the MTHFR het with the variant-present findings; its evidence is unclear (Tier D).
     assert "rs1801133" in _rsids(loaded_page, "records")
     assert "rs1801133" not in _rsids(loaded_page, "negativeChecks")
+    state = loaded_page.evaluate("() => window.__lucidase.state.records.find(r => r.rsid === 'rs1801133').coverage_state")
+    assert state == "insufficient_evidence", state
+    show_table(loaded_page)
+    # It is under Unclear, its own word, and not under Found.
     row = _row_for(loaded_page, "rs1801133")
+    expect(row).to_have_count(0)
+    loaded_page.locator("[data-filter='insufficient']").click()
     expect(row).to_have_count(1)
     assert "tested wt" not in row.inner_text().lower()
     assert "tested normal" not in row.inner_text().lower()
-    state = loaded_page.evaluate("() => window.__lucidase.state.records.find(r => r.rsid === 'rs1801133').coverage_state")
     expect(row.locator(f".lds-tag-state-{state}")).to_have_text(PLAIN_WORDS[state])
 
 

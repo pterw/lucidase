@@ -18,12 +18,14 @@ import {
   csvReport,
   drawerTierText,
   escapeHtml,
+  foundCategoryCounts,
   groupIdForModel,
   groupedReport,
   karyogramStateLabels,
   kbBadge,
   markdownReport,
   partnerModelNote,
+  rowsByState,
   testedVariantCounts,
   toViewModel,
 } from "../src/view-model.js";
@@ -446,14 +448,16 @@ test("Markdown rows match the CSV rows per record: tier, stars, limitation, geno
   const md = markdownReport(reportData(a, { records: all, negativeChecks: [], arrayGaps: [], insufficientEvidence: [] }));
   const csv = parseCsv(csvReport(all, a.kb.genes));
   const starsText = (n) => (n === "" ? NO_CLINVAR_STATUS : `${Number(n)} of 4 review stars`);
+  // Each record is in the section of its own result word; the demo has Found, Not found and Unclear records.
   const compare = (mdText) => {
-    const rows = markdownRows(mdText, "Found");
+    const rows = Object.assign({}, ...["Found", "Not found", "Unclear"].map((word) => markdownRows(mdText, word)));
     assert.equal(Object.keys(rows).length, csv.length);
     for (const c of csv) {
       const r = rows[c.rsID];
       assert.ok(r, `${c.rsID} is missing from the Markdown: ${Object.keys(rows)}`);
       assert.equal(r.Tier, c.Evidence_Tier, `${c.rsID} tier`);
-      assert.equal(r.ClinVar, c.ClinVar_Stars.split(";").map(starsText).join(";"), `${c.rsID} stars`);
+      // The Not found table has no ClinVar column.
+      if (c.Result !== "Not found") assert.equal(r.ClinVar, c.ClinVar_Stars.split(";").map(starsText).join(";"), `${c.rsID} stars`);
       assert.ok(r.Limitation.startsWith(c.Limitation), `${c.rsID} limitation`);
       assert.equal(r.Genotype, c.Genotype, `${c.rsID} genotype`);
     }
@@ -622,9 +626,9 @@ test("the Markdown report uses the plain words, keeps the help and the absence s
     assert.ok(section.trimStart().startsWith(help), `${label} section opens with its help`);
     const rows = Object.values(markdownRows(md, label));
     assert.ok(rows.some((row) => row.Result === label), label);
-    // The worker lists a variant-present or wild-type locus with unclear evidence under Found or Not found; the row's
-    // own Result still says Unclear.
-    for (const row of rows) assert.ok([label, "Unclear"].includes(row.Result), `${label} row: ${row.Result}`);
+    // A section named by a result word holds only checks with that word, though the worker lists an unclear check
+    // with the variant-present or wild-type ones too.
+    for (const row of rows) assert.equal(row.Result, label, `${label} row: ${row.Result}`);
   }
   assert.ok(md.includes("This is not the same as 'normal'."), "absence of a finding is not absence of risk");
   assert.ok(md.includes("guardrail text"), "the scope guardrail still opens the report");
@@ -837,4 +841,112 @@ test("rows that share a topic still have distinct markers, so their Details butt
   assert.equal(new Set(hfe.map((r) => r.topic)).size, 1);
   const names = rows.map((r) => `${r.topic}, ${r.markers}`);
   assert.equal(new Set(names).size, names.length);
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// Lists and sections named by a result word hold exactly the checks in that word's state. The worker's lists are
+// split by sample observation and overlap: an unclear check sits in its observation list and in the unclear list.
+
+/**
+ * The demo with rs6025 dropped (Not on your chip) and HFE H63D made wild type: H63D is then Unclear with no variant
+ * (the worker also lists it with the wild-type checks), and MTHFR rs1801133 stays Unclear with the variant present
+ * (the worker also lists it with the variant-present findings). Both carry a KB interpretation.
+ */
+const MIXED_UNCLEAR_FILE = DEMO.replace(/^rs6025[^\n]*\r?\n/m, "").replace(
+  /^rs1799945\t6\t26092913\tCG/m,
+  "rs1799945\t6\t26092913\tCC"
+);
+const PER_LOCUS_STATES = ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"];
+
+/** The first cell of every body row of the Markdown table under "## <heading>", duplicates kept. */
+function markdownIds(md, heading) {
+  const lines = md.split("\n");
+  const start = lines.findIndex((l) => l === `## ${heading}`);
+  assert.ok(start >= 0, `no section "${heading}"`);
+  let i = start + 1;
+  while (i < lines.length && !lines[i].startsWith("|") && !lines[i].startsWith("## ")) i++;
+  const ids = [];
+  for (i += 2; i < lines.length && lines[i].startsWith("|"); i++) ids.push(lines[i].replace(/^\| /, "").split(" | ")[0]);
+  return ids;
+}
+
+test("each Markdown result section holds exactly the checks in that state, and each check is in one section once", () => {
+  const a = analyse(MIXED_UNCLEAR_FILE);
+  const data = reportData(a);
+  // The fixture exercises both overlaps, or this test proves nothing.
+  assert.ok(data.records.some((vm) => vm.id === "rs1801133" && vm.coverage_state === "insufficient_evidence"));
+  assert.ok(data.negativeChecks.some((vm) => vm.id === "rs1799945" && vm.coverage_state === "insufficient_evidence"));
+  const md = markdownReport(data);
+  const placed = [];
+  for (const state of PER_LOCUS_STATES) {
+    const label = RESULT_WORDS[state].label;
+    const expected = a.vms.filter((vm) => vm.coverage_state === state).map((vm) => vm.exportId);
+    assert.ok(expected.length > 0, `the fixture has a check in ${label}`);
+    const ids = markdownIds(md, label);
+    assert.deepEqual([...ids].sort(), [...expected].sort(), `## ${label}`);
+    for (const row of Object.values(markdownRows(md, label))) assert.equal(row.Result, label, `## ${label}: ${row.rsID}`);
+    placed.push(...ids);
+  }
+  assert.deepEqual(placed.sort(), a.vms.map((vm) => vm.exportId).sort(), "every check once, in one section");
+});
+
+test("an unclear check keeps its interpretation, reason and statement in the Unclear section of the Markdown", () => {
+  const a = analyse(MIXED_UNCLEAR_FILE);
+  const rows = markdownRows(markdownReport(reportData(a)), "Unclear");
+  const mthfr = a.byRsid.rs1801133; // variant present
+  const h63d = a.byRsid.rs1799945; // wild type
+  for (const vm of [mthfr, h63d]) {
+    assert.equal(vm.coverage_state, "insufficient_evidence", vm.id);
+    assert.ok(vm.interpretation && typeof vm.phenotype === "string" && vm.phenotype.length > 0, `${vm.id} is interpreted`);
+    const row = rows[vm.exportId];
+    assert.ok(row, `${vm.id} is in the Unclear section`);
+    assert.equal(row["Phenotype / guidance"], vm.phenotype, vm.id);
+    assert.equal(row.Category, vm.category, vm.id);
+    assert.equal(row.Magnitude, vm.magnitude === null ? "" : vm.magnitude.toFixed(1), vm.id);
+    assert.equal(row.ClinVar, vm.starsExportText, vm.id);
+    assert.equal(row.Reason, vm.reason, vm.id);
+  }
+  assert.match(h63d.statement, /^rs1799945 variant not detected \(\d variants tested in HFE\)$/);
+  assert.equal(rows.rs1799945.Statement, h63d.statement);
+});
+
+test("rows by state: each check once, under its own state, from the worker's overlapping lists", () => {
+  const a = analyse(MIXED_UNCLEAR_FILE);
+  const lists = workerLists(a);
+  assert.ok(lists.length > a.vms.length, "the lists overlap, or this test proves nothing");
+  const byState = rowsByState(lists);
+  assert.deepEqual(Object.keys(byState), PER_LOCUS_STATES);
+  for (const state of PER_LOCUS_STATES) {
+    const expected = a.vms.filter((vm) => vm.coverage_state === state).map((vm) => vm.id);
+    assert.ok(expected.length > 0, `the fixture has a check in ${state}`);
+    assert.deepEqual(byState[state].map((vm) => vm.id).sort(), expected.sort(), state);
+  }
+  // A component locus on its own and a marker outside coverage are never a row.
+  const component = { ...a.byRsid.rs1801133, id: "rs429358", role: "apoe_component" };
+  assert.deepEqual(rowsByState([component]).supported_and_observed, []);
+  assert.deepEqual(rowsByState([component]).insufficient_evidence, []);
+  assert.throws(() => rowsByState([{ ...a.byRsid.rs671, coverage_state: "outside_coverage" }]), /coverage state/);
+});
+
+test("the counts by category count Found checks only, once each, and an ACMG SF gene once", () => {
+  const a = analyse(DEMO);
+  // HFE H63D is a heterozygous Carrier reading with unclear evidence (Tier D): it is not found, so it is not counted.
+  assert.equal(a.byRsid.rs1799945.coverage_state, "insufficient_evidence");
+  assert.equal(a.byRsid.rs1799945.sample_observation, "variant_present");
+  assert.equal(a.byRsid.rs1799945.category, "Carrier");
+  assert.deepEqual(foundCategoryCounts(workerLists(a)), { pathogenic: 0, carrier: 2, pgx: 4, risk: 3, acmg: 1 });
+  // The same rule, computed independently from the Found checks.
+  const found = a.vms.filter((vm) => vm.coverage_state === "supported_and_observed");
+  const n = (category) => found.filter((vm) => vm.category === category).length;
+  assert.deepEqual(foundCategoryCounts(workerLists(a)), {
+    pathogenic: n("Pathogenic"), carrier: n("Carrier"), pgx: n("Pharmacogenomics"), risk: n("Risk Factor"),
+    acmg: new Set(found.filter((vm) => vm.acmg_sf).map((vm) => vm.gene)).size,
+  });
+  // With H63D's evidence sufficient, both HFE variants are Found: two Carrier checks, still one ACMG SF gene.
+  const both = analyse(DEMO, (kb) => {
+    kb.loci.rs1799945.evidence_sufficiency = "sufficient";
+    return kb;
+  });
+  assert.equal(both.vms.filter((vm) => vm.gene === "HFE" && vm.coverage_state === "supported_and_observed").length, 2);
+  assert.deepEqual(foundCategoryCounts(workerLists(both)), { pathogenic: 0, carrier: 3, pgx: 4, risk: 3, acmg: 1 });
 });
