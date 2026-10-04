@@ -63,7 +63,46 @@
 .lds-brand:hover { color: var(--text-body); }
 .lds-nav { display: flex; align-items: center; gap: 2px; }
 .lds-header-spacer { flex: 1; }
-@media (max-width: 679px) { .lds-header-inner { gap: 8px; } .lds-header .lds-localnote { display: none; } }
+@media (max-width: 679px) { .lds-header-inner { gap: 8px; } .lds-header-inner > .lds-localnote { display: none; } }
+
+/* AppHeader, narrow: below 680px the page links and the local note move into a "Pages" disclosure. Opt in with
+   .lds-header-collapse on the <header>; the button keeps aria-expanded and the panel's hidden attribute in step. */
+.lds-pages-toggle { display: none; align-items: center; gap: 6px; height: 40px; padding: 0 10px; border: 0; background: transparent; cursor: pointer;
+  font: 700 14px var(--font-sans); color: var(--text-body); border-radius: var(--radius-control); }
+.lds-pages-toggle[aria-expanded="true"] { background: var(--bg-hover); }
+.lds-pages { display: none; }
+.lds-pages-status { padding: 10px 10px 0; }
+@media (max-width: 679px) {
+  .lds-header-collapse .lds-header-inner { gap: 4px; }
+  .lds-header-collapse .lds-header-inner > .lds-nav { display: none; }
+  .lds-header-collapse .lds-pages-toggle { display: inline-flex; }
+  .lds-header-collapse .lds-pages:not([hidden]) { display: flex; flex-direction: column; padding-top: 4px; padding-bottom: 12px; border-top: 1px solid var(--border-default); }
+}
+
+/* StepNav: Choose your file, Read your results, Save a copy. Below 560px of its own width it becomes the current step,
+   "Step 2 of 3", a bar and a back link; both forms are in the markup and a container query shows one. */
+.lds-stepnav { container-type: inline-size; }
+.lds-stepnav-list { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; }
+.lds-step { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
+.lds-step:last-child { flex: none; }
+.lds-step-item { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: none;
+  font: 700 14px var(--font-sans); color: var(--text-body); white-space: nowrap; }
+button.lds-step-item { cursor: pointer; }
+.lds-step-dot { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 24px; height: 24px;
+  border: 1.5px solid var(--ink); border-radius: var(--radius-dot); font: 700 12px var(--font-mono); color: var(--text-body); }
+.lds-step-line { flex: 1; min-width: 16px; height: 1px; margin: 0 14px; background: var(--border-strong); }
+.lds-step[data-state="done"] .lds-step-line { background: var(--ink); }
+.lds-step[data-state="current"] .lds-step-dot { background: var(--ink); color: var(--on-ink); }
+.lds-step[data-state="upcoming"] .lds-step-item { color: var(--text-subtle); }
+.lds-step[data-state="upcoming"] .lds-step-dot { border-color: var(--border-strong); color: var(--text-subtle); }
+.lds-stepnav-compact { display: none; flex-direction: column; gap: 8px; }
+.lds-stepnav-compact-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.lds-stepnav-current { font: 700 15px var(--font-sans); color: var(--text-body); }
+.lds-stepnav-count { font: 400 13px var(--font-mono); color: var(--text-muted); }
+.lds-stepnav .lds-progress-bar { transition: transform var(--dur-slow) var(--ease-standard); }
+.lds-stepnav-back { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0; border: 0; background: none;
+  cursor: pointer; font: 700 14px var(--font-sans); color: var(--text-link); }
+@container (max-width: 559px) { .lds-stepnav-list { display: none; } .lds-stepnav-compact { display: flex; } }
 
 /* NavLink */
 .lds-navlink { display: flex; align-items: center; min-height: 44px; padding: 0 10px; font: 700 15px var(--font-sans); color: var(--text-muted); text-decoration: none; }
@@ -179,6 +218,34 @@
 .lds-meta { font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
 .lds-data { font-family: var(--font-mono); letter-spacing: var(--tracking-mono); }
 
+/* FindingRow: one result in plain words; mark, topic, gene, statement, the limitation (always visible), technical ids.
+   An <article>, not a button (it holds a heading and paragraphs); its "Details" button opens the Inspector. */
+.lds-finding { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; column-gap: 14px; row-gap: 6px;
+  margin: 0 -12px 0 -8px; padding: 16px 12px 16px 8px; border-bottom: 1px solid var(--border-default);
+  transition: background-color var(--dur-instant) ease; }
+.lds-finding:hover { background: var(--bg-hover); }
+.lds-finding.is-selected { background: var(--accent-wash); }
+.lds-finding > .lds-mark { margin-top: 3px; }
+.lds-finding-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.lds-finding-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
+.lds-finding-topic { margin: 0; font: 700 16px/1.35 var(--font-sans); color: var(--text-body); }
+.lds-finding-gene { font: 400 13px var(--font-mono); color: var(--text-muted); }
+.lds-finding-statement { margin: 0; font: 400 16px/1.55 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-finding-limit { display: flex; gap: 8px; margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--notice-ink); max-width: var(--measure-prose); }
+.lds-finding-limit > .lds-icon { width: 15px; height: 15px; margin-top: 2px; }
+.lds-finding-tech { font: 400 13px var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
+.lds-finding-open { align-self: start; display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 8px; border: 0; background: transparent;
+  cursor: pointer; font: 700 14px var(--font-sans); color: var(--text-link); }
+
+/* Ligature: the wordmark's arch joining two markers into one result (APOE only). The SVG is inline; see its classes. */
+.lds-ligature { display: inline-flex; flex-direction: column; gap: 4px; width: 240px; max-width: 100%; margin: 0; }
+.lds-ligature svg { display: block; width: 240px; max-width: 100%; height: auto; }
+.lds-ligature-arch { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.lds-ligature-dot { fill: var(--accent); }
+.lds-ligature-markers { display: flex; justify-content: space-between; gap: 8px; font: 400 13px var(--font-mono); color: var(--text-muted); }
+.lds-ligature-result { text-align: center; font: 400 22px/1.2 var(--font-serif); color: var(--text-body); }
+.lds-ligature-caption { text-align: center; font: 400 13px var(--font-sans); color: var(--text-muted); }
+
 /* Counts: large condensed numbers with a plain label; hairlines, no boxes. */
 .lds-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); column-gap: 24px; border-top: 1px solid var(--border-default); }
 .lds-count { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--border-default); }
@@ -212,12 +279,37 @@
 
 /* StateMark: the karyogram's dot language, shape-coded so the state reads without colour.
    Found = filled, Not found = ring, Not on your chip = dashed ring, Unclear = half, Not checked = small dot. */
-.lds-mark { display: inline-block; flex: none; width: 12px; height: 12px; border-radius: var(--radius-dot); box-sizing: border-box; color: var(--state-outside); }
+.lds-mark { --lds-mark-dot: 2.5px; display: inline-block; flex: none; width: 12px; height: 12px; border-radius: var(--radius-dot); box-sizing: border-box; color: var(--state-outside); }
+.lds-mark-14 { --lds-mark-dot: 2.8px; width: 14px; height: 14px; }
+.lds-mark-16 { --lds-mark-dot: 3.2px; width: 16px; height: 16px; }
 .lds-mark-supported_and_observed { color: var(--state-observed); background: currentColor; }
 .lds-mark-supported_not_observed { color: var(--state-not-observed); border: 2px solid currentColor; }
 .lds-mark-not_tested_by_array { color: var(--state-array-gap); border: 1.75px dashed currentColor; }
 .lds-mark-insufficient_evidence { color: var(--state-insufficient); border: 1.75px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
-.lds-mark-outside_coverage { color: var(--state-outside); background: radial-gradient(circle, currentColor 0 2.5px, transparent 3px); }
+.lds-mark-outside_coverage, .lds-mark-reference { background: radial-gradient(circle, currentColor 0 var(--lds-mark-dot), transparent calc(var(--lds-mark-dot) + 0.5px)); }
+.lds-mark-outside_coverage { color: var(--state-outside); }
+.lds-mark-reference { color: var(--ink-subtle); }
+/* StateMark with its plain word ("Found", "Not found", ...). */
+.lds-statemark { display: inline-flex; align-items: center; gap: 8px; font: 700 14px var(--font-sans); color: var(--text-body); white-space: nowrap; }
+
+/* KaryogramLegend: mark and plain word, the count, and one line on what that result means. */
+.lds-legend { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.lds-legend-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-default); }
+.lds-legend-count { font: 700 15px var(--font-mono); color: var(--text-body); }
+.lds-legend-help { grid-column: 1 / -1; padding-left: 22px; font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
+
+/* Term: an inline glossary word (its dotted underline is .lds-term in ds/base.css). The definition opens on hover,
+   focus and tap; the script keeps aria-expanded on the button and this CSS reads only that. Under 560px the
+   definition sits at the foot of the viewport so it never runs off the side of a phone screen. */
+.lds-termwrap { position: relative; display: inline; }
+button.lds-term { padding: 0; border: 0; background: none; font: inherit; color: inherit; letter-spacing: inherit; }
+.lds-term-pop { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: var(--z-menu); width: 280px; padding: 10px 12px;
+  background: var(--ink); color: var(--on-ink); font: 400 14px/1.5 var(--font-sans); text-align: left; border-radius: var(--radius-control); }
+.lds-term-pop::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 6px; } /* keeps the pointer inside on the way down */
+.lds-term[aria-expanded="true"] + .lds-term-pop { display: block; }
+@media (max-width: 559px) {
+  .lds-term-pop { position: fixed; top: auto; left: var(--layout-gutter-sm); right: var(--layout-gutter-sm); bottom: var(--layout-gutter-sm); width: auto; }
+}
 
 /* SearchInput */
 .lds-field { position: relative; display: flex; align-items: center; }
@@ -258,6 +350,8 @@
 .lds-table tbody tr[tabindex]:hover { background: var(--bg-hover); cursor: pointer; }
 .lds-table tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .lds-table .lds-data { font-family: var(--font-mono-narrow); font-size: 13px; }
+.lds-table tbody tr.is-selected, .lds-table tbody tr.is-selected:hover { background: var(--accent-wash); }
+.lds-table td.lds-table-empty { padding: 32px 16px; text-align: center; font: italic 400 15px var(--font-serif); color: var(--text-muted); }
 
 /* Inspector (the details panel). It still slides in over the page in this release. */
 .lds-inspector { background: var(--bg-panel); border-left: 1px solid var(--border-default); color: var(--text-body);
@@ -271,6 +365,25 @@
 .lds-isec-title { margin: 0 0 8px; font: 700 15px/1.3 var(--font-sans); color: var(--text-body); }
 .lds-isec-sub { margin: -4px 0 10px; font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
 .lds-isec-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.lds-isec-body { display: flex; flex-direction: column; gap: 10px; font: 400 16px/1.55 var(--font-serif); color: var(--text-body); }
+.lds-inspector-heading { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lds-inspector-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 2px; }
+
+/* Inspector, docked and non-modal: a sticky column beside the results, so the list stays visible and clickable.
+   .lds-results holds the list and the column. The list keeps at least 560px and the column is var(--inspector-w);
+   when both no longer fit beside each other (560 + 32 gap + 440 = 1032px of container width) the Inspector moves
+   below the list at full width and stops sticking. */
+.lds-results { container: lds-results / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; width: 100%; }
+.lds-results-main { flex: 1 1 560px; min-width: 0; }
+.lds-results-side { flex: 0 1 var(--inspector-w); min-width: 0; align-self: stretch; }
+.lds-inspector-docked { position: sticky; top: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 32px);
+  border: 1px solid var(--border-default); transition: none; }
+.lds-inspector-docked:focus { outline: none; }
+.lds-inspector-docked .lds-inspector-body { flex: 1; min-height: 0; overflow-y: auto; }
+@container lds-results (max-width: 1031px) {
+  .lds-results-side { flex-basis: 100%; }
+  .lds-inspector-docked { position: static; max-height: none; }
+}
 
 /* SegmentedControl */
 .lds-segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--border-control); border-radius: var(--radius-control); overflow: hidden; }
