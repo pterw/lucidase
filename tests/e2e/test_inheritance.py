@@ -96,3 +96,43 @@ def test_demo_hfe_double_het_is_phase_unknown(loaded_page):
     assert "phase unknown" in section, section
     assert "trans phase" not in section
     assert "synergistic" not in section
+
+
+# Owner ruling 2026-10-04: a multi-locus finding may rest on an Unclear reading, but it must say so.
+MULTI_LOCUS_CAUTION = "This pairing relies on a reading Lucidase marks as unclear, so treat it with extra caution."
+
+
+def _assert_component(row, rsid, word, state):
+    """One component of a multi-locus card: its marker, its own result word and the StateMark shape for its state."""
+    item = row.locator(f'[data-component-rsid="{rsid}"]')
+    expect(item).to_have_count(1)
+    expect(item).to_contain_text(rsid)
+    expect(item).to_contain_text(word)
+    expect(item.locator(f".lds-mark.lds-mark-{state}")).to_have_count(1)
+
+
+def test_demo_multi_locus_cards_show_each_component_word_and_caution_on_unclear(loaded_page):
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible()
+    rows = page.locator("#assortment-cards-container > div")
+    compound = rows.filter(has_text="Possible compound heterozygote")
+    pairing = rows.filter(has_text="Co-occurring variant alleles")
+    expect(compound).to_have_count(1)
+    expect(pairing).to_have_count(1)
+
+    # HFE: C282Y is Found, H63D's own word is Unclear, so the card carries the caution line.
+    _assert_component(compound, "rs1800562", "Found", "supported_and_observed")
+    _assert_component(compound, "rs1799945", "Unclear", "insufficient_evidence")
+    caution = page.get_by_text(MULTI_LOCUS_CAUTION, exact=True)
+    expect(compound.get_by_text(MULTI_LOCUS_CAUTION, exact=True)).to_have_count(1)  # positive control
+
+    # F5 + F2: both Found, no caution line (same locator as the positive control above).
+    _assert_component(pairing, "rs6025", "Found", "supported_and_observed")
+    _assert_component(pairing, "rs1799963", "Found", "supported_and_observed")
+    expect(pairing.get_by_text(MULTI_LOCUS_CAUTION, exact=True)).to_have_count(0)
+    expect(caution).to_have_count(1)
+
+    # The existing inspect buttons are kept.
+    expect(compound.locator("button.btn-inspect-gene[data-gene='HFE']")).to_have_count(1)
+    expect(pairing.locator("button.btn-inspect-gene")).to_have_count(2)

@@ -478,6 +478,38 @@ export function apoeCardModel(apoe) {
   };
 }
 
+/** The plain line a multi-locus finding carries when one of its markers is not Found (owner ruling 2026-10-04). */
+export const MULTI_LOCUS_CAUTION = "This pairing relies on a reading Lucidase marks as unclear, so treat it with extra caution.";
+
+/** The (rsid, gene) of each marker in a compound-heterozygote finding (gene, loci) or a co-occurring one (genes, loci). */
+function multiLocusMarkers(finding, records) {
+  if (Array.isArray(finding.genes)) {
+    // A co-occurring locus reads "<rsid> (Chr <chrom>)" (core/inheritance.js detectMultiLocus).
+    return finding.loci.map((locus, i) => {
+      const rec = records.find((r) => r.gene === finding.genes[i] && `${r.rsid} (Chr ${r.chrom})` === locus);
+      return { locus, rec };
+    });
+  }
+  return finding.loci.map((rsid) => ({ locus: rsid, rec: records.find((r) => r.gene === finding.gene && r.rsid === rsid) }));
+}
+
+/**
+ * Each marker of a multi-locus finding with its own result word, from the findings the detectors ran on (`records`,
+ * the worker's observed findings), and the caution line when any marker is not Found. A detector only pairs Found or
+ * Unclear readings; a marker that is missing, or in any other state, is a broken contract and throws.
+ */
+export function multiLocusReading(finding, records) {
+  const components = multiLocusMarkers(finding, records).map(({ locus, rec }) => {
+    if (!rec) throw new Error(`multi-locus finding names ${locus}, which is not among the findings`);
+    if (rec.coverage_state !== "supported_and_observed" && rec.coverage_state !== "insufficient_evidence") {
+      throw new Error(`multi-locus finding pairs ${rec.rsid} in state "${rec.coverage_state}"`);
+    }
+    return { rsid: rec.rsid, gene: rec.gene, state: rec.coverage_state, label: RESULT_WORDS[rec.coverage_state].label };
+  });
+  const caution = components.some((c) => c.state !== "supported_and_observed") ? MULTI_LOCUS_CAUTION : null;
+  return { components, caution };
+}
+
 const ACMG_VERSION_FALLBACK = "ACMG SF";
 
 /** Start-page scope line: the ACMG SF version and tested scope, both from the KB manifest. No emoji (design system). */
@@ -660,10 +692,18 @@ export function markdownReport(data) {
     md += `\n`;
   }
 
+  // Each multi-locus finding lists every marker's own result word, and says so when one of them is not Found.
+  const multiLocusLines = (finding) => {
+    const { components, caution } = multiLocusReading(finding, data.records);
+    return `- **Result per marker**: ${components.map((c) => `${c.rsid}: ${c.label}`).join("; ")}\n` +
+      (caution ? `- **Caution**: ${caution}\n` : "");
+  };
+
   if (data.compoundHeterozygotes.length > 0) {
     md += `## Possible compound heterozygotes (phase unknown)\n\n`;
     for (const ch of data.compoundHeterozygotes) {
       md += `### ${ch.title} (${ch.gene})\n`;
+      md += multiLocusLines(ch);
       md += `- **Significance**: ${ch.significance}\n`;
       md += `- **Clinical summary**: ${ch.summary}\n`;
       md += `- **Segregation**: ${ch.segregation_notes}\n\n`;
@@ -674,6 +714,7 @@ export function markdownReport(data) {
     md += `## Co-occurring variant alleles on unlinked loci\n\n`;
     for (const ia of data.independentAssortment) {
       md += `### ${ia.type} (${ia.genes.join(" + ")})\n`;
+      md += multiLocusLines(ia);
       md += `- **Loci**: ${ia.loci.join(" · ")}\n`;
       md += `- **Chance a child inherits all listed alleles**: ${(ia.joint_transmission_prob * 100).toFixed(0)}% (${ia.assumption})\n`;
       md += `- **Note**: ${ia.description}\n\n`;

@@ -28,6 +28,7 @@ import {
   heroScopeText,
   kbBadge,
   markdownReport,
+  multiLocusReading,
   partnerModelNote,
   rowsByState,
   testedVariantCounts,
@@ -693,6 +694,20 @@ function renderApoeCard() {
   pillEl.className = `lds-tag ${tone}`;
 }
 
+// Each marker of a multi-locus finding with its own result word and StateMark, so colour is never the only signal,
+// and the caution line when one of them is not Found (owner ruling 2026-10-04).
+function multiLocusComponentsHtml(finding) {
+  const { components, caution } = multiLocusReading(finding, state.records);
+  const items = components.map((c) => `
+    <li class="flex items-center gap-2" data-component-rsid="${escapeHtml(c.rsid)}">
+      <span class="lds-data">${escapeHtml(c.rsid)}</span>${stateTagHtml(c.state, c.label)}
+    </li>`).join("");
+  const cautionHtml = caution === null
+    ? ""
+    : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span>${escapeHtml(caution)}</span></p>`;
+  return `<ul class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Result per marker">${items}</ul>${cautionHtml}`;
+}
+
 function renderAssortmentSection() {
   const section = document.getElementById("assortment-section");
   const container = document.getElementById("assortment-cards-container");
@@ -731,6 +746,7 @@ function renderAssortmentSection() {
         <p class="lds-h3 lds-data">${escapeHtml(ch.title)}</p>
         <p class="lds-prose">${escapeHtml(ch.summary)}</p>
       </div>
+      ${multiLocusComponentsHtml(ch)}
       <p class="lds-meta"><strong class="text-ink">Segregation:</strong> ${escapeHtml(ch.segregation_notes)}</p>
       <div>
         <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(ch.gene)}">
@@ -755,6 +771,7 @@ function renderAssortmentSection() {
         <p class="lds-h3">${escapeHtml(ia.type)}</p>
         <p class="lds-prose">${escapeHtml(ia.description)}</p>
       </div>
+      ${multiLocusComponentsHtml(ia)}
       <dl class="lds-datalist">
         <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
         <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>

@@ -6,7 +6,7 @@ import { validateKb } from "../src/core/kb.js";
 import { parseGenotypeFile } from "../src/core/parse.js";
 import { classify } from "../src/core/classify.js";
 import { assembleFindings } from "../src/core/apoe.js";
-import { describeSegregation } from "../src/core/inheritance.js";
+import { describeSegregation, detectCompoundHeterozygosity, detectMultiLocus } from "../src/core/inheritance.js";
 import {
   NOT_AVAILABLE,
   APOE_FIGURES_NOTE,
@@ -949,4 +949,60 @@ test("the counts by category count Found checks only, once each, and an ACMG SF 
   });
   assert.equal(both.vms.filter((vm) => vm.gene === "HFE" && vm.coverage_state === "supported_and_observed").length, 2);
   assert.deepEqual(foundCategoryCounts(workerLists(both)), { pathogenic: 0, carrier: 3, pgx: 4, risk: 3, acmg: 1 });
+});
+
+// Owner ruling 2026-10-04: a multi-locus finding may rest on an Unclear reading, but it must say so. Each component
+// carries its own result word; a caution line is added only when a component is not Found.
+const MULTI_LOCUS_CAUTION = "This pairing relies on a reading Lucidase marks as unclear, so treat it with extra caution.";
+
+/** The demo's report data with the worker's multi-locus findings, detected from its observed findings. */
+function demoMultiLocusData(mutate = (records) => records) {
+  const base = reportData(analyse(DEMO));
+  const records = mutate(base.records);
+  return {
+    ...base,
+    records,
+    compoundHeterozygotes: detectCompoundHeterozygosity(records, KB_JSON.genes),
+    independentAssortment: detectMultiLocus(records, KB_JSON.genes),
+  };
+}
+
+/** The body of one "## " section of a Markdown report (up to the next "## " heading). */
+function mdSection(md, heading) {
+  const start = md.indexOf(`## ${heading}\n`);
+  assert.ok(start >= 0, `no "## ${heading}" section`);
+  const next = md.indexOf("\n## ", start + 3);
+  return md.slice(start, next < 0 ? md.length : next);
+}
+
+test("a multi-locus finding with an Unclear component shows each marker's word and the caution line", () => {
+  const data = demoMultiLocusData();
+  // The demo's HFE pairing: C282Y is Found, H63D's evidence is insufficient (its own word is Unclear).
+  assert.equal(data.compoundHeterozygotes.length, 1);
+  assert.equal(data.records.find((r) => r.rsid === "rs1799945").coverage_state, "insufficient_evidence");
+  const compound = mdSection(markdownReport(data), "Possible compound heterozygotes (phase unknown)");
+  assert.match(compound, /rs1800562: Found/);
+  assert.match(compound, /rs1799945: Unclear/);
+  assert.ok(compound.includes(MULTI_LOCUS_CAUTION), compound);
+});
+
+test("a multi-locus finding whose components are all Found shows the words and no caution line", () => {
+  const data = demoMultiLocusData();
+  const pairing = mdSection(markdownReport(data), "Co-occurring variant alleles on unlinked loci");
+  assert.match(pairing, /rs6025: Found/);
+  assert.match(pairing, /rs1799963: Found/);
+  assert.ok(!pairing.includes(MULTI_LOCUS_CAUTION), pairing);
+  // Positive control for the same string: the same pairing with F2 read as Unclear carries the caution.
+  const unclear = demoMultiLocusData((records) =>
+    records.map((r) => (r.rsid === "rs1799963" ? { ...r, coverage_state: "insufficient_evidence" } : r)));
+  assert.equal(unclear.independentAssortment.length, 1);
+  const flagged = mdSection(markdownReport(unclear), "Co-occurring variant alleles on unlinked loci");
+  assert.match(flagged, /rs1799963: Unclear/);
+  assert.ok(flagged.includes(MULTI_LOCUS_CAUTION), flagged);
+});
+
+test("a multi-locus finding whose marker is not among the findings fails fast instead of guessing a word", () => {
+  const data = demoMultiLocusData();
+  const records = data.records.filter((r) => r.rsid !== "rs1799945");
+  assert.throws(() => markdownReport({ ...data, records }), /rs1799945/);
 });
