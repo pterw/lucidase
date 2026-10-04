@@ -6,7 +6,7 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WAIT_TIMEOUT_MS, goto_ready, wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, WAIT_TIMEOUT_MS, goto_ready, show_table, wait_drawer_closed, wait_drawer_open
 
 BAD_FILE = {"name": "bad.txt", "mimeType": "text/plain", "buffer": b"this is not a genome file\n"}
 
@@ -14,6 +14,7 @@ BAD_FILE = {"name": "bad.txt", "mimeType": "text/plain", "buffer": b"this is not
 def test_drawer_closes_and_clears_when_a_bad_file_fails(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
     expect(loaded_page.locator("#results-section")).to_be_visible()
+    show_table(loaded_page)
     loaded_page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(loaded_page)
     loaded_page.set_input_files("#file-input", files=[BAD_FILE])
@@ -25,6 +26,7 @@ def test_drawer_closes_and_clears_when_a_bad_file_fails(loaded_page):
 def test_drawer_closes_when_a_new_run_starts(loaded_page):
     loaded_page.locator("#btn-load-demo").click()
     expect(loaded_page.locator("#results-section")).to_be_visible()
+    show_table(loaded_page)
     loaded_page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(loaded_page)
     loaded_page.set_input_files("#file-input", str(DEMO_FILE))

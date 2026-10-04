@@ -11,6 +11,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -116,6 +117,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -212,6 +214,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -326,6 +329,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -421,6 +425,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -516,6 +521,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -612,6 +618,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -708,6 +715,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -804,6 +812,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -961,6 +970,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -1067,6 +1077,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -1165,6 +1176,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -1260,6 +1272,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "pharmacogenomic",
               "mendelian_disease": false,
@@ -1356,6 +1369,7 @@
         },
         "genes": {
           "CYP2C19": {
+            "topic": "Clopidogrel (Plavix) response",
             "inheritance": {
               "model": "recessive",
               "mendelian_disease": false,
@@ -1437,6 +1451,389 @@
       "problems": [
         "genes.CYP2C19.inheritance.model: must be one of autosomal_recessive, autosomal_dominant, risk_factor, pharmacogenomic, trait",
         "genes.CYP2C19.acmg_sf: required boolean"
+      ]
+    }
+  },
+  {
+    "id": "gene-topic-is-required",
+    "description": "A gene without its plain-language topic is rejected; the topic is never defaulted",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes.CYP2C19.topic: required non-empty string with no leading or trailing whitespace"
+      ]
+    }
+  },
+  {
+    "id": "gene-topic-must-be-a-non-empty-string",
+    "description": "An empty or non-string gene topic is rejected",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "topic": "",
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes.CYP2C19.topic: required non-empty string with no leading or trailing whitespace"
+      ]
+    }
+  },
+  {
+    "id": "gene-topic-must-not-be-blank",
+    "description": "A whitespace-only gene topic is rejected, as the KB build rejects it",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "topic": "   ",
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes.CYP2C19.topic: required non-empty string with no leading or trailing whitespace"
+      ]
+    }
+  },
+  {
+    "id": "gene-topic-must-not-be-padded",
+    "description": "A gene topic with leading or trailing whitespace is rejected, as the KB build rejects it",
+    "input": {
+      "kb": {
+        "schema_version": 2,
+        "manifest": {
+          "release": "test",
+          "guardrail": "Absence of a finding is not absence of risk."
+        },
+        "genes": {
+          "CYP2C19": {
+            "topic": " Clopidogrel (Plavix) response\n",
+            "inheritance": {
+              "model": "pharmacogenomic",
+              "mendelian_disease": false,
+              "disease": null,
+              "omim": null,
+              "penetrance": null
+            },
+            "acmg_sf": false,
+            "insights": null
+          }
+        },
+        "loci": {
+          "rs4244285": {
+            "rsid": "rs4244285",
+            "gene": "CYP2C19",
+            "chrom": "10",
+            "pos_grch37": 96541616,
+            "pos_grch38": 94781859,
+            "ref": "G",
+            "alt": "A",
+            "allele_codes": null,
+            "interpretations": {
+              "0": {
+                "category": "Not detected",
+                "significance": "Not detected",
+                "magnitude": 0.0,
+                "repute": "Neutral",
+                "phenotype": "No variant allele detected at this position.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "1": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 3,
+                "repute": "Bad",
+                "phenotype": "Reduced CYP2C19 function allele present.",
+                "drug_response": null,
+                "caveats": []
+              },
+              "2": {
+                "category": "Pharmacogenomics",
+                "significance": "Drug Response",
+                "magnitude": 4.5,
+                "repute": "Bad",
+                "phenotype": "Two reduced-function alleles.",
+                "drug_response": null,
+                "caveats": []
+              }
+            },
+            "evidence": {
+              "clinvar": {
+                "accession": null,
+                "review_status": null,
+                "stars": null,
+                "significance": null,
+                "provenance": {
+                  "source": "test fixture",
+                  "release": null,
+                  "accession": null,
+                  "url": null,
+                  "curation_mode": "manually_curated",
+                  "retrieved_at": null
+                }
+              }
+            },
+            "evidence_tier": "Tier A",
+            "tier_source": "curated",
+            "tier_rationale": "fixture rationale",
+            "tier_citation": "fixture citation",
+            "evidence_sufficiency": "sufficient",
+            "limitation": "Single-variant test.",
+            "role": "standard"
+          }
+        }
+      }
+    },
+    "expected": {
+      "problems": [
+        "genes.CYP2C19.topic: required non-empty string with no leading or trailing whitespace"
       ]
     }
   }

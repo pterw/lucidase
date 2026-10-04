@@ -366,6 +366,49 @@ def test_gene_insights_are_curated_and_null_when_absent(built):
     assert built["genes"]["MCM6"]["insights"] is None
 
 
+# Plain-language result titles, owner-authored in the design system (ui_kits/web/meta.js, LDS_META[gene].topic).
+# The apostrophe in APOE's topic is U+2019, as in the design system.
+EXPECTED_TOPICS = {
+    "APOE": "Alzheimer’s disease risk",
+    "CYP2C19": "Clopidogrel (Plavix) response",
+    "SLCO1B1": "Simvastatin muscle side effects",
+    "VKORC1": "Warfarin dose sensitivity",
+    "DPYD": "Fluorouracil (5-FU) side effects",
+    "HFE": "Haemochromatosis (iron overload)",
+    "CFTR": "Cystic fibrosis",
+    "F2": "Blood clots (prothrombin)",
+    "F5": "Blood clots (factor V Leiden)",
+    "MTHFR": "Folate metabolism (MTHFR)",
+    "MCM6": "Lactose tolerance",
+    "ALDH2": "Alcohol flush reaction",
+}
+
+
+def test_every_gene_carries_its_plain_language_topic(built):
+    assert {gene: record.get("topic") for gene, record in built["genes"].items()} == EXPECTED_TOPICS
+
+
+@pytest.mark.parametrize(
+    "mutate,fragment",
+    [
+        (lambda gene: gene.pop("topic"), "topic must be a non-empty string"),
+        (lambda gene: gene.update(topic=""), "topic must be a non-empty string"),
+        (lambda gene: gene.update(topic="   "), "topic must be a non-empty string"),
+        (lambda gene: gene.update(topic=None), "topic must be a non-empty string"),
+        (lambda gene: gene.update(topic=" Cystic fibrosis"), "topic has leading or trailing whitespace"),
+        (lambda gene: gene.update(topic="Cystic fibrosis\n"), "topic has leading or trailing whitespace"),
+    ],
+    ids=["missing", "empty", "blank", "null", "leading-space", "trailing-newline"],
+)
+def test_qc_rejects_a_gene_topic_that_is_missing_empty_or_padded(curation, mutate, fragment):
+    doc = copy.deepcopy(curation)
+    mutate(doc["genes"]["CFTR"])
+    errors = validate_curation(doc)
+    assert any(e.startswith("CFTR: ") and fragment in e for e in errors), errors
+    payload, build_errors = build_kb(doc)
+    assert payload is None and build_errors == errors
+
+
 def test_apoe_diplotypes(built):
     dips = built["genes"]["APOE"]["diplotypes"]
     assert set(dips) == {"e2/e2", "e2/e3", "e2/e4", "e3/e3", "e3/e4", "e4/e4"}
@@ -843,14 +886,11 @@ def test_build_in_memory_reports_a_missing_payload_directory(curation, tmp_path)
     assert payload is None and has_error(errors, "not found")
 
 
-def test_curation_only_build_is_reachable_through_an_explicit_parameter(curation):
-    """upstream_root=None skips the overlay: curated provenance, null pLI, no vep/dbsnp blocks."""
-    payload, errors = build_kb(curation, upstream_root=None)
-    assert errors == []
-    evidence = payload["loci"]["rs671"]["evidence"]
-    assert evidence["clinvar"]["provenance"]["curation_mode"] == "manually_curated"
-    assert evidence["gnomad"]["pli"] is None
-    assert evidence["vep"] is None and evidence["dbsnp"] is None
+def test_a_build_without_pinned_payloads_is_refused_because_it_would_have_no_assemblies(curation):
+    """P2-019: `assemblies` comes only from the pinned UCSC tables, and the web loader rejects a KB without it.
+    A curation-only build (upstream_root=None) would silently omit it, so build_kb refuses it up front."""
+    with pytest.raises(ValueError, match="upstream_root is required.*assemblies"):
+        build_kb(copy.deepcopy(curation), upstream_root=None)
 
 
 def test_missing_per_variant_gnomad_capture_fails_the_build(tmp_path, good_kb, curation):

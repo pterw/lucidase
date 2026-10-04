@@ -121,6 +121,7 @@ from graph_core import (  # noqa: E402
 from gui import (  # noqa: E402
     EXAMPLES,
     ExplorerApp,
+    coverage_count_lines,
     stars_text,
     run_gui,
     write_clinical_csv,
@@ -143,6 +144,7 @@ from ml_engine import (  # noqa: E402
 )
 from variant_annotator import (  # noqa: E402
     APOE_ROW_ID,
+    RESULT_WORDS,
     AnnotationRecord,
     VariantAnnotator,
 )
@@ -262,15 +264,15 @@ def run_headless(args) -> int:
         print(f"  Elevated Risk Factors:.. {summary['risk_factor_count']}")
         print(f"  ACMG SF v3.2 Actionable: {summary['acmg_actionable_findings']}")
         coverage = summary["coverage"]
-        print(f"  Not tested by this file: {coverage['not_tested_by_array_count']} of {coverage['total_loci']} loci")
-        print(f"  Insufficient evidence:.. {coverage['insufficient_evidence_count']}")
+        for line in coverage_count_lines(coverage):
+            print(line)
         print("  Absence of a finding does not imply absence of genetic risk.\n")
 
         for r in records:
             label = "APOE" if r.rsid == APOE_ROW_ID else r.rsid  # APOE_ROW_ID is an internal row id
             print(
                 f"- {label:<12s} [{r.gene:<8s}] Genotype: {r.genotype:<4s} | {r.category} "
-                f"({stars_text(r)}) | {r.coverage_state} | {r.sample_observation}"
+                f"({stars_text(r)}) | {RESULT_WORDS[r.coverage_state]} | {r.sample_observation}"
             )
             print(f"  Significance: {r.clinical_significance}")
             print(f"  Condition:    {r.phenotype}")

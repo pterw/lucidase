@@ -12,7 +12,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, goto_ready, wait_drawer_open
+from conftest import DEMO_FILE, apoe_row, goto_ready, open_apoe, show_table, wait_drawer_open
 
 FIXTURES = Path(__file__).parent / "fixtures"
 E1_E4 = FIXTURES / "apoe-atypical-23andme.txt"  # rs429358 C/C with rs7412 C/T: an e1/e4 genotype
@@ -28,6 +28,7 @@ def test_drawer_has_no_cyp2c19_note_for_a_vkorc1_drug_response(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     _row(page, "rs9923231").click()
     wait_drawer_open(page)
     expect(page.locator("#drawer-drug-box")).to_be_visible()
@@ -40,7 +41,9 @@ def test_trait_category_is_not_styled_benign(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
-    # MTHFR rs1801133 is a Trait interpretation in the KB.
+    show_table(page)
+    # MTHFR rs1801133 is a Trait interpretation in the KB. Its evidence is unclear, so it is under the Unclear tab.
+    page.locator("[data-filter='insufficient']").click()
     badge = _row(page, "rs1801133").locator("span.lds-tag", has_text="Trait").first
     expect(badge).to_be_visible()
     classes = badge.get_attribute("class")
@@ -58,6 +61,7 @@ def test_disagreeing_apoe_component_tiers_do_not_wear_the_tier_d_class(page):
     goto_ready(page, page.base_url)
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     cell = page.locator("#variants-tbody tr").first.locator("span.lds-tag", has_text="rs7412: Tier C")
     expect(cell).to_be_visible()
     classes = cell.get_attribute("class").split()
@@ -70,21 +74,49 @@ def test_apoe_e1_e4_page_shows_no_e4_inheritance_figure(loaded_page):
     page = loaded_page
     page.set_input_files("#file-input", str(E1_E4))
     expect(page.locator("#results-section")).to_be_visible()
-    expect(page.locator("#apoe-status-card")).to_be_visible()
+    expect(apoe_row(page)).to_be_visible()
     assert page.evaluate("() => window.__lucidase.state.apoe.diplotype") == "atypical"
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
+    open_apoe(page)
     for element in ("#drawer-seg-risk-unscreened", "#drawer-seg-risk-carrier", "#drawer-seg-carrier-prior"):
         assert page.locator(element).inner_text().strip() == "Not available", element
     text = page.locator("#drawer-segregation-container").inner_text().lower()
     assert "inherits the e4 allele" not in text, text
 
 
-def test_two_variants_of_one_acmg_gene_count_as_one_actionable_gene(loaded_page):
-    page = loaded_page
-    page.locator("#btn-load-demo").click()
-    expect(page.locator("#results-section")).to_be_visible()
-    # The demo carries HFE C282Y (rs1800562) and H63D (rs1799945), both heterozygous: two variants, one gene.
+def _acmg_rows(page):
+    show_table(page)
     page.locator("[data-filter='acmg']").click()
-    expect(page.locator("#variants-tbody tr")).to_have_count(2)
+    return page.locator("#variants-tbody tr")
+
+
+def test_two_found_variants_of_one_acmg_gene_count_as_one_actionable_gene(page):
+    # The demo carries HFE C282Y (rs1800562) and H63D (rs1799945), both heterozygous. H63D's evidence is unclear in the
+    # KB; with it marked sufficient here, both are Found: two variants, one gene.
+    def tampered_kb(route):
+        kb = json.loads(route.fetch().text())
+        kb["loci"]["rs1799945"]["evidence_sufficiency"] = "sufficient"
+        route.fulfill(status=200, content_type="application/json", body=json.dumps(kb))
+
+    page.route("**/knowledge-base.json", tampered_kb)
+    goto_ready(page, page.base_url)
+    page.set_input_files("#file-input", str(DEMO_FILE))
+    expect(page.locator("#results-section")).to_be_visible()
+    rows = _acmg_rows(page)
+    expect(rows).to_have_count(2)
+    for rsid in ("rs1800562", "rs1799945"):
+        expect(_row(page, rsid).locator(".lds-tag-state-supported_and_observed")).to_have_text("Found")
     expect(page.locator("#count-acmg")).to_have_text("1")
+
+
+def test_an_unclear_acmg_variant_is_not_counted_as_found(loaded_page):
+    page = loaded_page
+    page.set_input_files("#file-input", str(DEMO_FILE))
+    expect(page.locator("#results-section")).to_be_visible()
+    # Unmodified KB: H63D is Unclear, so the ACMG SF tab, a narrowing of Found, lists only C282Y.
+    rows = _acmg_rows(page)
+    expect(rows).to_have_count(1)
+    expect(_row(page, "rs1800562")).to_have_count(1)
+    expect(_row(page, "rs1799945")).to_have_count(0)
+    expect(page.locator("#count-acmg")).to_have_text("1")
+    page.locator("[data-filter='insufficient']").click()
+    expect(_row(page, "rs1799945")).to_have_count(1)

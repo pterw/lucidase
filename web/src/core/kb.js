@@ -104,6 +104,10 @@ function checkGene(symbol, gene, problems) {
     problems.push(`${p}: not an object`);
     return;
   }
+  // Same rule as the KB build (tools/build_canonical_kb.py): non-empty after trimming, and not padded.
+  if (!isStr(gene.topic) || gene.topic.trim() !== gene.topic || gene.topic.trim() === "") {
+    problems.push(`${p}.topic: required non-empty string with no leading or trailing whitespace`);
+  }
   const inh = gene.inheritance;
   if (!isObj(inh)) {
     problems.push(`${p}.inheritance: required object`);

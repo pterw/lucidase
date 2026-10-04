@@ -109,10 +109,11 @@ class ApoeEvidencePerComponent(Fixture):
         app.genome_tree.picked = app.genome_records.index(self.row(report, "APOE"))
         app._genome_row_selected(None)
         detail = app.genome_detail_text.content
-        self.assertIn("rs429358: ★ (1 / 4 stars) · rs7412: ★★★ (3 / 4 stars)", detail)
+        self.assertIn("rs429358: 1 of 4 review stars · rs7412: 3 of 4 review stars", detail)
         self.assertIn("rs429358: 14.85% · rs7412: 7.42%", detail)
         self.assertIn("rs429358: Tier A · rs7412: Tier A", detail)
-        self.assertNotIn("(2 / 4 stars)", detail)
+        self.assertNotIn("2 of 4 review stars", detail)
+        self.assertNotIn("★", detail)
 
     def test_csv_and_markdown_show_the_components_values(self):
         csv_path, md_path = self.tmpdir() / "r.csv", self.tmpdir() / "r.md"
@@ -128,7 +129,8 @@ class ApoeEvidencePerComponent(Fixture):
         qc = {"call_rate": 1.0, "qc_note": "", "sex_signal": "n/a"}
         gui.write_clinical_markdown(str(md_path), self.report_.records, parse, qc, "f.txt", "rel")
         line = next(x for x in md_path.read_text(encoding="utf-8").splitlines() if "APOE (rs429358" in x)
-        self.assertIn("rs429358: ★ · rs7412: ★★★", line)
+        self.assertIn("rs429358: 1 of 4 review stars · rs7412: 3 of 4 review stars", line)
+        self.assertNotIn("★", line)
 
 
 class NotDetectedStatement(Fixture):
@@ -230,7 +232,10 @@ class CliReportUsesTheGuiSerialiser(Fixture):
         self.assertIn(gui.REPORT_CAVEAT, text)
         self.assertIn(dpyd.limitation, text)
         self.assertIn(dpyd.not_detected_statement, text)
-        self.assertIn("supported_not_observed", text)
+        # The report says the plain result word; the data key stays in the CSV only.
+        dpyd_line = next(x for x in text.splitlines() if x.startswith(f"| **{dpyd.rsid}** |"))
+        self.assertIn("| Not found |", dpyd_line)
+        self.assertNotIn("supported_not_observed", text)
         self.assertIn("call_unavailable", text)
         self.assertIn("mine.txt", text)
         self.assertNotIn("APOE-STATUS", text)
@@ -243,6 +248,21 @@ class CliReportUsesTheGuiSerialiser(Fixture):
         dpyd = self.row(report, "DPYD")
         self.assertIn(dpyd.limitation, stdout)
         self.assertIn(dpyd.not_detected_statement, stdout)
+
+    def test_stdout_says_the_result_words_and_the_stars_in_words(self):
+        _, stdout = self.run_cli(self.tmpdir() / "r.md")
+        report = self.annotator.annotate_genome(parse_genotype_file(self.SAMPLE, "mine.txt"))
+        cov = self.annotator.summarize_annotations(report)["coverage"]
+        self.assertIn(
+            f"  Not on your chip:....... {cov['not_tested_by_array_count']} of {cov['total_loci']} loci\n", stdout
+        )
+        self.assertIn(f"  Unclear:................ {cov['insufficient_evidence_count']}\n", stdout)
+        dpyd = next(x for x in stdout.splitlines() if "[DPYD" in x)
+        self.assertIn("| Not found |", dpyd)
+        mcm6 = next(x for x in stdout.splitlines() if "[MCM6" in x)
+        self.assertIn("(0 of 4 review stars)", mcm6)
+        for old in ("★", "0 stars", "Not tested by this file", "Insufficient evidence", "supported_", "not_tested_"):
+            self.assertNotIn(old, stdout)
 
 
 if __name__ == "__main__":

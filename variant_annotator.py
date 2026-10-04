@@ -167,6 +167,10 @@ def _check_gene(symbol: str, gene: Any, problems: list[str]) -> None:
     if not isinstance(gene, dict):
         problems.append(f"{p}: not an object")
         return
+    # Same rule as the KB build (tools/build_canonical_kb.py): non-empty after trimming, and not padded.
+    topic = gene.get("topic")
+    if not _is_str(topic) or topic.strip() != topic or not topic.strip():
+        problems.append(f"{p}.topic: required non-empty string with no leading or trailing whitespace")
     inh = gene.get("inheritance")
     if not isinstance(inh, dict):
         problems.append(f"{p}.inheritance: required object")
@@ -625,11 +629,15 @@ def assemble_findings(records: list[dict], kb: Any, outside_count: int = 0) -> d
 # ===========================================================================
 # Desktop view of the findings
 # ===========================================================================
-_STATE_LABEL = {
-    "not_tested_by_array": "Not tested by this file",
-    "insufficient_evidence": "Insufficient evidence",
-    "supported_not_observed": "Not detected",
-    "supported_and_observed": "Detected",
+# The plain result word per coverage state, the desktop's one source for them: the labels of the web view model's
+# RESULT_WORDS (web/src/view-model.js; tests/test_gui_genome.py pins the two together). The keys are the
+# coverage_state data keys, which the CSV export keeps as they are.
+RESULT_WORDS = {
+    "supported_and_observed": "Found",
+    "supported_not_observed": "Not found",
+    "not_tested_by_array": "Not on your chip",
+    "outside_coverage": "Not checked",
+    "insufficient_evidence": "Unclear",
 }
 _REPORTED_CATEGORIES = ("Pathogenic", "Carrier", "Pharmacogenomics", "Risk Factor", "Trait")
 
@@ -797,7 +805,7 @@ def _to_annotation(rec: dict, kb: KnowledgeBase, build: str, tested: dict[str, i
         magnitude, repute = interp["magnitude"], interp["repute"]
         drug, caveats = interp.get("drug_response") or "", list(interp["caveats"])
     else:
-        category, significance = "Not available", _STATE_LABEL[state]
+        category, significance = "Not available", RESULT_WORDS[state]
         phenotype = rec["reason"] or ""
         magnitude, repute, drug, caveats = None, "", "", []
     genotype = rec["genotype_display"] if rec["genotype_display"] is not None else "not tested"

@@ -15,9 +15,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from playwright.sync_api import expect
 
-from conftest import wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, apoe_row, open_apoe, show_table, wait_drawer_closed, wait_drawer_open
 
 FIXTURES = Path(__file__).parent / "fixtures"
 EVIL_QUERIES = [
@@ -34,6 +35,7 @@ EVIL_QUERIES = [
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
 
 
 def _wait_outcome(page):
@@ -89,16 +91,17 @@ def test_filter_transitions(loaded_page):
         assert "Showing" in loaded_page.locator("#showing-count").text_content(), name
 
 
-# What each filter shows today. The Risk Factors filter keeps APOE through its e3/e4 and e4/e4 diplotype rule (S2-F6
-# owns that rule); the rest follow the KB category. The wild-type fixture has no observed variant, so every filter
-# is empty for it.
+# What each filter shows today. "all" is the Found tab and the category filters narrow it: the demo's HFE H63D
+# (rs1799945) and MTHFR (rs1801133) are variant readings with unclear evidence, so they are under Unclear, not here.
+# The Risk Factors filter keeps APOE through its e3/e4 and e4/e4 diplotype rule (S2-F6 owns that rule); the rest
+# follow the KB category. The wild-type fixture has no found variant, so every filter is empty for it.
 DEMO_FILTER_ROWS = {
     "all": {
         "APOE (rs429358 + rs7412)", "rs3918290", "rs6025", "rs1799963", "rs4149056", "rs4244285",
-        "rs113993960", "rs9923231", "rs1800562", "rs4988235", "rs1799945", "rs1801133",
+        "rs113993960", "rs9923231", "rs1800562", "rs4988235",
     },
     "pathogenic": set(),
-    "carrier": {"rs113993960", "rs1800562", "rs1799945"},
+    "carrier": {"rs113993960", "rs1800562"},
     "pgx": {"rs3918290", "rs4149056", "rs4244285", "rs9923231"},
     "risk": {"APOE (rs429358 + rs7412)", "rs6025", "rs1799963"},
 }
@@ -115,6 +118,7 @@ def _shown_ids(page):
 
 
 def _filter_sets(page):
+    show_table(page)
     shown = {}
     for name in DEMO_FILTER_ROWS:
         page.locator(f"[data-filter='{name}']").click()
@@ -131,6 +135,90 @@ def test_each_filter_is_empty_for_the_wild_type_file(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "wildtype-23andme.txt"))
     expect(loaded_page.locator("#results-section")).to_be_visible()
     assert _filter_sets(loaded_page) == {name: set() for name in DEMO_FILTER_ROWS}
+
+
+# The tabs named by a result word: (tab, state key, plain word, the summary strip's count element).
+STATE_TABS = [
+    ("all", "supported_and_observed", "Found", "count-state-observed"),
+    ("negative", "supported_not_observed", "Not found", "count-state-negative"),
+    ("gaps", "not_tested_by_array", "Not on your chip", "count-state-gaps"),
+    ("insufficient", "insufficient_evidence", "Unclear", "count-state-insufficient"),
+]
+CATEGORY_TABS = ("pathogenic", "carrier", "pgx", "risk", "acmg")
+
+
+def _shown_rows(page):
+    """(id, result word, gene) of each data row the table shows now."""
+    return page.evaluate(
+        "() => [...document.querySelectorAll('#variants-tbody tr')].filter(r => r.children.length > 1)"
+        ".map(r => [r.children[0].textContent.trim(), r.children[3].textContent.trim(),"
+        " r.children[1].querySelector('.font-bold').textContent.trim()])"
+    )
+
+
+def _ids_by_state(page):
+    """Each check's id under its own coverage state, from the worker's (overlapping) lists."""
+    return page.evaluate(
+        "() => { const s = window.__lucidase.state; const out = {};"
+        " for (const vm of [...s.records, ...s.negativeChecks, ...s.arrayGaps, ...s.insufficientEvidence])"
+        " (out[vm.coverage_state] ??= new Set()).add(vm.id);"
+        " return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, [...v]])); }"
+    )
+
+
+def _count(page, element_id):
+    return int(page.locator(f"#{element_id}").text_content().replace(",", ""))
+
+
+# Demo: 10 Found, 1 Not found, 2 Unclear (H63D and MTHFR: variant present, evidence unclear; the worker also lists
+# them with the variant-present findings). Wild type: 9 Not found, 2 Not on your chip, 2 Unclear (H63D and MTHFR
+# wild type; the worker also lists them with the wild-type checks). Between them every state tab is non-empty once.
+STATE_TAB_COUNTS = {
+    "demo": {"all": 10, "negative": 1, "gaps": 0, "insufficient": 2},
+    "wildtype": {"all": 0, "negative": 9, "gaps": 2, "insufficient": 2},
+}
+
+
+@pytest.mark.parametrize("sample", ["demo", "wildtype"])
+def test_each_state_tab_lists_exactly_the_checks_with_its_word_and_agrees_with_the_summary(loaded_page, sample):
+    page = loaded_page
+    page.set_input_files("#file-input", str(DEMO_FILE if sample == "demo" else FIXTURES / "wildtype-23andme.txt"))
+    expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
+    by_state = _ids_by_state(page)
+    for tab, state, word, count_id in STATE_TABS:
+        page.locator(f"[data-filter='{tab}']").click()
+        rows = _shown_rows(page)
+        ids = [row[0] for row in rows]
+        assert [row[1] for row in rows] == [word] * len(rows), f"{tab}: {rows}"
+        assert sorted(ids) == sorted(by_state.get(state, [])), f"{tab}: {ids}"
+        assert len(set(ids)) == len(ids), f"{tab} repeats a check: {ids}"
+        assert len(rows) == STATE_TAB_COUNTS[sample][tab], f"{tab}: {ids}"
+        assert _count(page, count_id) == len(rows), f"{tab}: the summary strip says {_count(page, count_id)}"
+        assert page.locator("#showing-count").text_content().startswith(f"Showing {len(rows)} "), tab
+    if sample == "demo":
+        page.locator("[data-filter='insufficient']").click()
+        assert {row[0] for row in _shown_rows(page)} == {"rs1799945", "rs1801133"}
+
+
+def test_each_category_tab_narrows_the_found_checks_and_agrees_with_its_count(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    page.locator("[data-filter='all']").click()
+    found = {row[0] for row in _shown_rows(page)}
+    assert len(found) == _count(page, "count-state-observed") == 10
+    shown_any = False
+    for tab in CATEGORY_TABS:
+        page.locator(f"[data-filter='{tab}']").click()
+        rows = _shown_rows(page)
+        shown_any = shown_any or bool(rows)
+        assert {row[1] for row in rows} <= {"Found"}, f"{tab}: {rows}"
+        assert {row[0] for row in rows} <= found, f"{tab}: {rows}"
+        # The ACMG SF count counts genes; every other count counts checks.
+        shown = len({row[2] for row in rows}) if tab == "acmg" else len(rows)
+        assert _count(page, f"count-{tab}") == shown, f"{tab}: {rows}"
+        assert page.locator("#showing-count").text_content() == f"Showing {len(rows)} of {len(found)} findings", tab
+    assert shown_any, "no category tab showed a row, so this test proved nothing"
 
 
 def test_kb_provenance_badge_visible(loaded_page):
@@ -191,12 +279,11 @@ def test_export_handlers_run(loaded_page):
 
 def test_apoe_e3e4_upload_and_inspect(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "apoe-e3e4-23andme.txt"))
-    loaded_page.locator("#apoe-status-card").wait_for(state="visible")
-    assert "ε3/ε4" in loaded_page.locator("#apoe-diplotype-title").text_content()
-    assert "3–4×" in loaded_page.locator("#apoe-risk-ratio").text_content()
-    loaded_page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(loaded_page)
+    apoe_row(loaded_page).wait_for(state="visible")
+    open_apoe(loaded_page)
     assert loaded_page.locator("#drawer-gene").text_content() == "APOE"
+    assert "ε3/ε4" in loaded_page.locator("#drawer-ligature .lds-ligature-result").text_content()
+    assert "3–4×" in loaded_page.locator("#drawer-apoe-risk-ratio").text_content()
 
 
 def test_typekit_stylesheet_linked(loaded_page):

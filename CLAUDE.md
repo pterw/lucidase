@@ -6,7 +6,8 @@ working here needs on top of that.
 
 ## Active work
 
-All pull requests are merged (#1, #3, #2; `main` at `30602b2`). The current state, the open items and the design-system
+PRs #1, #3, #2 and #5 (design-system reskin) are merged (`main` at `745b147`). Design-system PR 2 is on branch
+`feat/design-system-structure` as a draft PR. The current state, the open items and the design-system
 notes are in `docs/HANDOFF.md`; read it after `AGENTS.md`. The controller pushes only commits that passed all five
 gates, by explicit SHA, with `git push --atomic`. Implementers never push. There is no CI.
 
@@ -32,13 +33,19 @@ Two untracked items at the repo root belong to the owner, and both are excluded 
     Condensed only as a fallback), mono `input-mono` and `input-mono-narrow` (rsIDs, genotypes, dense tables).
   - Copy: sentence case, no eyebrows above headings, no emoji, "Not available" for missing values, and the absence
     wording rules in `AGENTS.md`. The theme follows the device; the override is a footer link.
+- Owner rulings of 2026-10-04 (PR 2):
+  - each KB gene carries a plain-language `topic`, curated in `tools/curation/kb_curation.json` (the report's row
+    titles); the report groups come from the existing `inheritance.model`;
+  - a multi-locus finding may include an Unclear call, but it shows each marker's own result word and a caution line;
+  - glossary definitions: "variant" and "carrier" are the design system's; the other five in `web/src/glossary.js`
+    are drafts awaiting owner review.
 - Owner rulings 10, 11 and 13 still hold:
   - the product is named **Lucidase** (ruling 11);
   - the README opens with the controller-designed banner (a light/dark SVG in `docs/assets/`) and screenshots.
     Regenerate the screenshots with `python tools/capture_readme_screenshot.py`;
   - the karyogram page (ruling 13).
-- The design system lands in two steps. PR 1 (this reskin) applies it on the existing DOM, flow and view-model
-  wording. PR 2 brings its structure: the grouped report (Pharmacology, Health risk factors, Carrier status, Traits),
+- The design system lands in two steps. PR 1 (#5, merged) applied it on the existing DOM, flow and view-model
+  wording. PR 2 (`feat/design-system-structure`) brings its structure: the grouped report (Pharmacology, Health risk factors, Carrier status, Traits),
   the plain result words (Found, Not found, Not on your chip, Unclear, Not checked) in the view model and exports,
   the docked Inspector and the three-step StepNav.
 - Product goal: "a real useful tool that does not charge for analyzing uploaded docs". Docs and UI describe only
@@ -46,7 +53,7 @@ Two untracked items at the repo root belong to the owner, and both are excluded 
 - Network access is allowed only when the owner approves it for a specific task. Tests are always offline.
 - Owner decisions still pending:
   - homozygous calls at palindromic sites (review S1b-C-3);
-  - whether to cite or remove the APOE card's risk figures;
+  - whether to cite or remove the APOE risk figures (now shown in the APOE Inspector, under the Ligature);
   - the UI tagline;
   - the Vercel project `name`;
   - a trademark search.

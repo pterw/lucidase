@@ -118,28 +118,55 @@ def loaded_page(page):
     return page
 
 
-# Real geometry, not a class-name proxy. The drawer slides in over 300 ms, so a
-# state counts only once the box is identical on two consecutive animation frames:
-# open = right edge at the viewport edge, closed = fully off the right edge.
+# Real geometry, not a class-name proxy. The Inspector (#variant-drawer) is docked in the page, beside the results or
+# under them, so a state counts only once its box is identical on two consecutive animation frames:
+# open = a box with an area, across the viewport's width (not parked off-screen), closed = no box at all.
 _DRAWER_SETTLED = """(want) => {
   const el = document.getElementById('variant-drawer');
   const r = el.getBoundingClientRect();
-  const prev = window.__drawerLeft;
-  window.__drawerLeft = r.left;
-  if (prev === undefined || Math.abs(prev - r.left) >= 0.5) return false;
+  const key = [r.left, r.top, r.width, r.height].map((v) => Math.round(v)).join(',');
+  const prev = window.__drawerBox;
+  window.__drawerBox = key;
+  if (prev !== key) return false;
   return want === 'open'
-    ? r.width > 0 && Math.abs(r.right - window.innerWidth) < 1
-    : r.left >= window.innerWidth;
+    ? r.width > 0 && r.height > 0 && r.left >= 0 && r.right <= window.innerWidth + 0.5
+    : el.getClientRects().length === 0;
 }"""
 
 
 def _wait_drawer(page, want, timeout):
-    page.evaluate("delete window.__drawerLeft")
+    page.evaluate("delete window.__drawerBox")
     page.wait_for_function(_DRAWER_SETTLED, arg=want, polling="raf", timeout=timeout)
+
+
+def show_table(page):
+    """Open "All results as a table" (collapsed behind "Show the table" until asked) and wait until it is usable.
+
+    Call it after the results are on the page, before using the table's rows, filter tabs or search.
+    """
+    expect(page.locator("#results-section")).to_be_visible()
+    button = page.locator("#btn-show-table")
+    if button.get_attribute("aria-expanded") != "true":
+        button.click()
+    expect(page.locator("#table-panel")).to_be_visible()
 
 
 def wait_drawer_open(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "open", timeout)
+
+
+def apoe_row(page):
+    """The APOE FindingRow in the grouped report (its id is the page's own APOE record id, never typed in)."""
+    expect(page.locator("#results-section")).to_be_visible()
+    apoe_id = page.evaluate("() => window.__lucidase.state.apoe.id")
+    return page.locator(f"#report-groups article.lds-finding[data-finding-id='{apoe_id}']")
+
+
+def open_apoe(page):
+    """Open the APOE record in the Inspector from its FindingRow's Details button; returns the Inspector."""
+    apoe_row(page).locator("button.lds-finding-open").click()
+    wait_drawer_open(page)
+    return page.locator("#variant-drawer")
 
 
 def wait_drawer_closed(page, timeout=WAIT_TIMEOUT_MS):

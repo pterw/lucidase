@@ -41,7 +41,7 @@ from genomic_parser import (
     read_genotype_text,
 )
 from ml_engine import binning_caveat_lines
-from variant_annotator import APOE_ROW_ID, AnnotationRecord, AnnotationReport, VariantAnnotator
+from variant_annotator import APOE_ROW_ID, RESULT_WORDS, AnnotationRecord, AnnotationReport, VariantAnnotator
 from graph_core import (
     DEFAULT_K,
     EDGE,
@@ -157,10 +157,18 @@ NOT_AVAILABLE = "not available"
 
 
 def _one_stars_text(stars) -> str:
-    """ClinVar review stars. Zero is a value ("0 stars"); only None is "not available"."""
-    if stars is None:
-        return NOT_AVAILABLE
-    return "★" * stars if stars else "0 stars"
+    """ClinVar review stars in words, as the web says them: "3 of 4 review stars". Zero is a value
+    ("0 of 4 review stars"); only None is "not available"."""
+    return NOT_AVAILABLE if stars is None else f"{stars} of 4 review stars"
+
+
+def coverage_count_lines(coverage: dict) -> list[str]:
+    """The banner lines that count the untested and unclear loci, under the plain result words."""
+    gaps, unclear = RESULT_WORDS["not_tested_by_array"], RESULT_WORDS["insufficient_evidence"]
+    return [
+        f"  {gaps + ':':.<24s} {coverage['not_tested_by_array_count']} of {coverage['total_loci']} loci",
+        f"  {unclear + ':':.<24s} {coverage['insufficient_evidence_count']}",
+    ]
 
 
 def _labelled(r: AnnotationRecord, pick, fmt) -> str:
@@ -172,10 +180,6 @@ def stars_text(r: AnnotationRecord) -> str:
     if r.component_evidence is not None:
         return _labelled(r, lambda c: c["review_stars"], _one_stars_text)
     return _one_stars_text(r.review_stars)
-
-
-def _stars_detail(stars) -> str:
-    return f"{'★' * stars} ({stars} / 4 stars)".strip() if stars is not None else NOT_AVAILABLE
 
 
 def _af_text(af) -> str:
@@ -263,7 +267,8 @@ def write_clinical_markdown(
         f.write("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
         for r in records:
             f.write(
-                f"| **{_md_cell(_row_label(r))}** | `{r.gene}` | `{r.genotype}` | {_md_cell(r.coverage_state)} | "
+                f"| **{_md_cell(_row_label(r))}** | `{r.gene}` | `{r.genotype}` | "
+                f"{_md_cell(RESULT_WORDS[r.coverage_state])} | "
                 f"{_md_cell(r.sample_observation)} | {_md_cell(r.category)} | "
                 f"{_md_cell(stars_text(r))} | {_md_cell(r.clinical_significance)} | {_md_cell(r.phenotype)} | "
                 f"{_md_cell(r.not_detected_statement)} | "
@@ -1103,8 +1108,8 @@ class ExplorerApp:
             f"  Pharmacogenomics:....... {summary['pgx_count']} drug response alerts\n",
             f"  Elevated Risk Factors:.. {summary['risk_factor_count']}\n",
             f"  ACMG SF v3.2 Actionable: {summary['acmg_actionable_findings']}\n",
-            f"  Not tested by this file: {coverage['not_tested_by_array_count']} of {coverage['total_loci']} loci\n",
-            f"  Insufficient evidence:.. {coverage['insufficient_evidence_count']}\n\n",
+            *(f"{line}\n" for line in coverage_count_lines(coverage)),
+            "\n",
             "Absence of a finding does not imply absence of genetic risk.\n\n",
             "Select any variant row in the table above to inspect ClinVar review stars, the phenotype, the limitation and caveats, and the tissue notes (hand-entered; the provenance is shown with them).\n",
         ]
@@ -1140,19 +1145,13 @@ class ExplorerApp:
         lines = [
             f"═" * 3 + f" Clinical Variant Inspection: {_row_label(r)} ({r.gene}) " + "═" * 3 + "\n\n",
             f"  Genotype:............... {r.genotype}\n",
-            f"  Coverage:............... {r.coverage_state.replace('_', ' ')}"
+            f"  Coverage:............... {RESULT_WORDS[r.coverage_state]}"
             + (f" ({r.reason})" if r.reason else "")
             + "\n",
             f"  Chromosome Coordinate:.. {_coordinate_text(r)}\n",
             f"  Category:............... {r.category}\n",
             f"  Clinical Significance:.. {r.clinical_significance}\n",
-            "  ClinVar Review Stars:... "
-            + (
-                _labelled(r, lambda c: c["review_stars"], _stars_detail)
-                if r.component_evidence is not None
-                else _stars_detail(r.review_stars)
-            )
-            + "\n",
+            f"  ClinVar Review Stars:... {stars_text(r)}\n",
             "  Evidence Tier:.......... "
             + (
                 _labelled(r, lambda c: c["evidence_tier"], _tier_text)

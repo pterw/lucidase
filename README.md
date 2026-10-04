@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lucidase-screenshot-dark.png">
-  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase analysis results for the bundled demo sample: the scientific-scope guardrail, the sample profile, the summary counts and the APOE compound haplotype card">
+  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase results for the bundled demo sample: the Summary sentence with the counts, the karyogram with one shape-coded mark per check, and the key with the count for each result word">
 </picture>
 
 *The bundled synthetic demo sample, analysed in the browser.*
@@ -23,8 +23,11 @@ Lucidase reads a raw genotype file in your browser and interprets the 14 curated
 - Parses the file in a Web Worker, in the page.
 - Compares alleles by alt-allele count against plus-strand ref/alt. A genotype that cannot be resolved unambiguously is never reported as a match.
 - Gives every curated locus one coverage state per sample: `supported_and_observed`, `supported_not_observed`, `not_tested_by_array`, `outside_coverage` or `insufficient_evidence`.
+- Groups the results by Pharmacology, Health risk factors, Carrier status and Traits, one row per check in plain words (Found, Not found, Not on your chip, Unclear), each with what it can't tell you.
 - Shows APOE as one composite row built from rs429358 and rs7412.
+- Opens the results with a summary: the counts in one sentence, the karyogram of your file with one mark per checked locus (selecting a mark opens that result), and a key with the count for each result.
 - Shows disease or recurrence figures for inheritance only at Mendelian disease loci. Other loci get allele-transmission figures only.
+- Opens each result's details beside the list, and explains genetics words inline.
 - Exports Markdown and CSV reports.
 - Has light and dark themes.
 
@@ -32,7 +35,7 @@ Lucidase reads a raw genotype file in your browser and interprets the 14 curated
 
 - It is not a diagnostic test and not medical advice. Absence of a finding does not imply absence of genetic risk.
 - It does not sequence whole genes. It cannot detect copy-number variations, balanced translocations or structural repeats.
-- A single-variant test of a multi-variant gene carries its limitation on the row, in the drawer and in every export.
+- A single-variant test of a multi-variant gene carries its limitation on the row, in the details pane and in every export.
 - Only the curated loci are interpreted. Other markers in your file are counted, not interpreted.
 
 See "Known limitations" in [`web/README.md`](web/README.md).

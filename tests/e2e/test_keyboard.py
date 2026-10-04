@@ -1,8 +1,8 @@
-"""Keyboard access: a results row opens its drawer, and the export items are reachable with Tab."""
+"""Keyboard access: a results row opens the Inspector, and the export items are reachable with Tab."""
 
 from __future__ import annotations
 
-from conftest import WAIT_TIMEOUT_MS, wait_drawer_closed, wait_drawer_open
+from conftest import WAIT_TIMEOUT_MS, show_table, wait_drawer_closed, wait_drawer_open
 from playwright.sync_api import expect
 
 FIRST_ROW = "#variants-tbody tr:first-child"
@@ -22,7 +22,12 @@ def _tab_until(page, selector):
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     expect(page.locator(FIRST_ROW)).to_be_visible()
+
+
+def _inspector_has_focus(page):
+    return page.locator("#variant-drawer").evaluate("el => el === document.activeElement")
 
 
 def test_enter_opens_the_focused_row_and_closing_returns_focus_to_it(loaded_page):
@@ -36,10 +41,22 @@ def test_enter_opens_the_focused_row_and_closing_returns_focus_to_it(loaded_page
     _tab_until(page, FIRST_ROW)
     page.keyboard.press("Enter")
     wait_drawer_open(page)
-    assert page.locator("#drawer-rsid").inner_text().strip() == rsid
+    # The open record is the row's (its id; the APOE subtitle shows the markers, not the id).
+    assert page.locator("#drawer-rsid").get_attribute("data-record-id") == rsid
+    # Opening focuses the Inspector itself (design system Inspector), not its close button.
+    assert _inspector_has_focus(page)
 
+    # The close button, by keyboard, returns focus to the row.
     page.locator("#btn-close-drawer").focus()
     page.keyboard.press("Enter")
+    wait_drawer_closed(page)
+    assert row.evaluate("el => el === document.activeElement")
+
+    # So does Escape from inside the Inspector.
+    page.keyboard.press("Enter")
+    wait_drawer_open(page)
+    assert _inspector_has_focus(page)
+    page.keyboard.press("Escape")
     wait_drawer_closed(page)
     assert row.evaluate("el => el === document.activeElement")
 
@@ -57,8 +74,9 @@ def test_space_opens_a_row_and_its_default_scroll_is_cancelled(loaded_page):
     )
     page.keyboard.press("Space")
     wait_drawer_open(page)
+    assert _inspector_has_focus(page)
     assert page.evaluate("window.__spacePrevented") is True
-    assert page.locator("#drawer-rsid").inner_text().strip() == row.locator("td").first.inner_text().strip()
+    assert page.locator("#drawer-rsid").get_attribute("data-record-id") == row.locator("td").first.inner_text().strip()
 
 
 def test_export_items_are_buttons_reached_by_tab_and_enter_downloads(loaded_page):

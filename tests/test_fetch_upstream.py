@@ -137,7 +137,8 @@ def test_write_capture_failure_has_no_body_file(tmp_path):
 
 def test_cap_aborts_when_total_exceeds_limit(tmp_path, monkeypatch):
     monkeypatch.setattr(fu, "MAX_TOTAL_BYTES", 10)
-    cap = fu.Capturer(tmp_path, opener=lambda req, timeout: FakeResp(200, b"x" * 11), sleep=lambda s: None, log=lambda m: None)
+    body = b'"' + b"x" * 9 + b'"'  # 11 bytes of readable JSON: the cap, not the JSON check, must stop it
+    cap = fu.Capturer(tmp_path, opener=lambda req, timeout: FakeResp(200, body), sleep=lambda s: None, log=lambda m: None)
     with pytest.raises(fu.CapBytesExceeded):
         cap.run("dbsnp", "rs1", fu.dbsnp_request("rs1"))
 
@@ -295,15 +296,21 @@ def _quiet_capturer(tmp_path, opener):
 
 
 @pytest.mark.parametrize("status", [404, 500, 503, 429])
-def test_final_non_200_raises_capture_failed_and_keeps_the_failure_meta(tmp_path, status):
-    def opener(req, timeout):
-        raise _http_error(req, status)
+def test_final_non_200_raises_capture_failed_writes_nothing_and_logs_the_response(tmp_path, status):
+    """P1-091: a failure writes no meta (it would replace a pinned one); the response is logged and kept on the
+    exception instead."""
 
-    cap = _quiet_capturer(tmp_path, opener)
+    def opener(req, timeout):
+        raise _http_error(req, status, b'{"error":"upstream said no"}')
+
+    logs = []
+    cap = fu.Capturer(tmp_path, opener=opener, sleep=lambda s: None, log=logs.append)
     with pytest.raises(fu.CaptureFailed) as info:
         cap.run("dbsnp", "rs1", fu.dbsnp_request("rs1"))
     assert (info.value.source, info.value.key, info.value.status) == ("dbsnp", "rs1", status)
-    assert json.loads((tmp_path / "dbsnp" / "rs1.meta.json").read_text())["http_status"] == status
+    assert "upstream said no" in info.value.error_payload
+    assert any("dbsnp/rs1" in line and "nothing written" in line and "upstream said no" in line for line in logs)
+    assert not list(tmp_path.rglob("*"))
 
 
 def test_transport_failure_and_empty_200_body_fail_too(tmp_path):
@@ -557,3 +564,139 @@ def test_ucsc_only_combined_with_another_fetch_mode_is_an_argparse_error(tmp_pat
     assert info.value.code == 2
     assert "not allowed with argument" in capsys.readouterr().err
     assert calls == []
+
+
+# ---------------------------------------------------------------------------
+# P1-091: a failed or garbage recapture leaves the pinned body and its meta byte-identical
+# ---------------------------------------------------------------------------
+def _pin(root, source, name):
+    """Copy one real pinned capture (body and meta) into `root`, as a recapture would find it."""
+    meta_name = f"{name}.meta.json" if name.endswith(".gz") else f"{name[: -len('.json')]}.meta.json"
+    (root / source).mkdir(parents=True, exist_ok=True)
+    for file_name in (name, meta_name):
+        (root / source / file_name).write_bytes((REAL / source / file_name).read_bytes())
+
+
+def _tree(root):
+    """Every file under `root` with its bytes: a change, a removal or a leftover temp file all show up."""
+    return {p.relative_to(root).as_posix(): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()}
+
+
+PINNED_JSON = [
+    ("dbsnp", "rs671", lambda: fu.dbsnp_request("rs671")),
+    ("clinvar", "rs671.esearch", lambda: fu.clinvar_esearch_request("rs671")),
+    ("clinvar", "rs671", lambda: fu.clinvar_esummary_request(["18390"])),
+    ("ensembl", "rs671", lambda: fu.vep_request("rs671")),
+    ("gnomad", "rs671", lambda: fu.gnomad_variant_request("rs671")),
+    ("gnomad", "constraint_ALDH2", lambda: fu.gnomad_constraint_request("ALDH2")),
+]
+
+
+def _respond_404(req, timeout):
+    raise _http_error(req, 404, b'{"error":"not found"}')
+
+
+def _respond_500(req, timeout):
+    raise _http_error(req, 500, b"<html>server error</html>")
+
+
+def _respond_transport_error(req, timeout):
+    raise urllib.error.URLError("connection reset")
+
+
+FAILED_RESPONSES = {
+    "http_404": (_respond_404, fu.CaptureFailed),
+    "http_500": (_respond_500, fu.CaptureFailed),
+    "http_203_not_200": (lambda req, timeout: FakeResp(203, b"{}"), fu.CaptureFailed),
+    "transport_error": (_respond_transport_error, fu.CaptureFailed),
+    "empty_200": (lambda req, timeout: FakeResp(200, b""), fu.CaptureFailed),
+    "garbage_200": (lambda req, timeout: FakeResp(200, b"<html>maintenance</html>"), AdapterError),
+}
+
+
+@pytest.mark.parametrize("response", sorted(FAILED_RESPONSES))
+@pytest.mark.parametrize("source,key,make_spec", PINNED_JSON, ids=[f"{s}/{k}" for s, k, _ in PINNED_JSON])
+def test_a_failed_recapture_leaves_the_pinned_json_capture_byte_identical(tmp_path, source, key, make_spec, response):
+    _pin(tmp_path, source, f"{key}.json")
+    before = _tree(tmp_path)
+    opener, expected = FAILED_RESPONSES[response]
+    with pytest.raises(expected):
+        _quiet_capturer(tmp_path, opener).run(source, key, make_spec())
+    assert _tree(tmp_path) == before
+
+
+@pytest.mark.parametrize("response", ["http_404", "http_500", "transport_error", "empty_200", "garbage_200"])
+def test_a_failed_ucsc_recapture_leaves_the_pinned_table_byte_identical(tmp_path, response):
+    _pin(tmp_path, "ucsc", "hg19.chromInfo.txt.gz")
+    before = _tree(tmp_path)
+    with pytest.raises(fu.UcscCaptureFailed):
+        fu.capture_ucsc(_quiet_capturer(tmp_path, FAILED_RESPONSES[response][0]))
+    assert _tree(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    "body",
+    [_esearch_body(37, ["1", "2"]), b"{}", b'{"esearchresult": {"count": "1"}}'],
+    ids=["truncated", "not-an-esearch", "no-idlist"],
+)
+def test_an_unreadable_esearch_is_rejected_before_it_replaces_the_pinned_one(tmp_path, body):
+    """esearch has its own validator (`esearch_uids`); it runs before the write, not after it."""
+    _pin(tmp_path, "clinvar", "rs671.esearch.json")
+    _pin(tmp_path, "clinvar", "rs671.json")
+    before = _tree(tmp_path)
+    with pytest.raises(AdapterError):
+        fu.capture_clinvar(_quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, body)), "rs671")
+    assert _tree(tmp_path) == before
+
+
+def test_a_vep_400_whose_retry_fails_leaves_the_pinned_vep_capture_byte_identical(tmp_path):
+    _pin(tmp_path, "ensembl", "rs671.json")
+    before = _tree(tmp_path)
+
+    def opener(req, timeout):
+        if "rest.ensembl.org" in req.full_url:
+            if "AlphaMissense" in req.full_url:
+                raise _http_error(req, 400, b'{"error":"AlphaMissense"}')
+            raise _http_error(req, 500)
+        if "esearch" in req.full_url:
+            return FakeResp(200, _esearch_body(0, []))
+        return FakeResp(200, b"{}")
+
+    cap = _quiet_capturer(tmp_path, opener)
+    fu.capture_all(cap, rsids=("rs671",), genes=())
+    assert [(f.source, f.key, f.status) for f in cap.failures] == [("ensembl", "rs671", 500)]
+    after = _tree(tmp_path)
+    for name in ("ensembl/rs671.json", "ensembl/rs671.meta.json"):
+        assert after[name] == before[name], name
+    # the 400 is kept as evidence under its own name, never over the pinned meta
+    assert json.loads(after["ensembl/rs671.alphamissense_rejected.meta.json"])["http_status"] == 400
+
+
+def test_a_good_recapture_replaces_the_pinned_body_and_meta_and_leaves_no_temp_file(tmp_path):
+    _pin(tmp_path, "dbsnp", "rs671.json")
+    body = b'{"refsnp_id": "671"}'
+    _quiet_capturer(tmp_path, lambda req, timeout: FakeResp(200, body)).run("dbsnp", "rs671", fu.dbsnp_request("rs671"))
+    after = _tree(tmp_path)
+    assert sorted(after) == ["dbsnp/rs671.json", "dbsnp/rs671.meta.json"]
+    assert after["dbsnp/rs671.json"] == body
+    meta = json.loads(after["dbsnp/rs671.meta.json"])
+    assert meta["sha256_of_body"] == hashlib.sha256(body).hexdigest() and meta["bytes"] == len(body)
+
+
+def test_main_fails_loudly_and_keeps_the_pinned_clinvar_captures(tmp_path, capsys):
+    _pin(tmp_path, "clinvar", "rs671.esearch.json")
+    _pin(tmp_path, "clinvar", "rs671.json")
+    before = _tree(tmp_path)
+    code = fu.main(["--out", str(tmp_path), "--clinvar-only", "rs671"], opener=_respond_500, sleep=lambda s: None)
+    assert code == 1 and "clinvar/rs671.esearch: HTTP 500" in capsys.readouterr().err
+    assert _tree(tmp_path) == before
+
+
+def test_main_exits_2_on_a_garbage_200_and_keeps_the_pinned_capture(tmp_path, capsys):
+    _pin(tmp_path, "clinvar", "rs671.esearch.json")
+    _pin(tmp_path, "clinvar", "rs671.json")
+    before = _tree(tmp_path)
+    opener = lambda req, timeout: FakeResp(200, b"<html>captive portal</html>")  # noqa: E731
+    code = fu.main(["--out", str(tmp_path), "--clinvar-only", "rs671"], opener=opener, sleep=lambda s: None)
+    assert code == 2 and "ERROR" in capsys.readouterr().err
+    assert _tree(tmp_path) == before

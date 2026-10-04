@@ -4,15 +4,18 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
+from conftest import apoe_row, open_apoe
+
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
-def test_vcf_with_uppercase_header_renders_apoe_card(loaded_page):
+def test_vcf_with_uppercase_header_renders_apoe(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "apoe-e3e4-uppercase-header.vcf"))
     expect(loaded_page.locator("#results-section")).to_be_visible()
     expect(loaded_page.locator("#qc-format")).to_contain_text("VCF (GRCh37)")
-    expect(loaded_page.locator("#apoe-status-card")).to_be_visible()
-    expect(loaded_page.locator("#apoe-diplotype-title")).to_contain_text("ε3/ε4")
+    expect(apoe_row(loaded_page)).to_be_visible()
+    open_apoe(loaded_page)
+    expect(loaded_page.locator("#drawer-ligature .lds-ligature-result")).to_have_text("APOE ε3/ε4")
 
 
 def test_ancestry_header_row_is_not_counted_as_a_snp(loaded_page):

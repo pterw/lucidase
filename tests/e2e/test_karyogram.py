@@ -112,7 +112,40 @@ def test_demo_file_loads_through_the_file_input(page):
     assert _total(page, "rows") == str(len(rows))
     assert _total(page, "placed") == str(len(rows))
     assert "reference" not in page.evaluate(LOCUS_STATES).values()
-    expect(page.locator("#karyogram-legend")).to_contain_text("Supported & Observed")
+    expect(page.locator("#karyogram-legend")).to_contain_text("Found")
+
+
+# The design system's plain result words and their one-line help (components/core/hooks.js), verbatim.
+LEGEND_WORDS = {
+    "supported_and_observed": ("Found", "Your file has the variant this check looks for."),
+    "supported_not_observed": (
+        "Not found",
+        "Your file was checked here and the variant was not found among the variants tested. "
+        "This is not the same as 'normal'.",
+    ),
+    "not_tested_by_array": ("Not on your chip", "Your DNA chip did not read this position, or the reading failed. No result."),
+    "insufficient_evidence": (
+        "Unclear",
+        "A reading exists, but the evidence or the genotype is not clear enough to report a result.",
+    ),
+}
+
+
+def test_legend_and_loci_use_the_plain_words_with_their_help(page):
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    for state, (word, help_text) in LEGEND_WORDS.items():
+        item = page.locator(f'#karyogram-legend [data-legend-state="{state}"]')
+        expect(item.locator("[data-legend-label]")).to_have_text(word)
+        expect(item.locator("[data-legend-help]")).to_have_text(help_text)
+    expect(page.locator('#karyogram-legend [data-legend-state="reference"] [data-legend-help]')).to_have_count(0)
+    text = page.locator("#karyogram-legend").inner_text() + page.locator("#karyogram-loci-body").inner_text()
+    titles = page.locator("#karyogram-figure").inner_html()
+    for old in ("Supported", "Observed", "Array Gap", "Wild-Type", "Conflicting", "State 1", "State 2", "State 3", "State 5"):
+        assert old not in text and old not in titles, old
+    found = page.locator('#karyogram-loci-body tr[data-state="supported_and_observed"]').first
+    expect(found.locator("td").last).to_have_text("Found")
 
 
 def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):
@@ -386,6 +419,48 @@ def test_a_silent_worker_trips_the_watchdog(page):
     page.clock.run_for(31000)
     _assert_failed_and_inputs_free(page)
     expect(page.locator("#karyogram-error-detail")).to_contain_text("stopped responding")
+
+
+@pytest.mark.allow_console_errors
+def test_a_sample_fetch_that_never_answers_times_out_to_the_error_and_can_be_retried(page):
+    # The first sample request is held; the fake clock runs past the 30 s budget instead of waiting it out.
+    # Later requests (the retry) go through.
+    held = []
+
+    def hold_first(route):
+        if held:
+            route.continue_()
+        else:
+            held.append(route)
+
+    page.route("**/sample-karyogram-23andme.txt", hold_first)
+    page.add_init_script(COUNT_WORKERS)
+    page.clock.install()
+    _open(page)
+    with page.expect_request("**/sample-karyogram-23andme.txt"):
+        page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-progress")).to_be_visible()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "loading")
+    assert len(held) == 1, "the sample request should be held by the route"
+    page.clock.run_for(31000)
+    _assert_failed_and_inputs_free(page)
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("did not load in time")
+    expect(page.locator("#karyogram-progress")).to_be_hidden()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "error")
+
+    # The held response arrives late: it must not start a job or replace the error.
+    with page.expect_response("**/sample-karyogram-23andme.txt"):
+        held[0].continue_()
+    page.wait_for_timeout(500)
+    expect(page.locator("#karyogram-error")).to_be_visible()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "error")
+    assert page.evaluate("window.__workerCount") == 0
+
+    # Trying again works.
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    expect(page.locator("#karyogram-error")).to_be_hidden()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "result")
 
 
 # The computed shape of one mark: everything that distinguishes the marks except colour.

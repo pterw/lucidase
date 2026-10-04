@@ -133,8 +133,12 @@ test("the karyogram state labels reuse the analysis labels and add the reference
   const { karyogramStateLabels } = await import("../src/view-model.js");
   const labels = karyogramStateLabels();
   assert.deepEqual(Object.keys(labels).sort(), ["insufficient_evidence", "not_tested_by_array", "reference", "supported_and_observed", "supported_not_observed"]);
-  assert.equal(labels.supported_and_observed, "Supported & Observed");
-  assert.equal(labels.not_tested_by_array, "Array Gap (State 3)");
+  // The design system's plain result words (StateMark), never a "State N" code.
+  assert.equal(labels.supported_and_observed, "Found");
+  assert.equal(labels.supported_not_observed, "Not found");
+  assert.equal(labels.not_tested_by_array, "Not on your chip");
+  assert.equal(labels.insufficient_evidence, "Unclear");
+  for (const text of Object.values(labels)) assert.ok(!/State \d|Observed|Array Gap|Wild-Type/.test(text), text);
   labels.reference = "changed";
   assert.notEqual(karyogramStateLabels().reference, "changed");
 });
@@ -173,6 +177,19 @@ test("centromeres align across columns and loci sit at the exact y of their bin"
   const locus = (rsid) => svg.match(new RegExp(`data-rsid="${rsid}"[\\s\\S]*?kary-core" cx="([\\d.]+)" cy="([\\d.]+)"`));
   assert.deepEqual(locus("rsA").slice(1), ["14.0", "38.0"]);
   assert.deepEqual(locus("rsB").slice(1), ["42.0", "24.0"]);
+});
+
+test("a locus on a chromosome that is not drawn throws instead of rendering NaN coordinates", () => {
+  // Object.prototype members are not columns: a plain-object lookup found them and drew cx="NaN".
+  for (const chrom of ["constructor", "__proto__", "toString", "hasOwnProperty", "chrUnknown"]) {
+    const layout = handLayout();
+    layout.reference.loci[0].chrom = chrom;
+    assert.throws(
+      () => renderKaryogramSvg(layout),
+      (err) => err instanceof Error && err.message.includes(`undrawn chromosome ${chrom}`),
+      chrom,
+    );
+  }
 });
 
 test("an unknown build says the GRCh38 geometry is a fallback and the file build is unknown", () => {

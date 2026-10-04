@@ -13,6 +13,9 @@
 import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "./core/inheritance.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { getTheme, initTheme, setTheme } from "./theme.js";
+import { initPagesMenu } from "./pages-menu.js";
+import { renderTermParts, renderTextWithTerms, upgradeTerms } from "./term.js";
+import { renderKaryogramSvg } from "./karyogram-view.js";
 import {
   NOT_AVAILABLE,
   acmgVersionLabel,
@@ -22,13 +25,21 @@ import {
   escapeHtml,
   fmtPct,
   formatRate,
+  foundCategoryCounts,
+  groupedReport,
   heroScopeText,
+  karyogramStateLabels,
   kbBadge,
   markdownReport,
+  multiLocusReading,
   partnerModelNote,
+  rowsByState,
+  summaryProseParts,
   testedVariantCounts,
   toViewModel,
   MODEL_LABELS,
+  REPORT_GROUPS,
+  RESULT_WORDS,
 } from "./view-model.js";
 
 // Global Application State
@@ -49,21 +60,35 @@ const state = {
   genes: {},
   compoundHeterozygotes: [],
   independentAssortment: [],
+  // The Summary map's layout (core/karyogram.js), and the analysis that waits for it while the worker lays it out.
+  karyogram: null,
+  pendingAnalysis: null,
   selectedVariant: null,
   filterCategory: "all",
   searchQuery: "",
   sortBy: "magnitude",
+  // The StepNav step (0 choose your file, 1 read your results, 2 save a copy), set by the page phase.
+  step: 0,
   // Read-only view of the theme owned by theme.js (its storage reads and writes are guarded there).
   get theme() {
     return getTheme();
   }
 };
 
+// The StepNav's three steps (declared before initApp runs, which may be at module evaluation).
+const STEPS = ["Choose your file", "Read your results", "Save a copy"];
+
+// The last stretch of the progress bar: the worker reads the file again to lay out the Summary map.
+const MAP_PROGRESS = { percent: 95, status: "Placing the checks on the map of your chromosomes" };
+
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
 function initApp() {
   console.log("initApp executed, readyState:", document.readyState);
   initTheme();
+  initPagesMenu();
+  upgradeTerms();
   initEventListeners();
+  renderStepNav();
   loadManifest();
   window.__lucidase = {
     state,
@@ -163,11 +188,27 @@ function startWorker(job, canRetry = true) {
     const data = e.data;
     if (data.type === "progress") {
       armWatchdog(fail);
-      updateProgress(data.percent, data.status);
+      if (job.action === "karyogram") updateProgress(MAP_PROGRESS.percent, MAP_PROGRESS.status);
+      else updateProgress(data.percent, data.status);
     } else if (data.type === "complete") {
-      stopWorker();
+      // The results wait for the Summary map: the same file goes to the worker's own "karyogram" action (the one
+      // karyogram.html uses), so the map is laid out exactly as on that page. Its failure is the analysis's failure.
       try {
-        handleParseComplete(data);
+        state.pendingAnalysis = data;
+        const mapJob = { action: "karyogram", text: job.text, fileName: job.fileName };
+        updateProgress(MAP_PROGRESS.percent, MAP_PROGRESS.status);
+        startWorker(mapJob).postMessage(mapJob);
+      } catch (err) {
+        stopWorker();
+        showAnalysisError((err && err.message) || err);
+      }
+    } else if (data.type === "karyogram") {
+      stopWorker();
+      const analysis = state.pendingAnalysis;
+      state.pendingAnalysis = null;
+      try {
+        if (!analysis) throw new Error("The map arrived without the analysis it belongs to.");
+        handleParseComplete(analysis, data.layout);
       } catch (err) {
         showAnalysisError((err && err.message) || err);
       }
@@ -210,6 +251,7 @@ function setInputsDisabled(disabled) {
 // The one error path: every failure (worker, KB, file read, demo fetch) shows the #analysis-error alert and no results.
 function showAnalysisError(message) {
   closeDrawer();
+  state.pendingAnalysis = null;
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("results-section").classList.add("hidden");
   const box = document.getElementById("analysis-error");
@@ -217,6 +259,8 @@ function showAnalysisError(message) {
     String(message || "unknown error");
   box.classList.remove("hidden");
   setInputsDisabled(false);
+  showIntro(true);
+  setStep(0);
 }
 
 function initEventListeners() {
@@ -228,7 +272,6 @@ function initEventListeners() {
   const btnExportMd = document.getElementById("btn-export-md");
   const btnExportCsv = document.getElementById("btn-export-csv");
   const btnCloseDrawer = document.getElementById("btn-close-drawer");
-  const btnInspectApoe = document.getElementById("btn-inspect-apoe");
 
   // Drag and drop
   dropzone.addEventListener("dragover", (e) => {
@@ -282,6 +325,35 @@ function initEventListeners() {
     });
   }
 
+  // The grouped report: "Details" opens the record in the drawer, the same way a table row does.
+  document.getElementById("report-groups").addEventListener("click", (e) => {
+    const button = e.target.closest("button.lds-finding-open");
+    if (!button) return;
+    const id = button.closest("article.lds-finding").dataset.findingId;
+    const record = allRows().find((vm) => vm.id === id);
+    if (record) openDrawer(record, button);
+  });
+
+  // The Summary map: a mark opens its record (click, or Enter / Space on the focused mark).
+  const summaryMap = document.getElementById("summary-map");
+  summaryMap.addEventListener("click", (e) => {
+    const mark = e.target.closest(".kary-locus[data-finding-id]");
+    if (mark) openMarkRecord(mark);
+  });
+  summaryMap.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const mark = e.target.closest(".kary-locus[data-finding-id]");
+    if (!mark || mark !== e.target) return;
+    e.preventDefault(); // Space must open the record, not scroll the page
+    openMarkRecord(mark);
+  });
+
+  // "All results as a table" opens once asked for (design system: the button gives way to the table).
+  document.getElementById("btn-show-table").addEventListener("click", () => {
+    setTableOpen(true);
+    searchInput.focus();
+  });
+
   // Search input
   searchInput.addEventListener("input", (e) => {
     state.searchQuery = e.target.value.toLowerCase().trim();
@@ -302,25 +374,33 @@ function initEventListeners() {
     });
   });
 
-  // Exports
-  btnExportMd.addEventListener("click", exportMarkdownReport);
-  btnExportCsv.addEventListener("click", exportCsvReport);
+  // Exports: using the save section is step 3.
+  btnExportMd.addEventListener("click", () => {
+    enterSaveStep();
+    exportMarkdownReport();
+  });
+  btnExportCsv.addEventListener("click", () => {
+    enterSaveStep();
+    exportCsvReport();
+  });
+  document.getElementById("save").addEventListener("focusin", enterSaveStep);
+
+  // Steps: the StepNav (both forms) and the two buttons by the results heading.
+  document.getElementById("stepnav").addEventListener("click", (e) => {
+    const button = e.target.closest("button[data-step]");
+    if (button) goToStep(Number(button.dataset.step));
+  });
+  document.getElementById("btn-goto-save").addEventListener("click", () => goToStep(2));
+  document.getElementById("btn-use-another-file").addEventListener("click", () => goToStep(0));
 
 
-  // Detail drawer close
+  // Inspector close: its close button, or Escape anywhere on the page while it is open (design system Inspector)
   if (btnCloseDrawer) {
     btnCloseDrawer.addEventListener("click", closeDrawer);
   }
-
-  // Inspect APOE button
-  if (btnInspectApoe) {
-    btnInspectApoe.addEventListener("click", () => {
-      const apoeRec = state.apoe;
-      if (apoeRec) {
-        openDrawer(apoeRec);
-      }
-    });
-  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && state.selectedVariant !== null) closeDrawer();
+  });
 }
 
 function handleFileSelected(file) {
@@ -342,10 +422,13 @@ function handleFileSelected(file) {
 function processText(text, fileName) {
   try {
     closeDrawer();
+    state.pendingAnalysis = null;
     document.getElementById("analysis-error").classList.add("hidden");
     setInputsDisabled(true);
     document.getElementById("progress-section").classList.remove("hidden");
     document.getElementById("results-section").classList.add("hidden");
+    showIntro(true);
+    setStep(0);
     const job = { action: "parse", text, fileName };
     startWorker(job).postMessage(job);
   } catch (err) {
@@ -364,7 +447,7 @@ function updateProgress(percent, message) {
   if (pct) pct.textContent = `${percent}%`;
 }
 
-function handleParseComplete(data) {
+function handleParseComplete(data, karyogram) {
   const listed = [...data.records, ...data.negative_checks, ...data.array_gaps, ...data.insufficient_evidence];
   if (data.apoe) listed.push(data.apoe);
   const testedCounts = testedVariantCounts(listed);
@@ -382,18 +465,193 @@ function handleParseComplete(data) {
   state.apoe = data.apoe ? toVm(data.apoe) : null;
   state.compoundHeterozygotes = data.compound_heterozygotes;
   state.independentAssortment = data.independent_assortment;
+  state.karyogram = karyogram;
 
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("analysis-error").classList.add("hidden");
   document.getElementById("results-section").classList.remove("hidden");
   setInputsDisabled(false);
+  // The intro gives way to the results. A control in it that held focus (the example button) is gone, so focus
+  // moves to the results heading instead of falling back to the page.
+  const focusWasInIntro = document.getElementById("section-hero").contains(document.activeElement);
+  showIntro(false);
+  setStep(1);
+  if (focusWasInIntro) document.getElementById("results-h").focus();
 
   renderKbClaims(state.manifest);
   renderQC();
   renderSummaryCards();
-  renderApoeCard();
+  renderReportGroups();
   renderAssortmentSection();
+  setTableOpen(false);
   renderVariantsTable();
+}
+
+/** Opens or closes "All results as a table". Closed, only the "Show the table" button is shown. */
+function setTableOpen(open) {
+  const button = document.getElementById("btn-show-table");
+  button.setAttribute("aria-expanded", String(open));
+  button.classList.toggle("hidden", open);
+  document.getElementById("table-panel").classList.toggle("hidden", !open);
+}
+
+/**
+ * The grouped report (design system): one ReportSection per group, in its order, each with one FindingRow per
+ * check (view-model.js groupedReport). The mark keeps its shape and carries the plain word, so colour is never the
+ * only signal; the limitation is always on the row. A group with no check says so instead of disappearing.
+ */
+function renderReportGroups() {
+  const container = document.getElementById("report-groups");
+  container.innerHTML = groupedReport(allRows(), state.genes).map((group) => `
+    <section id="group-${escapeHtml(group.id)}" class="lds-section" aria-labelledby="group-${escapeHtml(group.id)}-h">
+      <div class="lds-section-head">
+        <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+        <p class="lds-section-aside">${escapeHtml(group.aside)}</p>
+      </div>
+      <div class="lds-section-body">
+        ${group.rows.length === 0 ? `<p class="lds-meta">No checks in this group.</p>` : group.rows.map(findingRowHtml).join("")}
+      </div>
+    </section>
+  `).join("");
+  // Glossary words in the groups' asides: the design system's own copy (REPORT_GROUPS), never knowledge-base text.
+  for (const group of REPORT_GROUPS) {
+    const terms = GROUP_ASIDE_TERMS[group.id];
+    if (terms) renderTextWithTerms(container.querySelector(`#group-${group.id} .lds-section-aside`), group.aside, terms);
+  }
+}
+
+// The glossary words (glossary.js) a group's aside explains with a Term, on their first occurrence.
+const GROUP_ASIDE_TERMS = { risk: ["variant", "risk factor"], carrier: ["variant"] };
+
+function findingRowHtml(row) {
+  const headingId = `f-${escapeHtml(row.key)}-h`;
+  const limitation = row.limitation === null
+    ? ""
+    : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span><b>What this can’t tell you:</b> ${escapeHtml(row.limitation)}</span></p>`;
+  return `
+    <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}">
+      <span class="lds-mark lds-mark-16 lds-mark-${escapeHtml(row.state)}" role="img" aria-label="${escapeHtml(row.stateLabel)}"></span>
+      <div class="lds-finding-main">
+        <div class="lds-finding-head">
+          <h3 id="${headingId}" class="lds-finding-topic">${escapeHtml(row.topic)}</h3>
+          <span class="lds-finding-gene">${escapeHtml(row.gene)}</span>
+        </div>
+        <p class="lds-finding-statement">${escapeHtml(row.statement)}</p>
+        ${limitation}
+        <div class="lds-finding-tech">${escapeHtml(row.technical)}</div>
+      </div>
+      <button type="button" class="lds-finding-open" aria-controls="variant-drawer" aria-expanded="false" aria-label="Details for ${escapeHtml(row.topic)}, ${escapeHtml(row.markers)}">Details<span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span></button>
+    </article>`;
+}
+
+/**
+ * The FindingRow whose record is in the drawer is the one selected row (none when the drawer is closed), and its
+ * marks on the Summary map are the selected marks (APOE has two).
+ */
+function markSelectedFinding(id) {
+  document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
+    const selected = article.dataset.findingId === id;
+    article.classList.toggle("is-selected", selected);
+    article.querySelector("button.lds-finding-open").setAttribute("aria-expanded", String(selected));
+  });
+  document.querySelectorAll("#summary-map .kary-locus[data-finding-id]").forEach((mark) => {
+    const selected = mark.dataset.findingId === id;
+    mark.classList.toggle("is-selected", selected);
+    mark.setAttribute("aria-expanded", String(selected));
+  });
+}
+
+// StepNav (design system): the step follows the page phase. Reading, or failing to read, a file is step 1; the
+// results are step 2; the save section is step 3. Step 1 can always be revisited, steps 2 and 3 only once there are
+// results. Both forms (the list, and the narrow "Step N of 3") are in the markup; a container query shows one.
+function setStep(step) {
+  state.step = step;
+  renderStepNav();
+}
+
+function renderStepNav() {
+  const nav = document.getElementById("stepnav");
+  if (!nav) return;
+  const current = state.step;
+  const hasResults = current > 0;
+  nav.querySelector(".lds-stepnav-list").innerHTML = STEPS.map((label, i) => {
+    const status = i < current ? "done" : i === current ? "current" : "upcoming";
+    const dot = status === "done" ? `<span class="lds-icon lds-icon-14 lds-i-check"></span>` : String(i + 1);
+    const done = status === "done" ? `<span class="sr-only"> (done)</span>` : "";
+    const inner = `<span class="lds-step-dot" aria-hidden="true">${dot}</span><span>${escapeHtml(label)}${done}</span>`;
+    const canVisit = status !== "current" && (i === 0 || hasResults);
+    const item = canVisit
+      ? `<button type="button" class="lds-step-item" data-step="${i}">${inner}</button>`
+      : `<span class="lds-step-item"${status === "current" ? ` aria-current="step"` : ""}>${inner}</span>`;
+    const line = i < STEPS.length - 1 ? `<span class="lds-step-line" aria-hidden="true"></span>` : "";
+    return `<li class="lds-step" data-state="${status}">${item}${line}</li>`;
+  }).join("");
+
+  // Narrow form: the current step, "Step N of 3", a bar grown by transform, and a link back to the previous step.
+  nav.querySelector(".lds-stepnav-current").textContent = STEPS[current];
+  nav.querySelector(".lds-stepnav-count").textContent = `Step ${current + 1} of ${STEPS.length}`;
+  nav.querySelector(".lds-progress-bar").style.transform = `scaleX(${(current + 1) / STEPS.length})`;
+  const back = nav.querySelector(".lds-stepnav-back");
+  back.hidden = current === 0;
+  if (current > 0) {
+    back.dataset.step = String(current - 1);
+    back.querySelector("[data-role='back-label']").textContent = STEPS[current - 1];
+  }
+}
+
+/** A visit from the StepNav or the results heading. Step 1 returns to the file chooser; steps 2 and 3 need results. */
+function goToStep(step) {
+  if (step === 0) {
+    useAnotherFile();
+    return;
+  }
+  if (state.step === 0) return;
+  setStep(step);
+  document.getElementById(step === 2 ? "save-h" : "results-h").focus();
+}
+
+/** The person reached the save section (used a button in it, or moved focus into it). */
+function enterSaveStep() {
+  if (state.step === 1) setStep(2);
+}
+
+function showIntro(show) {
+  document.getElementById("section-hero").classList.toggle("hidden", !show);
+}
+
+/**
+ * Back to the file chooser. The previous file's results leave the page and memory, so nothing of it is left to show
+ * or export, and the intro returns with focus on "Choose your DNA file". The KB claims stay.
+ */
+function useAnotherFile() {
+  closeDrawer();
+  Object.assign(state, {
+    fileName: "",
+    qc: null,
+    records: [],
+    negativeChecks: [],
+    arrayGaps: [],
+    insufficientEvidence: [],
+    coverageSummary: null,
+    summary: null,
+    apoe: null,
+    compoundHeterozygotes: [],
+    independentAssortment: [],
+    karyogram: null,
+    pendingAnalysis: null,
+  });
+  document.getElementById("variants-tbody").replaceChildren();
+  document.getElementById("summary-map").replaceChildren();
+  document.getElementById("report-groups").replaceChildren();
+  document.getElementById("assortment-cards-container").replaceChildren();
+  document.getElementById("results-section").classList.add("hidden");
+  document.getElementById("analysis-error").classList.add("hidden");
+  document.getElementById("progress-section").classList.add("hidden");
+  document.getElementById("file-input").value = "";
+  showIntro(true);
+  setStep(0);
+  window.scrollTo(0, 0);
+  document.getElementById("btn-browse-files").focus({ preventScroll: true });
 }
 
 function renderQC() {
@@ -415,75 +673,116 @@ function renderQC() {
   sexBadge.className = `lds-tag ${NEUTRAL_TAG}`;
 }
 
-/** Every card shows the worker's own figure: the category cards and the coverage cards are not recounted here. */
+/**
+ * The result counts are the worker's coverage figures. The category counts sit under "What was found", so the view
+ * model counts them over the Found checks only (the worker's summary also counts unclear variant readings).
+ */
 function renderSummaryCards() {
-  const sum = state.summary;
   const cov = state.coverageSummary;
-  if (!sum || !cov) return;
+  if (!state.summary || !cov) return;
   const figure = (value) => (typeof value === "number" ? value.toLocaleString() : NOT_AVAILABLE);
   const set = (id, value) => {
     const el = document.getElementById(id);
     if (el) el.textContent = figure(value);
   };
 
-  set("count-pathogenic", sum.pathogenic_count);
-  set("count-carrier", sum.carrier_count);
-  set("count-pgx", sum.pgx_count);
-  set("count-risk", sum.risk_factor_count);
-  set("count-acmg", sum.acmg_actionable_findings);
+  const found = foundCategoryCounts(listedRows());
+  set("count-pathogenic", found.pathogenic);
+  set("count-carrier", found.carrier);
+  set("count-pgx", found.pgx);
+  set("count-risk", found.risk);
+  set("count-acmg", found.acmg);
 
-  set("count-state-observed", cov.supported_and_observed_count);
-  set("count-state-negative", cov.supported_not_observed_count);
-  set("count-state-gaps", cov.not_tested_by_array_count);
-  set("count-state-outside", cov.outside_coverage_count);
-  set("count-state-insufficient", cov.insufficient_evidence_count);
+  // The sentence and the legend say the same figures: the worker's count per result.
+  const counts = {
+    supported_and_observed: cov.supported_and_observed_count,
+    supported_not_observed: cov.supported_not_observed_count,
+    not_tested_by_array: cov.not_tested_by_array_count,
+    insufficient_evidence: cov.insufficient_evidence_count,
+    outside_coverage: cov.outside_coverage_count,
+  };
+  renderTermParts(document.getElementById("summary-prose"), summaryProseParts(counts));
+  renderSummaryLegend(counts);
+  renderSummaryMap(state.karyogram);
+}
+
+// The legend's results in the design system's order (AnalysisScreen), each count keeping the id the tests and the
+// earlier count strip used. "Not checked" has no mark on the map: it counts the file's other markers.
+const SUMMARY_LEGEND = [
+  ["supported_and_observed", "count-state-observed"],
+  ["supported_not_observed", "count-state-negative"],
+  ["not_tested_by_array", "count-state-gaps"],
+  ["insufficient_evidence", "count-state-insufficient"],
+  ["outside_coverage", "count-state-outside"],
+];
+
+/** The KaryogramLegend (design system): mark and plain word, the count, and the word's one-line help. */
+function renderSummaryLegend(counts) {
+  document.getElementById("summary-legend").innerHTML = SUMMARY_LEGEND.map(([s, id]) => `
+    <li class="lds-legend-item" data-legend-state="${escapeHtml(s)}">
+      <span class="lds-statemark"><span class="lds-mark lds-mark-14 lds-mark-${escapeHtml(s)}" aria-hidden="true"></span>${escapeHtml(RESULT_WORDS[s].label)}</span>
+      <span id="${escapeHtml(id)}" class="lds-legend-count" data-legend-count="${escapeHtml(s)}">${escapeHtml(counts[s].toLocaleString())}</span>
+      <span class="lds-legend-help">${escapeHtml(RESULT_WORDS[s].help)}</span>
+    </li>`).join("");
+  // The Summary sentence above already explains "variant"; "genotype" is first used here, in the Unclear line.
+  const unclear = document.querySelector('#summary-legend [data-legend-state="insufficient_evidence"] .lds-legend-help');
+  renderTextWithTerms(unclear, RESULT_WORDS.insufficient_evidence.help, ["genotype"]);
+}
+
+/**
+ * The Summary map (design system Karyogram): the karyogram page's own view of the layout, with each checked locus
+ * made a button that opens its record in the Inspector. A locus belongs to the listed record with its rsid, or to the
+ * APOE record when it is one of its components; a locus with no record is a bug upstream and throws (fail fast).
+ * The figure becomes a group, not an image, so its buttons stay visible to assistive technology.
+ */
+function renderSummaryMap(layout) {
+  const box = document.getElementById("summary-map");
+  if (!layout) throw new Error("The analysis has no map layout.");
+  box.innerHTML = renderKaryogramSvg(layout, { stateLabels: karyogramStateLabels() });
+  box.querySelector("svg").setAttribute("role", "group");
+  document.getElementById("summary-density-notice").classList.toggle("hidden", layout.sample.density === "available");
+
+  const recordOf = new Map();
+  for (const vm of allRows()) for (const locus of vm.components ?? [vm]) recordOf.set(locus.rsid, vm);
+  box.querySelectorAll(".kary-locus").forEach((mark) => {
+    const rsid = mark.dataset.rsid;
+    const record = recordOf.get(rsid);
+    if (!record) throw new Error(`The map has a mark for ${rsid}, which no result carries.`);
+    const gene = state.genes[record.gene];
+    const topic = gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
+    const markState = mark.dataset.state;
+    if (!Object.hasOwn(RESULT_WORDS, markState)) throw new Error(`The map has an unknown result "${markState}" for ${rsid}.`);
+    mark.dataset.findingId = record.id;
+    mark.setAttribute("tabindex", "0");
+    mark.setAttribute("role", "button");
+    mark.setAttribute("aria-controls", "variant-drawer");
+    mark.setAttribute("aria-expanded", "false");
+    mark.setAttribute("aria-label", `${topic}, ${rsid}: ${RESULT_WORDS[markState].label}`);
+  });
+}
+
+/** Selecting a mark (click, Enter or Space) opens its record, the same way a FindingRow's Details button does. */
+function openMarkRecord(mark) {
+  const record = allRows().find((vm) => vm.id === mark.dataset.findingId);
+  if (record) openDrawer(record, mark);
 }
 
 // Badge tones (styles.css, from the design system's colour tokens). Each label is styled by an explicit map; anything
 // the page has no style for (an unknown category, tier or state) is the one neutral tone, never a "good" (green) one.
 const NEUTRAL_TAG = "lds-tag-neutral";
 
-// APOE tag tone per accent key from the view model; no diplotype asserted means the neutral tone.
-const APOE_ACCENTS = {
-  e4e4: "lds-tag-cat-pathogenic",
-  e4: "lds-tag-cat-carrier",
-  e2: "lds-tag-cat-pgx",
-  e3e3: "lds-tag-cat-not-detected"
-};
-
-function renderApoeCard() {
-  const card = document.getElementById("apoe-status-card");
-  if (!card) return;
-
-  if (!state.apoe) {
-    card.classList.add("hidden");
-    return;
-  }
-
-  card.classList.remove("hidden");
-  const model = apoeCardModel(state.apoe);
-
-  const titleEl = document.getElementById("apoe-diplotype-title");
-  const riskRatioEl = document.getElementById("apoe-risk-ratio");
-  const descEl = document.getElementById("apoe-phenotype-desc");
-  const rawLociEl = document.getElementById("apoe-raw-loci");
-  const lifetimeEl = document.getElementById("apoe-lifetime-stat");
-  const pillEl = document.getElementById("apoe-carrier-pill");
-  const hpaEl = document.getElementById("apoe-hpa-desc");
-
-  // Everything below is KB text; an unresolved APOE shows the reason and no numbers.
-  titleEl.textContent = model.title;
-  rawLociEl.textContent = model.rawLoci;
-  setValue(descEl, model.description);
-  setValue(riskRatioEl, model.riskBadge);
-  setValue(lifetimeEl, model.lifetime);
-  pillEl.textContent = model.pill;
-  setValue(hpaEl, model.hpaSummary);
-
-  // Tag tone by risk profile. No diplotype asserted: the neutral tone, never the not-detected green.
-  const tone = APOE_ACCENTS[model.accent] ?? NEUTRAL_TAG;
-  riskRatioEl.className = `lds-tag ${tone}`;
-  pillEl.className = `lds-tag ${tone}`;
+// Each marker of a multi-locus finding with its own result word and StateMark, so colour is never the only signal,
+// and the caution line when one of them is not Found (owner ruling 2026-10-04).
+function multiLocusComponentsHtml(finding) {
+  const { components, caution } = multiLocusReading(finding, state.records);
+  const items = components.map((c) => `
+    <li class="flex items-center gap-2" data-component-rsid="${escapeHtml(c.rsid)}">
+      <span class="lds-data">${escapeHtml(c.rsid)}</span>${stateTagHtml(c.state, c.label)}
+    </li>`).join("");
+  const cautionHtml = caution === null
+    ? ""
+    : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span>${escapeHtml(caution)}</span></p>`;
+  return `<ul class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Result per marker">${items}</ul>${cautionHtml}`;
 }
 
 function renderAssortmentSection() {
@@ -524,6 +823,7 @@ function renderAssortmentSection() {
         <p class="lds-h3 lds-data">${escapeHtml(ch.title)}</p>
         <p class="lds-prose">${escapeHtml(ch.summary)}</p>
       </div>
+      ${multiLocusComponentsHtml(ch)}
       <p class="lds-meta"><strong class="text-ink">Segregation:</strong> ${escapeHtml(ch.segregation_notes)}</p>
       <div>
         <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(ch.gene)}">
@@ -548,6 +848,7 @@ function renderAssortmentSection() {
         <p class="lds-h3">${escapeHtml(ia.type)}</p>
         <p class="lds-prose">${escapeHtml(ia.description)}</p>
       </div>
+      ${multiLocusComponentsHtml(ia)}
       <dl class="lds-datalist">
         <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
         <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>
@@ -603,21 +904,29 @@ const categoryTagClass = (r) =>
 // Evidence tiers are text in one neutral tone: a tier is not a result, so it gets no result colour.
 const TIER_TAG_CLASS = `lds-tag ${NEUTRAL_TAG} lds-data`;
 
+// The table's tabs named by a result word, and the state each lists. Every other tab is a category of Found checks.
+const STATE_TABS = {
+  all: "supported_and_observed",
+  negative: "supported_not_observed",
+  gaps: "not_tested_by_array",
+  insufficient: "insufficient_evidence"
+};
+
+/** The worker's lists as view models, as received: they overlap (an unclear check is in two). */
+function listedRows() {
+  return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence];
+}
+
 function renderVariantsTable() {
   const tbody = document.getElementById("variants-tbody");
   tbody.innerHTML = "";
 
-  let dataset = state.records;
-  if (state.filterCategory === "negative") {
-    dataset = state.negativeChecks;
-  } else if (state.filterCategory === "gaps") {
-    dataset = state.arrayGaps;
-  } else if (state.filterCategory === "insufficient") {
-    dataset = state.insufficientEvidence;
-  }
+  // A tab named by a result word lists exactly the checks with that word; the category tabs narrow the Found ones.
+  const byState = rowsByState(listedRows());
+  const dataset = byState[Object.hasOwn(STATE_TABS, state.filterCategory) ? STATE_TABS[state.filterCategory] : "supported_and_observed"];
 
   const filtered = dataset.filter(r => {
-    // Category filter for subcategories of observed findings
+    // Category filter for subcategories of the Found checks
     if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
     if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
     if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
@@ -634,13 +943,13 @@ function renderVariantsTable() {
     return true;
   });
 
-  let countLabel = `Showing ${filtered.length} of ${state.records.length} findings`;
+  let countLabel = `Showing ${filtered.length} of ${byState.supported_and_observed.length} findings`;
   if (state.filterCategory === "negative") {
-    countLabel = `Showing ${filtered.length} loci tested, variant not detected`;
+    countLabel = `Showing ${filtered.length} loci checked where the variant was not found`;
   } else if (state.filterCategory === "gaps") {
     countLabel = `Showing ${filtered.length} loci your chip did not read`;
   } else if (state.filterCategory === "insufficient") {
-    countLabel = `Showing ${filtered.length} loci with conflicting or insufficient evidence`;
+    countLabel = `Showing ${filtered.length} loci with an unclear result`;
   }
   document.getElementById("showing-count").textContent = countLabel;
 
@@ -681,6 +990,8 @@ function renderVariantsTable() {
       ? ""
       : `<span data-role="limitation" class="lds-tag lds-tag-notice" title="${escapeHtml(r.limitationTooltip)}">${r.limitation === null ? "Caveats" : "Limitation"}</span>`;
 
+    // A composite row (APOE) gives each component's review on its own line, so the column stays narrow.
+    const starsLines = r.componentEvidence ? r.componentEvidence.map((p) => `${p.rsid}: ${p.starsText}`) : [r.starsText];
     const guidance = r.statement ?? r.phenotype ?? r.significance;
     const guidanceTitle = [r.statement, r.phenotype, r.limitationTooltip].filter(part => part !== null).join(" ");
 
@@ -690,32 +1001,47 @@ function renderVariantsTable() {
         <span class="flex flex-wrap items-center gap-1.5"><span class="font-bold">${escapeHtml(r.gene)}</span> ${acmgPill} ${limitationBadge}</span>
       </td>
       <td class="lds-data font-bold">${valueHtml(r.genotype)}</td>
-      <td>${stateTagHtml(r.coverage_state, r.stateBadge)}</td>
+      <td>${stateTagHtml(r.coverage_state, r.stateLabel)}</td>
       <td>
         <span class="flex flex-wrap items-center gap-1.5">${tierBadge} ${categoryBadge}</span>
       </td>
-      <td class="lds-data text-ink-muted whitespace-nowrap">${r.starsMuted ? naHtml(r.starsText) : escapeHtml(r.starsText)}</td>
+      <td class="lds-data text-ink-muted whitespace-nowrap">${starsLines.map((line) => `<div>${r.starsMuted ? naHtml(line) : escapeHtml(line)}</div>`).join("")}</td>
       <td class="whitespace-nowrap ${r.magnitude !== null && r.magnitude >= 4 ? 'font-bold text-danger-ink' : ''}">
         ${valueHtml(r.magnitudeShort)} <span class="lds-meta">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
       </td>
-      <td class="text-ink-muted max-w-md truncate" title="${escapeHtml(guidanceTitle)}">
-        ${escapeHtml(guidance)}
+      <td class="text-ink-muted">
+        <div class="min-w-64 max-w-md line-clamp-2" title="${escapeHtml(guidanceTitle)}">${escapeHtml(guidance)}</div>
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// The element that opened the drawer; closeDrawer returns focus to it.
+// The element that opened the Inspector; closeDrawer returns focus to it.
 let drawerOpener = null;
 
+/**
+ * Shows a record in the Inspector (design system Inspector and ui_kits/web/RecordInspector.jsx): docked beside the
+ * results, or under them on a narrow screen. It is non-modal: the list stays usable, and opening another record
+ * swaps the content. The element ids are the drawer's (#variant-drawer, drawer-*), which the tests read.
+ */
 function openDrawer(record, opener = document.activeElement) {
-  state.selectedVariant = record;
-  drawerOpener = opener instanceof HTMLElement && opener !== document.body ? opener : null;
   const drawer = document.getElementById("variant-drawer");
-  if (!drawer) return;
+  const side = document.getElementById("inspector-side");
+  if (!drawer || !side) return;
+  const wasOpen = state.selectedVariant !== null;
+  state.selectedVariant = record;
+  // A map mark is an SVG element; it takes focus back like any HTML opener.
+  drawerOpener = (opener instanceof HTMLElement || opener instanceof SVGElement) && opener !== document.body ? opener : null;
 
-  document.getElementById("drawer-rsid").textContent = record.id;
+  // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
+  const gene = state.genes[record.gene];
+  document.getElementById("drawer-title").textContent =
+    gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
+  // The subtitle names the gene once, then the markers ("rs429358 + rs7412" for APOE); the record id stays readable.
+  const markerEl = document.getElementById("drawer-rsid");
+  markerEl.textContent = record.markerText;
+  markerEl.dataset.recordId = record.id;
   document.getElementById("drawer-gene").textContent = record.gene;
   setValue(document.getElementById("drawer-genotype"), record.genotype);
   setValue(document.getElementById("drawer-coord"), record.positionText);
@@ -724,7 +1050,7 @@ function openDrawer(record, opener = document.activeElement) {
     document.getElementById("drawer-phenotype"),
     [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null
   );
-  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsDetail, record.starsText);
+  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, record.starsText);
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 
@@ -737,10 +1063,11 @@ function openDrawer(record, opener = document.activeElement) {
   }
   setValue(document.getElementById("drawer-footer-tier"), drawerTierText(record));
 
-  if (covBadgeEl) {
-    covBadgeEl.className = stateTagClass(record.coverage_state);
-    covBadgeEl.innerHTML = stateTagInnerHtml(record.coverage_state, record.stateLabel);
-  }
+  // The result as the design system's StateMark with its word (the shape carries it without colour).
+  if (covBadgeEl) covBadgeEl.innerHTML = stateTagInnerHtml(record.coverage_state, record.stateLabel);
+
+  renderLigature(record);
+  const figuresShown = renderApoeFigures(record);
 
   // Limitation (e.g. the star-allele refusal or a single-variant test): from the KB, on every row that has one.
   const refusalBox = document.getElementById("drawer-refusal-box");
@@ -754,13 +1081,14 @@ function openDrawer(record, opener = document.activeElement) {
     }
   }
 
-  // Caveats list
+  // Caveats list. An APOE risk figure already shown under the Ligature is not repeated here.
   const caveatsBox = document.getElementById("drawer-caveats-box");
   const caveatsList = document.getElementById("drawer-caveats-list");
+  const caveats = record.caveats.filter((c) => !figuresShown.includes(c));
   if (caveatsBox && caveatsList) {
-    if (record.caveats.length > 0) {
+    if (caveats.length > 0) {
       caveatsBox.classList.remove("hidden");
-      caveatsList.innerHTML = record.caveats.map(c => `<li>${escapeHtml(c)}</li>`).join("");
+      caveatsList.innerHTML = caveats.map(c => `<li>${escapeHtml(c)}</li>`).join("");
     } else {
       caveatsBox.classList.add("hidden");
       caveatsList.innerHTML = "";
@@ -784,6 +1112,8 @@ function openDrawer(record, opener = document.activeElement) {
   } else {
     drugBox.classList.add("hidden");
   }
+  document.getElementById("drawer-notices")
+    .classList.toggle("hidden", !record.acmg_actionable && record.drug_response === null);
 
   // ClinVar external links: one per locus whose accession was machine-imported. A composite row (APOE) gets one
   // link per component, labelled with its rsid.
@@ -802,7 +1132,7 @@ function openDrawer(record, opener = document.activeElement) {
         anchor = extra;
       }
       anchor.href = link.url;
-      anchor.textContent = `Open the ClinVar record${labelled ? ` (${link.rsid})` : ""}`;
+      anchor.innerHTML = `ClinVar record${labelled ? ` (${escapeHtml(link.rsid)})` : ""}<span class="lds-icon lds-i-arrow-up-right" aria-hidden="true"></span>`;
     });
   } else {
     clinvarLink.classList.add("hidden");
@@ -847,8 +1177,64 @@ function openDrawer(record, opener = document.activeElement) {
     subcellContainer.innerHTML = `<span class="text-14">${naHtml()}</span>`;
   }
 
-  // Show drawer
-  drawer.classList.remove("translate-x-full");
+  // Show it and mark its row in the report. Opening focuses the Inspector itself (design system); swapping records
+  // while it is docked beside the list leaves focus in the list, where the person is choosing. Under the list (a
+  // narrow screen) it is out of sight, so it is brought into view and focused every time.
+  side.hidden = false;
+  markSelectedFinding(record.id);
+  const below = side.offsetTop > side.parentElement.firstElementChild.offsetTop;
+  if (!wasOpen || below) drawer.focus({ preventScroll: true });
+  if (below) drawer.scrollIntoView({ block: "start" });
+}
+
+/**
+ * The Ligature (design system components/report/Ligature.jsx): for a genuine two-marker composite (APOE) only, the
+ * two markers' genotypes joined into the one result. Every value comes from the record; a missing one says so.
+ */
+function renderLigature(record) {
+  const slot = document.getElementById("drawer-ligature");
+  const parts = record.components ?? [];
+  slot.hidden = parts.length !== 2;
+  if (parts.length !== 2) {
+    slot.replaceChildren();
+    return;
+  }
+  const marker = (c) => `<span>${escapeHtml(c.rsid)} ${valueHtml(c.genotype_display ?? null)}</span>`;
+  const result = record.diplotypeDisplay === null
+    ? naHtml()
+    : `${escapeHtml(record.gene)} ${escapeHtml(record.diplotypeDisplay)}`;
+  slot.innerHTML = `
+    <figure class="lds-ligature">
+      <svg viewBox="0 0 240 34" width="240" height="34" aria-hidden="true" focusable="false">
+        <path class="lds-ligature-arch" d="M30 32 C 30 4, 210 4, 210 32"/>
+        <circle class="lds-ligature-dot" cx="120" cy="11" r="4"/>
+      </svg>
+      <div class="lds-ligature-markers">${parts.map(marker).join("")}</div>
+      <div class="lds-ligature-result">${result}</div>
+      <figcaption class="lds-ligature-caption">One result built from two markers</figcaption>
+    </figure>`;
+}
+
+/**
+ * APOE only: the risk ratio and the estimated lifetime risk under the Ligature, as the knowledge base states them and
+ * each with its curation label (view-model.js apoeCardModel; whether to cite or remove them is the owner's decision).
+ * With no diplotype there is no figure, and each says "Not available". Returns the caveat lines the figures came from,
+ * so the caveats list does not repeat them.
+ */
+function renderApoeFigures(record) {
+  const slot = document.getElementById("drawer-apoe-figures");
+  const isApoe = state.apoe !== null && record.id === state.apoe.id;
+  slot.hidden = !isApoe;
+  if (!isApoe) return [];
+  const model = apoeCardModel(record);
+  const riskRatio = model.resolved ? model.riskBadge : null;
+  setValue(document.getElementById("drawer-apoe-risk-ratio"), riskRatio);
+  setValue(document.getElementById("drawer-apoe-lifetime"), model.lifetime);
+  // Each figure is its caveat line after the line's "<label>: " prefix.
+  return [riskRatio, model.lifetime]
+    .filter((figure) => figure !== null)
+    .map((figure) => record.caveats.find((c) => c.endsWith(`: ${figure}`)))
+    .filter((line) => line !== undefined);
 }
 
 function renderDrawerSegregation(record) {
@@ -867,19 +1253,24 @@ function renderDrawerSegregation(record) {
 
   // Wording follows the gene's inheritance model: disease and recurrence language is for Mendelian genes only.
   // For a recessive gene the headline figure is the genotype probability (two copies), before any penetrance.
-  setLabel(header, mendelian ? null : "Allele transmission");
-  setLabel(header && header.nextElementSibling, mendelian ? null : "Chance a child inherits the allele, from the patient genotype");
+  setLabel(header, mendelian ? null : "Passing it on");
+  // The other person is "the other parent" (design system), and the reader's own file is "your genotype".
+  setLabel(header && header.nextElementSibling, mendelian ? null : "The chance a child inherits the variant, from your genotype.");
   setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele frequency (gnomAD)");
   setLabel(
     riskUnscreenedEl.previousElementSibling,
-    !mendelian ? "Child inherits, unscreened partner" : recessive ? "Risk with an unscreened partner (genotype probability)" : null
+    !mendelian
+      ? "Child inherits, if the other parent is unscreened"
+      : recessive ? "Risk if the other parent is unscreened (genotype probability)" : null
   );
   setLabel(
     riskCarrierEl.previousElementSibling,
-    !mendelian ? "Child inherits, wild-type partner" : recessive ? "Risk with a carrier partner (genotype probability)" : null
+    !mendelian
+      ? "Child inherits, if the other parent has no variant"
+      : recessive ? "Risk if the other parent is a carrier (genotype probability)" : null
   );
   setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring allele simulator");
-  setLabel(simTitle && simTitle.lastElementChild, "Partner's genotype");
+  setLabel(simTitle && simTitle.lastElementChild, "Other parent");
   document.querySelectorAll(".partner-sim-btn").forEach(b => {
     setLabel(b, mendelian ? null : SIM_BUTTON_LABELS[b.getAttribute("data-partner")]);
   });
@@ -936,7 +1327,9 @@ function renderDrawerSegregation(record) {
 
 // The buttons keep their data-partner keys; each maps to a partner genotype model.
 const SIM_PARTNER_MODEL = { unscreened: "unscreened", carrier: "heterozygous", affected: "homozygous", wildtype: "wildtype" };
-const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "Heterozygous", affected: "Homozygous", wildtype: "Wild-type" };
+// The other parent's options in the design system's words (RecordInspector.jsx): Mendelian genes keep the markup's
+// Unscreened, Carrier, Affected, No variant; the others say how many copies the other parent has.
+const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "One copy", affected: "Two copies", wildtype: "No variant" };
 
 /** Sets an element's text, remembering the original so a later null restores it. */
 function setLabel(el, text) {
@@ -1073,18 +1466,22 @@ function renderDrawerBiotools(record) {
 
 function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
-  if (drawer) drawer.classList.add("translate-x-full");
+  const side = document.getElementById("inspector-side");
+  const focusWasInside = Boolean(drawer && drawer.contains(document.activeElement));
+  if (side) side.hidden = true;
   state.selectedVariant = null;
-  // Return focus to whatever opened the drawer (a table row, or a button), if it is still on the page.
-  if (drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
+  markSelectedFinding(null);
+  // Focus that was in the Inspector goes back to whatever opened it (a table row, or a button), if it is still on
+  // the page. Focus the person moved elsewhere stays where it is.
+  const lost = focusWasInside || document.activeElement === null || document.activeElement === document.body;
+  if (lost && drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
   drawerOpener = null;
 }
 
 /** Every row the file produced, once each: observed findings first, then wild-type, gaps and insufficient evidence. */
 function allRows() {
   const seen = new Set();
-  return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence]
-    .filter((vm) => !seen.has(vm.id) && seen.add(vm.id));
+  return listedRows().filter((vm) => !seen.has(vm.id) && seen.add(vm.id));
 }
 
 function exportMarkdownReport() {

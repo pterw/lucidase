@@ -74,10 +74,11 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
   }
 
   // Loci: group by chromosome bin, spread horizontally in 10 px steps, centred on the column.
-  const colByName = Object.fromEntries(cols.map((c) => [c.name, c]));
+  // A Map, not a plain object: a chromosome named "constructor" or "__proto__" must not find an Object.prototype member.
+  const colByName = new Map(cols.map((c) => [c.name, c]));
   const groups = new Map();
   for (const l of reference.loci) {
-    if (!colByName[l.chrom]) {
+    if (!colByName.has(l.chrom)) {
       throw new Error(`renderKaryogramSvg: locus ${l.rsid} is on undrawn chromosome ${l.chrom}`);
     }
     const key = `${l.chrom}:${binIndex(l.pos, binSize)}`;
@@ -86,7 +87,7 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
   }
   const stateCounts = new Map();
   for (const l of reference.loci) {
-    const col = colByName[l.chrom];
+    const col = colByName.get(l.chrom);
     const idx = binIndex(l.pos, binSize);
     const peers = groups.get(`${l.chrom}:${idx}`);
     const x = col.x + (peers.indexOf(l.rsid) - (peers.length - 1) / 2) * LOCUS_STEP;

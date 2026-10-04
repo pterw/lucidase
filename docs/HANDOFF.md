@@ -1,4 +1,4 @@
-# Handoff: Lucidase, state at 2026-10-03
+# Handoff: Lucidase, state at 2026-10-04
 
 For any coding or design agent (Claude, Codex, Qwen, Kimi, Gemini and others) picking up this repository. It is
 self-contained. Read it top to bottom once. After that, use it as a reference.
@@ -6,9 +6,9 @@ self-contained. Read it top to bottom once. After that, use it as a reference.
 ```yaml
 repo: pterw/lucidase              # private; formerly "genomepulse"; GitHub redirects old URLs
 default_branch: main
-state_of_main: 30602b2            # merge of PR #2; PRs #1, #3 and #2 are all merged
-open_prs: none
-next_work: a design system for the web UI (owner-led, with Claude Design), then a review PR
+state_of_main: 745b147            # merge of PR #5 (design-system reskin); PRs #1, #3, #2 and #5 are merged
+open_prs: design-system PR 2 (draft, branch feat/design-system-structure)
+next_work: owner review of PR 2 and its "Decisions to review"
 gates: 5 commands, all must pass before any commit (section 5)
 ci: none                          # the local gates are the check
 platform_tested: Windows 11, Python 3.13.3, Node 24, Tailwind CLI 3.4.17, Playwright bundled Chromium
@@ -24,10 +24,14 @@ words: *"a real useful tool that does not charge for analyzing uploaded docs"*.
 
 There are two pages:
 - **`web/index.html`**, the analysis page. Upload, then progress, then results:
-  - a guardrail banner, a QC summary and coverage-state cards;
-  - an APOE card, a multi-locus section and a filter bar;
-  - a findings table with a slide-out variant drawer;
-  - Markdown and CSV exports.
+  - a three-step StepNav (choose your file, read your results, save a copy);
+  - a guardrail notice, the file's QC, and a Summary: one sentence of counts, the karyogram with a mark per check,
+    and a legend in the plain result words (Found, Not found, Not on your chip, Unclear, Not checked);
+  - the grouped report (Pharmacology, Health risk factors, Carrier status, Traits), one row per check, APOE as one
+    row with a Ligature figure;
+  - a docked, non-modal Inspector beside the list (below it on narrow screens), multi-locus findings, the table one
+    click away, and a "Save a copy" section with the Markdown and CSV exports;
+  - an inline glossary (Term popovers) in the page's own copy.
 - **`web/karyogram.html`**, the karyogram page. It draws the file's markers as dots on the 24 chromosomes, with the
   curated genes ringed by the user's result.
 
@@ -50,16 +54,17 @@ and it must stay in parity with the web app through the shared vectors in `tests
 | Path | What it is |
 |---|---|
 | `web/index.html`, `web/karyogram.html` | The two pages: static HTML, ES modules, no bundler |
-| `web/src/app.js` | Analysis page controller (DOM, worker lifecycle, drawer, exports) |
+| `web/src/app.js` | Analysis page controller (DOM, worker lifecycle, grouped report, Inspector, summary map, exports) |
 | `web/src/karyogram-page.js` | Karyogram page controller |
 | `web/src/worker.js` | Web worker: parse, classify, assemble findings, karyogram layout |
 | `web/src/core/*.js` | Pure logic (no DOM, no `fetch`, no `self`): parsing, classification, APOE, coverage, KB validation, karyogram layout |
-| `web/src/view-model.js` | One view model per record; every row, drawer field and export reads from it |
+| `web/src/view-model.js` | One view model per record; every row, Inspector field and export reads from it (`RESULT_WORDS`, `REPORT_GROUPS`) |
+| `web/src/term.js`, `web/src/glossary.js`, `web/src/pages-menu.js` | Glossary popovers and their definitions; the narrow header "Pages" disclosure |
 | `web/src/karyogram-view.js` | Pure SVG renderer for the karyogram |
 | `web/src/theme.js` | Light/dark theme, shared by both pages (storage key `lucidase-theme`, attribute `data-theme`) |
 | `web/src/kb-loader.js` | The single validating loader for the knowledge base (a JSON module import) |
 | `web/src/knowledge-base.json` | **Generated** knowledge base. Never hand-edit it |
-| `web/src/styles.css` | Theme variables, badge classes, glass panels, typography overrides |
+| `web/src/styles.css` | Imports the design-system tokens (`web/src/ds/`); daisyUI theme bridge; the DS components as `lds-*` classes |
 | `web/tailwind.config.js`, `web/src/tailwind.input.css` | Tailwind 3.4.17 config and input |
 | `web/src/vendor/` | Vendored daisyUI 4.12.10 and the generated `tailwind.css` (see its README) |
 | `web/demo-data/` | Two clearly synthetic sample files, one per page |
@@ -89,7 +94,7 @@ These are summarised here; the full rules are in `AGENTS.md`.
   - Absence of a finding is "not detected among the N variants tested", never "normal".
   - Fail closed on ambiguous genotypes: palindromic sites, alleles outside ref/alt, no-calls.
   - Never fabricate provenance.
-  - Single-variant tests of multi-variant genes carry their limitation on the row, in the drawer and in every export.
+  - Single-variant tests of multi-variant genes carry their limitation on the row, in the Inspector and in every export.
   - `tests/e2e/test_ui_honesty.py` pins user-visible wording.
 - **Single source of genomic knowledge.** `web/src/knowledge-base.json` is built only by `tools/build_canonical_kb.py`,
   and `--verify-only` fails if it drifts. Never commit `canonical_variome.db`.
@@ -108,10 +113,10 @@ python tools/build_canonical_kb.py --verify-only
 python tools/check_vendored_css.py
 ```
 
-Results at `30602b2`, from the last full run on the merged tree:
-- pytest: 873 passed, 29 subtests;
-- node: fail 0;
-- e2e: 104 passed;
+Results on the design-system PR 2 branch (`feat/design-system-structure`), from the last full run:
+- pytest: 946 passed, 35 subtests;
+- node: 347 passed, fail 0;
+- e2e: 170 passed;
 - KB: up to date;
 - vendored CSS: up to date.
 
@@ -129,10 +134,10 @@ Practical notes:
 
 ## 6. Design-system work: what to know before changing the look
 
-**Status (2026-10-03).** The owner's **Lucidase design system** now owns the look; it superseded the provisional
-UI and ruling 15's font mapping. PR 1 (branch `feat/design-system-reskin`) applies it on the existing DOM and
-view-model wording; PR 2 brings its structure (grouped report, plain result words in the view model and exports,
-docked Inspector, StepNav). See `web/src/ds/README.md` and the "Visual design" rules in `AGENTS.md` and `CLAUDE.md`.
+**Status (2026-10-04).** The owner's **Lucidase design system** now owns the look; it superseded the provisional
+UI and ruling 15's font mapping. PR 1 (#5, merged) applied it on the existing DOM and view-model wording; PR 2
+(branch `feat/design-system-structure`) brings its structure: grouped report, plain result words in the view model
+and exports, Summary karyogram, docked Inspector, StepNav, glossary. See `web/src/ds/README.md` and the "Visual design" rules in `AGENTS.md` and `CLAUDE.md`.
 The rest of this section describes the provisional stack it replaced, kept for reference.
 
 **Already decided by the owner (keep these unless the owner changes them):**
@@ -178,8 +183,8 @@ The rest of this section describes the provisional stack it replaced, kept for r
   - upload, progress, error and results;
   - the coverage states: observed, not tested by array, no-call, insufficient evidence and others;
   - the karyogram's no-file, known-version, unknown-version and error states;
-  - the keyboard paths: rows open on Enter and Space, the Export items are buttons, and closing the drawer returns
-    focus to the element that opened it.
+  - the keyboard paths: rows, Details buttons and map marks open on Enter and Space, the export controls are
+    buttons, and closing the Inspector (Esc or ×) returns focus to the element that opened it.
 - **CSP:** no new third-party host. Fonts come only through the Typekit kit, and a new font source needs an owner
   decision plus CSP and test updates.
 - **After a visual change:** regenerate `web/src/vendor/tailwind.css` and the README screenshots, and update
@@ -210,20 +215,14 @@ The rest of this section describes the provisional stack it replaced, kept for r
 
 ## 8. Open items (from `AUDIT_LEDGER.md`)
 
-| Id | Where | What | Suggested fix |
-|---|---|---|---|
-| P1-091 | `tools/fetch_upstream.py` `Capturer.run` | It writes the body and its meta before it checks the status, so a failed recapture overwrites a good pinned fixture. Only `git diff` reveals it. | Write into a staging directory, and promote a capture into `fixtures/upstream/real/` only on success |
-| P2-018 | `web/src/karyogram-page.js` `loadSample` | `loadSample` waits on `fetch` before `startWorker` arms the 30 s watchdog, so a demo fetch that never resolves leaves the page loading forever | Arm a timeout around the fetch and send it to the existing error path |
-| P2-019 | `tools/build_canonical_kb.py`, `web/src/karyogram-view.js` | `build_kb(..., upstream_root=None)` omits `assemblies` without saying so, and `colByName` is a plain-object lookup. Neither is reachable from the shipped build | Refuse or document the first; make the second a `Map` or use `Object.hasOwn` |
-
-There is also one cheap test to add: `_vcf_alleles` in `genomic_parser.py` should get a regression test for
-no-call inputs (`'.'` and `'./.'` with a string allele table must return `None`). An automated reviewer flagged it
-with a harness artifact (integer inputs). The real behaviour is correct, but no test pins it.
+None. P1-091, P2-018 and P2-019 were remediated on 2026-10-04 (see the ledger's remediation log), and the no-call
+regression test for `_vcf_alleles` in `genomic_parser.py` is now `tests/test_vcf_alleles.py`.
 
 ## 9. Owner decisions still pending (keep the recorded defaults; do not decide them)
 
 - Homozygous calls at palindromic sites. The default is fail-closed: not interpretable.
-- Whether to cite or remove the APOE card's risk figures, and the HFE penetrance figures.
+- Whether to cite or remove the APOE risk figures (in the APOE Inspector), and the HFE penetrance figures.
+- The PR 2 "Decisions to review" list (glossary drafts, breakpoints, APOE map marks and others), in that PR's body.
 - The UI tagline.
 - The Vercel project `name`, and a trademark search for "Lucidase".
 - Whether AlphaGenome predictions belong in the KB. The only acceptable form is build time, on curated reference
@@ -259,4 +258,5 @@ syntax error, and it reported fabricated clinical evidence. **PR #1** made it re
 #1 was merged before its last 27 commits were pushed, and **PR #3** carried those into `main`. **PR #2** added the
 karyogram page: pinned UCSC hg19 and hg38 geometry in the KB, a deterministic synthetic sample, a pure layout and SVG
 view, the page and worker action, a whole-PR review in four areas, and plain-language copy. All three are merged at
-`30602b2`.
+`30602b2`. **PR #5** applied the owner's Lucidase design system on the existing DOM (`745b147`). Design-system **PR 2**
+(`feat/design-system-structure`) brings its structure and closed the last open audit items (P1-091, P2-018, P2-019).

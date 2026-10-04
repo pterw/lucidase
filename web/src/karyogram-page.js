@@ -10,8 +10,9 @@
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { layoutKaryogram } from "./core/karyogram.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
-import { escapeHtml, karyogramStateLabels } from "./view-model.js";
+import { RESULT_WORDS, escapeHtml, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
+import { initPagesMenu } from "./pages-menu.js";
 
 const SAMPLE_URL = "./demo-data/sample-karyogram-23andme.txt";
 const SAMPLE_NAME = "sample-karyogram-23andme.txt";
@@ -64,13 +65,18 @@ function stateOf(layout, rsid) {
 function renderLegend(layout) {
   const counts = Object.fromEntries(LEGEND_ORDER.map((s) => [s, 0]));
   for (const l of layout.reference.loci) counts[stateOf(layout, l.rsid)] += 1;
-  $("karyogram-legend").innerHTML = LEGEND_ORDER.map(
-    (s) =>
-      `<li class="flex items-center gap-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
+  // The design system's KaryogramLegend: mark, plain word, count, then the word's one-line help under it.
+  $("karyogram-legend").innerHTML = LEGEND_ORDER.map((s) => {
+    const help = Object.hasOwn(RESULT_WORDS, s) ? RESULT_WORDS[s].help : null;
+    return (
+      `<li class="flex flex-wrap items-center gap-x-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
       `<span class="kary-swatch kary-state-${escapeHtml(s)}" aria-hidden="true"></span>` +
-      `<span class="flex-1">${escapeHtml(labels[s])}</span>` +
-      `<span class="lds-data font-bold" data-legend-count="${escapeHtml(s)}">${counts[s]}</span></li>`,
-  ).join("");
+      `<span class="flex-1" data-legend-label>${escapeHtml(labels[s])}</span>` +
+      `<span class="lds-data font-bold" data-legend-count="${escapeHtml(s)}">${counts[s]}</span>` +
+      (help === null ? "" : `<span class="lds-meta basis-full pl-6" data-legend-help>${escapeHtml(help)}</span>`) +
+      `</li>`
+    );
+  }).join("");
 }
 
 function renderTotals(layout) {
@@ -241,15 +247,31 @@ function handleFileSelected(file) {
   reader.readAsText(file);
 }
 
+/**
+ * The bundled sample's text, or a rejection once the worker's time budget runs out: a request that never answers
+ * must not leave the page loading. A response that arrives after the timeout is dropped, because the race has settled.
+ */
+function fetchSampleText() {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error("The example file did not load in time.")), WORKER_TIMEOUT_MS);
+  });
+  const load = fetch(SAMPLE_URL).then((resp) => {
+    if (!resp.ok) throw new Error("Could not load the example file.");
+    return resp.text();
+  });
+  return Promise.race([load, timeout]).finally(() => clearTimeout(timer));
+}
+
 async function loadSample() {
   try {
     $("karyogram-error").classList.add("hidden");
+    // Disabled for the fetch too, so a second click or a file cannot race this load; showError frees them.
+    setInputsDisabled(true);
     setViewState("loading");
     $("karyogram-progress").classList.remove("hidden");
     updateProgress(10, "Loading the example file...");
-    const resp = await fetch(SAMPLE_URL);
-    if (!resp.ok) throw new Error("Could not load the example file.");
-    processText(await resp.text(), SAMPLE_NAME);
+    processText(await fetchSampleText(), SAMPLE_NAME);
   } catch (err) {
     showError((err && err.message) || err);
   }
@@ -257,6 +279,7 @@ async function loadSample() {
 
 async function initPage() {
   initTheme();
+  initPagesMenu();
   window.__lucidaseKaryogram = {
     get layout() {
       return view.layout;

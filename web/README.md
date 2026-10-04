@@ -29,7 +29,7 @@ All curated genomic knowledge lives in **one file**, `web/src/knowledge-base.jso
 
 The file is built, never hand-edited, by `tools/build_canonical_kb.py` from:
 
-- `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights);
+- `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights, and each gene's `topic`, the plain-language result title from the design system, such as "Clopidogrel (Plavix) response");
 - the pinned upstream payloads in `tools/fixtures/upstream/real/` (ClinVar, dbSNP, Ensembl VEP, gnomAD), captured once by `tools/fetch_upstream.py` and read only through `tools/source_adapters.py`.
 - the pinned UCSC `chromInfo` and `cytoBand` tables (hg19 and hg38), captured by `tools/fetch_upstream.py --ucsc-only`, which give the reference assembly geometry (`assemblies`: GRCh37 and GRCh38 chromosome lengths and centromeres); each source carries its URL, retrieval date and sha256.
 
@@ -48,7 +48,7 @@ User opens a file
        │
        ▼
  [Main thread — browser only]
- └─ One view model per record feeds the table, drawer, Markdown and CSV (view-model.js)
+ └─ One view model per record feeds the grouped report, Inspector, table, Markdown and CSV (view-model.js)
 ```
 
 ### Coverage taxonomy
@@ -180,7 +180,7 @@ These all fail closed, with a visible error or an explicit state:
 
 ## Visual design: the Lucidase design system
 
-The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 14 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
+The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 19 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
 
 ---
 

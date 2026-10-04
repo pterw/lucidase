@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, goto_ready, wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, WEB_DIR, goto_ready, open_apoe, show_table, wait_drawer_closed, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -36,6 +36,8 @@ PLACEHOLDERS = [
     "known variants",
 ]
 STATIC_CLAIMS = ["Redis", "ClinVar 2026.1", "ClinVar 2024-06", "dbSNP 156", "Evidence Tier 1", "81 Genes"]
+# The jargon the design system's plain result words replaced, and star glyphs for ClinVar review (case-sensitive).
+OLD_RESULT_WORDS = re.compile(r"State [1-5]|Supported|Observed|Tested WT|Array Gap|Wild-Type|Conflicting|[★☆]")
 BAD_WORDS = re.compile(r"\b(undefined|null|nan)\b", re.IGNORECASE)
 
 
@@ -79,13 +81,54 @@ def test_product_name_is_lucidase_everywhere_the_user_sees_it(loaded_page):
             page.evaluate(f"() => window.__lucidase.{fn}()")
         names.append(info.value.suggested_filename)
         texts.append(Path(info.value.path()).read_text(encoding="utf-8"))
-    assert texts[0].splitlines()[0] == "# Lucidase Variome Clinical Report"
+    assert texts[0].splitlines()[0] == "# Lucidase variome clinical report"
     assert names[0].startswith("Lucidase_Report_")
     assert names[1].startswith("Lucidase_Variants_")
 
 
+# The per-locus result words, each with the summary strip's count element.
+STATE_WORDS = {
+    "Found": "count-state-observed",
+    "Not found": "count-state-negative",
+    "Not on your chip": "count-state-gaps",
+    "Unclear": "count-state-insufficient",
+}
+
+
+def _markdown_sections(markdown: str) -> dict[str, list[dict[str, str]]]:
+    """Each "## " section's table as rows keyed by column header (a section with no table maps to [])."""
+    sections = {}
+    for chunk in markdown.split("\n## ")[1:]:
+        heading, _, body = chunk.partition("\n")
+        table = [line for line in body.splitlines() if line.startswith("| ")]
+        cells = [[c.strip() for c in re.split(r"(?<!\\)\|", line)[1:-1]] for line in table]
+        sections[heading] = [dict(zip(cells[0], row)) for row in cells[2:]] if cells else []
+    return sections
+
+
+@pytest.mark.parametrize("sample", ["demo", "wildtype"])
+def test_exports_list_each_check_once_under_its_own_word(loaded_page, sample):
+    page = loaded_page
+    _analyse(page, DEMO_FILE if sample == "demo" else WILDTYPE)
+    strip = {word: int(page.locator(f"#{el}").text_content().replace(",", "")) for word, el in STATE_WORDS.items()}
+    assert strip["Unclear"] == 2, "both files have two unclear checks, each also in another worker list"
+    sections = _markdown_sections(_export(page, "exportMarkdownReport"))
+    ids = []
+    for word, count in strip.items():
+        rows = sections.get(word, [])
+        assert len(rows) == count, f"## {word}: {len(rows)} rows, the summary strip says {count}"
+        assert [row["Result"] for row in rows] == [word] * count, f"## {word}: {rows}"
+        ids += [row["rsID"] for row in rows]
+    assert len(ids) == len(set(ids)) == sum(strip.values()), ids
+    rows = list(csv.DictReader(_export(page, "exportCsvReport").splitlines()))
+    assert len(rows) == len({row["rsID"] for row in rows}) == sum(strip.values()), [row["rsID"] for row in rows]
+    for word, count in strip.items():
+        assert sum(row["Result"] == word for row in rows) == count, word
+
+
 def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
+    show_table(page)
     chunks = [page.locator("body").inner_text()]
     for name in ("all", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"):
         page.locator(f"[data-filter='{name}']").click()
@@ -110,6 +153,8 @@ def _check_run(page, label):
     for name, text in (("page", screens), ("markdown", markdown), ("csv", csv_text)):
         assert not _violations(text), f"{label} {name}: {_violations(text)}"
         assert not _violations(text, STATIC_CLAIMS), f"{label} {name}: static claim {_violations(text, STATIC_CLAIMS)}"
+        old = OLD_RESULT_WORDS.findall(text)
+        assert not old, f"{label} {name}: old result wording {sorted(set(old))}"
     return screens, markdown, csv_text
 
 
@@ -148,8 +193,7 @@ def test_apoe_drawer_labels_each_component_evidence_by_rsid(loaded_page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     kb = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["loci"]
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
+    open_apoe(page)
     stars = page.locator("#drawer-stars").inner_text()
     assert "rs429358:" in stars and "rs7412:" in stars, stars
     af = page.locator("#drawer-af").inner_text()
@@ -165,6 +209,7 @@ def test_apoe_drawer_labels_each_component_evidence_by_rsid(loaded_page):
     assert "(rs429358)" in links.nth(0).inner_text() and "(rs7412)" in links.nth(1).inner_text()
     # Opening a single-locus record afterwards leaves exactly one unlabelled link.
     page.locator("#btn-close-drawer").click()
+    show_table(page)
     page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')")).click()
     wait_drawer_open(page)
     assert page.locator("#drawer-clinvar-link, [data-extra-clinvar-link]").count() == 1
@@ -216,12 +261,15 @@ def test_kb_text_is_escaped_where_it_reaches_innerhtml(page):
     goto_ready(page, page.base_url)
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    finding = page.locator('#report-groups article.lds-finding[data-finding-id="rs6025"]')
+    assert payload in finding.locator(".lds-finding-statement").inner_text(), "the phenotype shows literally in the report"
+    show_table(page)
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')"))
     assert payload in row.inner_text(), "the phenotype shows literally in the table row"
     row.click()
     wait_drawer_open(page)
     assert payload in page.locator("#drawer-caveats-list").inner_text()
-    assert page.locator("#variants-tbody img, #drawer-caveats-list img").count() == 0
+    assert page.locator("#report-groups img, #variants-tbody img, #drawer-caveats-list img").count() == 0
     assert page.evaluate("() => window.__xss") is None
 
 
@@ -229,6 +277,7 @@ def test_cyp2c19_row_carries_the_star_allele_limitation(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs4244285')"))
     badge = row.locator("[data-role='limitation']")
     expect(badge).to_be_visible()
@@ -245,6 +294,7 @@ def test_cyp2c19_row_carries_the_star_allele_limitation(loaded_page):
 def test_tested_wildtype_rows_state_the_count_and_the_limitation(loaded_page):
     page = loaded_page
     _analyse(page, WILDTYPE)
+    show_table(page)
     page.locator("[data-filter='negative']").click()
     dpyd = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs3918290')"))
     text = dpyd.inner_text()
@@ -277,20 +327,23 @@ def test_drawer_footer_shows_the_open_records_tier(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(page)
     tier = page.locator("#drawer-tier-badge").text_content().strip()
-    assert tier.startswith("Tier ")
-    assert page.locator("#drawer-footer-tier").inner_text().strip() == f"Evidence {tier}"
+    assert re.fullmatch(r"Tier [A-D]", tier), tier
+    # Sentence case around the KB tier's letter: "Evidence tier A", never "Evidence Tier A".
+    assert page.locator("#drawer-footer-tier").inner_text().strip() == f"Evidence tier {tier[-1]}"
 
 
 def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
-    assert page.locator("#drawer-rsid").inner_text().strip() == "APOE (rs429358 + rs7412)"
+    open_apoe(page)
+    # The subtitle names the gene once (#drawer-gene), then both markers; the record id stays on #drawer-rsid.
+    assert page.locator("#drawer-rsid").inner_text().strip() == "rs429358 + rs7412"
+    assert page.locator("#drawer-rsid").get_attribute("data-record-id") == "APOE (rs429358 + rs7412)"
     coord = page.locator("#drawer-coord").inner_text()
     assert "45,411,941" in coord and "45,412,079" in coord
     assert "APOE-STATUS" not in page.locator("body").inner_text()
