@@ -12,7 +12,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, goto_ready, show_table, wait_drawer_open
+from conftest import DEMO_FILE, apoe_row, goto_ready, open_apoe, show_table, wait_drawer_open
 
 FIXTURES = Path(__file__).parent / "fixtures"
 E1_E4 = FIXTURES / "apoe-atypical-23andme.txt"  # rs429358 C/C with rs7412 C/T: an e1/e4 genotype
@@ -74,10 +74,9 @@ def test_apoe_e1_e4_page_shows_no_e4_inheritance_figure(loaded_page):
     page = loaded_page
     page.set_input_files("#file-input", str(E1_E4))
     expect(page.locator("#results-section")).to_be_visible()
-    expect(page.locator("#apoe-status-card")).to_be_visible()
+    expect(apoe_row(page)).to_be_visible()
     assert page.evaluate("() => window.__lucidase.state.apoe.diplotype") == "atypical"
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
+    open_apoe(page)
     for element in ("#drawer-seg-risk-unscreened", "#drawer-seg-risk-carrier", "#drawer-seg-carrier-prior"):
         assert page.locator(element).inner_text().strip() == "Not available", element
     text = page.locator("#drawer-segregation-container").inner_text().lower()

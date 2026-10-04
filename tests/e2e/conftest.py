@@ -155,5 +155,19 @@ def wait_drawer_open(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "open", timeout)
 
 
+def apoe_row(page):
+    """The APOE FindingRow in the grouped report (its id is the page's own APOE record id, never typed in)."""
+    expect(page.locator("#results-section")).to_be_visible()
+    apoe_id = page.evaluate("() => window.__lucidase.state.apoe.id")
+    return page.locator(f"#report-groups article.lds-finding[data-finding-id='{apoe_id}']")
+
+
+def open_apoe(page):
+    """Open the APOE record in the Inspector from its FindingRow's Details button; returns the Inspector."""
+    apoe_row(page).locator("button.lds-finding-open").click()
+    wait_drawer_open(page)
+    return page.locator("#variant-drawer")
+
+
 def wait_drawer_closed(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "closed", timeout)

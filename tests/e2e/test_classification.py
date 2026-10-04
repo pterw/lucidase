@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, goto_ready, show_table
+from conftest import DEMO_FILE, apoe_row, goto_ready, show_table
 
 FIXTURES = Path(__file__).parent / "fixtures"
 WILDTYPE = FIXTURES / "wildtype-23andme.txt"
@@ -131,8 +131,9 @@ def test_apoe_components_are_not_separate_finding_rows(loaded_page):
     for rsid in ("rs429358", "rs7412"):
         expect(_row_for(loaded_page, rsid)).to_have_count(0)
         assert rsid not in _rsids(loaded_page, "records")
-    # The combined APOE finding is still shown.
-    expect(loaded_page.locator("#apoe-status-card")).to_be_visible()
+    # The combined APOE finding is still shown, as one row.
+    expect(apoe_row(loaded_page)).to_have_count(1)
+    expect(apoe_row(loaded_page)).to_be_visible()
 
 
 @pytest.mark.allow_console_errors

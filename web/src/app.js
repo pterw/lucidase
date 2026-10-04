@@ -269,7 +269,6 @@ function initEventListeners() {
   const btnExportMd = document.getElementById("btn-export-md");
   const btnExportCsv = document.getElementById("btn-export-csv");
   const btnCloseDrawer = document.getElementById("btn-close-drawer");
-  const btnInspectApoe = document.getElementById("btn-inspect-apoe");
 
   // Drag and drop
   dropzone.addEventListener("dragover", (e) => {
@@ -399,16 +398,6 @@ function initEventListeners() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && state.selectedVariant !== null) closeDrawer();
   });
-
-  // Inspect APOE button
-  if (btnInspectApoe) {
-    btnInspectApoe.addEventListener("click", () => {
-      const apoeRec = state.apoe;
-      if (apoeRec) {
-        openDrawer(apoeRec);
-      }
-    });
-  }
 }
 
 function handleFileSelected(file) {
@@ -490,7 +479,6 @@ function handleParseComplete(data, karyogram) {
   renderQC();
   renderSummaryCards();
   renderReportGroups();
-  renderApoeCard();
   renderAssortmentSection();
   setTableOpen(false);
   renderVariantsTable();
@@ -768,49 +756,6 @@ function openMarkRecord(mark) {
 // Badge tones (styles.css, from the design system's colour tokens). Each label is styled by an explicit map; anything
 // the page has no style for (an unknown category, tier or state) is the one neutral tone, never a "good" (green) one.
 const NEUTRAL_TAG = "lds-tag-neutral";
-
-// APOE tag tone per accent key from the view model; no diplotype asserted means the neutral tone.
-const APOE_ACCENTS = {
-  e4e4: "lds-tag-cat-pathogenic",
-  e4: "lds-tag-cat-carrier",
-  e2: "lds-tag-cat-pgx",
-  e3e3: "lds-tag-cat-not-detected"
-};
-
-function renderApoeCard() {
-  const card = document.getElementById("apoe-status-card");
-  if (!card) return;
-
-  if (!state.apoe) {
-    card.classList.add("hidden");
-    return;
-  }
-
-  card.classList.remove("hidden");
-  const model = apoeCardModel(state.apoe);
-
-  const titleEl = document.getElementById("apoe-diplotype-title");
-  const riskRatioEl = document.getElementById("apoe-risk-ratio");
-  const descEl = document.getElementById("apoe-phenotype-desc");
-  const rawLociEl = document.getElementById("apoe-raw-loci");
-  const lifetimeEl = document.getElementById("apoe-lifetime-stat");
-  const pillEl = document.getElementById("apoe-carrier-pill");
-  const hpaEl = document.getElementById("apoe-hpa-desc");
-
-  // Everything below is KB text; an unresolved APOE shows the reason and no numbers.
-  titleEl.textContent = model.title;
-  rawLociEl.textContent = model.rawLoci;
-  setValue(descEl, model.description);
-  setValue(riskRatioEl, model.riskBadge);
-  setValue(lifetimeEl, model.lifetime);
-  pillEl.textContent = model.pill;
-  setValue(hpaEl, model.hpaSummary);
-
-  // Tag tone by risk profile. No diplotype asserted: the neutral tone, never the not-detected green.
-  const tone = APOE_ACCENTS[model.accent] ?? NEUTRAL_TAG;
-  riskRatioEl.className = `lds-tag ${tone}`;
-  pillEl.className = `lds-tag ${tone}`;
-}
 
 // Each marker of a multi-locus finding with its own result word and StateMark, so colour is never the only signal,
 // and the caution line when one of them is not Found (owner ruling 2026-10-04).
@@ -1105,6 +1050,7 @@ function openDrawer(record, opener = document.activeElement) {
   if (covBadgeEl) covBadgeEl.innerHTML = stateTagInnerHtml(record.coverage_state, record.stateLabel);
 
   renderLigature(record);
+  const figuresShown = renderApoeFigures(record);
 
   // Limitation (e.g. the star-allele refusal or a single-variant test): from the KB, on every row that has one.
   const refusalBox = document.getElementById("drawer-refusal-box");
@@ -1118,13 +1064,14 @@ function openDrawer(record, opener = document.activeElement) {
     }
   }
 
-  // Caveats list
+  // Caveats list. An APOE risk figure already shown under the Ligature is not repeated here.
   const caveatsBox = document.getElementById("drawer-caveats-box");
   const caveatsList = document.getElementById("drawer-caveats-list");
+  const caveats = record.caveats.filter((c) => !figuresShown.includes(c));
   if (caveatsBox && caveatsList) {
-    if (record.caveats.length > 0) {
+    if (caveats.length > 0) {
       caveatsBox.classList.remove("hidden");
-      caveatsList.innerHTML = record.caveats.map(c => `<li>${escapeHtml(c)}</li>`).join("");
+      caveatsList.innerHTML = caveats.map(c => `<li>${escapeHtml(c)}</li>`).join("");
     } else {
       caveatsBox.classList.add("hidden");
       caveatsList.innerHTML = "";
@@ -1249,6 +1196,28 @@ function renderLigature(record) {
       <div class="lds-ligature-result">${result}</div>
       <figcaption class="lds-ligature-caption">One result built from two markers</figcaption>
     </figure>`;
+}
+
+/**
+ * APOE only: the risk ratio and the estimated lifetime risk under the Ligature, as the knowledge base states them and
+ * each with its curation label (view-model.js apoeCardModel; whether to cite or remove them is the owner's decision).
+ * With no diplotype there is no figure, and each says "Not available". Returns the caveat lines the figures came from,
+ * so the caveats list does not repeat them.
+ */
+function renderApoeFigures(record) {
+  const slot = document.getElementById("drawer-apoe-figures");
+  const isApoe = state.apoe !== null && record.id === state.apoe.id;
+  slot.hidden = !isApoe;
+  if (!isApoe) return [];
+  const model = apoeCardModel(record);
+  const riskRatio = model.resolved ? model.riskBadge : null;
+  setValue(document.getElementById("drawer-apoe-risk-ratio"), riskRatio);
+  setValue(document.getElementById("drawer-apoe-lifetime"), model.lifetime);
+  // Each figure is its caveat line after the line's "<label>: " prefix.
+  return [riskRatio, model.lifetime]
+    .filter((figure) => figure !== null)
+    .map((figure) => record.caveats.find((c) => c.endsWith(`: ${figure}`)))
+    .filter((line) => line !== undefined);
 }
 
 function renderDrawerSegregation(record) {

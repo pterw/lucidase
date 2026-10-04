@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, apoe_row, open_apoe, show_table, wait_drawer_closed, wait_drawer_open
 
 FIXTURES = Path(__file__).parent / "fixtures"
 EVIL_QUERIES = [
@@ -279,12 +279,11 @@ def test_export_handlers_run(loaded_page):
 
 def test_apoe_e3e4_upload_and_inspect(loaded_page):
     loaded_page.set_input_files("#file-input", str(FIXTURES / "apoe-e3e4-23andme.txt"))
-    loaded_page.locator("#apoe-status-card").wait_for(state="visible")
-    assert "ε3/ε4" in loaded_page.locator("#apoe-diplotype-title").text_content()
-    assert "3–4×" in loaded_page.locator("#apoe-risk-ratio").text_content()
-    loaded_page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(loaded_page)
+    apoe_row(loaded_page).wait_for(state="visible")
+    open_apoe(loaded_page)
     assert loaded_page.locator("#drawer-gene").text_content() == "APOE"
+    assert "ε3/ε4" in loaded_page.locator("#drawer-ligature .lds-ligature-result").text_content()
+    assert "3–4×" in loaded_page.locator("#drawer-apoe-risk-ratio").text_content()
 
 
 def test_typekit_stylesheet_linked(loaded_page):

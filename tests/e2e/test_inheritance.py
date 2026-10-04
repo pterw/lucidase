@@ -12,7 +12,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, show_table, wait_drawer_open
+from conftest import DEMO_FILE, open_apoe, show_table, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 FORBIDDEN_FOR_NON_MENDELIAN = ("affected", "recurrence", "disease risk")
@@ -42,8 +42,7 @@ def test_demo_apoe_e4e4_drawer_says_every_child_inherits_e4(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
+    open_apoe(page)
     page.locator(".partner-sim-btn[data-partner='wildtype']").click()
     expect(page.locator("#sim-p-affected")).to_have_text("100%")
     text = _seg_text(page)

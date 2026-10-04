@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, goto_ready, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, WEB_DIR, goto_ready, open_apoe, show_table, wait_drawer_closed, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -193,8 +193,7 @@ def test_apoe_drawer_labels_each_component_evidence_by_rsid(loaded_page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     kb = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["loci"]
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
+    open_apoe(page)
     stars = page.locator("#drawer-stars").inner_text()
     assert "rs429358:" in stars and "rs7412:" in stars, stars
     af = page.locator("#drawer-af").inner_text()
@@ -340,8 +339,7 @@ def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
-    page.locator("#btn-inspect-apoe").click()
-    wait_drawer_open(page)
+    open_apoe(page)
     assert page.locator("#drawer-rsid").inner_text().strip() == "APOE (rs429358 + rs7412)"
     coord = page.locator("#drawer-coord").inner_text()
     assert "45,411,941" in coord and "45,412,079" in coord
