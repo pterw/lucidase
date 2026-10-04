@@ -112,7 +112,40 @@ def test_demo_file_loads_through_the_file_input(page):
     assert _total(page, "rows") == str(len(rows))
     assert _total(page, "placed") == str(len(rows))
     assert "reference" not in page.evaluate(LOCUS_STATES).values()
-    expect(page.locator("#karyogram-legend")).to_contain_text("Supported & Observed")
+    expect(page.locator("#karyogram-legend")).to_contain_text("Found")
+
+
+# The design system's plain result words and their one-line help (components/core/hooks.js), verbatim.
+LEGEND_WORDS = {
+    "supported_and_observed": ("Found", "Your file has the variant this check looks for."),
+    "supported_not_observed": (
+        "Not found",
+        "Your file was checked here and the variant was not found among the variants tested. "
+        "This is not the same as 'normal'.",
+    ),
+    "not_tested_by_array": ("Not on your chip", "Your DNA chip did not read this position, or the reading failed. No result."),
+    "insufficient_evidence": (
+        "Unclear",
+        "A reading exists, but the evidence or the genotype is not clear enough to report a result.",
+    ),
+}
+
+
+def test_legend_and_loci_use_the_plain_words_with_their_help(page):
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    for state, (word, help_text) in LEGEND_WORDS.items():
+        item = page.locator(f'#karyogram-legend [data-legend-state="{state}"]')
+        expect(item.locator("[data-legend-label]")).to_have_text(word)
+        expect(item.locator("[data-legend-help]")).to_have_text(help_text)
+    expect(page.locator('#karyogram-legend [data-legend-state="reference"] [data-legend-help]')).to_have_count(0)
+    text = page.locator("#karyogram-legend").inner_text() + page.locator("#karyogram-loci-body").inner_text()
+    titles = page.locator("#karyogram-figure").inner_html()
+    for old in ("Supported", "Observed", "Array Gap", "Wild-Type", "Conflicting", "State 1", "State 2", "State 3", "State 5"):
+        assert old not in text and old not in titles, old
+    found = page.locator('#karyogram-loci-body tr[data-state="supported_and_observed"]').first
+    expect(found.locator("td").last).to_have_text("Found")
 
 
 def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):

@@ -6,6 +6,7 @@ never appear there; it is a supported-not-observed (or insufficient-evidence) re
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -75,6 +76,46 @@ def test_demo_mthfr_het_is_an_observed_finding(loaded_page):
     expect(row).to_have_count(1)
     assert "tested wt" not in row.inner_text().lower()
     assert "tested normal" not in row.inner_text().lower()
+    state = loaded_page.evaluate("() => window.__lucidase.state.records.find(r => r.rsid === 'rs1801133').coverage_state")
+    expect(row.locator(f".lds-tag-state-{state}")).to_have_text(PLAIN_WORDS[state])
+
+
+# The design system's plain result words (components/core/hooks.js stateMeta), verbatim.
+PLAIN_WORDS = {
+    "supported_and_observed": "Found",
+    "supported_not_observed": "Not found",
+    "not_tested_by_array": "Not on your chip",
+    "outside_coverage": "Not checked",
+    "insufficient_evidence": "Unclear",
+}
+OLD_WORDS = ("Supported", "Observed", "Tested WT", "Array Gap", "Wild-Type", "Conflicting", "Not on the chip", "State 1",
+             "State 2", "State 3", "State 4", "State 5", "★", "☆")
+
+
+def test_results_read_in_the_plain_words(loaded_page):
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible()
+    # Summary counts: the word beside each state's mark.
+    for state, word in PLAIN_WORDS.items():
+        expect(page.locator(f".lds-count-label:has(.lds-mark-{state})")).to_have_text(word)
+    # Filter tabs for the per-state tables.
+    for name, word in (("all", "Found"), ("negative", "Not found"), ("gaps", "Not on your chip"), ("insufficient", "Unclear")):
+        expect(page.locator(f"[data-filter='{name}']")).to_have_text(word)
+    # Table badges under each state filter.
+    for name in ("all", "negative", "gaps", "insufficient"):
+        page.locator(f"[data-filter='{name}']").click()
+        for state, word in PLAIN_WORDS.items():
+            tags = page.locator(f"#variants-tbody .lds-tag-state-{state}")
+            for i in range(tags.count()):
+                expect(tags.nth(i)).to_have_text(word)
+    page.locator("[data-filter='all']").click()
+    page.locator("#variants-tbody tr", has=page.locator(".lds-tag-state-supported_and_observed")).first.click()
+    expect(page.locator("#drawer-coverage-state-badge")).to_have_text("Found")
+    expect(page.locator("#drawer-stars")).to_have_text(re.compile(r"\d of 4 review stars|No ClinVar review status"))
+    text = page.locator("body").inner_text()
+    for old in OLD_WORDS:
+        assert old not in text, old
 
 
 def test_apoe_components_are_not_separate_finding_rows(loaded_page):

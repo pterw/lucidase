@@ -24,42 +24,96 @@ export function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
 }
 
-/** Short badge text and long label per coverage state (contracts C4). Unknown states throw. */
-const STATE_TEXT = {
-  supported_and_observed: { badge: "Observed", label: "Supported & Observed" },
-  supported_not_observed: { badge: "Tested WT", label: "Tested Wild-Type (State 2)" },
-  not_tested_by_array: { badge: "Array Gap", label: "Array Gap (State 3)" },
-  insufficient_evidence: { badge: "Conflicting", label: "Conflicting Evidence (State 5)" },
-};
+/**
+ * The design system's plain result word and one-line help per coverage state, verbatim from its StateMark and
+ * KaryogramLegend (components/core/hooks.js stateMeta and stateHelp), in its order. The keys are the data keys,
+ * which never change; every view and export shows these words, never a "State N" code.
+ */
+export const RESULT_WORDS = deepFreeze({
+  supported_and_observed: { label: "Found", help: "Your file has the variant this check looks for." },
+  supported_not_observed: {
+    label: "Not found",
+    help: "Your file was checked here and the variant was not found among the variants tested. This is not the same as 'normal'.",
+  },
+  not_tested_by_array: {
+    label: "Not on your chip",
+    help: "Your DNA chip did not read this position, or the reading failed. No result.",
+  },
+  outside_coverage: { label: "Not checked", help: "Markers in your file that Lucidase does not interpret. Counted only." },
+  insufficient_evidence: {
+    label: "Unclear",
+    help: "A reading exists, but the evidence or the genotype is not clear enough to report a result.",
+  },
+});
+
+/** The states one curated locus can have (contracts C4). `outside_coverage` is a count of markers, never a record. */
+const RECORD_STATES = ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"];
 
 /** The reference-only marker state on the karyogram: the locus has a position but no sample is loaded. */
 const REFERENCE_STATE_LABEL = "Location only (no file loaded)";
 
 /**
- * Human label per karyogram marker state: the four per-locus coverage states reuse the analysis labels above, plus
+ * Human label per karyogram marker state: the four per-locus coverage states reuse the result words above, plus
  * "reference" for the page before a file is loaded. A fresh object each call.
  */
 export function karyogramStateLabels() {
   const labels = { reference: REFERENCE_STATE_LABEL };
-  for (const [state, text] of Object.entries(STATE_TEXT)) labels[state] = text.label;
+  for (const state of RECORD_STATES) labels[state] = RESULT_WORDS[state].label;
   return labels;
 }
 
-/** The APOE card's wording per state. */
-const APOE_STATE_LABEL = {
-  supported_and_observed: "Observed",
-  supported_not_observed: "Not detected",
-  not_tested_by_array: "Not tested by array",
-  insufficient_evidence: "Insufficient evidence",
-};
-
 export const MODEL_LABELS = {
-  autosomal_recessive: "Autosomal Recessive",
-  autosomal_dominant: "Autosomal Dominant",
-  risk_factor: "Risk Factor (allele transmission)",
+  autosomal_recessive: "Autosomal recessive",
+  autosomal_dominant: "Autosomal dominant",
+  risk_factor: "Risk factor (allele transmission)",
   pharmacogenomic: "Pharmacogenomic (allele transmission)",
   trait: "Trait (allele transmission)",
 };
+
+/**
+ * The report's groups, in the design system's order, with its titles and asides verbatim (ui_kits/web/meta.js
+ * LDS_GROUPS). A gene's group follows from its KB inheritance model (`groupIdForModel`).
+ */
+export const REPORT_GROUPS = deepFreeze([
+  {
+    id: "medicines",
+    title: "Pharmacology",
+    aside: "How your genes may affect the way some drugs work in your body. Talk to a doctor or pharmacist before changing any medicine.",
+  },
+  {
+    id: "risk",
+    title: "Health risk factors",
+    aside: "Variants linked to a higher chance of a condition. A risk factor is not a diagnosis.",
+  },
+  {
+    id: "carrier",
+    title: "Carrier status",
+    aside: "Variants that usually cause no symptoms with one copy, but can be passed on to children.",
+  },
+  { id: "traits", title: "Traits", aside: "Everyday traits. These have little or no medical use." },
+]);
+
+const GROUP_BY_MODEL = {
+  pharmacogenomic: "medicines",
+  risk_factor: "risk",
+  autosomal_recessive: "carrier",
+  trait: "traits",
+};
+
+/** The report group id for a KB inheritance model, or null for a model no group covers. */
+export function groupIdForModel(model) {
+  return typeof model === "string" && Object.hasOwn(GROUP_BY_MODEL, model) ? GROUP_BY_MODEL[model] : null;
+}
+
+function deepFreeze(value) {
+  for (const inner of Object.values(value)) if (typeof inner === "object" && inner !== null) deepFreeze(inner);
+  return Object.freeze(value);
+}
+
+/** ClinVar review stars in words: "3 of 4 review stars". No review status is said as such. */
+function reviewStarsText(stars) {
+  return stars === null ? NO_CLINVAR_STATUS : `${stars} of 4 review stars`;
+}
 
 const nonEmptyString = (v) => (typeof v === "string" && v !== "" ? v : null);
 const numberOrNull = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -111,8 +165,7 @@ function locusEvidence(rec) {
   return {
     rsid: rec.rsid,
     stars,
-    starsText: stars === null ? NO_CLINVAR_STATUS : stars > 0 ? "★".repeat(stars) : "0 stars",
-    starsDetail: stars === null ? NO_CLINVAR_STATUS : stars > 0 ? `${"★".repeat(stars)} (${stars} / 4 stars)` : "0 / 4 stars",
+    starsText: reviewStarsText(stars),
     clinvarUrl: imported && digits ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${Number(digits)}` : null,
     af,
     afText: af === null ? null : `${(af * 100).toFixed(2)}%`,
@@ -157,8 +210,10 @@ function apoeAccentKey(diplotype) {
 }
 
 export function toViewModel(record, genes, testedCounts = {}) {
-  const state = STATE_TEXT[record.coverage_state];
-  if (state === undefined) throw new Error(`unknown coverage state "${record.coverage_state}" on ${record.rsid}`);
+  if (!RECORD_STATES.includes(record.coverage_state)) {
+    throw new Error(`unknown coverage state "${record.coverage_state}" on ${record.rsid}`);
+  }
+  const state = RESULT_WORDS[record.coverage_state];
   const gene = genes[record.gene];
   const interp = record.interpretation ?? null;
   const evidence = record.evidence ?? {};
@@ -218,8 +273,8 @@ export function toViewModel(record, genes, testedCounts = {}) {
     coordinates: allPositions ? positions.map((p) => `chr${p.chrom}:${p.pos}`).join(";") : null,
     chromosomes: [...new Set(positions.map((p) => p.chrom))].join(";"),
     positionExport: allPositions ? positions.map((p) => p.pos).join(";") : null,
-    stateBadge: state.badge,
     stateLabel: state.label,
+    stateHelp: state.help,
     tier,
     category,
     isCarrier: category === "Carrier",
@@ -240,7 +295,6 @@ export function toViewModel(record, genes, testedCounts = {}) {
     clinvar_stars: stars,
     starsMuted: isComposite ? evidenceParts.every((p) => p.stars === null) : stars === null,
     starsText: isComposite ? joinLabelled(evidenceParts, (p) => p.starsText) : single.starsText,
-    starsDetail: isComposite ? joinLabelled(evidenceParts, (p) => p.starsDetail) : single.starsDetail,
     clinvarUrl: isComposite ? null : single.clinvarUrl,
     clinvarLinks: evidenceParts.filter((p) => p.clinvarUrl !== null).map((p) => ({ rsid: p.rsid, url: p.clinvarUrl })),
     gnomad_af: af,
@@ -306,7 +360,7 @@ export function toViewModel(record, genes, testedCounts = {}) {
 /** The APOE card's display strings, from the APOE view model (one formatter: core/apoe.js displayDiplotype). */
 export function apoeCardModel(apoe) {
   const resolved = apoe.diplotype !== null && apoe.diplotype !== "atypical";
-  const stateLabel = APOE_STATE_LABEL[apoe.coverage_state];
+  const stateLabel = RESULT_WORDS[apoe.coverage_state].label;
   const kbFigure = (prefix) => {
     const hit = apoe.caveats.find((c) => c.startsWith(prefix));
     return hit ? hit.slice(prefix.length) : null;
@@ -398,7 +452,7 @@ const csvText = (value) => {
 const csvCell = (value) => (value === null || value === undefined ? '""' : typeof value === "number" ? String(value) : csvText(value));
 
 const CSV_HEADERS = [
-  "rsID", "Gene", "Genotype", "Chromosome", "Position", "Coverage_State", "Evidence_Tier",
+  "rsID", "Gene", "Genotype", "Chromosome", "Position", "Coverage_State", "Result", "Evidence_Tier",
   "Category", "Significance", "Magnitude", "Repute", "ClinVar_Stars",
   "Inheritance_Mode", "Gnomad_AF", "Child_Inherits_Allele_Wildtype_Partner", "Child_Inherits_Allele_Unscreened_Partner",
   "Child_Affected_Unscreened_Partner",
@@ -441,6 +495,7 @@ export function csvReport(viewModels, genes) {
       csvCell(vm.chromosomes),
       vm.positions.length === 1 && vm.positionExport !== null ? vm.positions[0].pos : csvCell(vm.positionExport),
       csvCell(vm.coverage_state),
+      csvCell(vm.stateLabel),
       csvCell(vm.tierExport),
       csvCell(vm.category),
       csvCell(vm.significanceValue),
@@ -489,47 +544,47 @@ export function markdownReport(data) {
   const { qc, manifest, coverage: cov, apoe } = data;
   const listed = new Set();
   const unseen = (vms) => vms.filter((vm) => !listed.has(vm.id) && listed.add(vm.id));
-  let md = `# Lucidase Variome Clinical Report\n\n`;
-  md += `> **CARDINAL SCOPE GUARDRAIL**: ${manifest.guardrail}\n\n`;
+  let md = `# Lucidase variome clinical report\n\n`;
+  md += `> **Cardinal scope guardrail**: ${manifest.guardrail}\n\n`;
   md += `**Sample**: ${data.fileName} | **Format**: ${qc.format_name.toUpperCase()} (${qc.build}) | **Sex-chromosome QC**: ${qc.sex_signal}\n`;
-  md += `**Markers**: ${qc.total_snps.toLocaleString("en-US")} | **Call Rate**: ${formatRate(qc.call_rate)} | **Heterozygosity**: ${formatRate(qc.heterozygosity_rate)}\n\n`;
+  md += `**Markers**: ${qc.total_snps.toLocaleString("en-US")} | **Call rate**: ${formatRate(qc.call_rate)} | **Heterozygosity**: ${formatRate(qc.heterozygosity_rate)}\n\n`;
 
-  md += `## Coverage Taxonomy (5-State Summary)\n\n`;
-  md += `- **Supported & Observed (State 1)**: ${countText(cov.supported_and_observed_count)} findings\n`;
-  md += `- **Tested Wild-Type / Supported Not Observed (State 2)**: ${countText(cov.supported_not_observed_count)} loci\n`;
-  md += `- **Microarray Gaps / Not Tested by Chip (State 3)**: ${countText(cov.not_tested_by_array_count)} loci\n`;
-  md += `- **Outside Coverage Scope (State 4)**: ${countText(cov.outside_coverage_count)} markers\n`;
-  md += `- **Conflicting / Insufficient Evidence (State 5)**: ${countText(cov.insufficient_evidence_count)} loci\n\n`;
+  // One line per coverage state, in the design system's order: the plain word, the count and what the word means.
+  md += `## Results of the checks\n\n`;
+  for (const [state, words] of Object.entries(RESULT_WORDS)) {
+    md += `- **${words.label}**: ${countText(cov[`${state}_count`])}. ${words.help}\n`;
+  }
+  md += `\n`;
 
   if (apoe) {
     const card = apoeCardModel(apoe);
-    md += `## APOE Neuro-Genomic Status\n`;
+    md += `## APOE neuro-genomic status\n`;
     md += `- **Locus**: ${apoe.exportId} (${apoe.coordinates ?? NOT_AVAILABLE})\n`;
     md += `- **Diplotype**: ${card.resolved ? card.title : "none asserted"}\n`;
-    md += `- **State**: ${card.stateLabel}${apoe.reason ? ` (${apoe.reason})` : ""}\n`;
+    md += `- **Result**: ${card.stateLabel}${apoe.reason ? ` (${apoe.reason})` : ""}\n`;
     if (card.resolved) {
-      md += `- **Risk Ratio**: ${card.riskBadge ?? NOT_AVAILABLE}\n`;
-      md += `- **Estimated Lifetime Risk**: ${card.lifetime ?? NOT_AVAILABLE}\n`;
+      md += `- **Risk ratio**: ${card.riskBadge ?? NOT_AVAILABLE}\n`;
+      md += `- **Estimated lifetime risk**: ${card.lifetime ?? NOT_AVAILABLE}\n`;
     }
     if (apoe.caveat) md += `- **Caveat**: ${apoe.caveat}\n`;
     if (apoe.limitation) md += `- **Limitation**: ${apoe.limitation}\n`;
-    md += `- **Underlying Loci**: ${mdFileText(card.rawLoci).escaped}\n`;
-    if (card.resolved) md += `- **Clinical Guidance**: ${apoe.phenotype ?? NOT_AVAILABLE}\n`;
+    md += `- **Underlying loci**: ${mdFileText(card.rawLoci).escaped}\n`;
+    if (card.resolved) md += `- **Clinical guidance**: ${apoe.phenotype ?? NOT_AVAILABLE}\n`;
     md += `\n`;
   }
 
   if (data.compoundHeterozygotes.length > 0) {
-    md += `## Possible Compound Heterozygotes (Phase Unknown)\n\n`;
+    md += `## Possible compound heterozygotes (phase unknown)\n\n`;
     for (const ch of data.compoundHeterozygotes) {
       md += `### ${ch.title} (${ch.gene})\n`;
       md += `- **Significance**: ${ch.significance}\n`;
-      md += `- **Clinical Summary**: ${ch.summary}\n`;
+      md += `- **Clinical summary**: ${ch.summary}\n`;
       md += `- **Segregation**: ${ch.segregation_notes}\n\n`;
     }
   }
 
   if (data.independentAssortment.length > 0) {
-    md += `## Co-occurring Variant Alleles on Unlinked Loci\n\n`;
+    md += `## Co-occurring variant alleles on unlinked loci\n\n`;
     for (const ia of data.independentAssortment) {
       md += `### ${ia.type} (${ia.genes.join(" + ")})\n`;
       md += `- **Loci**: ${ia.loci.join(" · ")}\n`;
@@ -538,11 +593,14 @@ export function markdownReport(data) {
     }
   }
 
-  md += `## Observed Clinical Findings (State 1)\n\n`;
+  // One section per state: the plain word as the heading, its one-line help, then the table.
+  const section = (state) => `## ${RESULT_WORDS[state].label}\n\n${RESULT_WORDS[state].help}\n\n`;
+
+  md += section("supported_and_observed");
   md += mdTable(
-    ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Category", "ClinVar", "Magnitude", "Limitation", "Phenotype / Guidance", "Missing fields"],
+    ["rsID", "Gene", "Genotype", "Position", "Result", "Tier", "Category", "ClinVar", "Magnitude", "Limitation", "Phenotype / guidance", "Missing fields"],
     unseen(data.records).map((r) => [
-      r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.coverage_state, r.tierExport, r.category,
+      r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.stateLabel, r.tierExport, r.category,
       r.starsExportText, r.magnitude === null ? null : r.magnitude.toFixed(1),
       r.limitationTooltip, r.phenotype, r.missing_fields.join("; "),
     ])
@@ -550,11 +608,11 @@ export function markdownReport(data) {
 
   const negatives = unseen(data.negativeChecks);
   if (negatives.length > 0) {
-    md += `\n## Tested Wild-Type Loci (State 2: Supported but Not Observed)\n\n`;
+    md += `\n${section("supported_not_observed")}`;
     md += mdTable(
-      ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Result", "Limitation", "Missing fields"],
+      ["rsID", "Gene", "Genotype", "Position", "Result", "Tier", "Statement", "Limitation", "Missing fields"],
       negatives.map((r) => [
-        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.coverage_state, r.tierExport,
+        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.stateLabel, r.tierExport,
         r.statement ?? r.phenotype, r.limitationTooltip, r.missing_fields.join("; "),
       ])
     );
@@ -562,20 +620,20 @@ export function markdownReport(data) {
 
   const gaps = unseen(data.arrayGaps);
   if (gaps.length > 0) {
-    md += `\n## Microarray Gaps (State 3: Not Tested by Chip)\n\n`;
+    md += `\n${section("not_tested_by_array")}`;
     md += mdTable(
-      ["rsID", "Gene", "Build Coordinates", "State", "Reason", "Limitation", "Missing fields"],
-      gaps.map((r) => [r.exportId, r.gene, r.coordinates, r.coverage_state, r.phenotype, r.limitationTooltip, r.missing_fields.join("; ")])
+      ["rsID", "Gene", "Build coordinates", "Result", "Reason", "Limitation", "Missing fields"],
+      gaps.map((r) => [r.exportId, r.gene, r.coordinates, r.stateLabel, r.phenotype, r.limitationTooltip, r.missing_fields.join("; ")])
     );
   }
 
   const insufficient = unseen(data.insufficientEvidence);
   if (insufficient.length > 0) {
-    md += `\n## Insufficient Evidence or Not Interpretable (State 5)\n\n`;
+    md += `\n${section("insufficient_evidence")}`;
     md += mdTable(
-      ["rsID", "Gene", "Genotype", "Position", "State", "Tier", "Reason", "Limitation", "Missing fields"],
+      ["rsID", "Gene", "Genotype", "Position", "Result", "Tier", "Reason", "Limitation", "Missing fields"],
       insufficient.map((r) => [
-        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.coverage_state, r.tierExport, r.phenotype, r.limitationTooltip,
+        r.exportId, r.gene, mdFileText(r.genotype), r.coordinates, r.stateLabel, r.tierExport, r.phenotype, r.limitationTooltip,
         r.missing_fields.join("; "),
       ])
     );

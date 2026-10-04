@@ -55,7 +55,7 @@ def test_single_component_is_not_tested_with_no_diplotype(loaded_page):
     assert apoe["coverage_state"] == "not_tested_by_array"
     assert "rs7412" in apoe["reason"]
     text = loaded_page.locator("#apoe-status-card").inner_text()
-    assert "Not tested by array" in text
+    assert "Not on your chip" in text
     assert "ε" not in text
     assert _apoe_rows(loaded_page) == 1
 

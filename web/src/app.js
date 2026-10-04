@@ -636,11 +636,11 @@ function renderVariantsTable() {
 
   let countLabel = `Showing ${filtered.length} of ${state.records.length} findings`;
   if (state.filterCategory === "negative") {
-    countLabel = `Showing ${filtered.length} loci tested, variant not detected`;
+    countLabel = `Showing ${filtered.length} loci checked where the variant was not found`;
   } else if (state.filterCategory === "gaps") {
     countLabel = `Showing ${filtered.length} loci your chip did not read`;
   } else if (state.filterCategory === "insufficient") {
-    countLabel = `Showing ${filtered.length} loci with conflicting or insufficient evidence`;
+    countLabel = `Showing ${filtered.length} loci with an unclear result`;
   }
   document.getElementById("showing-count").textContent = countLabel;
 
@@ -690,7 +690,7 @@ function renderVariantsTable() {
         <span class="flex flex-wrap items-center gap-1.5"><span class="font-bold">${escapeHtml(r.gene)}</span> ${acmgPill} ${limitationBadge}</span>
       </td>
       <td class="lds-data font-bold">${valueHtml(r.genotype)}</td>
-      <td>${stateTagHtml(r.coverage_state, r.stateBadge)}</td>
+      <td>${stateTagHtml(r.coverage_state, r.stateLabel)}</td>
       <td>
         <span class="flex flex-wrap items-center gap-1.5">${tierBadge} ${categoryBadge}</span>
       </td>
@@ -724,7 +724,7 @@ function openDrawer(record, opener = document.activeElement) {
     document.getElementById("drawer-phenotype"),
     [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null
   );
-  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsDetail, record.starsText);
+  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, record.starsText);
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 

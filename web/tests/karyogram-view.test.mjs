@@ -133,8 +133,12 @@ test("the karyogram state labels reuse the analysis labels and add the reference
   const { karyogramStateLabels } = await import("../src/view-model.js");
   const labels = karyogramStateLabels();
   assert.deepEqual(Object.keys(labels).sort(), ["insufficient_evidence", "not_tested_by_array", "reference", "supported_and_observed", "supported_not_observed"]);
-  assert.equal(labels.supported_and_observed, "Supported & Observed");
-  assert.equal(labels.not_tested_by_array, "Array Gap (State 3)");
+  // The design system's plain result words (StateMark), never a "State N" code.
+  assert.equal(labels.supported_and_observed, "Found");
+  assert.equal(labels.supported_not_observed, "Not found");
+  assert.equal(labels.not_tested_by_array, "Not on your chip");
+  assert.equal(labels.insufficient_evidence, "Unclear");
+  for (const text of Object.values(labels)) assert.ok(!/State \d|Observed|Array Gap|Wild-Type/.test(text), text);
   labels.reference = "changed";
   assert.notEqual(karyogramStateLabels().reference, "changed");
 });

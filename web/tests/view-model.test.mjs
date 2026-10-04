@@ -10,11 +10,16 @@ import { describeSegregation } from "../src/core/inheritance.js";
 import {
   NOT_AVAILABLE,
   APOE_FIGURES_NOTE,
+  MODEL_LABELS,
   NO_CLINVAR_STATUS,
+  REPORT_GROUPS,
+  RESULT_WORDS,
   apoeCardModel,
   csvReport,
   drawerTierText,
   escapeHtml,
+  groupIdForModel,
+  karyogramStateLabels,
   kbBadge,
   markdownReport,
   partnerModelNote,
@@ -45,9 +50,9 @@ function analyse(text, mutateKb = (kb) => kb) {
 
 /** Every string anywhere in a display model (the raw record fields are excluded). */
 const DISPLAY_KEYS = [
-  "id", "exportId", "genotype", "positionText", "coordinates", "chromosomes", "positionExport", "stateBadge",
-  "stateLabel", "tier", "category", "significance", "significanceValue", "phenotype", "statement", "magnitudeText",
-  "starsText", "starsDetail", "clinvarUrl", "afText", "limitation", "limitationTooltip", "modelLabel",
+  "id", "exportId", "genotype", "positionText", "coordinates", "chromosomes", "positionExport", "stateLabel",
+  "stateHelp", "tier", "category", "significance", "significanceValue", "phenotype", "statement", "magnitudeText",
+  "starsText", "clinvarUrl", "afText", "limitation", "limitationTooltip", "modelLabel",
 ];
 const displayStrings = (vm) => [
   ...DISPLAY_KEYS.map((k) => vm[k]),
@@ -144,7 +149,7 @@ test("a not-tested record has no undefined, null or NaN in any field, and shows 
   const { vms, kb } = analyse(DEMO.replace(/^rs6025[^\n]*\r?\n/m, ""));
   const gap = vms.find((v) => v.id === "rs6025");
   assert.equal(gap.coverage_state, "not_tested_by_array");
-  assert.equal(gap.significance, "Array Gap (State 3)");
+  assert.equal(gap.significance, "Not on your chip");
   assert.equal(gap.phenotype, "locus not assayed on this array");
   assert.match(gap.positionText, /^chr1:169,519,049$/);
   assert.equal(gap.genotype, null);
@@ -221,7 +226,7 @@ test("the APOE row never presents one component's evidence as its own", () => {
   assert.deepEqual(apoe.componentEvidence.map((c) => c.af), [e4.gnomad.af, e2.gnomad.af]);
   const url = (e) => `https://www.ncbi.nlm.nih.gov/clinvar/variation/${Number(e.clinvar.accession.replace(/\D/g, ""))}`;
   assert.deepEqual(apoe.clinvarLinks, [{ rsid: "rs429358", url: url(e4) }, { rsid: "rs7412", url: url(e2) }]);
-  assert.equal(apoe.starsText, "rs429358: ★ · rs7412: ★★★");
+  assert.equal(apoe.starsText, "rs429358: 1 of 4 review stars · rs7412: 3 of 4 review stars");
   assert.match(apoe.afText, /^rs429358: \d+\.\d\d% · rs7412: \d+\.\d\d%$/);
   const round = (x) => Math.round(x * 1e6) / 1e6;
   const csv = parseCsv(csvReport([apoe], a.kb.genes))[0];
@@ -229,8 +234,8 @@ test("the APOE row never presents one component's evidence as its own", () => {
   assert.equal(csv.Gnomad_AF, `${round(e4.gnomad.af)};${round(e2.gnomad.af)}`);
   assert.equal(csv.Evidence_Tier, "Tier A;Tier A");
   const md = markdownReport(reportData(a));
-  assert.equal(md.split("\n")[0], "# Lucidase Variome Clinical Report");
-  assert.ok(md.includes("★;★★★"), "Markdown ClinVar column joins the component values");
+  assert.equal(md.split("\n")[0], "# Lucidase variome clinical report");
+  assert.ok(md.includes("1 of 4 review stars;3 of 4 review stars"), "Markdown ClinVar column joins the component values");
   // The tier is shown once when both components agree, and per component otherwise.
   assert.equal(apoe.tier, "Tier A");
   const split = structuredClone(apoe);
@@ -273,14 +278,14 @@ test("tier, stars and limitation are the same in the table model, drawer text, C
 test("stars come exactly from the evidence, and ClinVar links only from a machine-imported accession", () => {
   const a = analyse(DEMO);
   const f5 = a.byRsid.rs6025;
-  assert.equal(f5.starsText, "★".repeat(f5.stars));
+  assert.equal(f5.starsText, `${f5.stars} of 4 review stars`);
   assert.match(f5.clinvarUrl, /^https:\/\/www\.ncbi\.nlm\.nih\.gov\/clinvar\/variation\/\d+$/);
   const curated = structuredClone(f5);
   curated.evidence.clinvar.provenance.curation_mode = "manually_curated";
   assert.equal(toViewModel(curated, a.kb.genes).clinvarUrl, null);
   const none = structuredClone(f5);
   none.evidence.clinvar.stars = 0;
-  assert.equal(toViewModel(none, a.kb.genes).starsText, "0 stars");
+  assert.equal(toViewModel(none, a.kb.genes).starsText, "0 of 4 review stars");
 });
 
 test("not detected wording states the count, never 'Normal'", () => {
@@ -373,12 +378,14 @@ test("the partner model is stated in words", () => {
 /** The Markdown table under a "## <heading>" line as rows keyed by rsID, with `\|` read as a literal pipe. */
 function markdownRows(md, heading) {
   const lines = md.split("\n");
-  const start = lines.findIndex((l) => l.startsWith(`## ${heading}`));
+  const start = lines.findIndex((l) => l === `## ${heading}`);
   assert.ok(start >= 0, `no section "${heading}"`);
   const cells = (line) =>
     line.replace(/^\| /, "").replace(/ \|$/, "").split(/ \| /).map((c) => c.replace(/\\\|/g, "|"));
   const table = [];
-  for (let i = start + 2; i < lines.length && lines[i].startsWith("|"); i++) table.push(lines[i]);
+  let i = start + 1;
+  while (i < lines.length && !lines[i].startsWith("|") && !lines[i].startsWith("## ")) i++;
+  for (; i < lines.length && lines[i].startsWith("|"); i++) table.push(lines[i]);
   const [header, , ...body] = table.map(cells);
   return Object.fromEntries(body.map((r) => [r[0], Object.fromEntries(header.map((h, i) => [h, r[i]]))]));
 }
@@ -401,7 +408,7 @@ test("a hostile genotype is neutralised in the CSV and the Markdown", () => {
   const row = md.split("\n").find((l) => l.startsWith("| rs6025 "));
   assert.ok(row.includes("&lt;DEL&gt;/a\\|b&amp;c"), row);
   assert.ok(!row.includes("<DEL>"), row);
-  assert.equal(markdownRows(md, "Observed").rs6025.Genotype, "&lt;DEL&gt;/a|b&amp;c", "the pipe did not move any cell");
+  assert.equal(markdownRows(md, "Found").rs6025.Genotype, "&lt;DEL&gt;/a|b&amp;c", "the pipe did not move any cell");
 });
 
 test("a backslash before a pipe is escaped too, so it cannot cancel the pipe's escape (S2-F1 Minor)", () => {
@@ -437,9 +444,9 @@ test("Markdown rows match the CSV rows per record: tier, stars, limitation, geno
   const all = a.vms.some((v) => v.id === a.apoe.id) ? a.vms : [...a.vms, a.apoe];
   const md = markdownReport(reportData(a, { records: all, negativeChecks: [], arrayGaps: [], insufficientEvidence: [] }));
   const csv = parseCsv(csvReport(all, a.kb.genes));
-  const starsText = (n) => (n === "" ? NO_CLINVAR_STATUS : Number(n) > 0 ? "\u2605".repeat(Number(n)) : "0 stars");
+  const starsText = (n) => (n === "" ? NO_CLINVAR_STATUS : `${Number(n)} of 4 review stars`);
   const compare = (mdText) => {
-    const rows = markdownRows(mdText, "Observed Clinical Findings");
+    const rows = markdownRows(mdText, "Found");
     assert.equal(Object.keys(rows).length, csv.length);
     for (const c of csv) {
       const r = rows[c.rsID];
@@ -467,7 +474,7 @@ test("the APOE figures are labelled as curated and unverified on the card and in
   assert.equal(APOE_FIGURES_NOTE, "manually curated; source citation pending verification");
   for (const text of [card.riskBadge, card.lifetime, card.description]) assert.ok(text.includes(APOE_FIGURES_NOTE), text);
   const md = markdownReport(reportData(a));
-  for (const label of ["Risk Ratio", "Estimated Lifetime Risk", "Clinical Guidance"]) {
+  for (const label of ["Risk ratio", "Estimated lifetime risk", "Clinical guidance"]) {
     const line = md.split("\n").find((l) => l.startsWith(`- **${label}**`));
     assert.ok(line.includes(APOE_FIGURES_NOTE), line);
   }
@@ -527,5 +534,177 @@ test("the APOE e4 accent flag and the card's accent key follow the diplotype", (
   for (const diplotype of ["atypical", null]) {
     assert.equal(apoeCardModel(apoeWith(diplotype)).accent, null, `no accent for ${diplotype}`);
     assert.equal(apoeWith(diplotype).apoeE4Accent, false);
+  }
+});
+
+// The design system's plain result words and their one-line help (components/core/hooks.js stateMeta and stateHelp),
+// copied verbatim. The data keys never change; only the words a person reads do.
+const DS_RESULT_WORDS = {
+  supported_and_observed: ["Found", "Your file has the variant this check looks for."],
+  supported_not_observed: [
+    "Not found",
+    "Your file was checked here and the variant was not found among the variants tested. This is not the same as 'normal'.",
+  ],
+  not_tested_by_array: ["Not on your chip", "Your DNA chip did not read this position, or the reading failed. No result."],
+  outside_coverage: ["Not checked", "Markers in your file that Lucidase does not interpret. Counted only."],
+  insufficient_evidence: [
+    "Unclear",
+    "A reading exists, but the evidence or the genotype is not clear enough to report a result.",
+  ],
+};
+const OLD_STATE_WORDS = [
+  /State \d/, /Supported/, /Observed/, /Tested WT/, /Wild-Type/, /Array Gap/, /Microarray/, /Conflicting Evidence/,
+  /Taxonomy/, /★/, /☆/,
+];
+
+/** A file that gives every per-locus state: the demo with rs6025 dropped (gap) and rs1799945 unreadable (unclear). */
+const ALL_STATES_FILE = DEMO.replace(/^rs6025[^\n]*\r?\n/m, "")
+  .replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG")
+  .replace(/^rs1799945\t6\t26092913\tCG/m, "rs1799945\t6\t26092913\tTT");
+
+test("each coverage state reads as the design system's plain word with its one-line help", () => {
+  for (const [state, [label, help]] of Object.entries(DS_RESULT_WORDS)) {
+    assert.deepEqual(RESULT_WORDS[state], { label, help }, state);
+  }
+  assert.deepEqual(Object.keys(RESULT_WORDS), Object.keys(DS_RESULT_WORDS), "the design system's state order");
+  const a = analyse(ALL_STATES_FILE);
+  const seen = new Set();
+  for (const vm of [...a.vms, a.apoe]) {
+    const [label, help] = DS_RESULT_WORDS[vm.coverage_state];
+    assert.equal(vm.stateLabel, label, vm.id);
+    assert.equal(vm.stateHelp, help, vm.id);
+    assert.equal(vm.stateBadge, undefined, "one word per state: the badge and the label are the same field");
+    for (const text of displayStrings(vm)) for (const old of OLD_STATE_WORDS) assert.ok(!old.test(text), `${old} in "${text}"`);
+    seen.add(vm.coverage_state);
+  }
+  assert.deepEqual([...seen].sort(), ["insufficient_evidence", "not_tested_by_array", "supported_and_observed", "supported_not_observed"]);
+  assert.throws(() => toViewModel({ ...a.byRsid.rs6025, coverage_state: "outside_coverage" }, a.kb.genes), /coverage state/);
+  // The karyogram reuses the same words; its reference marker keeps its own label.
+  const labels = karyogramStateLabels();
+  for (const state of ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"]) {
+    assert.equal(labels[state], DS_RESULT_WORDS[state][0], state);
+  }
+});
+
+test("the APOE card states its result in the same plain words", () => {
+  const a = analyse(DEMO);
+  assert.equal(apoeCardModel(a.apoe).stateLabel, "Found");
+  const sparse = analyse(DEMO.replace(/^rs7412[^\n]*\r?\n/m, ""));
+  const card = apoeCardModel(sparse.apoe);
+  assert.equal(sparse.apoe.coverage_state, "not_tested_by_array");
+  assert.equal(card.stateLabel, "Not on your chip");
+  assert.equal(card.pill, "Not on your chip");
+});
+
+test("the Markdown report uses the plain words, keeps the help and the absence statement, and has no state codes", () => {
+  const a = analyse(ALL_STATES_FILE);
+  const coverage = {
+    supported_and_observed_count: 7, supported_not_observed_count: 3, not_tested_by_array_count: 2,
+    outside_coverage_count: 600000, insufficient_evidence_count: 1,
+  };
+  const md = markdownReport(reportData(a, { coverage }));
+  for (const old of OLD_STATE_WORDS) assert.ok(!old.test(md), `${old} is still in the Markdown`);
+  // Every heading is sentence case: no capital after the first word, other than gene symbols and APOE.
+  for (const heading of md.split("\n").filter((l) => l.startsWith("#"))) {
+    const words = heading.replace(/^#+ /, "").split(" ").slice(1);
+    for (const w of words) assert.ok(!/^[A-Z][a-z]/.test(w), `"${w}" in "${heading}" is not sentence case`);
+  }
+  const summary = md.split("\n## Results of the checks\n")[1].split("\n## ")[0];
+  const counts = [7, 3, 2, 600000, 1];
+  Object.values(DS_RESULT_WORDS).forEach(([label, help], i) => {
+    assert.ok(summary.includes(`- **${label}**: ${counts[i].toLocaleString("en-US")}. ${help}`), `${label} summary line`);
+  });
+  for (const [state, [label, help]] of Object.entries(DS_RESULT_WORDS)) {
+    if (state === "outside_coverage") continue;
+    const section = md.split(`\n## ${label}\n`)[1];
+    assert.ok(section, `no "## ${label}" section`);
+    assert.ok(section.trimStart().startsWith(help), `${label} section opens with its help`);
+    const rows = Object.values(markdownRows(md, label));
+    assert.ok(rows.some((row) => row.Result === label), label);
+    // The worker lists a variant-present or wild-type locus with unclear evidence under Found or Not found; the row's
+    // own Result still says Unclear.
+    for (const row of rows) assert.ok([label, "Unclear"].includes(row.Result), `${label} row: ${row.Result}`);
+  }
+  assert.ok(md.includes("This is not the same as 'normal'."), "absence of a finding is not absence of risk");
+  assert.ok(md.includes("guardrail text"), "the scope guardrail still opens the report");
+});
+
+test("the CSV keeps the machine state key and adds the plain result word", () => {
+  const a = analyse(ALL_STATES_FILE);
+  const rows = parseCsv(csvReport([...a.vms, a.apoe], a.kb.genes));
+  const header = csvReport([], a.kb.genes).split("\r\n")[0].split(",");
+  assert.equal(header[header.indexOf("Coverage_State") + 1], "Result", "Result sits next to Coverage_State");
+  for (const row of rows) {
+    assert.ok(Object.hasOwn(DS_RESULT_WORDS, row.Coverage_State), row.Coverage_State);
+    assert.equal(row.Result, DS_RESULT_WORDS[row.Coverage_State][0], row.rsID);
+  }
+  const text = csvReport([...a.vms, a.apoe], a.kb.genes);
+  for (const old of OLD_STATE_WORDS) assert.ok(!old.test(text), `${old} is still in the CSV`);
+});
+
+test("ClinVar review stars are words, never star glyphs, everywhere", () => {
+  const a = analyse(DEMO);
+  for (const vm of [...a.vms, a.apoe]) {
+    for (const p of vm.componentEvidence ?? [vm]) {
+      if (p.stars === null) continue;
+      const text = `${p.stars} of 4 review stars`;
+      assert.ok((vm.componentEvidence ? vm.starsText.includes(`${p.rsid}: ${text}`) : vm.starsText === text), vm.id);
+    }
+    assert.equal(vm.starsDetail, undefined, "the drawer shows the same words as the table");
+  }
+  const one = structuredClone(a.byRsid.rs6025);
+  one.evidence.clinvar.stars = 1;
+  assert.equal(toViewModel(one, a.kb.genes).starsText, "1 of 4 review stars");
+  const none = structuredClone(a.byRsid.rs6025);
+  none.evidence.clinvar.stars = null;
+  assert.equal(toViewModel(none, a.kb.genes).starsText, NO_CLINVAR_STATUS);
+  const md = markdownReport(reportData(a));
+  const csv = csvReport(a.vms, a.kb.genes);
+  for (const text of [md, csv, ...a.vms.flatMap(displayStrings)]) assert.ok(!/[★☆]/.test(text), text.slice(0, 80));
+});
+
+test("inheritance model labels are sentence case", () => {
+  assert.deepEqual(MODEL_LABELS, {
+    autosomal_recessive: "Autosomal recessive",
+    autosomal_dominant: "Autosomal dominant",
+    risk_factor: "Risk factor (allele transmission)",
+    pharmacogenomic: "Pharmacogenomic (allele transmission)",
+    trait: "Trait (allele transmission)",
+  });
+  const a = analyse(DEMO);
+  const csv = parseCsv(csvReport(a.vms, a.kb.genes));
+  assert.ok(csv.some((r) => r.Inheritance_Mode === "Autosomal recessive"));
+});
+
+test("the report groups are the design system's, in its order, and every KB gene belongs to one", () => {
+  // ui_kits/web/meta.js LDS_GROUPS, verbatim.
+  assert.deepEqual(REPORT_GROUPS, [
+    { id: "medicines", title: "Pharmacology", aside: "How your genes may affect the way some drugs work in your body. Talk to a doctor or pharmacist before changing any medicine." },
+    { id: "risk", title: "Health risk factors", aside: "Variants linked to a higher chance of a condition. A risk factor is not a diagnosis." },
+    { id: "carrier", title: "Carrier status", aside: "Variants that usually cause no symptoms with one copy, but can be passed on to children." },
+    { id: "traits", title: "Traits", aside: "Everyday traits. These have little or no medical use." },
+  ]);
+  assert.equal(groupIdForModel("pharmacogenomic"), "medicines");
+  assert.equal(groupIdForModel("risk_factor"), "risk");
+  assert.equal(groupIdForModel("autosomal_recessive"), "carrier");
+  assert.equal(groupIdForModel("trait"), "traits");
+  for (const other of ["autosomal_dominant", "unknown", "toString", "", null, undefined]) assert.equal(groupIdForModel(other), null, String(other));
+  // Fail fast: a model added to the KB without a group breaks this test.
+  const ids = new Set(REPORT_GROUPS.map((g) => g.id));
+  for (const [gene, entry] of Object.entries(KB_JSON.genes)) {
+    assert.ok(ids.has(groupIdForModel(entry.inheritance.model)), `${gene} (${entry.inheritance.model}) has no report group`);
+  }
+  assert.throws(() => { REPORT_GROUPS.push({}); }, TypeError);
+  assert.throws(() => { REPORT_GROUPS[0].title = "x"; }, TypeError);
+});
+
+test("the page's summary counts show the view model's words and help (no second copy can drift)", () => {
+  const html = readText("../index.html");
+  for (const [state, { label, help }] of Object.entries(RESULT_WORDS)) {
+    const count = html.match(
+      new RegExp(`lds-mark-${state}" aria-hidden="true"></span>([^<]*)</span>\\s*<span[^>]*>[^<]*</span>\\s*<span class="lds-count-help">([^<]*)</span>`)
+    );
+    assert.ok(count, `no summary count for ${state}`);
+    assert.deepEqual([count[1], count[2]], [label, help], state);
   }
 });

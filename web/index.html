@@ -154,29 +154,29 @@
             <h3 class="lds-h3 mb-2">Results of the checks</h3>
             <div class="lds-counts">
               <div class="lds-count">
-                <span class="lds-count-label"><span class="lds-mark lds-mark-supported_and_observed" aria-hidden="true"></span>Observed</span>
+                <span class="lds-count-label"><span class="lds-mark lds-mark-supported_and_observed" aria-hidden="true"></span>Found</span>
                 <span id="count-state-observed" class="lds-count-value">0</span>
-                <span class="lds-count-help">Variant seen in your file</span>
+                <span class="lds-count-help">Your file has the variant this check looks for.</span>
               </div>
               <div class="lds-count">
-                <span class="lds-count-label"><span class="lds-mark lds-mark-supported_not_observed" aria-hidden="true"></span>Not detected</span>
+                <span class="lds-count-label"><span class="lds-mark lds-mark-supported_not_observed" aria-hidden="true"></span>Not found</span>
                 <span id="count-state-negative" class="lds-count-value">0</span>
-                <span class="lds-count-help">Among the variants tested</span>
+                <span class="lds-count-help">Your file was checked here and the variant was not found among the variants tested. This is not the same as 'normal'.</span>
               </div>
               <div class="lds-count">
-                <span class="lds-count-label"><span class="lds-mark lds-mark-not_tested_by_array" aria-hidden="true"></span>Not on the chip</span>
+                <span class="lds-count-label"><span class="lds-mark lds-mark-not_tested_by_array" aria-hidden="true"></span>Not on your chip</span>
                 <span id="count-state-gaps" class="lds-count-value">0</span>
-                <span class="lds-count-help">Your chip did not read it</span>
+                <span class="lds-count-help">Your DNA chip did not read this position, or the reading failed. No result.</span>
               </div>
               <div class="lds-count">
-                <span class="lds-count-label"><span class="lds-mark lds-mark-outside_coverage" aria-hidden="true"></span>Outside the checks</span>
+                <span class="lds-count-label"><span class="lds-mark lds-mark-outside_coverage" aria-hidden="true"></span>Not checked</span>
                 <span id="count-state-outside" class="lds-count-value">0</span>
-                <span class="lds-count-help">Markers counted, not interpreted</span>
+                <span class="lds-count-help">Markers in your file that Lucidase does not interpret. Counted only.</span>
               </div>
               <div class="lds-count">
-                <span class="lds-count-label"><span class="lds-mark lds-mark-insufficient_evidence" aria-hidden="true"></span>Conflicting</span>
+                <span class="lds-count-label"><span class="lds-mark lds-mark-insufficient_evidence" aria-hidden="true"></span>Unclear</span>
                 <span id="count-state-insufficient" class="lds-count-value">0</span>
-                <span class="lds-count-help">Disputed or insufficient evidence</span>
+                <span class="lds-count-help">A reading exists, but the evidence or the genotype is not clear enough to report a result.</span>
               </div>
             </div>
           </div>
@@ -255,10 +255,10 @@
         </div>
         <div class="lds-section-body flex flex-col gap-4">
           <div class="lds-tabs" role="group" aria-label="Show">
-            <button type="button" data-filter="all" class="lds-tab tab-active">Observed findings</button>
-            <button type="button" data-filter="negative" class="lds-tab">Not detected</button>
-            <button type="button" data-filter="gaps" class="lds-tab">Not on the chip</button>
-            <button type="button" data-filter="insufficient" class="lds-tab">Conflicting evidence</button>
+            <button type="button" data-filter="all" class="lds-tab tab-active">Found</button>
+            <button type="button" data-filter="negative" class="lds-tab">Not found</button>
+            <button type="button" data-filter="gaps" class="lds-tab">Not on your chip</button>
+            <button type="button" data-filter="insufficient" class="lds-tab">Unclear</button>
             <button type="button" data-filter="carrier" class="lds-tab">Carrier status</button>
             <button type="button" data-filter="pathogenic" class="lds-tab">Pathogenic</button>
             <button type="button" data-filter="acmg" data-acmg-version class="lds-tab">ACMG SF</button>
@@ -363,7 +363,7 @@
         <section class="lds-isec">
           <dl class="lds-datalist">
             <div><dt>Genotype</dt><dd id="drawer-genotype">Not available</dd></div>
-            <div><dt>ClinVar review stars</dt><dd id="drawer-stars">Not available</dd></div>
+            <div><dt>ClinVar review</dt><dd id="drawer-stars">Not available</dd></div>
             <div><dt>Magnitude</dt><dd id="drawer-magnitude">Not available</dd></div>
             <div><dt>gnomAD allele frequency</dt><dd id="drawer-af">Not available</dd></div>
           </dl>

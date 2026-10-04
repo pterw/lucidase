@@ -10,7 +10,7 @@
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { layoutKaryogram } from "./core/karyogram.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
-import { escapeHtml, karyogramStateLabels } from "./view-model.js";
+import { RESULT_WORDS, escapeHtml, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
 
 const SAMPLE_URL = "./demo-data/sample-karyogram-23andme.txt";
@@ -64,13 +64,18 @@ function stateOf(layout, rsid) {
 function renderLegend(layout) {
   const counts = Object.fromEntries(LEGEND_ORDER.map((s) => [s, 0]));
   for (const l of layout.reference.loci) counts[stateOf(layout, l.rsid)] += 1;
-  $("karyogram-legend").innerHTML = LEGEND_ORDER.map(
-    (s) =>
-      `<li class="flex items-center gap-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
+  // The design system's KaryogramLegend: mark, plain word, count, then the word's one-line help under it.
+  $("karyogram-legend").innerHTML = LEGEND_ORDER.map((s) => {
+    const help = Object.hasOwn(RESULT_WORDS, s) ? RESULT_WORDS[s].help : null;
+    return (
+      `<li class="flex flex-wrap items-center gap-x-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
       `<span class="kary-swatch kary-state-${escapeHtml(s)}" aria-hidden="true"></span>` +
-      `<span class="flex-1">${escapeHtml(labels[s])}</span>` +
-      `<span class="lds-data font-bold" data-legend-count="${escapeHtml(s)}">${counts[s]}</span></li>`,
-  ).join("");
+      `<span class="flex-1" data-legend-label>${escapeHtml(labels[s])}</span>` +
+      `<span class="lds-data font-bold" data-legend-count="${escapeHtml(s)}">${counts[s]}</span>` +
+      (help === null ? "" : `<span class="lds-meta basis-full pl-6" data-legend-help>${escapeHtml(help)}</span>`) +
+      `</li>`
+    );
+  }).join("");
 }
 
 function renderTotals(layout) {

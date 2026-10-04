@@ -36,6 +36,8 @@ PLACEHOLDERS = [
     "known variants",
 ]
 STATIC_CLAIMS = ["Redis", "ClinVar 2026.1", "ClinVar 2024-06", "dbSNP 156", "Evidence Tier 1", "81 Genes"]
+# The jargon the design system's plain result words replaced, and star glyphs for ClinVar review (case-sensitive).
+OLD_RESULT_WORDS = re.compile(r"State [1-5]|Supported|Observed|Tested WT|Array Gap|Wild-Type|Conflicting|[★☆]")
 BAD_WORDS = re.compile(r"\b(undefined|null|nan)\b", re.IGNORECASE)
 
 
@@ -79,7 +81,7 @@ def test_product_name_is_lucidase_everywhere_the_user_sees_it(loaded_page):
             page.evaluate(f"() => window.__lucidase.{fn}()")
         names.append(info.value.suggested_filename)
         texts.append(Path(info.value.path()).read_text(encoding="utf-8"))
-    assert texts[0].splitlines()[0] == "# Lucidase Variome Clinical Report"
+    assert texts[0].splitlines()[0] == "# Lucidase variome clinical report"
     assert names[0].startswith("Lucidase_Report_")
     assert names[1].startswith("Lucidase_Variants_")
 
@@ -110,6 +112,8 @@ def _check_run(page, label):
     for name, text in (("page", screens), ("markdown", markdown), ("csv", csv_text)):
         assert not _violations(text), f"{label} {name}: {_violations(text)}"
         assert not _violations(text, STATIC_CLAIMS), f"{label} {name}: static claim {_violations(text, STATIC_CLAIMS)}"
+        old = OLD_RESULT_WORDS.findall(text)
+        assert not old, f"{label} {name}: old result wording {sorted(set(old))}"
     return screens, markdown, csv_text
 
 
