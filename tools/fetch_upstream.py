@@ -10,8 +10,10 @@ sha256, so a tampered fixture is detectable offline.
 
 Request construction (pure) is separate from I/O so tests never need a network.
 This script names no field of any payload: reading a response is `tools/source_adapters.py`'s job
-(AGENTS.md section 2). A failed request fails the run (exit 1, failed keys listed).
-Stdlib only.
+(AGENTS.md section 2). A failed request fails the run (exit 1, failed keys listed) and writes nothing: a response
+is checked (status 200, a non-empty body, readable JSON for a `.json` capture, plus the source's own validator)
+before its body and meta replace a pinned capture, so a failed or garbage recapture leaves the pinned files as
+they were. Stdlib only.
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -35,6 +38,7 @@ if str(PROJECT_ROOT) not in sys.path:  # run as `python tools/fetch_upstream.py`
 from tools.source_adapters import (  # noqa: E402
     AdapterError,
     TruncatedSearch,
+    decode_json_body,
     esearch_uids,
     gnomad_variant_ids_from_dbsnp,
     is_multiple_variants_refusal,
@@ -106,11 +110,12 @@ class UcscCaptureFailed(RuntimeError):
 
 
 class CaptureFailed(RuntimeError):
-    """A request ended in a final non-200 status (or an empty body). Its meta is on disk; the run must fail."""
+    """A request ended in a final non-200 status (or an empty body). Nothing was written, so a pinned capture under
+    that key is unchanged; `error_payload` keeps the start of the response for the log. The run must fail."""
 
-    def __init__(self, source: str, key: str, status: int):
+    def __init__(self, source: str, key: str, status: int, error_payload: str = ""):
         super().__init__(f"{source}/{key}: HTTP {status}")
-        self.source, self.key, self.status = source, key, status
+        self.source, self.key, self.status, self.error_payload = source, key, status, error_payload
 
 
 ESEARCH_RETMAX = 500
@@ -235,12 +240,25 @@ def perform_with_retry(spec, opener=None, sleep=time.sleep, log=print):
     return status, body
 
 
+def _replace_atomically(path: Path, data: bytes) -> None:
+    """Write `data` to a temp file in the same directory, then rename it over `path` (atomic on one filesystem),
+    so an interrupted write never leaves a half-written capture in place of a good one."""
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        tmp.write_bytes(data)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
 def write_capture(
     out_dir: Path, source: str, key: str, spec: dict, status: int, body: bytes, now=None, body_ext: str = ".json"
 ) -> dict:
-    """Write verbatim body (if the request succeeded with a non-empty body) and its meta.
+    """Write verbatim body (if the request succeeded with a non-empty body) and its meta, each atomically.
 
-    The body file is ``<key><body_ext>``; the meta is always ``<key>.meta.json``.
+    The body file is ``<key><body_ext>``; the meta is always ``<key>.meta.json``. A failure writes a meta with no
+    body; `Capturer.run` never calls this for a failure, only `_capture_locus` does, for the VEP 400 evidence under
+    its own key.
     """
     now = now or _dt.datetime.now(_dt.timezone.utc)
     ok = 200 <= status < 300 and len(body) > 0
@@ -258,10 +276,8 @@ def write_capture(
     target = Path(out_dir) / source
     target.mkdir(parents=True, exist_ok=True)
     if ok:
-        (target / f"{key}{body_ext}").write_bytes(body)
-    (target / f"{key}.meta.json").write_text(
-        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
-    )
+        _replace_atomically(target / f"{key}{body_ext}", body)
+    _replace_atomically(target / f"{key}.meta.json", (json.dumps(meta, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     return meta
 
 
@@ -280,15 +296,29 @@ class Capturer:
         allow_status: tuple[int, ...] = (),
         body_ext: str = ".json",
         validate: Callable[[bytes], None] | None = None,
-    ) -> tuple[int, bytes, dict]:
-        """One request, written to disk. Raises `CaptureFailed` unless the status is 200 (non-empty body) or in
-        `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag).
+    ) -> tuple[int, bytes, dict | None]:
+        """One request; only a good response is written to disk. Returns (status, body, the written meta).
 
-        `validate` runs on a 200, non-empty body BEFORE anything is written, so a bad body can neither overwrite a
-        pinned file nor get a matching meta; whatever it raises propagates."""
+        Every check runs BEFORE anything is written, so a failed or garbage response can neither overwrite a pinned
+        body nor its meta:
+        - a status other than 200, or an empty body, writes nothing and raises `CaptureFailed`, unless the status is
+          in `allow_status` (the caller handles that status itself: only VEP's 400 for the AlphaMissense flag); then
+          it writes nothing and returns meta None;
+        - a `.json` capture must be readable JSON (`decode_json_body`, the rule `load_pinned` applies);
+        - `validate`, the source's own check, runs last.
+        Whatever a check raises propagates."""
         self.sleep(MIN_INTERVAL_S)
         status, body = perform_with_retry(spec, self.opener, self.sleep, self.log)
-        if validate is not None and status == 200 and body:
+        if status != 200 or not body:
+            self.rows.append({"source": source, "key": key, "status": status, "bytes": 0})
+            payload = body[:2000].decode("utf-8", "replace")
+            self.log(f"{source}/{key}: HTTP {status}, nothing written; response: {payload[:200]!r}")
+            if status in allow_status:
+                return status, body, None
+            raise CaptureFailed(source, key, status, payload)
+        if body_ext == ".json":
+            decode_json_body(body, f"{source}/{key} ({spec['url']})")
+        if validate is not None:
             validate(body)
         meta = write_capture(self.out_dir, source, key, spec, status, body, body_ext=body_ext)
         self.total += meta["bytes"]
@@ -296,8 +326,6 @@ class Capturer:
         self.log(f"{source}/{key}: HTTP {status}, {meta['bytes']} bytes")
         if self.total > MAX_TOTAL_BYTES:
             raise CapBytesExceeded(f"captured {self.total} bytes, over the {MAX_TOTAL_BYTES} byte cap")
-        if (status != 200 or not body) and status not in allow_status:
-            raise CaptureFailed(source, key, status)
         return status, body, meta
 
     def attempt(self, unit, *args, **kwargs) -> None:
@@ -311,11 +339,14 @@ class Capturer:
 
 
 def capture_clinvar(cap: Capturer, rsid: str) -> None:
-    _, body, _ = cap.run("clinvar", f"{rsid}.esearch", clinvar_esearch_request(rsid))
+    """An esearch is validated by `esearch_uids` (readable, not truncated) before it is written."""
+    _, body, _ = cap.run("clinvar", f"{rsid}.esearch", clinvar_esearch_request(rsid), validate=esearch_uids)
     uids = esearch_uids(body)
     if not uids:
         cap.log(f"{rsid}: plain term returned 0 uids; trying tagged term")
-        _, body, _ = cap.run("clinvar", f"{rsid}.esearch_tagged", clinvar_esearch_request(rsid, True))
+        _, body, _ = cap.run(
+            "clinvar", f"{rsid}.esearch_tagged", clinvar_esearch_request(rsid, True), validate=esearch_uids
+        )
         uids = esearch_uids(body)
     if uids:
         cap.run("clinvar", rsid, clinvar_esummary_request(uids))
@@ -343,13 +374,14 @@ def _capture_locus(cap: Capturer, rsid: str) -> None:
 
     capture_clinvar(cap, rsid)
 
-    # The one status handled in place: VEP answers 400 when the AlphaMissense flag is not supported. The 400
-    # is kept (renamed) as evidence and the request is repeated once without the flag; that repeat must be 200.
-    status, _, _ = cap.run("ensembl", rsid, vep_request(rsid), allow_status=(400,))
+    # The one status handled in place: VEP answers 400 when the AlphaMissense flag is not supported. The 400 is kept
+    # as evidence under its own key (a meta with no body), never over the pinned `<rsid>.meta.json`, and the request
+    # is repeated once without the flag; that repeat must be 200.
+    spec = vep_request(rsid)
+    status, body, _ = cap.run("ensembl", rsid, spec, allow_status=(400,))
     if status == 400:
         cap.log(f"{rsid}: VEP rejected request; error payload kept in meta, retrying without AlphaMissense")
-        rejected = cap.out_dir / "ensembl"
-        (rejected / f"{rsid}.meta.json").replace(rejected / f"{rsid}.alphamissense_rejected.meta.json")
+        write_capture(cap.out_dir, "ensembl", f"{rsid}.alphamissense_rejected", spec, status, body)
         cap.run("ensembl", rsid, vep_request(rsid, alphamissense=False))
 
     cap.run("gnomad", rsid, gnomad_variant_request(rsid))

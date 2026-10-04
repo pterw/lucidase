@@ -117,6 +117,15 @@ def _body_path(meta_path: Path) -> Path:
     return meta_path.with_name(stem if stem.endswith(".gz") else stem + ".json")
 
 
+def decode_json_body(body: bytes, where: str) -> Any:
+    """A `.json` capture's body as JSON. The one readability rule for a JSON capture, applied when it is captured
+    (`tools/fetch_upstream.py`, before anything is written) and when it is loaded (`load_pinned`)."""
+    try:
+        return json.loads(body.decode("utf-8"))
+    except ValueError as exc:  # JSONDecodeError and UnicodeDecodeError
+        raise PayloadIntegrityError(f"{where}: the capture is not readable JSON ({exc})") from exc
+
+
 def load_pinned(body_path: Path | str) -> PinnedPayload:
     """Load a capture after checking its bytes against the sha256 in its meta."""
     body_path = Path(body_path)
@@ -137,10 +146,7 @@ def load_pinned(body_path: Path | str) -> PinnedPayload:
     if body_path.name.endswith(".gz"):
         data = body  # gzip: raw bytes, parsed by the UCSC adapter
     else:
-        try:
-            data = json.loads(body.decode("utf-8"))
-        except ValueError as exc:  # JSONDecodeError and UnicodeDecodeError
-            raise PayloadIntegrityError(f"{body_path}: the capture is not readable JSON ({exc})") from exc
+        data = decode_json_body(body, str(body_path))
     return PinnedPayload(body_path, data, meta)
 
 
