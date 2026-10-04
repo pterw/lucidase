@@ -272,5 +272,9 @@ def test_pages_disclosure_at_narrow_width(page, path):
 
 
 def test_the_stepnav_is_on_the_analysis_page_only(page):
+    # Positive control first: the same selector must find the StepNav where it exists, or the absence check below
+    # would pass vacuously after a rename.
+    goto_ready(page, page.base_url)
+    expect(page.locator("nav.lds-stepnav")).to_have_count(1)
     page.goto(f"{page.base_url}/karyogram.html", wait_until="networkidle")
     expect(page.locator("nav.lds-stepnav")).to_have_count(0)
