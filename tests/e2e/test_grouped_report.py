@@ -43,6 +43,7 @@ EXPECTED_JS = """async () => {
       word: vm.RESULT_WORDS[r.coverage_state].label,
       limitation: r.limitation,
       technical: (r.components || [r]).map((l) => l.rsid + ' · ' + (l.genotype_display || 'No reading')).join(' + '),
+      markers: (r.components || [r]).map((l) => l.rsid).join(' and '),
     })),
   };
 }"""
@@ -142,7 +143,8 @@ def test_each_row_shows_its_topic_word_mark_limitation_and_technical_line(loaded
             expect(limit).to_have_count(0)
         button = row.locator("button.lds-finding-open")
         expect(button).to_have_text("Details")
-        expect(button).to_have_attribute("aria-label", f"Details for {check['topic']}")
+        # Topic plus markers: two loci can share a topic (HFE), and each button needs its own accessible name.
+        expect(button).to_have_attribute("aria-label", f"Details for {check['topic']}, {check['markers']}")
         expect(button).to_have_attribute("aria-expanded", "false")
         expect(button.locator(".lds-icon.lds-i-chevron-right")).to_have_count(1)
 

@@ -135,7 +135,8 @@ export function groupedReport(viewModels, genes) {
 /**
  * One FindingRow: topic (KB gene topic), gene, state and its plain word, the statement the table shows, the
  * limitation and caveats, and the technical line "<rsid> · <genotype>" per locus ("No reading" when there is none).
- * `key` is the record's rsids joined by "-", safe in an element id. `record` is the view model the drawer opens.
+ * `key` is the record's rsids joined by "-", safe in an element id. `markers` names them for the Details button, since
+ * two loci can share a topic (HFE). `record` is the view model the drawer opens.
  */
 function findingRow(vm, gene) {
   const loci = vm.components ?? [vm];
@@ -150,6 +151,7 @@ function findingRow(vm, gene) {
     limitation: vm.limitation,
     caveats: vm.caveats,
     technical: loci.map((locus) => `${locus.rsid} · ${nonEmptyString(locus.genotype_display) ?? NO_READING}`).join(" + "),
+    markers: loci.map((locus) => locus.rsid).join(" and "),
     record: vm,
   };
 }

@@ -495,7 +495,7 @@ function findingRowHtml(row) {
         ${limitation}
         <div class="lds-finding-tech">${escapeHtml(row.technical)}</div>
       </div>
-      <button type="button" class="lds-finding-open" aria-controls="variant-drawer" aria-expanded="false" aria-label="Details for ${escapeHtml(row.topic)}">Details<span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span></button>
+      <button type="button" class="lds-finding-open" aria-controls="variant-drawer" aria-expanded="false" aria-label="Details for ${escapeHtml(row.topic)}, ${escapeHtml(row.markers)}">Details<span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span></button>
     </article>`;
 }
 

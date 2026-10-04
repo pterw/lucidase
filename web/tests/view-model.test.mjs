@@ -754,6 +754,7 @@ test("APOE is one composite row in the grouped report, never its two component l
   assert.equal(apoe[0].id, a.apoe.id);
   assert.equal(apoe[0].record.components.length, 2);
   assert.equal(apoe[0].technical, "rs429358 · C/C + rs7412 · C/C");
+  assert.equal(apoe[0].markers, "rs429358 and rs7412");
   for (const rsid of ["rs429358", "rs7412"]) assert.ok(!rows.some((r) => r.id === rsid), rsid);
 });
 
@@ -826,4 +827,14 @@ test("each finding row carries the topic, the plain word, the statement, the lim
   for (const text of rows.flatMap((r) => [r.topic, r.statement, r.technical, r.stateLabel])) {
     for (const bad of PLACEHOLDERS) assert.ok(!text.includes(bad), `${bad} in "${text}"`);
   }
+});
+
+test("rows that share a topic still have distinct markers, so their Details buttons can be told apart", () => {
+  const a = analyse(ALL_STATES_FILE);
+  const rows = reportRows(groupedReport(workerLists(a), a.kb.genes));
+  const hfe = rows.filter((r) => r.gene === "HFE");
+  assert.ok(hfe.length >= 2, "the fixture needs both HFE loci for this check to mean anything");
+  assert.equal(new Set(hfe.map((r) => r.topic)).size, 1);
+  const names = rows.map((r) => `${r.topic}, ${r.markers}`);
+  assert.equal(new Set(names).size, names.length);
 });
