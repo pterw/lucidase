@@ -1024,7 +1024,10 @@ function openDrawer(record, opener = document.activeElement) {
   const gene = state.genes[record.gene];
   document.getElementById("drawer-title").textContent =
     gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
-  document.getElementById("drawer-rsid").textContent = record.id;
+  // The subtitle names the gene once, then the markers ("rs429358 + rs7412" for APOE); the record id stays readable.
+  const markerEl = document.getElementById("drawer-rsid");
+  markerEl.textContent = record.markerText;
+  markerEl.dataset.recordId = record.id;
   document.getElementById("drawer-gene").textContent = record.gene;
   setValue(document.getElementById("drawer-genotype"), record.genotype);
   setValue(document.getElementById("drawer-coord"), record.positionText);
@@ -1237,15 +1240,20 @@ function renderDrawerSegregation(record) {
   // Wording follows the gene's inheritance model: disease and recurrence language is for Mendelian genes only.
   // For a recessive gene the headline figure is the genotype probability (two copies), before any penetrance.
   setLabel(header, mendelian ? null : "Passing it on");
-  setLabel(header && header.nextElementSibling, mendelian ? null : "Chance a child inherits the allele, from the patient genotype");
+  // The other person is "the other parent" (design system), and the reader's own file is "your genotype".
+  setLabel(header && header.nextElementSibling, mendelian ? null : "The chance a child inherits the variant, from your genotype.");
   setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele frequency (gnomAD)");
   setLabel(
     riskUnscreenedEl.previousElementSibling,
-    !mendelian ? "Child inherits, unscreened partner" : recessive ? "Risk with an unscreened partner (genotype probability)" : null
+    !mendelian
+      ? "Child inherits, if the other parent is unscreened"
+      : recessive ? "Risk if the other parent is unscreened (genotype probability)" : null
   );
   setLabel(
     riskCarrierEl.previousElementSibling,
-    !mendelian ? "Child inherits, wild-type partner" : recessive ? "Risk with a carrier partner (genotype probability)" : null
+    !mendelian
+      ? "Child inherits, if the other parent has no variant"
+      : recessive ? "Risk if the other parent is a carrier (genotype probability)" : null
   );
   setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring allele simulator");
   setLabel(simTitle && simTitle.lastElementChild, "Other parent");

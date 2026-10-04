@@ -331,8 +331,9 @@ def test_drawer_footer_shows_the_open_records_tier(loaded_page):
     page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(page)
     tier = page.locator("#drawer-tier-badge").text_content().strip()
-    assert tier.startswith("Tier ")
-    assert page.locator("#drawer-footer-tier").inner_text().strip() == f"Evidence {tier}"
+    assert re.fullmatch(r"Tier [A-D]", tier), tier
+    # Sentence case around the KB tier's letter: "Evidence tier A", never "Evidence Tier A".
+    assert page.locator("#drawer-footer-tier").inner_text().strip() == f"Evidence tier {tier[-1]}"
 
 
 def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
@@ -340,7 +341,9 @@ def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     open_apoe(page)
-    assert page.locator("#drawer-rsid").inner_text().strip() == "APOE (rs429358 + rs7412)"
+    # The subtitle names the gene once (#drawer-gene), then both markers; the record id stays on #drawer-rsid.
+    assert page.locator("#drawer-rsid").inner_text().strip() == "rs429358 + rs7412"
+    assert page.locator("#drawer-rsid").get_attribute("data-record-id") == "APOE (rs429358 + rs7412)"
     coord = page.locator("#drawer-coord").inner_text()
     assert "45,411,941" in coord and "45,412,079" in coord
     assert "APOE-STATUS" not in page.locator("body").inner_text()

@@ -214,7 +214,7 @@ def test_clicking_a_mark_opens_its_record_and_selects_its_row(loaded_page):
     # Each APOE locus opens the one APOE record, and swaps the open record.
     for rsid in apoe:
         page.locator(f'{MARKS}[data-rsid="{rsid}"]').click()
-        expect(page.locator("#drawer-rsid")).to_have_text(loci[rsid]["record"])
+        expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", loci[rsid]["record"])
         assert _selected_ids(page) == [loci[rsid]["record"]]
         for other in apoe:
             expect(page.locator(f'{MARKS}[data-rsid="{other}"]')).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
@@ -272,6 +272,48 @@ def test_no_sideways_scroll_on_a_phone_and_the_map_stays_in_its_box(browser, bas
         for name in ("prose", "legend"):
             b = page.locator(f"#summary-{name}").bounding_box()
             assert b["x"] >= 0 and b["x"] + b["width"] <= NARROW["width"], (name, b)
+    finally:
+        context.close()
+
+
+def test_on_a_phone_the_map_keeps_a_readable_size_and_scrolls_inside_its_own_box(browser, base_url):
+    """At 390px the map keeps its drawn size (labels at least 10px, WCAG-minded tap targets) and scrolls sideways
+    inside its own box, a named, keyboard-scrollable region, never the page."""
+    context = browser.new_context(viewport=NARROW)
+    context.set_default_timeout(WAIT_TIMEOUT_MS)
+    context.route(lambda url: not url.startswith(("http://127.0.0.1", "data:", "blob:")), lambda r: r.abort())
+    page = context.new_page()
+    try:
+        page.goto(base_url, wait_until="networkidle")
+        page.wait_for_function("() => window.__lucidase !== undefined")
+        _load_demo(page)
+        box = page.locator(MAP)
+        expect(box.locator("svg")).to_be_visible()
+        expect(box).to_have_attribute("role", "region")
+        expect(box).to_have_attribute("aria-label", "Chromosome map")
+        expect(box).to_have_attribute("tabindex", "0")
+
+        overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
+        assert overflow <= 0, f"the page scrolls sideways by {overflow}px"
+        assert box.evaluate("el => getComputedStyle(el).overflowX") == "auto"
+        dims = box.evaluate("el => ({ scroll: el.scrollWidth, client: el.clientWidth })")
+        assert dims["scroll"] > dims["client"], dims
+
+        # Rendered sizes: the SVG's scale times each label's font size, and each mark's halo as drawn.
+        scale = box.locator("svg").evaluate("svg => svg.getBoundingClientRect().width / svg.viewBox.baseVal.width")
+        sizes = box.locator(".kary-label").evaluate_all("els => els.map((t) => parseFloat(getComputedStyle(t).fontSize))")
+        assert sizes and min(sizes) * scale >= 10, (sizes, scale)
+        halos = box.locator(".kary-locus .kary-halo").evaluate_all(
+            "els => els.map((c) => c.getBoundingClientRect().width)"
+        )
+        assert halos and min(halos) >= 20, halos
+
+        # The region scrolls from the keyboard.
+        box.focus()
+        page.keyboard.press("ArrowRight")
+        page.wait_for_function("() => document.getElementById('summary-map').scrollLeft > 0")
+        overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
+        assert overflow <= 0, f"the page scrolls sideways by {overflow}px"
     finally:
         context.close()
 

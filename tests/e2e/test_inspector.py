@@ -120,7 +120,7 @@ def test_docked_beside_the_list_non_modal_and_rows_swap_the_record(loaded_page):
 
     # Choosing another row swaps the record and the selection, with no close in between.
     other.click()
-    expect(page.locator("#drawer-rsid")).to_have_text(second)
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", second)
     wait_drawer_open(page)
     expect(page.locator("#report-groups .lds-finding.is-selected")).to_have_count(1)
     expect(_row(page, second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
@@ -346,3 +346,89 @@ def test_the_ligature_says_not_available_for_a_missing_genotype_and_diplotype(lo
         [f"rs429358 {apoe['parts'][0][1]}", "rs7412 Not available"]
     )
     expect(figure.locator(".lds-ligature-result")).to_have_text("Not available")
+
+
+# The simulator's words (polish pass): the design system calls the other person "Other parent", and the transmission
+# subtitle speaks to the reader about their own file. Keyed by whether the gene is a Mendelian disease gene; the demo's
+# Mendelian genes (HFE, CFTR) are autosomal recessive, so their figures are genotype probabilities.
+SEG_WORDS = {
+    False: {
+        "sub": "The chance a child inherits the variant, from your genotype.",
+        "unscreened": "Child inherits, if the other parent is unscreened",
+        "second": "Child inherits, if the other parent has no variant",
+    },
+    True: {
+        "sub": "Mendelian inheritance model and recurrence calculation",
+        "unscreened": "Risk if the other parent is unscreened (genotype probability)",
+        "second": "Risk if the other parent is a carrier (genotype probability)",
+    },
+}
+
+
+def test_the_simulator_names_the_other_parent_and_speaks_to_the_reader(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    hfe = page.evaluate("() => window.__lucidase.state.records.find((r) => r.gene === 'HFE').id")
+    seen = set()
+    for finding_id in ("rs4244285", hfe):
+        rec = _record(page, finding_id)
+        seen.add(rec["mendelian"])
+        _details(page, finding_id).click()
+        wait_drawer_open(page)
+        expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", finding_id)
+        words = SEG_WORDS[rec["mendelian"]]
+        expect(page.locator("#drawer-segregation-container [data-role='seg-title'] + p")).to_have_text(words["sub"])
+        dt = "xpath=preceding-sibling::dt"
+        expect(page.locator("#drawer-seg-risk-unscreened").locator(dt)).to_have_text(words["unscreened"])
+        expect(page.locator("#drawer-seg-risk-carrier").locator(dt)).to_have_text(words["second"])
+        expect(page.locator("#drawer-partner-model-note")).to_have_text(re.compile(r"^Other parent: unscreened\. "))
+        # Nowhere in the Inspector a "partner" or a "patient"; the same text does name the other parent.
+        text = page.locator(INSPECTOR).inner_text().lower()
+        assert "other parent" in text
+        for word in ("partner", "patient"):
+            assert word not in text, (finding_id, word)
+    assert seen == {True, False}, "the demo covers both simulator wordings"
+
+
+def test_the_apoe_subtitle_names_the_gene_once_then_its_markers_and_positions(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    apoe = page.evaluate(
+        "() => { const a = window.__lucidase.state.apoe;"
+        " return { id: a.id, gene: a.gene, rsids: a.components.map((c) => c.rsid), positionText: a.positionText }; }"
+    )
+    assert apoe["rsids"] == ["rs429358", "rs7412"] and apoe["positionText"]
+    sub = page.locator(f"{INSPECTOR} .lds-inspector-sub")
+    _details(page, apoe["id"]).click()
+    wait_drawer_open(page)
+    expect(sub).to_have_text(f"{apoe['gene']} · {' + '.join(apoe['rsids'])} · {apoe['positionText']}")
+    assert sub.inner_text().count(apoe["gene"]) == 1
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", apoe["id"])
+    # A single-marker record (same selectors): its marker is its id.
+    _details(page, "rs4244285").click()
+    expect(page.locator("#drawer-rsid")).to_have_text("rs4244285")
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", "rs4244285")
+
+
+# DataList (design system components/report/DataList.jsx): a value is mono unless it is prose (mono: false), which is
+# in the sans font. Prose here: the APOE figures' KB wording and the ClinVar review; data: genotype, frequency, magnitude.
+PROSE_VALUES = ("#drawer-apoe-risk-ratio", "#drawer-apoe-lifetime", "#drawer-stars")
+DATA_VALUES = ("#drawer-genotype", "#drawer-af", "#drawer-magnitude")
+
+
+def test_datalist_prose_values_are_sans_and_data_values_mono(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    _details(page, _apoe_id(page)).click()
+    wait_drawer_open(page)
+
+    def family(sel):
+        return page.locator(sel).evaluate("el => getComputedStyle(el).fontFamily")
+
+    sans = family(f"{INSPECTOR} .lds-datalist dt >> nth=0")
+    assert "akzidenz-grotesk-next-pro" in sans, sans
+    for sel in PROSE_VALUES:
+        expect(page.locator(sel)).to_be_visible()
+        assert family(sel) == sans, (sel, family(sel))
+    for sel in DATA_VALUES:
+        assert "input-mono" in family(sel), (sel, family(sel))

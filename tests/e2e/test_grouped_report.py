@@ -158,7 +158,8 @@ def test_details_opens_the_drawer_and_escape_returns_focus_to_it(loaded_page):
         button.focus()
         page.keyboard.press("Enter")
         wait_drawer_open(page)
-        expect(page.locator("#drawer-rsid")).to_have_text(finding_id)
+        # The open record's id (the APOE subtitle shows its markers, not the id; test_inspector.py).
+        expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", finding_id)
         assert page.locator("#variant-drawer").evaluate("el => el.contains(document.activeElement)")
         expect(button).to_have_attribute("aria-expanded", "true")
         expect(row).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))

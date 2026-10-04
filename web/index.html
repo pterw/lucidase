@@ -199,7 +199,7 @@
         <div class="lds-section-body flex flex-col gap-8">
           <div class="flex flex-col gap-5">
             <p id="summary-prose" class="lds-summary-prose"></p>
-            <div id="summary-map" class="lds-summary-map"></div>
+            <div id="summary-map" class="lds-summary-map" role="region" aria-label="Chromosome map" tabindex="0"></div>
             <div id="summary-density-notice" class="hidden lds-alert lds-alert-notice" role="note">
               <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
               <p class="lds-alert-text">
@@ -375,8 +375,8 @@
                 <!-- APOE only: its risk figures as the knowledge base states them, each with its curation label -->
                 <div id="drawer-apoe-figures" hidden>
                   <dl class="lds-datalist">
-                    <div><dt>Risk ratio</dt><dd id="drawer-apoe-risk-ratio">Not available</dd></div>
-                    <div><dt>Estimated lifetime risk</dt><dd id="drawer-apoe-lifetime">Not available</dd></div>
+                    <div><dt>Risk ratio</dt><dd id="drawer-apoe-risk-ratio" class="lds-dd-prose">Not available</dd></div>
+                    <div><dt>Estimated lifetime risk</dt><dd id="drawer-apoe-lifetime" class="lds-dd-prose">Not available</dd></div>
                   </dl>
                 </div>
               </div>
@@ -408,8 +408,8 @@
               <dl class="lds-datalist">
                 <div><dt>Carrier frequency (2pq)</dt><dd id="drawer-seg-carrier-prior">Not available</dd></div>
                 <div><dt>Penetrance</dt><dd id="drawer-seg-penetrance">Not available</dd></div>
-                <div><dt>Risk with an unscreened partner</dt><dd id="drawer-seg-risk-unscreened">Not available</dd></div>
-                <div><dt>Risk with a carrier partner</dt><dd id="drawer-seg-risk-carrier">Not available</dd></div>
+                <div><dt>Risk if the other parent is unscreened</dt><dd id="drawer-seg-risk-unscreened">Not available</dd></div>
+                <div><dt>Risk if the other parent is a carrier</dt><dd id="drawer-seg-risk-carrier">Not available</dd></div>
               </dl>
 
               <div class="flex flex-col gap-3">
@@ -449,7 +449,7 @@
               <h3 id="isec-tech" class="lds-isec-title">Technical details</h3>
               <dl class="lds-datalist">
                 <div><dt>Genotype</dt><dd id="drawer-genotype">Not available</dd></div>
-                <div><dt>ClinVar review</dt><dd id="drawer-stars">Not available</dd></div>
+                <div><dt>ClinVar review</dt><dd id="drawer-stars" class="lds-dd-prose">Not available</dd></div>
                 <div><dt>Magnitude</dt><dd id="drawer-magnitude">Not available</dd></div>
                 <div><dt>gnomAD allele frequency</dt><dd id="drawer-af">Not available</dd></div>
               </dl>

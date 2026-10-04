@@ -245,6 +245,15 @@ test("the APOE row never presents one component's evidence as its own", () => {
   const split = structuredClone(apoe);
   split.components[1].evidence_tier = "Tier B";
   assert.equal(toViewModel(split, a.kb.genes).tier, "rs429358: Tier A · rs7412: Tier B");
+  // The Inspector footer says the same in sentence case: once when the components agree, per marker otherwise.
+  assert.equal(drawerTierText(apoe), "Evidence tier A");
+  assert.equal(drawerTierText(toViewModel(split, a.kb.genes)), "Evidence tier: rs429358 A · rs7412 B");
+  const halfTier = structuredClone(apoe);
+  halfTier.components[1].evidence_tier = null;
+  assert.equal(drawerTierText(toViewModel(halfTier, a.kb.genes)), `Evidence tier: rs429358 A · rs7412 ${NOT_AVAILABLE}`);
+  // The Inspector names the markers once, without the gene the subtitle already starts with.
+  assert.equal(apoe.markerText, "rs429358 + rs7412");
+  assert.equal(a.byRsid.rs4244285.markerText, "rs4244285");
   // A component whose accession is not machine imported has no link.
   const curated = structuredClone(apoe);
   curated.components[0].evidence.clinvar.provenance.curation_mode = "manually_curated";
@@ -267,7 +276,9 @@ test("tier, stars and limitation are the same in the table model, drawer text, C
   assert.equal(csvRows.rs4244285.ClinVar_Stars, String(cyp.stars));
   assert.equal(csvRows.rs4244285.Limitation, cyp.limitation);
   assert.ok(md.includes(cyp.tier) && md.includes(cyp.limitation), "Markdown carries the same tier and limitation");
-  assert.equal(drawerTierText(cyp), `Evidence ${cyp.tier}`);
+  // The footer is a sentence-case phrase around the KB tier's letter ("Tier A" reads "Evidence tier A").
+  assert.equal(cyp.tier, "Tier A");
+  assert.equal(drawerTierText(cyp), "Evidence tier A");
   for (const vm of a.vms.filter((v) => v.id !== a.apoe?.id)) {
     const row = csvRows[vm.exportId];
     assert.equal(row.Evidence_Tier, vm.tier ?? "", vm.id);
@@ -370,12 +381,18 @@ test("the KB badge text and title come from the manifest, with no source version
   assert.match(kbBadge({}).text, /Not available/);
 });
 
-test("the partner model is stated in words", () => {
-  const unscreened = partnerModelNote("unscreened", 0.25);
-  assert.match(unscreened, /gnomAD allele frequency \(25%\)/);
-  assert.match(unscreened, /Hardy-Weinberg/);
-  assert.match(partnerModelNote("unscreened", null), /No gnomAD allele frequency/);
-  assert.match(partnerModelNote("heterozygous", 0.1), /heterozygous/);
+test("the other parent's model is stated in words, calling them the other parent", () => {
+  assert.equal(
+    partnerModelNote("unscreened", 0.25),
+    "Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (25%), under Hardy-Weinberg equilibrium."
+  );
+  assert.equal(
+    partnerModelNote("unscreened", null),
+    `Other parent: unscreened. No gnomAD allele frequency is available for this variant, so the figures are ${NOT_AVAILABLE.toLowerCase()}.`
+  );
+  assert.equal(partnerModelNote("heterozygous", 0.1), "Other parent: one copy (heterozygous). They pass on the variant allele with probability 0.5.");
+  assert.equal(partnerModelNote("homozygous", 0.1), "Other parent: two copies (homozygous). They pass on the variant allele with probability 1.");
+  assert.equal(partnerModelNote("wildtype", 0.1), "Other parent: no variant (wild-type). They pass on no variant allele.");
   assert.throws(() => partnerModelNote("carrier", 0.1), /unknown partner model/);
 });
 

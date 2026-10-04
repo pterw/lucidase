@@ -41,7 +41,8 @@ def test_enter_opens_the_focused_row_and_closing_returns_focus_to_it(loaded_page
     _tab_until(page, FIRST_ROW)
     page.keyboard.press("Enter")
     wait_drawer_open(page)
-    assert page.locator("#drawer-rsid").inner_text().strip() == rsid
+    # The open record is the row's (its id; the APOE subtitle shows the markers, not the id).
+    assert page.locator("#drawer-rsid").get_attribute("data-record-id") == rsid
     # Opening focuses the Inspector itself (design system Inspector), not its close button.
     assert _inspector_has_focus(page)
 
@@ -75,7 +76,7 @@ def test_space_opens_a_row_and_its_default_scroll_is_cancelled(loaded_page):
     wait_drawer_open(page)
     assert _inspector_has_focus(page)
     assert page.evaluate("window.__spacePrevented") is True
-    assert page.locator("#drawer-rsid").inner_text().strip() == row.locator("td").first.inner_text().strip()
+    assert page.locator("#drawer-rsid").get_attribute("data-record-id") == row.locator("td").first.inner_text().strip()
 
 
 def test_export_items_are_buttons_reached_by_tab_and_enter_downloads(loaded_page):

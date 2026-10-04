@@ -266,6 +266,8 @@ button.lds-step-item { cursor: pointer; }
 .lds-datalist > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .lds-datalist dt { font: 400 13px/1.4 var(--font-sans); color: var(--text-muted); }
 .lds-datalist dd { margin: 0; font: 700 14px/1.45 var(--font-mono); color: var(--text-body); overflow-wrap: anywhere; }
+/* A prose value (the design system DataList's mono: false) is in the sans font; rsIDs, genotypes and numbers stay mono. */
+.lds-datalist dd.lds-dd-prose { font-family: var(--font-sans); }
 
 /* Tag (badge): 2px corners, one tone triple each. Colour is never the only signal; the text always says it. */
 .lds-tag { display: inline-flex; align-items: center; gap: 6px; min-height: 22px; padding: 0 7px; border: 1px solid; border-radius: var(--radius-badge);
@@ -444,8 +446,11 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    button: a pointer, the focus ring on its halo (an SVG group draws no outline), and the selected halo larger and
    stronger, as in the design system's Karyogram (8.5 to 11 of its 4.25 core, 0.2 to 0.3 opacity). */
 .lds-summary-prose { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
-.lds-summary-map { min-width: 0; }
-.lds-summary-map svg { display: block; width: 100%; max-width: 760px; height: auto; }
+/* On a narrow screen the map keeps its drawn size and scrolls sideways inside its own box (a named, focusable
+   region), never the page: 672px is the SVG's own width (24 chromosome columns of 28 units), one unit per pixel, so
+   chromosome labels stay 10px and each mark's halo 20px across. */
+.lds-summary-map { min-width: 0; overflow-x: auto; }
+.lds-summary-map svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; }
 .lds-summary-legend { max-width: 560px; }
 .lds-summary-map .kary-locus { cursor: pointer; outline: none; }
 .lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.3; }

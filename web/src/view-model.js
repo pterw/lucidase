@@ -347,6 +347,8 @@ export function toViewModel(record, genes, testedCounts = {}) {
   const positions = parts.map((c) => ({ rsid: c.rsid, chrom: c.chrom, pos: numberOrNull(c.pos) }));
   const allPositions = positions.every((p) => p.pos !== null);
   const isComposite = Boolean(record.components);
+  // The record's markers, as the Inspector subtitle names them after the gene: "rs429358 + rs7412", or the one rsid.
+  const markerText = positions.map((p) => p.rsid).join(" + ");
 
   // One evidence entry per locus. A composite (APOE) row carries both components' evidence, each labelled with its
   // rsid, and none of it is presented as the row's own (AGENTS.md 4.5, contracts C4).
@@ -385,8 +387,9 @@ export function toViewModel(record, genes, testedCounts = {}) {
 
   const vm = {
     ...record,
-    id: isComposite ? `${record.gene} (${positions.map((p) => p.rsid).join(" + ")})` : record.rsid,
+    id: isComposite ? `${record.gene} (${markerText})` : record.rsid,
     exportId: positions.map((p) => p.rsid).join(";"),
+    markerText,
     genotype,
     positions,
     positionText: allPositions
@@ -572,26 +575,42 @@ export function kbBadge(manifest) {
   };
 }
 
-/** Footer text for the open record's tier. */
-export function drawerTierText(vm) {
-  return vm.tier === null ? `Evidence tier: ${NOT_AVAILABLE}` : `Evidence ${vm.tier}`;
+/** The letter of a KB evidence tier ("Tier A" is "A"); the KB loader admits only these four. */
+function tierLetter(tier) {
+  const match = /^Tier ([A-D])$/.exec(tier);
+  if (!match) throw new Error(`unknown evidence tier ${JSON.stringify(tier)}`);
+  return match[1];
 }
 
-const PARTNER_PHRASE = {
-  wildtype: "wild-type: the partner transmits no variant allele",
-  heterozygous: "heterozygous: the partner transmits the variant allele with probability 0.5",
-  homozygous: "homozygous: the partner transmits the variant allele with probability 1",
+/**
+ * Footer text for the open record's tier, in sentence case: "Evidence tier A". A composite whose components'
+ * tiers differ (or one is missing) names each marker's tier.
+ */
+export function drawerTierText(vm) {
+  if (vm.tier === null) return `Evidence tier: ${NOT_AVAILABLE}`;
+  const parts = vm.componentEvidence;
+  if (parts && !parts.every((p) => p.tier === parts[0].tier)) {
+    return `Evidence tier: ${parts.map((p) => `${p.rsid} ${p.tier === null ? NOT_AVAILABLE : tierLetter(p.tier)}`).join(" · ")}`;
+  }
+  return `Evidence tier ${tierLetter(vm.tier)}`;
+}
+
+// The design system calls the other person in the simulator "Other parent" (RecordInspector.jsx).
+const OTHER_PARENT_PHRASE = {
+  wildtype: "no variant (wild-type). They pass on no variant allele",
+  heterozygous: "one copy (heterozygous). They pass on the variant allele with probability 0.5",
+  homozygous: "two copies (homozygous). They pass on the variant allele with probability 1",
 };
 
-/** States which partner model produced the offspring figures (AGENTS.md 4.4). */
+/** States which model of the other parent produced the offspring figures (AGENTS.md 4.4). */
 export function partnerModelNote(partnerModel, af) {
   if (partnerModel === "unscreened") {
     return af === null || af === undefined
-      ? `Partner model: unscreened. No gnomAD allele frequency is available for this variant, so the figures are ${NOT_AVAILABLE.toLowerCase()}.`
-      : `Partner model: unscreened. The partner's allele probability is the gnomAD allele frequency (${fmtPct(af)}) under Hardy-Weinberg equilibrium.`;
+      ? `Other parent: unscreened. No gnomAD allele frequency is available for this variant, so the figures are ${NOT_AVAILABLE.toLowerCase()}.`
+      : `Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (${fmtPct(af)}), under Hardy-Weinberg equilibrium.`;
   }
-  if (!Object.hasOwn(PARTNER_PHRASE, partnerModel)) throw new Error(`unknown partner model ${JSON.stringify(partnerModel)}`);
-  return `Partner model: ${PARTNER_PHRASE[partnerModel]}.`;
+  if (!Object.hasOwn(OTHER_PARENT_PHRASE, partnerModel)) throw new Error(`unknown partner model ${JSON.stringify(partnerModel)}`);
+  return `Other parent: ${OTHER_PARENT_PHRASE[partnerModel]}.`;
 }
 
 // ---------------------------------------------------------------------------------------------------------------
