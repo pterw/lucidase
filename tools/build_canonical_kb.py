@@ -640,12 +640,12 @@ def _check_imported_ranges(rsid: str, gnomad: Optional[dict[str, Any]]) -> list[
 
 
 def _build_locus(
-    rsid: str, locus: dict[str, Any], gene: dict[str, Any], snapshot: Optional[UpstreamSnapshot]
+    rsid: str, locus: dict[str, Any], gene: dict[str, Any], snapshot: UpstreamSnapshot
 ) -> tuple[dict[str, Any], list[str]]:
     evidence = _build_evidence(locus["evidence"])
     evidence.setdefault("dbsnp", None)
     evidence.setdefault("vep", None)
-    errors = [] if snapshot is None else _overlay_imported(rsid, locus, evidence, snapshot)
+    errors = _overlay_imported(rsid, locus, evidence, snapshot)
     basis = locus.get("tier")
     source = tier_source_for(gene)
     if source == "clinvar_review":  # Mendelian-disease gene: ClinVar review stars (imported where available)
@@ -711,19 +711,25 @@ def check_locus_bounds(loci: dict[str, Any], assemblies: dict[str, Any]) -> list
 
 
 def build_kb(
-    curation: dict[str, Any], upstream_root: Optional[Path | str] = DEFAULT_UPSTREAM_ROOT
+    curation: dict[str, Any], upstream_root: Path | str = DEFAULT_UPSTREAM_ROOT
 ) -> tuple[Optional[dict[str, Any]], list[str]]:
     """Build the KB document in memory. Returns (None, errors) when QC finds any error.
 
     `upstream_root` holds the pinned upstream payloads. Their sha256 is verified first; a tampered
-    payload is a QC error and nothing is imported from it. `upstream_root=None` is the explicit
-    curation-only build (no overlay, no cross-checks); the CLI never uses it.
+    payload is a QC error and nothing is imported from it. It is required: `assemblies` comes only from the
+    pinned UCSC tables and the web loader rejects a KB without it, so a curation-only build (None) raises
+    `ValueError` instead of returning a KB that cannot load.
     """
+    if upstream_root is None:
+        raise ValueError(
+            "build_kb: upstream_root is required. The KB's assemblies come only from the pinned UCSC payloads, "
+            "so a build without them would omit assemblies and the web loader would reject it"
+        )
     errors = validate_curation(curation)
     if errors:
         return None, errors
-    snapshot = None if upstream_root is None else UpstreamSnapshot(upstream_root)
-    errors = [] if snapshot is None else snapshot.verify_integrity()
+    snapshot = UpstreamSnapshot(upstream_root)
+    errors = snapshot.verify_integrity()
     if errors:
         return None, errors
     genes = {symbol: _build_gene(curation["genes"][symbol]) for symbol in sorted(curation["genes"])}
@@ -732,17 +738,15 @@ def build_kb(
         locus = curation["loci"][rsid]
         loci[rsid], locus_errors = _build_locus(rsid, locus, curation["genes"][locus["gene"]], snapshot)
         errors.extend(locus_errors)
-    assemblies = None
-    if snapshot is not None:
-        try:
-            assemblies = {build: _assembly_dict(snapshot.assembly(build)) for build, _ in BUILDS}
-        except AdapterError as exc:
-            errors.append(f"assemblies: UCSC geometry cannot be imported: {exc}")
-        else:
-            errors.extend(check_locus_bounds(loci, assemblies))
+    try:
+        assemblies = {build: _assembly_dict(snapshot.assembly(build)) for build, _ in BUILDS}
+    except AdapterError as exc:
+        errors.append(f"assemblies: UCSC geometry cannot be imported: {exc}")
+    else:
+        errors.extend(check_locus_bounds(loci, assemblies))
     if errors:
         return None, errors
-    sections = {"genes": genes, "loci": loci, **({} if assemblies is None else {"assemblies": assemblies})}
+    sections = {"genes": genes, "loci": loci, "assemblies": assemblies}
     canonical = json.dumps(sections, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     manifest = {
         "release": curation["release"],

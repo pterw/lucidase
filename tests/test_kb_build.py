@@ -405,7 +405,7 @@ def test_qc_rejects_a_gene_topic_that_is_missing_empty_or_padded(curation, mutat
     mutate(doc["genes"]["CFTR"])
     errors = validate_curation(doc)
     assert any(e.startswith("CFTR: ") and fragment in e for e in errors), errors
-    payload, build_errors = build_kb(doc, upstream_root=None)
+    payload, build_errors = build_kb(doc)
     assert payload is None and build_errors == errors
 
 
@@ -886,14 +886,11 @@ def test_build_in_memory_reports_a_missing_payload_directory(curation, tmp_path)
     assert payload is None and has_error(errors, "not found")
 
 
-def test_curation_only_build_is_reachable_through_an_explicit_parameter(curation):
-    """upstream_root=None skips the overlay: curated provenance, null pLI, no vep/dbsnp blocks."""
-    payload, errors = build_kb(curation, upstream_root=None)
-    assert errors == []
-    evidence = payload["loci"]["rs671"]["evidence"]
-    assert evidence["clinvar"]["provenance"]["curation_mode"] == "manually_curated"
-    assert evidence["gnomad"]["pli"] is None
-    assert evidence["vep"] is None and evidence["dbsnp"] is None
+def test_a_build_without_pinned_payloads_is_refused_because_it_would_have_no_assemblies(curation):
+    """P2-019: `assemblies` comes only from the pinned UCSC tables, and the web loader rejects a KB without it.
+    A curation-only build (upstream_root=None) would silently omit it, so build_kb refuses it up front."""
+    with pytest.raises(ValueError, match="upstream_root is required.*assemblies"):
+        build_kb(copy.deepcopy(curation), upstream_root=None)
 
 
 def test_missing_per_variant_gnomad_capture_fails_the_build(tmp_path, good_kb, curation):
