@@ -9,7 +9,7 @@ mapping (see `CLAUDE.md`).
 | `colors.css`, `typography.css`, `spacing.css`, `shape.css`, `motion.css`, `base.css` | `tokens/*.css` | none (copied unchanged) |
 | `lucidase.preset.cjs` | `tailwind/lucidase.preset.js` | motion values aligned with `motion.css` (240 ms, ease-out-quart); the original said 300 ms and another curve |
 | `../brand/*.svg` | `assets/logo/` (favicon, lockup, wordmark; light and dark) | none |
-| `../icons/*.svg` | Lucide `lucide-static@0.469.0` (ISC, `../icons/LICENSE`), the set the design system's `Icon` names | none; 14 icons, served same-origin instead of from a CDN |
+| `../icons/*.svg` | Lucide `lucide-static@0.469.0` (ISC, `../icons/LICENSE`), the set the design system's `Icon` names | none; 19 icons, served same-origin instead of from a CDN |
 
 Not copied:
 - `tokens/fonts.css`: it `@import`s the Adobe Fonts kit `gfe3vcu`, which both pages already link once in `<head>`.

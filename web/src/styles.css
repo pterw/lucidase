@@ -154,6 +154,11 @@ button.lds-step-item { cursor: pointer; }
 .lds-i-table { --lds-icon: url("icons/table.svg"); }
 .lds-i-search { --lds-icon: url("icons/search.svg"); }
 .lds-i-external-link { --lds-icon: url("icons/external-link.svg"); }
+.lds-i-chevron-right { --lds-icon: url("icons/chevron-right.svg"); }
+.lds-i-menu { --lds-icon: url("icons/menu.svg"); }
+.lds-i-arrow-up-right { --lds-icon: url("icons/arrow-up-right.svg"); }
+.lds-i-check { --lds-icon: url("icons/check.svg"); }
+.lds-i-arrow-left { --lds-icon: url("icons/arrow-left.svg"); }
 
 /* Button: primary is ink (not teal, for contrast); no press shrink. */
 .lds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px;

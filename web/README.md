@@ -180,7 +180,7 @@ These all fail closed, with a visible error or an explicit state:
 
 ## Visual design: the Lucidase design system
 
-The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 14 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
+The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 19 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
 
 ---
 
