@@ -19,6 +19,7 @@ import {
   drawerTierText,
   escapeHtml,
   groupIdForModel,
+  groupedReport,
   karyogramStateLabels,
   kbBadge,
   markdownReport,
@@ -706,5 +707,123 @@ test("the page's summary counts show the view model's words and help (no second 
     );
     assert.ok(count, `no summary count for ${state}`);
     assert.deepEqual([count[1], count[2]], [label, help], state);
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// The grouped report (design system ui_kits/web/AnalysisScreen.jsx): one ReportSection per REPORT_GROUPS group,
+// holding one FindingRow per interpreted check.
+
+/** Every interpreted check, in the overlapping lists the worker sends (an unclear record is in two lists). */
+const workerLists = (a) => [
+  ...a.vms.filter((vm) => vm.coverage_state === "supported_and_observed" || vm.sample_observation === "variant_present"),
+  ...a.vms.filter((vm) => vm.sample_observation === "wild_type"),
+  ...a.vms.filter((vm) => vm.coverage_state === "not_tested_by_array"),
+  ...a.vms.filter((vm) => vm.coverage_state === "insufficient_evidence"),
+];
+const reportRows = (report) => report.flatMap((group) => group.rows.map((row) => ({ group: group.id, ...row })));
+
+test("the grouped report has the four design-system groups in order, with their titles and asides", () => {
+  const a = analyse(DEMO);
+  const report = groupedReport(workerLists(a), a.kb.genes);
+  assert.deepEqual(
+    report.map(({ id, title, aside }) => ({ id, title, aside })),
+    REPORT_GROUPS.map(({ id, title, aside }) => ({ id, title, aside }))
+  );
+});
+
+test("every interpreted check is in the grouped report exactly once, in all four per-locus states", () => {
+  const a = analyse(ALL_STATES_FILE);
+  const lists = workerLists(a);
+  assert.ok(lists.length > a.vms.length, "the worker's lists overlap, so the report must not repeat a check");
+  const rows = reportRows(groupedReport(lists, a.kb.genes));
+  assert.deepEqual(rows.map((r) => r.id).sort(), a.vms.map((vm) => vm.id).sort());
+  assert.equal(new Set(rows.map((r) => r.id)).size, rows.length);
+  assert.deepEqual(
+    [...new Set(rows.map((r) => r.state))].sort(),
+    ["insufficient_evidence", "not_tested_by_array", "supported_and_observed", "supported_not_observed"]
+  );
+});
+
+test("APOE is one composite row in the grouped report, never its two component loci", () => {
+  const a = analyse(DEMO);
+  const components = a.apoe.components.map((c) => toViewModel(c, a.kb.genes));
+  const rows = reportRows(groupedReport([...workerLists(a), ...components], a.kb.genes));
+  const apoe = rows.filter((r) => r.gene === "APOE");
+  assert.equal(apoe.length, 1);
+  assert.equal(apoe[0].id, a.apoe.id);
+  assert.equal(apoe[0].record.components.length, 2);
+  assert.equal(apoe[0].technical, "rs429358 · C/C + rs7412 · C/C");
+  for (const rsid of ["rs429358", "rs7412"]) assert.ok(!rows.some((r) => r.id === rsid), rsid);
+});
+
+test("markers outside coverage are never in the grouped report", () => {
+  const a = analyse(DEMO);
+  const outside = { ...a.byRsid.rs6025, id: "rs1234567", rsid: "rs1234567", coverage_state: "outside_coverage" };
+  const rows = reportRows(groupedReport([...workerLists(a), outside], a.kb.genes));
+  assert.ok(!rows.some((r) => r.id === "rs1234567" || r.state === "outside_coverage"));
+  assert.equal(rows.length, a.vms.length);
+});
+
+test("a check's group follows its gene's KB inheritance model; a model with no group fails loudly", () => {
+  const a = analyse(DEMO);
+  for (const row of reportRows(groupedReport(workerLists(a), a.kb.genes))) {
+    assert.equal(row.group, groupIdForModel(a.kb.genes[row.gene].inheritance.model), row.id);
+  }
+  // Move MTHFR to the pharmacogenomic model in the KB: its row moves to Pharmacology.
+  const moved = analyse(DEMO, (kb) => {
+    kb.genes.MTHFR.inheritance.model = "pharmacogenomic";
+    return kb;
+  });
+  const movedRows = reportRows(groupedReport(workerLists(moved), moved.kb.genes));
+  assert.equal(movedRows.find((r) => r.gene === "MTHFR").group, "medicines");
+  const genes = structuredClone(a.kb.genes);
+  genes.MTHFR.inheritance.model = "autosomal_dominant";
+  assert.throws(() => groupedReport(workerLists(a), genes), /MTHFR/);
+});
+
+test("a group with no check in this KB is still listed, with no rows", () => {
+  const a = analyse(DEMO, (kb) => {
+    for (const gene of Object.values(kb.genes)) if (gene.inheritance.model === "trait") gene.inheritance.model = "risk_factor";
+    return kb;
+  });
+  const report = groupedReport(workerLists(a), a.kb.genes);
+  assert.deepEqual(report.map((g) => g.id), REPORT_GROUPS.map((g) => g.id));
+  assert.deepEqual(report.find((g) => g.id === "traits").rows, []);
+});
+
+test("each finding row carries the topic, the plain word, the statement, the limitation and the technical line", () => {
+  const a = analyse(ALL_STATES_FILE);
+  const rows = reportRows(groupedReport(workerLists(a), a.kb.genes));
+  for (const row of rows) {
+    const vm = a.vms.find((v) => v.id === row.id);
+    assert.equal(row.record, vm, row.id);
+    assert.equal(row.topic, a.kb.genes[row.gene].topic, row.id);
+    assert.equal(row.gene, vm.gene);
+    assert.equal(row.state, vm.coverage_state);
+    assert.equal(row.stateLabel, RESULT_WORDS[vm.coverage_state].label);
+    assert.equal(row.statement, vm.statement ?? vm.phenotype ?? vm.significance);
+    assert.equal(row.limitation, vm.limitation);
+    assert.deepEqual(row.caveats, vm.caveats);
+    assert.match(row.key, /^[A-Za-z0-9-]+$/, "the key is safe in an element id");
+  }
+  assert.equal(new Set(rows.map((r) => r.key)).size, rows.length);
+  const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+  assert.equal(byId.rs4244285.technical, `rs4244285 · ${a.byRsid.rs4244285.genotype}`);
+  assert.ok(byId.rs4244285.limitation.length > 0, "the CYP2C19 star-allele limitation travels with its row");
+  // A gap has no genotype: the technical line says so in words.
+  assert.equal(byId.rs6025.state, "not_tested_by_array");
+  assert.equal(byId.rs6025.technical, "rs6025 · No reading");
+  assert.equal(byId.rs6025.stateLabel, "Not on your chip");
+  assert.equal(byId.rs1799945.stateLabel, "Unclear");
+  // The wild-type statement keeps its count, never "normal".
+  assert.match(byId.rs671.statement, /not detected \(1 variant tested in ALDH2\)/);
+  // HFE: two loci share one topic; the KB carries no per-locus variant name, so the technical lines tell them apart.
+  const hfe = rows.filter((r) => r.gene === "HFE");
+  assert.equal(hfe.length, 2);
+  assert.equal(hfe[0].topic, hfe[1].topic);
+  assert.notEqual(hfe[0].technical, hfe[1].technical);
+  for (const text of rows.flatMap((r) => [r.topic, r.statement, r.technical, r.stateLabel])) {
+    for (const bad of PLACEHOLDERS) assert.ok(!text.includes(bad), `${bad} in "${text}"`);
   }
 });

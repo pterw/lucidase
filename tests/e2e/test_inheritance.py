@@ -12,7 +12,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, wait_drawer_open
+from conftest import DEMO_FILE, show_table, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 FORBIDDEN_FOR_NON_MENDELIAN = ("affected", "recurrence", "disease risk")
@@ -55,6 +55,7 @@ def test_demo_apoe_e4e4_drawer_says_every_child_inherits_e4(loaded_page):
 def test_wildtype_f5_drawer_has_no_affected_status_and_no_fifty_percent(loaded_page, tmp_path):
     page = loaded_page
     _analyse(page, _wildtype_f5_file(tmp_path))
+    show_table(page)
     page.locator("[data-filter='negative']").click()
     page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')")).click()
     wait_drawer_open(page)

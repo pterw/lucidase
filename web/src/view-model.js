@@ -105,6 +105,55 @@ export function groupIdForModel(model) {
   return typeof model === "string" && Object.hasOwn(GROUP_BY_MODEL, model) ? GROUP_BY_MODEL[model] : null;
 }
 
+/** The technical line's word for a locus with no genotype (a chip gap or a no-call). */
+const NO_READING = "No reading";
+
+/**
+ * The grouped report (design system ui_kits/web/AnalysisScreen.jsx): every REPORT_GROUPS group in its order, each
+ * with one FindingRow model per interpreted check whose gene's KB inheritance model maps to the group.
+ *
+ * `viewModels` are display models from `toViewModel`, in the worker's lists, which overlap (an unclear record can
+ * be in two), so each check is kept once, by id, in the order first seen. APOE arrives as one composite record
+ * (`components`); a component locus on its own is never a row. `outside_coverage` markers are counted only, never
+ * rows. A group with no check keeps its place with no rows. A gene whose model has no group throws (fail fast):
+ * a check is never dropped from the report silently.
+ */
+export function groupedReport(viewModels, genes) {
+  const rowsByGroup = new Map(REPORT_GROUPS.map((group) => [group.id, []]));
+  const seen = new Set();
+  for (const vm of viewModels) {
+    if (vm.coverage_state === "outside_coverage" || vm.role === "apoe_component" || seen.has(vm.id)) continue;
+    seen.add(vm.id);
+    const gene = genes[vm.gene];
+    const groupId = groupIdForModel(gene && gene.inheritance && gene.inheritance.model);
+    if (groupId === null) throw new Error(`${vm.gene} (${vm.id}) has no report group for its inheritance model`);
+    rowsByGroup.get(groupId).push(findingRow(vm, gene));
+  }
+  return REPORT_GROUPS.map((group) => ({ ...group, rows: rowsByGroup.get(group.id) }));
+}
+
+/**
+ * One FindingRow: topic (KB gene topic), gene, state and its plain word, the statement the table shows, the
+ * limitation and caveats, and the technical line "<rsid> · <genotype>" per locus ("No reading" when there is none).
+ * `key` is the record's rsids joined by "-", safe in an element id. `record` is the view model the drawer opens.
+ */
+function findingRow(vm, gene) {
+  const loci = vm.components ?? [vm];
+  return {
+    id: vm.id,
+    key: loci.map((locus) => locus.rsid).join("-").replace(/[^A-Za-z0-9-]/g, "-"),
+    topic: gene.topic,
+    gene: vm.gene,
+    state: vm.coverage_state,
+    stateLabel: vm.stateLabel,
+    statement: vm.statement ?? vm.phenotype ?? vm.significance,
+    limitation: vm.limitation,
+    caveats: vm.caveats,
+    technical: loci.map((locus) => `${locus.rsid} · ${nonEmptyString(locus.genotype_display) ?? NO_READING}`).join(" + "),
+    record: vm,
+  };
+}
+
 function deepFreeze(value) {
   for (const inner of Object.values(value)) if (typeof inner === "object" && inner !== null) deepFreeze(inner);
   return Object.freeze(value);

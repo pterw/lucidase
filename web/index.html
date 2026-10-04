@@ -256,6 +256,9 @@
         </div>
       </section>
 
+      <!-- The report: one section per group, one FindingRow per check (rendered by src/app.js from the view model) -->
+      <div id="report-groups" class="flex flex-col gap-16"></div>
+
       <!-- APOE: two markers read together -->
       <section id="apoe-status-card" class="hidden lds-section" aria-labelledby="apoe-h">
         <div class="lds-section-head">
@@ -290,53 +293,57 @@
         <div id="assortment-cards-container" class="lds-section-body flex flex-col"></div>
       </section>
 
-      <!-- All results: filters, search, save, table -->
-      <section class="lds-section" aria-labelledby="table-h">
+      <!-- All results as a table: one click away (filters, search and the table stay closed until asked for) -->
+      <section id="results-table" class="lds-section" aria-labelledby="table-h">
         <div class="lds-section-head">
-          <h2 id="table-h" class="lds-section-title">All results</h2>
-          <p class="lds-section-aside">Select a row to see its details, its limits and where the data comes from.</p>
+          <h2 id="table-h" class="lds-section-title">All results as a table</h2>
+          <p class="lds-section-aside">The same results with the technical columns, for checking against other tools.</p>
         </div>
         <div class="lds-section-body flex flex-col gap-4">
-          <div class="lds-tabs" role="group" aria-label="Show">
-            <button type="button" data-filter="all" class="lds-tab tab-active">Found</button>
-            <button type="button" data-filter="negative" class="lds-tab">Not found</button>
-            <button type="button" data-filter="gaps" class="lds-tab">Not on your chip</button>
-            <button type="button" data-filter="insufficient" class="lds-tab">Unclear</button>
-            <button type="button" data-filter="carrier" class="lds-tab">Carrier status</button>
-            <button type="button" data-filter="pathogenic" class="lds-tab">Pathogenic</button>
-            <button type="button" data-filter="acmg" data-acmg-version class="lds-tab">ACMG SF</button>
-            <button type="button" data-filter="pgx" class="lds-tab">Pharmacogenomics</button>
-            <button type="button" data-filter="risk" class="lds-tab">Risk factors</button>
-          </div>
-
           <div class="flex flex-wrap items-center gap-3">
-            <label class="lds-field flex-1" style="min-width: 220px; max-width: 360px">
-              <span class="lds-icon lds-icon-14 lds-i-search" aria-hidden="true"></span>
-              <span class="sr-only">Search</span>
-              <input type="text" id="search-input" placeholder="Find a marker, gene or drug" class="lds-input" autocomplete="off">
-            </label>
+            <button type="button" id="btn-show-table" class="lds-btn lds-btn-secondary lds-btn-sm" aria-expanded="false" aria-controls="table-panel"><span class="lds-icon lds-i-table" aria-hidden="true"></span>Show the table</button>
             <div class="flex-1"></div>
             <span id="kb-provenance-badge" class="lds-localnote lds-data"><span id="kb-provenance-text">KB · Offline</span></span>
           </div>
 
-          <div class="overflow-x-auto max-h-[600px] overflow-y-auto border-t border-line">
-            <table class="lds-table">
-              <thead>
-                <tr>
-                  <th scope="col">Marker</th>
-                  <th scope="col">Gene</th>
-                  <th scope="col">Genotype</th>
-                  <th scope="col">Result</th>
-                  <th scope="col">Evidence and category</th>
-                  <th scope="col">ClinVar review</th>
-                  <th scope="col">Magnitude</th>
-                  <th scope="col">What it means</th>
-                </tr>
-              </thead>
-              <tbody id="variants-tbody"></tbody>
-            </table>
+          <div id="table-panel" class="hidden flex flex-col gap-4">
+            <div class="lds-tabs" role="group" aria-label="Show">
+              <button type="button" data-filter="all" class="lds-tab tab-active">Found</button>
+              <button type="button" data-filter="negative" class="lds-tab">Not found</button>
+              <button type="button" data-filter="gaps" class="lds-tab">Not on your chip</button>
+              <button type="button" data-filter="insufficient" class="lds-tab">Unclear</button>
+              <button type="button" data-filter="carrier" class="lds-tab">Carrier status</button>
+              <button type="button" data-filter="pathogenic" class="lds-tab">Pathogenic</button>
+              <button type="button" data-filter="acmg" data-acmg-version class="lds-tab">ACMG SF</button>
+              <button type="button" data-filter="pgx" class="lds-tab">Pharmacogenomics</button>
+              <button type="button" data-filter="risk" class="lds-tab">Risk factors</button>
+            </div>
+
+            <label class="lds-field w-full" style="max-width: 260px">
+              <span class="lds-icon lds-icon-14 lds-i-search" aria-hidden="true"></span>
+              <span class="sr-only">Search findings</span>
+              <input type="search" id="search-input" placeholder="Find a marker, gene or drug" class="lds-input" autocomplete="off">
+            </label>
+
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto border-t border-line">
+              <table class="lds-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Marker</th>
+                    <th scope="col">Gene</th>
+                    <th scope="col">Genotype</th>
+                    <th scope="col">Result</th>
+                    <th scope="col">Evidence and category</th>
+                    <th scope="col">ClinVar review</th>
+                    <th scope="col">Magnitude</th>
+                    <th scope="col">What it means</th>
+                  </tr>
+                </thead>
+                <tbody id="variants-tbody"></tbody>
+              </table>
+            </div>
+            <p id="showing-count" class="lds-meta">Showing 0 findings</p>
           </div>
-          <p id="showing-count" class="lds-meta">Showing 0 findings</p>
         </div>
       </section>
 

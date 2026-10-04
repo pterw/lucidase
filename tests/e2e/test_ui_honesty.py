@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, goto_ready, wait_drawer_closed, wait_drawer_open
+from conftest import DEMO_FILE, WEB_DIR, goto_ready, show_table, wait_drawer_closed, wait_drawer_open
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -88,6 +88,7 @@ def test_product_name_is_lucidase_everywhere_the_user_sees_it(loaded_page):
 
 def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
+    show_table(page)
     chunks = [page.locator("body").inner_text()]
     for name in ("all", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"):
         page.locator(f"[data-filter='{name}']").click()
@@ -169,6 +170,7 @@ def test_apoe_drawer_labels_each_component_evidence_by_rsid(loaded_page):
     assert "(rs429358)" in links.nth(0).inner_text() and "(rs7412)" in links.nth(1).inner_text()
     # Opening a single-locus record afterwards leaves exactly one unlabelled link.
     page.locator("#btn-close-drawer").click()
+    show_table(page)
     page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')")).click()
     wait_drawer_open(page)
     assert page.locator("#drawer-clinvar-link, [data-extra-clinvar-link]").count() == 1
@@ -220,12 +222,15 @@ def test_kb_text_is_escaped_where_it_reaches_innerhtml(page):
     goto_ready(page, page.base_url)
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    finding = page.locator('#report-groups article.lds-finding[data-finding-id="rs6025"]')
+    assert payload in finding.locator(".lds-finding-statement").inner_text(), "the phenotype shows literally in the report"
+    show_table(page)
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs6025')"))
     assert payload in row.inner_text(), "the phenotype shows literally in the table row"
     row.click()
     wait_drawer_open(page)
     assert payload in page.locator("#drawer-caveats-list").inner_text()
-    assert page.locator("#variants-tbody img, #drawer-caveats-list img").count() == 0
+    assert page.locator("#report-groups img, #variants-tbody img, #drawer-caveats-list img").count() == 0
     assert page.evaluate("() => window.__xss") is None
 
 
@@ -233,6 +238,7 @@ def test_cyp2c19_row_carries_the_star_allele_limitation(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     row = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs4244285')"))
     badge = row.locator("[data-role='limitation']")
     expect(badge).to_be_visible()
@@ -249,6 +255,7 @@ def test_cyp2c19_row_carries_the_star_allele_limitation(loaded_page):
 def test_tested_wildtype_rows_state_the_count_and_the_limitation(loaded_page):
     page = loaded_page
     _analyse(page, WILDTYPE)
+    show_table(page)
     page.locator("[data-filter='negative']").click()
     dpyd = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs3918290')"))
     text = dpyd.inner_text()
@@ -281,6 +288,7 @@ def test_drawer_footer_shows_the_open_records_tier(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(page)
     tier = page.locator("#drawer-tier-badge").text_content().strip()

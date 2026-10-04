@@ -23,6 +23,7 @@ import {
   escapeHtml,
   fmtPct,
   formatRate,
+  groupedReport,
   heroScopeText,
   kbBadge,
   markdownReport,
@@ -292,6 +293,21 @@ function initEventListeners() {
     });
   }
 
+  // The grouped report: "Details" opens the record in the drawer, the same way a table row does.
+  document.getElementById("report-groups").addEventListener("click", (e) => {
+    const button = e.target.closest("button.lds-finding-open");
+    if (!button) return;
+    const id = button.closest("article.lds-finding").dataset.findingId;
+    const record = allRows().find((vm) => vm.id === id);
+    if (record) openDrawer(record, button);
+  });
+
+  // "All results as a table" opens once asked for (design system: the button gives way to the table).
+  document.getElementById("btn-show-table").addEventListener("click", () => {
+    setTableOpen(true);
+    searchInput.focus();
+  });
+
   // Search input
   searchInput.addEventListener("input", (e) => {
     state.searchQuery = e.target.value.toLowerCase().trim();
@@ -332,10 +348,13 @@ function initEventListeners() {
   document.getElementById("btn-use-another-file").addEventListener("click", () => goToStep(0));
 
 
-  // Detail drawer close
+  // Detail drawer close: its close button, or Escape while it is open
   if (btnCloseDrawer) {
     btnCloseDrawer.addEventListener("click", closeDrawer);
   }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && state.selectedVariant !== null) closeDrawer();
+  });
 
   // Inspect APOE button
   if (btnInspectApoe) {
@@ -424,9 +443,69 @@ function handleParseComplete(data) {
   renderKbClaims(state.manifest);
   renderQC();
   renderSummaryCards();
+  renderReportGroups();
   renderApoeCard();
   renderAssortmentSection();
+  setTableOpen(false);
   renderVariantsTable();
+}
+
+/** Opens or closes "All results as a table". Closed, only the "Show the table" button is shown. */
+function setTableOpen(open) {
+  const button = document.getElementById("btn-show-table");
+  button.setAttribute("aria-expanded", String(open));
+  button.classList.toggle("hidden", open);
+  document.getElementById("table-panel").classList.toggle("hidden", !open);
+}
+
+/**
+ * The grouped report (design system): one ReportSection per group, in its order, each with one FindingRow per
+ * check (view-model.js groupedReport). The mark keeps its shape and carries the plain word, so colour is never the
+ * only signal; the limitation is always on the row. A group with no check says so instead of disappearing.
+ */
+function renderReportGroups() {
+  const container = document.getElementById("report-groups");
+  container.innerHTML = groupedReport(allRows(), state.genes).map((group) => `
+    <section id="group-${escapeHtml(group.id)}" class="lds-section" aria-labelledby="group-${escapeHtml(group.id)}-h">
+      <div class="lds-section-head">
+        <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+        <p class="lds-section-aside">${escapeHtml(group.aside)}</p>
+      </div>
+      <div class="lds-section-body">
+        ${group.rows.length === 0 ? `<p class="lds-meta">No checks in this group.</p>` : group.rows.map(findingRowHtml).join("")}
+      </div>
+    </section>
+  `).join("");
+}
+
+function findingRowHtml(row) {
+  const headingId = `f-${escapeHtml(row.key)}-h`;
+  const limitation = row.limitation === null
+    ? ""
+    : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span><b>What this can’t tell you:</b> ${escapeHtml(row.limitation)}</span></p>`;
+  return `
+    <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}">
+      <span class="lds-mark lds-mark-16 lds-mark-${escapeHtml(row.state)}" role="img" aria-label="${escapeHtml(row.stateLabel)}"></span>
+      <div class="lds-finding-main">
+        <div class="lds-finding-head">
+          <h3 id="${headingId}" class="lds-finding-topic">${escapeHtml(row.topic)}</h3>
+          <span class="lds-finding-gene">${escapeHtml(row.gene)}</span>
+        </div>
+        <p class="lds-finding-statement">${escapeHtml(row.statement)}</p>
+        ${limitation}
+        <div class="lds-finding-tech">${escapeHtml(row.technical)}</div>
+      </div>
+      <button type="button" class="lds-finding-open" aria-controls="variant-drawer" aria-expanded="false" aria-label="Details for ${escapeHtml(row.topic)}">Details<span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span></button>
+    </article>`;
+}
+
+/** The FindingRow whose record is in the drawer is the one selected row (none when the drawer is closed). */
+function markSelectedFinding(id) {
+  document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
+    const selected = article.dataset.findingId === id;
+    article.classList.toggle("is-selected", selected);
+    article.querySelector("button.lds-finding-open").setAttribute("aria-expanded", String(selected));
+  });
 }
 
 // StepNav (design system): the step follows the page phase. Reading, or failing to read, a file is step 1; the
@@ -507,6 +586,7 @@ function useAnotherFile() {
     independentAssortment: [],
   });
   document.getElementById("variants-tbody").replaceChildren();
+  document.getElementById("report-groups").replaceChildren();
   document.getElementById("assortment-cards-container").replaceChildren();
   document.getElementById("results-section").classList.add("hidden");
   document.getElementById("analysis-error").classList.add("hidden");
@@ -803,6 +883,8 @@ function renderVariantsTable() {
       ? ""
       : `<span data-role="limitation" class="lds-tag lds-tag-notice" title="${escapeHtml(r.limitationTooltip)}">${r.limitation === null ? "Caveats" : "Limitation"}</span>`;
 
+    // A composite row (APOE) gives each component's review on its own line, so the column stays narrow.
+    const starsLines = r.componentEvidence ? r.componentEvidence.map((p) => `${p.rsid}: ${p.starsText}`) : [r.starsText];
     const guidance = r.statement ?? r.phenotype ?? r.significance;
     const guidanceTitle = [r.statement, r.phenotype, r.limitationTooltip].filter(part => part !== null).join(" ");
 
@@ -816,12 +898,12 @@ function renderVariantsTable() {
       <td>
         <span class="flex flex-wrap items-center gap-1.5">${tierBadge} ${categoryBadge}</span>
       </td>
-      <td class="lds-data text-ink-muted whitespace-nowrap">${r.starsMuted ? naHtml(r.starsText) : escapeHtml(r.starsText)}</td>
+      <td class="lds-data text-ink-muted whitespace-nowrap">${starsLines.map((line) => `<div>${r.starsMuted ? naHtml(line) : escapeHtml(line)}</div>`).join("")}</td>
       <td class="whitespace-nowrap ${r.magnitude !== null && r.magnitude >= 4 ? 'font-bold text-danger-ink' : ''}">
         ${valueHtml(r.magnitudeShort)} <span class="lds-meta">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
       </td>
-      <td class="text-ink-muted max-w-md truncate" title="${escapeHtml(guidanceTitle)}">
-        ${escapeHtml(guidance)}
+      <td class="text-ink-muted">
+        <div class="min-w-64 max-w-md line-clamp-2" title="${escapeHtml(guidanceTitle)}">${escapeHtml(guidance)}</div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -969,8 +1051,10 @@ function openDrawer(record, opener = document.activeElement) {
     subcellContainer.innerHTML = `<span class="text-14">${naHtml()}</span>`;
   }
 
-  // Show drawer
+  // Show drawer, mark its row in the report, and move focus into it (Escape or the close button brings it back)
   drawer.classList.remove("translate-x-full");
+  markSelectedFinding(record.id);
+  document.getElementById("btn-close-drawer").focus({ preventScroll: true });
 }
 
 function renderDrawerSegregation(record) {
@@ -1197,6 +1281,7 @@ function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
   if (drawer) drawer.classList.add("translate-x-full");
   state.selectedVariant = null;
+  markSelectedFinding(null);
   // Return focus to whatever opened the drawer (a table row, or a button), if it is still on the page.
   if (drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
   drawerOpener = null;

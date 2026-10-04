@@ -36,7 +36,7 @@ def _step_button(page, index):
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
-    expect(page.locator("#variants-tbody tr").first).to_be_visible()
+    expect(page.locator("#report-groups article.lds-finding").first).to_be_visible()
 
 
 def _no_horizontal_scroll(page):

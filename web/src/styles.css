@@ -241,6 +241,7 @@ button.lds-step-item { cursor: pointer; }
 .lds-finding-tech { font: 400 13px var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
 .lds-finding-open { align-self: start; display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 8px; border: 0; background: transparent;
   cursor: pointer; font: 700 14px var(--font-sans); color: var(--text-link); }
+.lds-finding-open > .lds-icon { width: 15px; height: 15px; }
 
 /* Ligature: the wordmark's arch joining two markers into one result (APOE only). The SVG is inline; see its classes. */
 .lds-ligature { display: inline-flex; flex-direction: column; gap: 4px; width: 240px; max-width: 100%; margin: 0; }

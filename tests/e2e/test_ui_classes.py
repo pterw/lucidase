@@ -12,7 +12,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, goto_ready, wait_drawer_open
+from conftest import DEMO_FILE, goto_ready, show_table, wait_drawer_open
 
 FIXTURES = Path(__file__).parent / "fixtures"
 E1_E4 = FIXTURES / "apoe-atypical-23andme.txt"  # rs429358 C/C with rs7412 C/T: an e1/e4 genotype
@@ -28,6 +28,7 @@ def test_drawer_has_no_cyp2c19_note_for_a_vkorc1_drug_response(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     _row(page, "rs9923231").click()
     wait_drawer_open(page)
     expect(page.locator("#drawer-drug-box")).to_be_visible()
@@ -40,6 +41,7 @@ def test_trait_category_is_not_styled_benign(loaded_page):
     page = loaded_page
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     # MTHFR rs1801133 is a Trait interpretation in the KB.
     badge = _row(page, "rs1801133").locator("span.lds-tag", has_text="Trait").first
     expect(badge).to_be_visible()
@@ -58,6 +60,7 @@ def test_disagreeing_apoe_component_tiers_do_not_wear_the_tier_d_class(page):
     goto_ready(page, page.base_url)
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     cell = page.locator("#variants-tbody tr").first.locator("span.lds-tag", has_text="rs7412: Tier C")
     expect(cell).to_be_visible()
     classes = cell.get_attribute("class").split()
@@ -85,6 +88,7 @@ def test_two_variants_of_one_acmg_gene_count_as_one_actionable_gene(loaded_page)
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     # The demo carries HFE C282Y (rs1800562) and H63D (rs1799945), both heterozygous: two variants, one gene.
+    show_table(page)
     page.locator("[data-filter='acmg']").click()
     expect(page.locator("#variants-tbody tr")).to_have_count(2)
     expect(page.locator("#count-acmg")).to_have_text("1")

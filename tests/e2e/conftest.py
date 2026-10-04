@@ -138,6 +138,18 @@ def _wait_drawer(page, want, timeout):
     page.wait_for_function(_DRAWER_SETTLED, arg=want, polling="raf", timeout=timeout)
 
 
+def show_table(page):
+    """Open "All results as a table" (collapsed behind "Show the table" until asked) and wait until it is usable.
+
+    Call it after the results are on the page, before using the table's rows, filter tabs or search.
+    """
+    expect(page.locator("#results-section")).to_be_visible()
+    button = page.locator("#btn-show-table")
+    if button.get_attribute("aria-expanded") != "true":
+        button.click()
+    expect(page.locator("#table-panel")).to_be_visible()
+
+
 def wait_drawer_open(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "open", timeout)
 

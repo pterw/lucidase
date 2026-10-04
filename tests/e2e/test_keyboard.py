@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from conftest import WAIT_TIMEOUT_MS, wait_drawer_closed, wait_drawer_open
+from conftest import WAIT_TIMEOUT_MS, show_table, wait_drawer_closed, wait_drawer_open
 from playwright.sync_api import expect
 
 FIRST_ROW = "#variants-tbody tr:first-child"
@@ -22,6 +22,7 @@ def _tab_until(page, selector):
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
     expect(page.locator(FIRST_ROW)).to_be_visible()
 
 

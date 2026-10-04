@@ -17,7 +17,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import wait_drawer_closed, wait_drawer_open
+from conftest import show_table, wait_drawer_closed, wait_drawer_open
 
 FIXTURES = Path(__file__).parent / "fixtures"
 EVIL_QUERIES = [
@@ -34,6 +34,7 @@ EVIL_QUERIES = [
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
 
 
 def _wait_outcome(page):
@@ -115,6 +116,7 @@ def _shown_ids(page):
 
 
 def _filter_sets(page):
+    show_table(page)
     shown = {}
     for name in DEMO_FILTER_ROWS:
         page.locator(f"[data-filter='{name}']").click()

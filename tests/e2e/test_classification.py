@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, goto_ready
+from conftest import DEMO_FILE, goto_ready, show_table
 
 FIXTURES = Path(__file__).parent / "fixtures"
 WILDTYPE = FIXTURES / "wildtype-23andme.txt"
@@ -100,6 +100,7 @@ def test_results_read_in_the_plain_words(loaded_page):
     for state, word in PLAIN_WORDS.items():
         expect(page.locator(f".lds-count-label:has(.lds-mark-{state})")).to_have_text(word)
     # Filter tabs for the per-state tables.
+    show_table(page)
     for name, word in (("all", "Found"), ("negative", "Not found"), ("gaps", "Not on your chip"), ("insufficient", "Unclear")):
         expect(page.locator(f"[data-filter='{name}']")).to_have_text(word)
     # Table badges under each state filter.
