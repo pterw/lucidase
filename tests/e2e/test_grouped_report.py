@@ -82,7 +82,8 @@ def test_the_four_groups_follow_the_summary_in_the_design_system_order(loaded_pa
         heading = section.locator(".lds-section-head h2.lds-section-title")
         expect(heading).to_have_text(group["title"])
         expect(section).to_have_attribute("aria-labelledby", heading.get_attribute("id"))
-        expect(section.locator(".lds-section-aside")).to_have_text(group["aside"])
+        # The rendered text: a glossary word's closed definition (test_glossary.py) is not part of what is read.
+        expect(section.locator(".lds-section-aside")).to_have_text(group["aside"], use_inner_text=True)
     # After the Summary, before "Across genes" and the table.
     order = page.evaluate(
         """() => ['summary-h', 'report-groups', 'assortment-section', 'table-h']

@@ -135,7 +135,8 @@ def test_prose_counts_equal_the_legend_and_the_grouped_report(loaded_page, tmp_p
         expect(item).to_have_count(1)
         expect(item.locator(".lds-statemark")).to_have_text(words[state]["label"])
         expect(item.locator(f".lds-statemark > .lds-mark-{state}")).to_have_count(1)
-        expect(item.locator(".lds-legend-help")).to_have_text(words[state]["help"])
+        # The rendered text: a glossary word's closed definition (test_glossary.py) is not part of what is read.
+        expect(item.locator(".lds-legend-help")).to_have_text(words[state]["help"], use_inner_text=True)
         count = item.locator(f'.lds-legend-count[data-legend-count="{state}"]')
         expect(count).to_have_attribute("id", count_id)
         legend = _int(count.inner_text())

@@ -14,6 +14,7 @@ import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { getTheme, initTheme, setTheme } from "./theme.js";
 import { initPagesMenu } from "./pages-menu.js";
+import { renderTermParts, renderTextWithTerms, upgradeTerms } from "./term.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
 import {
   NOT_AVAILABLE,
@@ -33,10 +34,11 @@ import {
   multiLocusReading,
   partnerModelNote,
   rowsByState,
-  summaryProse,
+  summaryProseParts,
   testedVariantCounts,
   toViewModel,
   MODEL_LABELS,
+  REPORT_GROUPS,
   RESULT_WORDS,
 } from "./view-model.js";
 
@@ -84,6 +86,7 @@ function initApp() {
   console.log("initApp executed, readyState:", document.readyState);
   initTheme();
   initPagesMenu();
+  upgradeTerms();
   initEventListeners();
   renderStepNav();
   loadManifest();
@@ -510,7 +513,15 @@ function renderReportGroups() {
       </div>
     </section>
   `).join("");
+  // Glossary words in the groups' asides: the design system's own copy (REPORT_GROUPS), never knowledge-base text.
+  for (const group of REPORT_GROUPS) {
+    const terms = GROUP_ASIDE_TERMS[group.id];
+    if (terms) renderTextWithTerms(container.querySelector(`#group-${group.id} .lds-section-aside`), group.aside, terms);
+  }
 }
+
+// The glossary words (glossary.js) a group's aside explains with a Term, on their first occurrence.
+const GROUP_ASIDE_TERMS = { risk: ["variant", "risk factor"], carrier: ["variant"] };
 
 function findingRowHtml(row) {
   const headingId = `f-${escapeHtml(row.key)}-h`;
@@ -690,7 +701,7 @@ function renderSummaryCards() {
     insufficient_evidence: cov.insufficient_evidence_count,
     outside_coverage: cov.outside_coverage_count,
   };
-  document.getElementById("summary-prose").textContent = summaryProse(counts);
+  renderTermParts(document.getElementById("summary-prose"), summaryProseParts(counts));
   renderSummaryLegend(counts);
   renderSummaryMap(state.karyogram);
 }
@@ -713,6 +724,9 @@ function renderSummaryLegend(counts) {
       <span id="${escapeHtml(id)}" class="lds-legend-count" data-legend-count="${escapeHtml(s)}">${escapeHtml(counts[s].toLocaleString())}</span>
       <span class="lds-legend-help">${escapeHtml(RESULT_WORDS[s].help)}</span>
     </li>`).join("");
+  // The Summary sentence above already explains "variant"; "genotype" is first used here, in the Unclear line.
+  const unclear = document.querySelector('#summary-legend [data-legend-state="insufficient_evidence"] .lds-legend-help');
+  renderTextWithTerms(unclear, RESULT_WORDS.insufficient_evidence.help, ["genotype"]);
 }
 
 /**

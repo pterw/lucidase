@@ -10,6 +10,7 @@
  */
 import { displayDiplotype } from "./core/apoe.js";
 import { offspringDistribution, geneOutcome } from "./core/inheritance.js";
+import { termParts } from "./glossary.js";
 
 export const NOT_AVAILABLE = "Not available";
 export const NO_CLINVAR_STATUS = "No ClinVar review status";
@@ -201,6 +202,14 @@ export function summaryProse(counts) {
     `A variant was ${clauses.slice(0, -1).join(", ")}, and ${clauses[clauses.length - 1]}. ` +
     `${fig(outside)} other ${outside === 1 ? "marker" : "markers"} in your file ${were(outside)} counted but not interpreted.`
   );
+}
+
+/**
+ * The Summary sentence as parts (glossary.js termParts), with a Term on "variant" as in the design system's
+ * AnalysisScreen. The parts' texts joined are `summaryProse(counts)`.
+ */
+export function summaryProseParts(counts) {
+  return termParts(summaryProse(counts), ["variant"]);
 }
 
 /**
