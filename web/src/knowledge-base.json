@@ -416,7 +416,8 @@
           "url": null
         },
         "uniprot_id": "P05091"
-      }
+      },
+      "topic": "Alcohol flush reaction"
     },
     "APOE": {
       "acmg_sf": false,
@@ -539,7 +540,8 @@
           "url": null
         },
         "uniprot_id": "P02649"
-      }
+      },
+      "topic": "Alzheimer’s disease risk"
     },
     "CFTR": {
       "acmg_sf": false,
@@ -581,7 +583,8 @@
           "url": null
         },
         "uniprot_id": "P13569"
-      }
+      },
+      "topic": "Cystic fibrosis"
     },
     "CYP2C19": {
       "acmg_sf": false,
@@ -621,7 +624,8 @@
           "url": null
         },
         "uniprot_id": "P33261"
-      }
+      },
+      "topic": "Clopidogrel (Plavix) response"
     },
     "DPYD": {
       "acmg_sf": false,
@@ -665,7 +669,8 @@
           "url": null
         },
         "uniprot_id": "Q12882"
-      }
+      },
+      "topic": "Fluorouracil (5-FU) side effects"
     },
     "F2": {
       "acmg_sf": false,
@@ -705,7 +710,8 @@
           "url": null
         },
         "uniprot_id": "P00734"
-      }
+      },
+      "topic": "Blood clots (prothrombin)"
     },
     "F5": {
       "acmg_sf": false,
@@ -746,7 +752,8 @@
           "url": null
         },
         "uniprot_id": "P12259"
-      }
+      },
+      "topic": "Blood clots (factor V Leiden)"
     },
     "HFE": {
       "acmg_sf": true,
@@ -788,7 +795,8 @@
           "url": null
         },
         "uniprot_id": "P55899"
-      }
+      },
+      "topic": "Haemochromatosis (iron overload)"
     },
     "MCM6": {
       "acmg_sf": false,
@@ -799,7 +807,8 @@
         "omim": null,
         "penetrance": null
       },
-      "insights": null
+      "insights": null,
+      "topic": "Lactose tolerance"
     },
     "MTHFR": {
       "acmg_sf": false,
@@ -840,7 +849,8 @@
           "url": null
         },
         "uniprot_id": "P42417"
-      }
+      },
+      "topic": "Folate metabolism (MTHFR)"
     },
     "SLCO1B1": {
       "acmg_sf": false,
@@ -881,7 +891,8 @@
           "url": null
         },
         "uniprot_id": "Q9Y6L6"
-      }
+      },
+      "topic": "Simvastatin muscle side effects"
     },
     "VKORC1": {
       "acmg_sf": false,
@@ -920,7 +931,8 @@
           "url": null
         },
         "uniprot_id": "Q9BQB6"
-      }
+      },
+      "topic": "Warfarin dose sensitivity"
     }
   },
   "loci": {
@@ -2766,7 +2778,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "ca80829be8685ade277c4f1e64d2fd4b6cd64dd054e5cc36e732d94609195e58"
+    "sha256": "ef2fc86aea9a5b6cb40abb8c0b5d4a421263d08b5756691c1f81ed49168a555c"
   },
   "schema_version": 2
 }

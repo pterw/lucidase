@@ -163,9 +163,14 @@ def _validate_gene(symbol: str, gene: Any) -> list[str]:
     if not isinstance(gene, dict):
         return [f"{symbol}: gene must be an object"]
     errors = []
+    topic = gene.get("topic")
+    if not isinstance(topic, str) or not topic.strip():
+        errors.append(f"{symbol}: topic must be a non-empty string (the plain-language result title)")
+    elif topic != topic.strip():
+        errors.append(f"{symbol}: topic has leading or trailing whitespace: {topic!r}")
     inh = gene.get("inheritance")
     if not isinstance(inh, dict):
-        return [f"{symbol}: inheritance missing"]
+        return [*errors, f"{symbol}: inheritance missing"]
     if inh.get("model") not in INHERITANCE_MODELS:
         errors.append(f"{symbol}: inheritance model {inh.get('model')!r} is not one of {sorted(INHERITANCE_MODELS)}")
     if not isinstance(inh.get("mendelian_disease"), bool):
@@ -427,6 +432,7 @@ def _interp(raw: dict[str, Any]) -> dict[str, Any]:
 def _build_gene(gene: dict[str, Any]) -> dict[str, Any]:
     inh = gene["inheritance"]
     out: dict[str, Any] = {
+        "topic": gene["topic"],
         "inheritance": {
             "model": inh["model"],
             "mendelian_disease": inh["mendelian_disease"],

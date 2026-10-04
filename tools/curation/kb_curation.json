@@ -3,6 +3,7 @@
   "acmg_sf_version": "ACMG SF v3.2",
   "genes": {
     "HFE": {
+      "topic": "Haemochromatosis (iron overload)",
       "inheritance": {
         "model": "autosomal_recessive",
         "mendelian_disease": true,
@@ -40,6 +41,7 @@
       }
     },
     "CFTR": {
+      "topic": "Cystic fibrosis",
       "inheritance": {
         "model": "autosomal_recessive",
         "mendelian_disease": true,
@@ -77,6 +79,7 @@
       }
     },
     "APOE": {
+      "topic": "Alzheimer’s disease risk",
       "inheritance": {
         "model": "risk_factor",
         "mendelian_disease": false,
@@ -195,6 +198,7 @@
       }
     },
     "F5": {
+      "topic": "Blood clots (factor V Leiden)",
       "inheritance": {
         "model": "risk_factor",
         "mendelian_disease": false,
@@ -231,6 +235,7 @@
       }
     },
     "F2": {
+      "topic": "Blood clots (prothrombin)",
       "inheritance": {
         "model": "risk_factor",
         "mendelian_disease": false,
@@ -266,6 +271,7 @@
       }
     },
     "CYP2C19": {
+      "topic": "Clopidogrel (Plavix) response",
       "inheritance": {
         "model": "pharmacogenomic",
         "mendelian_disease": false,
@@ -301,6 +307,7 @@
       }
     },
     "VKORC1": {
+      "topic": "Warfarin dose sensitivity",
       "inheritance": {
         "model": "pharmacogenomic",
         "mendelian_disease": false,
@@ -335,6 +342,7 @@
       }
     },
     "SLCO1B1": {
+      "topic": "Simvastatin muscle side effects",
       "inheritance": {
         "model": "pharmacogenomic",
         "mendelian_disease": false,
@@ -371,6 +379,7 @@
       }
     },
     "DPYD": {
+      "topic": "Fluorouracil (5-FU) side effects",
       "inheritance": {
         "model": "pharmacogenomic",
         "mendelian_disease": false,
@@ -410,6 +419,7 @@
       }
     },
     "MTHFR": {
+      "topic": "Folate metabolism (MTHFR)",
       "inheritance": {
         "model": "trait",
         "mendelian_disease": false,
@@ -446,6 +456,7 @@
       }
     },
     "MCM6": {
+      "topic": "Lactose tolerance",
       "inheritance": {
         "model": "trait",
         "mendelian_disease": false,
@@ -457,6 +468,7 @@
       "insights": null
     },
     "ALDH2": {
+      "topic": "Alcohol flush reaction",
       "inheritance": {
         "model": "trait",
         "mendelian_disease": false,

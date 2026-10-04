@@ -104,6 +104,7 @@ function checkGene(symbol, gene, problems) {
     problems.push(`${p}: not an object`);
     return;
   }
+  if (!isStr(gene.topic)) problems.push(`${p}.topic: required non-empty string`);
   const inh = gene.inheritance;
   if (!isObj(inh)) {
     problems.push(`${p}.inheritance: required object`);

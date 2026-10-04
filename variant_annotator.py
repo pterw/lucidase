@@ -167,6 +167,8 @@ def _check_gene(symbol: str, gene: Any, problems: list[str]) -> None:
     if not isinstance(gene, dict):
         problems.append(f"{p}: not an object")
         return
+    if not _is_str(gene.get("topic")):
+        problems.append(f"{p}.topic: required non-empty string")
     inh = gene.get("inheritance")
     if not isinstance(inh, dict):
         problems.append(f"{p}.inheritance: required object")

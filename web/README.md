@@ -29,7 +29,7 @@ All curated genomic knowledge lives in **one file**, `web/src/knowledge-base.jso
 
 The file is built, never hand-edited, by `tools/build_canonical_kb.py` from:
 
-- `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights);
+- `tools/curation/kb_curation.json`, the hand-edited curation input (loci, alleles, genotype interpretations, inheritance models, gene insights, and each gene's `topic`, the plain-language result title from the design system, such as "Clopidogrel (Plavix) response");
 - the pinned upstream payloads in `tools/fixtures/upstream/real/` (ClinVar, dbSNP, Ensembl VEP, gnomAD), captured once by `tools/fetch_upstream.py` and read only through `tools/source_adapters.py`.
 - the pinned UCSC `chromInfo` and `cytoBand` tables (hg19 and hg38), captured by `tools/fetch_upstream.py --ucsc-only`, which give the reference assembly geometry (`assemblies`: GRCh37 and GRCh38 chromosome lengths and centromeres); each source carries its URL, retrieval date and sha256.
 

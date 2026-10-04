@@ -31,6 +31,7 @@ function goodKb() {
     manifest: { release: "test", guardrail: "Absence of a finding is not absence of risk." },
     genes: {
       HFE: {
+        topic: "Haemochromatosis (iron overload)",
         inheritance: { model: "autosomal_recessive", mendelian_disease: true, disease: "HH", omim: "1", penetrance: null },
         acmg_sf: true,
         insights: null,
@@ -160,6 +161,19 @@ test("APOE diplotypes, when present, need all six keys", () => {
   assert.match(problemsOf(kb).join("\n"), /diplotypes/);
 });
 
+test("a gene needs a plain-language topic: missing, empty or non-string is rejected", () => {
+  for (const [label, mutate] of [
+    ["missing", (gene) => delete gene.topic],
+    ["empty", (gene) => (gene.topic = "")],
+    ["null", (gene) => (gene.topic = null)],
+    ["number", (gene) => (gene.topic = 7)],
+  ]) {
+    const kb = goodKb();
+    mutate(kb.genes.HFE);
+    assert.match(problemsOf(kb).join("\n"), /genes\.HFE\.topic: required non-empty string/, label);
+  }
+});
+
 test("non-object input is a KbSchemaError, not a TypeError", () => {
   assert.throws(() => validateKb(null), KbSchemaError);
   assert.throws(() => validateKb("x"), KbSchemaError);
@@ -244,4 +258,14 @@ test("the committed knowledge base is accepted and exposes its assemblies, froze
   assert.equal(kb.assemblies.GRCh37.chromosomes["1"].length, 249250621);
   assert.equal(kb.assemblies.GRCh37.sources.length, 2);
   assert.ok(Object.isFrozen(kb.assemblies.GRCh38.chromosomes["1"].centromere));
+});
+
+test("every gene in the committed knowledge base carries a non-empty topic", () => {
+  const json = JSON.parse(readFileSync(new URL("../src/knowledge-base.json", import.meta.url), "utf-8"));
+  const kb = validateKb(json);
+  for (const [symbol, gene] of Object.entries(kb.genes)) {
+    assert.equal(typeof gene.topic, "string", symbol);
+    assert.ok(gene.topic.length > 0 && gene.topic === gene.topic.trim(), symbol);
+  }
+  assert.equal(kb.genes.CYP2C19.topic, "Clopidogrel (Plavix) response");
 });
