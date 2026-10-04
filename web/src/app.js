@@ -350,7 +350,7 @@ function initEventListeners() {
   document.getElementById("btn-use-another-file").addEventListener("click", () => goToStep(0));
 
 
-  // Detail drawer close: its close button, or Escape while it is open
+  // Inspector close: its close button, or Escape anywhere on the page while it is open (design system Inspector)
   if (btnCloseDrawer) {
     btnCloseDrawer.addEventListener("click", closeDrawer);
   }
@@ -923,15 +923,26 @@ function renderVariantsTable() {
   });
 }
 
-// The element that opened the drawer; closeDrawer returns focus to it.
+// The element that opened the Inspector; closeDrawer returns focus to it.
 let drawerOpener = null;
 
+/**
+ * Shows a record in the Inspector (design system Inspector and ui_kits/web/RecordInspector.jsx): docked beside the
+ * results, or under them on a narrow screen. It is non-modal: the list stays usable, and opening another record
+ * swaps the content. The element ids are the drawer's (#variant-drawer, drawer-*), which the tests read.
+ */
 function openDrawer(record, opener = document.activeElement) {
+  const drawer = document.getElementById("variant-drawer");
+  const side = document.getElementById("inspector-side");
+  if (!drawer || !side) return;
+  const wasOpen = state.selectedVariant !== null;
   state.selectedVariant = record;
   drawerOpener = opener instanceof HTMLElement && opener !== document.body ? opener : null;
-  const drawer = document.getElementById("variant-drawer");
-  if (!drawer) return;
 
+  // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
+  const gene = state.genes[record.gene];
+  document.getElementById("drawer-title").textContent =
+    gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
   document.getElementById("drawer-rsid").textContent = record.id;
   document.getElementById("drawer-gene").textContent = record.gene;
   setValue(document.getElementById("drawer-genotype"), record.genotype);
@@ -954,10 +965,10 @@ function openDrawer(record, opener = document.activeElement) {
   }
   setValue(document.getElementById("drawer-footer-tier"), drawerTierText(record));
 
-  if (covBadgeEl) {
-    covBadgeEl.className = stateTagClass(record.coverage_state);
-    covBadgeEl.innerHTML = stateTagInnerHtml(record.coverage_state, record.stateLabel);
-  }
+  // The result as the design system's StateMark with its word (the shape carries it without colour).
+  if (covBadgeEl) covBadgeEl.innerHTML = stateTagInnerHtml(record.coverage_state, record.stateLabel);
+
+  renderLigature(record);
 
   // Limitation (e.g. the star-allele refusal or a single-variant test): from the KB, on every row that has one.
   const refusalBox = document.getElementById("drawer-refusal-box");
@@ -1001,6 +1012,8 @@ function openDrawer(record, opener = document.activeElement) {
   } else {
     drugBox.classList.add("hidden");
   }
+  document.getElementById("drawer-notices")
+    .classList.toggle("hidden", !record.acmg_actionable && record.drug_response === null);
 
   // ClinVar external links: one per locus whose accession was machine-imported. A composite row (APOE) gets one
   // link per component, labelled with its rsid.
@@ -1019,7 +1032,7 @@ function openDrawer(record, opener = document.activeElement) {
         anchor = extra;
       }
       anchor.href = link.url;
-      anchor.textContent = `Open the ClinVar record${labelled ? ` (${link.rsid})` : ""}`;
+      anchor.innerHTML = `ClinVar record${labelled ? ` (${escapeHtml(link.rsid)})` : ""}<span class="lds-icon lds-i-arrow-up-right" aria-hidden="true"></span>`;
     });
   } else {
     clinvarLink.classList.add("hidden");
@@ -1064,10 +1077,42 @@ function openDrawer(record, opener = document.activeElement) {
     subcellContainer.innerHTML = `<span class="text-14">${naHtml()}</span>`;
   }
 
-  // Show drawer, mark its row in the report, and move focus into it (Escape or the close button brings it back)
-  drawer.classList.remove("translate-x-full");
+  // Show it and mark its row in the report. Opening focuses the Inspector itself (design system); swapping records
+  // while it is docked beside the list leaves focus in the list, where the person is choosing. Under the list (a
+  // narrow screen) it is out of sight, so it is brought into view and focused every time.
+  side.hidden = false;
   markSelectedFinding(record.id);
-  document.getElementById("btn-close-drawer").focus({ preventScroll: true });
+  const below = side.offsetTop > side.parentElement.firstElementChild.offsetTop;
+  if (!wasOpen || below) drawer.focus({ preventScroll: true });
+  if (below) drawer.scrollIntoView({ block: "start" });
+}
+
+/**
+ * The Ligature (design system components/report/Ligature.jsx): for a genuine two-marker composite (APOE) only, the
+ * two markers' genotypes joined into the one result. Every value comes from the record; a missing one says so.
+ */
+function renderLigature(record) {
+  const slot = document.getElementById("drawer-ligature");
+  const parts = record.components ?? [];
+  slot.hidden = parts.length !== 2;
+  if (parts.length !== 2) {
+    slot.replaceChildren();
+    return;
+  }
+  const marker = (c) => `<span>${escapeHtml(c.rsid)} ${valueHtml(c.genotype_display ?? null)}</span>`;
+  const result = record.diplotypeDisplay === null
+    ? naHtml()
+    : `${escapeHtml(record.gene)} ${escapeHtml(record.diplotypeDisplay)}`;
+  slot.innerHTML = `
+    <figure class="lds-ligature">
+      <svg viewBox="0 0 240 34" width="240" height="34" aria-hidden="true" focusable="false">
+        <path class="lds-ligature-arch" d="M30 32 C 30 4, 210 4, 210 32"/>
+        <circle class="lds-ligature-dot" cx="120" cy="11" r="4"/>
+      </svg>
+      <div class="lds-ligature-markers">${parts.map(marker).join("")}</div>
+      <div class="lds-ligature-result">${result}</div>
+      <figcaption class="lds-ligature-caption">One result built from two markers</figcaption>
+    </figure>`;
 }
 
 function renderDrawerSegregation(record) {
@@ -1086,7 +1131,7 @@ function renderDrawerSegregation(record) {
 
   // Wording follows the gene's inheritance model: disease and recurrence language is for Mendelian genes only.
   // For a recessive gene the headline figure is the genotype probability (two copies), before any penetrance.
-  setLabel(header, mendelian ? null : "Allele transmission");
+  setLabel(header, mendelian ? null : "Passing it on");
   setLabel(header && header.nextElementSibling, mendelian ? null : "Chance a child inherits the allele, from the patient genotype");
   setLabel(priorEl.previousElementSibling, mendelian ? null : "Allele frequency (gnomAD)");
   setLabel(
@@ -1098,7 +1143,7 @@ function renderDrawerSegregation(record) {
     !mendelian ? "Child inherits, wild-type partner" : recessive ? "Risk with a carrier partner (genotype probability)" : null
   );
   setLabel(simTitle && simTitle.firstElementChild, mendelian ? null : "Offspring allele simulator");
-  setLabel(simTitle && simTitle.lastElementChild, "Partner's genotype");
+  setLabel(simTitle && simTitle.lastElementChild, "Other parent");
   document.querySelectorAll(".partner-sim-btn").forEach(b => {
     setLabel(b, mendelian ? null : SIM_BUTTON_LABELS[b.getAttribute("data-partner")]);
   });
@@ -1155,7 +1200,9 @@ function renderDrawerSegregation(record) {
 
 // The buttons keep their data-partner keys; each maps to a partner genotype model.
 const SIM_PARTNER_MODEL = { unscreened: "unscreened", carrier: "heterozygous", affected: "homozygous", wildtype: "wildtype" };
-const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "Heterozygous", affected: "Homozygous", wildtype: "Wild-type" };
+// The other parent's options in the design system's words (RecordInspector.jsx): Mendelian genes keep the markup's
+// Unscreened, Carrier, Affected, No variant; the others say how many copies the other parent has.
+const SIM_BUTTON_LABELS = { unscreened: "Unscreened", carrier: "One copy", affected: "Two copies", wildtype: "No variant" };
 
 /** Sets an element's text, remembering the original so a later null restores it. */
 function setLabel(el, text) {
@@ -1292,11 +1339,15 @@ function renderDrawerBiotools(record) {
 
 function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
-  if (drawer) drawer.classList.add("translate-x-full");
+  const side = document.getElementById("inspector-side");
+  const focusWasInside = Boolean(drawer && drawer.contains(document.activeElement));
+  if (side) side.hidden = true;
   state.selectedVariant = null;
   markSelectedFinding(null);
-  // Return focus to whatever opened the drawer (a table row, or a button), if it is still on the page.
-  if (drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
+  // Focus that was in the Inspector goes back to whatever opened it (a table row, or a button), if it is still on
+  // the page. Focus the person moved elsewhere stays where it is.
+  const lost = focusWasInside || document.activeElement === null || document.activeElement === document.body;
+  if (lost && drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
   drawerOpener = null;
 }
 

@@ -147,8 +147,10 @@
       </div>
     </section>
 
-    <!-- Results (populated after the analysis) -->
-    <section id="results-section" class="hidden flex flex-col gap-16" aria-labelledby="results-h">
+    <!-- Results (populated after the analysis): the list, and the docked Inspector beside it or under it (design
+         system AnalysisScreen). The list's content keeps its indentation. -->
+    <section id="results-section" class="hidden lds-results" aria-labelledby="results-h">
+      <div class="lds-results-main flex flex-col gap-16">
       <div class="flex flex-col gap-6">
         <div class="flex flex-wrap items-end justify-between gap-4">
           <h1 id="results-h" class="lds-display" tabindex="-1">Your results</h1>
@@ -363,196 +365,203 @@
           </div>
         </div>
       </section>
+      </div>
+
+      <!-- Result details: the docked, non-modal Inspector (design system Inspector and RecordInspector). It sits beside
+           the list, or under it on a narrow screen; the list stays usable. Shown while a record is open. -->
+      <div id="inspector-side" class="lds-results-side" hidden>
+        <aside id="variant-drawer" class="lds-inspector lds-inspector-docked" tabindex="-1" aria-labelledby="drawer-title">
+          <div class="lds-inspector-head">
+            <div class="lds-inspector-heading">
+              <h2 id="drawer-title" class="lds-inspector-title">Not available</h2>
+              <p class="lds-inspector-sub"><span id="drawer-gene">Gene</span> · <span id="drawer-rsid">rsID</span> · <span id="drawer-coord">Not available</span></p>
+              <div class="lds-inspector-meta">
+                <span id="drawer-coverage-state-badge" class="lds-statemark"></span>
+                <span id="drawer-tier-badge" class="lds-tag lds-tag-neutral"></span>
+              </div>
+            </div>
+            <button id="btn-close-drawer" type="button" class="lds-iconbtn" aria-label="Close details">
+              <span class="lds-icon lds-i-x" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div class="lds-inspector-body">
+            <!-- Notices: ACMG SF gene, CPIC drug response (the block is hidden when neither applies) -->
+            <div id="drawer-notices" class="flex flex-col gap-3 pt-4">
+              <div id="drawer-acmg-box" class="hidden lds-alert lds-alert-info">
+                <span class="lds-icon lds-icon-18 lds-i-info" aria-hidden="true"></span>
+                <div class="lds-alert-body">
+                  <p class="lds-alert-title"><span data-acmg-version>ACMG SF</span> gene</p>
+                  <p class="lds-alert-text">This gene is on the <span data-acmg-version>ACMG SF</span> list of genes where a finding can lead to medical action. The result shown reflects curated ClinVar submissions; Lucidase does not apply the ACMG/AMP 2015 variant classification criteria itself.</p>
+                </div>
+              </div>
+
+              <div id="drawer-drug-box" class="hidden lds-alert lds-alert-pgx">
+                <span class="lds-icon lds-icon-18 lds-i-info" aria-hidden="true"></span>
+                <div class="lds-alert-body">
+                  <p class="lds-alert-title">Drug response (CPIC guideline)</p>
+                  <p id="drawer-drug-text" class="lds-alert-text"></p>
+                </div>
+              </div>
+            </div>
+
+            <section class="lds-isec" aria-labelledby="isec-found">
+              <h3 id="isec-found" class="lds-isec-title">What was found</h3>
+              <div class="lds-isec-body">
+                <p id="drawer-significance" class="m-0 font-sans font-bold text-15 text-ink">Not available</p>
+                <p id="drawer-phenotype" class="lds-prose">Not available</p>
+                <!-- APOE only: the Ligature joining its two markers into one result (filled by src/app.js) -->
+                <div id="drawer-ligature" hidden></div>
+              </div>
+            </section>
+
+            <!-- The limitation (a single-variant test, the star-allele refusal) -->
+            <section id="drawer-refusal-box" class="hidden lds-isec" aria-labelledby="isec-limit">
+              <h3 id="isec-limit" class="lds-isec-title">What this can’t tell you</h3>
+              <div class="lds-isec-body">
+                <p id="drawer-refusal-text" class="m-0"></p>
+              </div>
+            </section>
+
+            <section id="drawer-caveats-box" class="hidden lds-isec" aria-labelledby="isec-caveats">
+              <h3 id="isec-caveats" class="lds-isec-title">Caveats and scope</h3>
+              <ul id="drawer-caveats-list" class="lds-list text-ink-muted"></ul>
+            </section>
+
+            <!-- Inheritance: recurrence for Mendelian genes ("If you have children"), allele transmission otherwise -->
+            <section id="drawer-segregation-container" class="lds-isec flex flex-col gap-4" aria-labelledby="isec-seg">
+              <div class="lds-isec-head">
+                <div>
+                  <h3 id="isec-seg" class="lds-isec-title mb-1" data-role="seg-title">If you have children</h3>
+                  <p class="lds-meta">Mendelian inheritance model and recurrence calculation</p>
+                </div>
+                <span id="drawer-seg-mode-badge" class="lds-tag lds-tag-neutral">Not available</span>
+              </div>
+
+              <dl class="lds-datalist">
+                <div><dt>Carrier frequency (2pq)</dt><dd id="drawer-seg-carrier-prior">Not available</dd></div>
+                <div><dt>Penetrance</dt><dd id="drawer-seg-penetrance">Not available</dd></div>
+                <div><dt>Risk with an unscreened partner</dt><dd id="drawer-seg-risk-unscreened">Not available</dd></div>
+                <div><dt>Risk with a carrier partner</dt><dd id="drawer-seg-risk-carrier">Not available</dd></div>
+              </dl>
+
+              <div class="flex flex-col gap-3">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                  <span class="lds-h3">Offspring simulator</span>
+                  <span class="lds-meta">Other parent</span>
+                </div>
+                <div id="drawer-partner-buttons" class="lds-segmented" role="group" aria-label="Other parent">
+                  <button type="button" data-partner="unscreened" class="partner-sim-btn lds-segment" aria-pressed="true">Unscreened</button>
+                  <button type="button" data-partner="carrier" class="partner-sim-btn lds-segment" aria-pressed="false">Carrier</button>
+                  <button type="button" data-partner="affected" class="partner-sim-btn lds-segment" aria-pressed="false">Affected</button>
+                  <button type="button" data-partner="wildtype" class="partner-sim-btn lds-segment" aria-pressed="false">No variant</button>
+                </div>
+                <p id="drawer-partner-model-note" class="lds-meta"></p>
+
+                <div class="flex flex-col gap-3">
+                  <div class="lds-prob">
+                    <div class="lds-prob-head"><span>Affected probability</span><span id="sim-p-affected">Not available</span></div>
+                    <div class="lds-prob-track"><div id="sim-bar-affected" class="lds-prob-bar" style="width: 0%"></div></div>
+                  </div>
+                  <div class="lds-prob">
+                    <div class="lds-prob-head"><span>Carrier probability</span><span id="sim-p-carrier">Not available</span></div>
+                    <div class="lds-prob-track"><div id="sim-bar-carrier" class="lds-prob-bar" style="width: 0%"></div></div>
+                  </div>
+                  <div class="lds-prob">
+                    <div class="lds-prob-head"><span>Wild-type (non-carrier)</span><span id="sim-p-wildtype">Not available</span></div>
+                    <div class="lds-prob-track"><div id="sim-bar-wildtype" class="lds-prob-bar" style="width: 0%"></div></div>
+                  </div>
+                  <div class="lds-prob-head pt-2 border-t border-line">
+                    <span>Effective penetrance, adjusted</span><span id="sim-effective-risk">Not available</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="lds-isec" aria-labelledby="isec-tech">
+              <h3 id="isec-tech" class="lds-isec-title">Technical details</h3>
+              <dl class="lds-datalist">
+                <div><dt>Genotype</dt><dd id="drawer-genotype">Not available</dd></div>
+                <div><dt>ClinVar review</dt><dd id="drawer-stars">Not available</dd></div>
+                <div><dt>Magnitude</dt><dd id="drawer-magnitude">Not available</dd></div>
+                <div><dt>gnomAD allele frequency</dt><dd id="drawer-af">Not available</dd></div>
+              </dl>
+            </section>
+
+            <!-- Gene and protein context: AlphaFold DB, Ensembl VEP, ENCODE -->
+            <section id="drawer-biotools-container" class="lds-isec flex flex-col gap-5">
+              <div class="lds-isec-head">
+                <div>
+                  <h3 class="lds-isec-title mb-1">Gene and protein context</h3>
+                  <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
+                </div>
+                <span id="drawer-biotool-gene-badge" class="lds-tag lds-tag-neutral lds-data">Gene</span>
+              </div>
+
+              <div id="biotool-alphafold-card" class="flex flex-col gap-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="flex flex-wrap items-center gap-2">
+                    <span class="lds-h3">AlphaFold DB structure</span>
+                    <span id="drawer-af-uniprot" class="lds-meta lds-data">Not available</span>
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="lds-meta">pLDDT</span>
+                    <span id="drawer-af-plddt" class="lds-tag lds-tag-neutral lds-data">Not available</span>
+                  </span>
+                </div>
+                <p id="drawer-af-status" class="lds-prose">Not available</p>
+                <div>
+                  <p class="lds-meta mb-1">Folded domains</p>
+                  <div id="drawer-af-domains" class="flex flex-col gap-1 lds-data text-13"></div>
+                </div>
+                <p id="drawer-af-joints" class="lds-meta">Not available</p>
+              </div>
+
+              <div id="biotool-ensembl-card" class="flex flex-col gap-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="lds-h3">Ensembl VEP and constraint</span>
+                  <span id="drawer-ens-transcript" class="lds-meta lds-data">Not available</span>
+                </div>
+                <dl class="lds-datalist">
+                  <div><dt>AlphaMissense class</dt><dd id="drawer-ens-alphamissense">Not available</dd></div>
+                  <div><dt>LOEUF constraint</dt><dd id="drawer-ens-loeuf">Not available</dd></div>
+                </dl>
+              </div>
+
+              <div id="biotool-encode-card" class="flex flex-col gap-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="lds-h3">ENCODE RNA-seq expression</span>
+                  <span class="lds-meta">Type A biosamples, TPM</span>
+                </div>
+                <div id="drawer-encode-tissues" class="flex flex-col gap-2"></div>
+              </div>
+            </section>
+
+            <section class="lds-isec">
+              <div class="lds-isec-head">
+                <h3 class="lds-isec-title">Human Protein Atlas expression</h3>
+                <span class="lds-meta">Normal tissue IHC</span>
+              </div>
+              <div id="drawer-hpa-tissues" class="flex flex-col"></div>
+            </section>
+
+            <section class="lds-isec">
+              <h3 class="lds-isec-title">Where the protein sits in the cell</h3>
+              <div id="drawer-hpa-subcell" class="flex flex-wrap gap-1.5"></div>
+            </section>
+          </div>
+
+          <div class="lds-inspector-foot">
+            <span id="drawer-footer-tier" class="lds-meta">Not available</span>
+            <div class="flex flex-wrap gap-x-4 gap-y-1">
+              <a id="drawer-clinvar-link" href="#" target="_blank" rel="noopener noreferrer" class="lds-btn lds-btn-sm lds-btn-link">ClinVar record<span class="lds-icon lds-i-arrow-up-right" aria-hidden="true"></span></a>
+            </div>
+          </div>
+        </aside>
+      </div>
     </section>
 
   </main>
-
-  <!-- Result details (slides in over the page) -->
-  <aside id="variant-drawer" aria-label="Result details" class="lds-inspector fixed inset-y-0 right-0 z-50 w-full sm:w-inspector translate-x-full overflow-y-auto flex flex-col justify-between">
-    <div>
-      <div class="lds-inspector-head">
-        <div class="flex flex-col gap-1.5 min-w-0">
-          <h2 id="drawer-rsid" class="lds-inspector-title">rsID</h2>
-          <p class="lds-inspector-sub"><span id="drawer-gene">Gene</span> · <span id="drawer-coord">Not available</span></p>
-          <div class="flex flex-wrap items-center gap-2 mt-1">
-            <span id="drawer-coverage-state-badge" class="lds-tag lds-tag-neutral"></span>
-            <span id="drawer-tier-badge" class="lds-tag lds-tag-neutral"></span>
-          </div>
-        </div>
-        <button id="btn-close-drawer" type="button" class="lds-iconbtn" aria-label="Close details">
-          <span class="lds-icon lds-i-x" aria-hidden="true"></span>
-        </button>
-      </div>
-
-      <div class="lds-inspector-body">
-        <div class="flex flex-col gap-3 pt-4">
-          <!-- What this test can't tell you (a single-variant test, the star-allele refusal) -->
-          <div id="drawer-refusal-box" class="hidden lds-alert lds-alert-notice">
-            <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
-            <div class="lds-alert-body">
-              <p class="lds-alert-title">What this test can't tell you</p>
-              <p id="drawer-refusal-text" class="lds-alert-text"></p>
-            </div>
-          </div>
-
-          <div id="drawer-acmg-box" class="hidden lds-alert lds-alert-info">
-            <span class="lds-icon lds-icon-18 lds-i-info" aria-hidden="true"></span>
-            <div class="lds-alert-body">
-              <p class="lds-alert-title"><span data-acmg-version>ACMG SF</span> gene</p>
-              <p class="lds-alert-text">This gene is on the <span data-acmg-version>ACMG SF</span> list of genes where a finding can lead to medical action. The result shown reflects curated ClinVar submissions; Lucidase does not apply the ACMG/AMP 2015 variant classification criteria itself.</p>
-            </div>
-          </div>
-
-          <div id="drawer-drug-box" class="hidden lds-alert lds-alert-pgx">
-            <span class="lds-icon lds-icon-18 lds-i-info" aria-hidden="true"></span>
-            <div class="lds-alert-body">
-              <p class="lds-alert-title">Drug response (CPIC guideline)</p>
-              <p id="drawer-drug-text" class="lds-alert-text"></p>
-            </div>
-          </div>
-        </div>
-
-        <section class="lds-isec">
-          <h3 class="lds-isec-title">What it means</h3>
-          <p id="drawer-significance" class="font-sans font-bold text-15 text-ink mb-1.5">Not available</p>
-          <p id="drawer-phenotype" class="lds-prose">Not available</p>
-        </section>
-
-        <section class="lds-isec">
-          <dl class="lds-datalist">
-            <div><dt>Genotype</dt><dd id="drawer-genotype">Not available</dd></div>
-            <div><dt>ClinVar review</dt><dd id="drawer-stars">Not available</dd></div>
-            <div><dt>Magnitude</dt><dd id="drawer-magnitude">Not available</dd></div>
-            <div><dt>gnomAD allele frequency</dt><dd id="drawer-af">Not available</dd></div>
-          </dl>
-        </section>
-
-        <section id="drawer-caveats-box" class="hidden lds-isec">
-          <h3 class="lds-isec-title">Caveats and scope</h3>
-          <ul id="drawer-caveats-list" class="lds-list text-ink-muted"></ul>
-        </section>
-
-        <!-- Inheritance: recurrence for Mendelian genes, allele transmission otherwise -->
-        <section id="drawer-segregation-container" class="lds-isec flex flex-col gap-4">
-          <div class="lds-isec-head">
-            <div>
-              <h3 class="lds-isec-title mb-1" data-role="seg-title">Inheritance and recurrence</h3>
-              <p class="lds-meta">Mendelian inheritance model and recurrence calculation</p>
-            </div>
-            <span id="drawer-seg-mode-badge" class="lds-tag lds-tag-neutral">Not available</span>
-          </div>
-
-          <dl class="lds-datalist">
-            <div><dt>Carrier frequency (2pq)</dt><dd id="drawer-seg-carrier-prior">Not available</dd></div>
-            <div><dt>Penetrance</dt><dd id="drawer-seg-penetrance">Not available</dd></div>
-            <div><dt>Risk with an unscreened partner</dt><dd id="drawer-seg-risk-unscreened">Not available</dd></div>
-            <div><dt>Risk with a carrier partner</dt><dd id="drawer-seg-risk-carrier">Not available</dd></div>
-          </dl>
-
-          <div class="flex flex-col gap-3">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <span class="lds-h3">Offspring simulator</span>
-              <span class="lds-meta">Partner's genotype</span>
-            </div>
-            <div id="drawer-partner-buttons" class="lds-segmented" role="group" aria-label="Partner's genotype">
-              <button type="button" data-partner="unscreened" class="partner-sim-btn lds-segment" aria-pressed="true">Unscreened</button>
-              <button type="button" data-partner="carrier" class="partner-sim-btn lds-segment" aria-pressed="false">Carrier</button>
-              <button type="button" data-partner="affected" class="partner-sim-btn lds-segment" aria-pressed="false">Affected</button>
-              <button type="button" data-partner="wildtype" class="partner-sim-btn lds-segment" aria-pressed="false">Wild-type</button>
-            </div>
-            <p id="drawer-partner-model-note" class="lds-meta"></p>
-
-            <div class="flex flex-col gap-3">
-              <div class="lds-prob">
-                <div class="lds-prob-head"><span>Affected probability</span><span id="sim-p-affected">Not available</span></div>
-                <div class="lds-prob-track"><div id="sim-bar-affected" class="lds-prob-bar" style="width: 0%"></div></div>
-              </div>
-              <div class="lds-prob">
-                <div class="lds-prob-head"><span>Carrier probability</span><span id="sim-p-carrier">Not available</span></div>
-                <div class="lds-prob-track"><div id="sim-bar-carrier" class="lds-prob-bar" style="width: 0%"></div></div>
-              </div>
-              <div class="lds-prob">
-                <div class="lds-prob-head"><span>Wild-type (non-carrier)</span><span id="sim-p-wildtype">Not available</span></div>
-                <div class="lds-prob-track"><div id="sim-bar-wildtype" class="lds-prob-bar" style="width: 0%"></div></div>
-              </div>
-              <div class="lds-prob-head pt-2 border-t border-line">
-                <span>Effective penetrance, adjusted</span><span id="sim-effective-risk">Not available</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Gene and protein context: AlphaFold DB, Ensembl VEP, ENCODE -->
-        <section id="drawer-biotools-container" class="lds-isec flex flex-col gap-5">
-          <div class="lds-isec-head">
-            <div>
-              <h3 class="lds-isec-title mb-1">Gene and protein context</h3>
-              <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
-            </div>
-            <span id="drawer-biotool-gene-badge" class="lds-tag lds-tag-neutral lds-data">Gene</span>
-          </div>
-
-          <div id="biotool-alphafold-card" class="flex flex-col gap-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="flex flex-wrap items-center gap-2">
-                <span class="lds-h3">AlphaFold DB structure</span>
-                <span id="drawer-af-uniprot" class="lds-meta lds-data">Not available</span>
-              </span>
-              <span class="flex items-center gap-1.5">
-                <span class="lds-meta">pLDDT</span>
-                <span id="drawer-af-plddt" class="lds-tag lds-tag-neutral lds-data">Not available</span>
-              </span>
-            </div>
-            <p id="drawer-af-status" class="lds-prose">Not available</p>
-            <div>
-              <p class="lds-meta mb-1">Folded domains</p>
-              <div id="drawer-af-domains" class="flex flex-col gap-1 lds-data text-13"></div>
-            </div>
-            <p id="drawer-af-joints" class="lds-meta">Not available</p>
-          </div>
-
-          <div id="biotool-ensembl-card" class="flex flex-col gap-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="lds-h3">Ensembl VEP and constraint</span>
-              <span id="drawer-ens-transcript" class="lds-meta lds-data">Not available</span>
-            </div>
-            <dl class="lds-datalist">
-              <div><dt>AlphaMissense class</dt><dd id="drawer-ens-alphamissense">Not available</dd></div>
-              <div><dt>LOEUF constraint</dt><dd id="drawer-ens-loeuf">Not available</dd></div>
-            </dl>
-          </div>
-
-          <div id="biotool-encode-card" class="flex flex-col gap-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="lds-h3">ENCODE RNA-seq expression</span>
-              <span class="lds-meta">Type A biosamples, TPM</span>
-            </div>
-            <div id="drawer-encode-tissues" class="flex flex-col gap-2"></div>
-          </div>
-        </section>
-
-        <section class="lds-isec">
-          <div class="lds-isec-head">
-            <h3 class="lds-isec-title">Human Protein Atlas expression</h3>
-            <span class="lds-meta">Normal tissue IHC</span>
-          </div>
-          <div id="drawer-hpa-tissues" class="flex flex-col"></div>
-        </section>
-
-        <section class="lds-isec">
-          <h3 class="lds-isec-title">Where the protein sits in the cell</h3>
-          <div id="drawer-hpa-subcell" class="flex flex-wrap gap-1.5"></div>
-        </section>
-      </div>
-    </div>
-
-    <div class="lds-inspector-foot">
-      <div class="flex flex-wrap gap-2">
-        <a id="drawer-clinvar-link" href="#" target="_blank" rel="noopener noreferrer" class="lds-btn lds-btn-secondary lds-btn-sm lds-extlink">Open the ClinVar record</a>
-      </div>
-      <span id="drawer-footer-tier" class="lds-meta lds-data">Not available</span>
-    </div>
-  </aside>
 
   <footer class="lds-footer mt-auto">
     <div class="lds-wrap lds-footer-inner">

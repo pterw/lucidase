@@ -56,7 +56,8 @@ def test_hfe_biotools_panel(loaded_page, tmp_path):
     assert imported["alphamissense_class"] in am_text
     assert f"{imported['alphamissense_score']:.2f}" in am_text
     assert "liver" in page.locator("#drawer-encode-tissues").inner_text().lower()
-    page.locator("#variant-drawer").evaluate("el => el.scrollTop = 450")
+    # The docked Inspector scrolls its body, not the whole pane.
+    page.locator("#variant-drawer .lds-inspector-body").evaluate("el => el.scrollTop = 450")
     shot = tmp_path / "biotools.png"
     page.screenshot(path=str(shot))
     assert shot.stat().st_size > 0

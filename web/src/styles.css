@@ -172,6 +172,8 @@ button.lds-step-item { cursor: pointer; }
 .lds-btn-secondary { border-color: var(--border-control); }
 .lds-btn-secondary:hover { background: var(--bg-hover); border-color: var(--ink); color: var(--text-body); }
 .lds-btn-ghost:hover { background: var(--bg-hover); color: var(--text-body); }
+/* Button variant link (design system Button variant="link"): a text link with the button's type and icon gap. */
+.lds-btn-link, .lds-btn-link:hover { height: auto; padding: 0; background: transparent; color: var(--text-link); text-decoration: underline; text-underline-offset: 3px; }
 .lds-btn:disabled, .lds-btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
 .lds-extlink::after { content: ""; flex: none; width: 14px; height: 14px; background-color: currentColor;
   -webkit-mask: url("icons/external-link.svg") center / contain no-repeat; mask: url("icons/external-link.svg") center / contain no-repeat; }
@@ -359,7 +361,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-table tbody tr.is-selected, .lds-table tbody tr.is-selected:hover { background: var(--accent-wash); }
 .lds-table td.lds-table-empty { padding: 32px 16px; text-align: center; font: italic 400 15px var(--font-serif); color: var(--text-muted); }
 
-/* Inspector (the details panel). It still slides in over the page in this release. */
+/* Inspector (the details panel). The page docks it beside the results: see .lds-inspector-docked below. */
 .lds-inspector { background: var(--bg-panel); border-left: 1px solid var(--border-default); color: var(--text-body);
   transition: transform var(--dur-slow) var(--ease-standard); }
 .lds-inspector-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 14px; border-bottom: 1px solid var(--border-default); }

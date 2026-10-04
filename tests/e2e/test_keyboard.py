@@ -1,4 +1,4 @@
-"""Keyboard access: a results row opens its drawer, and the export items are reachable with Tab."""
+"""Keyboard access: a results row opens the Inspector, and the export items are reachable with Tab."""
 
 from __future__ import annotations
 
@@ -26,6 +26,10 @@ def _load_demo(page):
     expect(page.locator(FIRST_ROW)).to_be_visible()
 
 
+def _inspector_has_focus(page):
+    return page.locator("#variant-drawer").evaluate("el => el === document.activeElement")
+
+
 def test_enter_opens_the_focused_row_and_closing_returns_focus_to_it(loaded_page):
     page = loaded_page
     _load_demo(page)
@@ -38,9 +42,20 @@ def test_enter_opens_the_focused_row_and_closing_returns_focus_to_it(loaded_page
     page.keyboard.press("Enter")
     wait_drawer_open(page)
     assert page.locator("#drawer-rsid").inner_text().strip() == rsid
+    # Opening focuses the Inspector itself (design system Inspector), not its close button.
+    assert _inspector_has_focus(page)
 
+    # The close button, by keyboard, returns focus to the row.
     page.locator("#btn-close-drawer").focus()
     page.keyboard.press("Enter")
+    wait_drawer_closed(page)
+    assert row.evaluate("el => el === document.activeElement")
+
+    # So does Escape from inside the Inspector.
+    page.keyboard.press("Enter")
+    wait_drawer_open(page)
+    assert _inspector_has_focus(page)
+    page.keyboard.press("Escape")
     wait_drawer_closed(page)
     assert row.evaluate("el => el === document.activeElement")
 
@@ -58,6 +73,7 @@ def test_space_opens_a_row_and_its_default_scroll_is_cancelled(loaded_page):
     )
     page.keyboard.press("Space")
     wait_drawer_open(page)
+    assert _inspector_has_focus(page)
     assert page.evaluate("window.__spacePrevented") is True
     assert page.locator("#drawer-rsid").inner_text().strip() == row.locator("td").first.inner_text().strip()
 

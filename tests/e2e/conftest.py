@@ -118,23 +118,24 @@ def loaded_page(page):
     return page
 
 
-# Real geometry, not a class-name proxy. The drawer slides in over 300 ms, so a
-# state counts only once the box is identical on two consecutive animation frames:
-# open = right edge at the viewport edge, closed = fully off the right edge.
+# Real geometry, not a class-name proxy. The Inspector (#variant-drawer) is docked in the page, beside the results or
+# under them, so a state counts only once its box is identical on two consecutive animation frames:
+# open = a box with an area, across the viewport's width (not parked off-screen), closed = no box at all.
 _DRAWER_SETTLED = """(want) => {
   const el = document.getElementById('variant-drawer');
   const r = el.getBoundingClientRect();
-  const prev = window.__drawerLeft;
-  window.__drawerLeft = r.left;
-  if (prev === undefined || Math.abs(prev - r.left) >= 0.5) return false;
+  const key = [r.left, r.top, r.width, r.height].map((v) => Math.round(v)).join(',');
+  const prev = window.__drawerBox;
+  window.__drawerBox = key;
+  if (prev !== key) return false;
   return want === 'open'
-    ? r.width > 0 && Math.abs(r.right - window.innerWidth) < 1
-    : r.left >= window.innerWidth;
+    ? r.width > 0 && r.height > 0 && r.left >= 0 && r.right <= window.innerWidth + 0.5
+    : el.getClientRects().length === 0;
 }"""
 
 
 def _wait_drawer(page, want, timeout):
-    page.evaluate("delete window.__drawerLeft")
+    page.evaluate("delete window.__drawerBox")
     page.wait_for_function(_DRAWER_SETTLED, arg=want, polling="raf", timeout=timeout)
 
 
