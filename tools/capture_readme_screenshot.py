@@ -82,15 +82,14 @@ def main() -> None:
             page.goto(url, wait_until="networkidle")
             page.click("#btn-load-demo")
             page.wait_for_selector("#results-section", state="visible")
-            # Put the top of the results a few pixels under the sticky header, measured
-            # in the page, so no sliver of the section above shows through.
+            # Open on the Summary (the counts sentence, the karyogram and its key), its top a
+            # little under the viewport's edge, so no sliver of the section above shows through.
+            page.wait_for_selector("#summary-h", state="visible")
             page.evaluate(
                 """() => {
-                    const header = document.querySelector('header');
-                    const results = document.getElementById('results-section');
-                    const gap = 8;
-                    const top = results.getBoundingClientRect().top + window.scrollY;
-                    window.scrollTo(0, top - header.getBoundingClientRect().height - gap);
+                    const summary = document.getElementById('summary-h').closest('section');
+                    const top = summary.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo(0, top - 24);
                 }"""
             )
             page.mouse.move(0, 0)

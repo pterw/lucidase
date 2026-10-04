@@ -48,7 +48,7 @@ User opens a file
        │
        ▼
  [Main thread — browser only]
- └─ One view model per record feeds the table, drawer, Markdown and CSV (view-model.js)
+ └─ One view model per record feeds the grouped report, Inspector, table, Markdown and CSV (view-model.js)
 ```
 
 ### Coverage taxonomy

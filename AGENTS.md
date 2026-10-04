@@ -18,7 +18,8 @@ Do not route around it.
 ## 2. Architecture and boundaries
 
 **Single source of truth.** All curated genomic knowledge (loci, alleles,
-genotype interpretations, evidence, inheritance, gene insights) and the
+genotype interpretations, evidence, inheritance, gene insights, and each
+gene's plain-language result topic) and the
 reference assembly geometry (chromosome lengths and centromeres, GRCh37 and
 GRCh38) live in `web/src/knowledge-base.json`. Only `tools/build_canonical_kb.py`
 writes it, and nobody edits it by hand. The build's hand-edited input is
@@ -34,8 +35,13 @@ web/src/karyogram-page.js,     UI of the karyogram page: owns its DOM, calls
   karyogram.html               the worker's "karyogram" action
 web/src/karyogram-view.js      pure SVG view of a karyogram layout
 web/src/theme.js               light/dark theme shared by both pages
+web/src/pages-menu.js          the header's narrow "Pages" disclosure (both pages)
+web/src/term.js, glossary.js   inline glossary (Term popovers) and its one
+                               table of definitions
 web/src/view-model.js          pure display model: one view model per record
-                               feeds the table, drawer, Markdown and CSV
+                               feeds the grouped report, Inspector, table,
+                               Markdown and CSV; RESULT_WORDS is the one source
+                               of the plain result words
 web/src/worker.js              adapter: message in -> core -> message out
 web/src/kb-loader.js           the one KB loader (JSON module import), used
                                by the worker and the page
@@ -116,7 +122,7 @@ records the provisional look the design system replaced.
    - Hand-entered values are labelled `manually_curated`. QC output reports
      the real error count, and the build exits non-zero when it fails.
 6. Single-variant tests of multi-variant genes (DPYD, CFTR, CYP2C19 star
-   alleles, ACMG SF loci) carry their limitation on the row, in the drawer
+   alleles, ACMG SF loci) carry their limitation on the row, in the Inspector
    and in every export.
 
 ## 5. Privacy invariants
