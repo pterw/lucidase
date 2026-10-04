@@ -210,15 +210,8 @@ The rest of this section describes the provisional stack it replaced, kept for r
 
 ## 8. Open items (from `AUDIT_LEDGER.md`)
 
-| Id | Where | What | Suggested fix |
-|---|---|---|---|
-| P1-091 | `tools/fetch_upstream.py` `Capturer.run` | It writes the body and its meta before it checks the status, so a failed recapture overwrites a good pinned fixture. Only `git diff` reveals it. | Write into a staging directory, and promote a capture into `fixtures/upstream/real/` only on success |
-| P2-018 | `web/src/karyogram-page.js` `loadSample` | `loadSample` waits on `fetch` before `startWorker` arms the 30 s watchdog, so a demo fetch that never resolves leaves the page loading forever | Arm a timeout around the fetch and send it to the existing error path |
-| P2-019 | `tools/build_canonical_kb.py`, `web/src/karyogram-view.js` | `build_kb(..., upstream_root=None)` omits `assemblies` without saying so, and `colByName` is a plain-object lookup. Neither is reachable from the shipped build | Refuse or document the first; make the second a `Map` or use `Object.hasOwn` |
-
-There is also one cheap test to add: `_vcf_alleles` in `genomic_parser.py` should get a regression test for
-no-call inputs (`'.'` and `'./.'` with a string allele table must return `None`). An automated reviewer flagged it
-with a harness artifact (integer inputs). The real behaviour is correct, but no test pins it.
+None. P1-091, P2-018 and P2-019 were remediated on 2026-10-04 (see the ledger's remediation log), and the no-call
+regression test for `_vcf_alleles` in `genomic_parser.py` is now `tests/test_vcf_alleles.py`.
 
 ## 9. Owner decisions still pending (keep the recorded defaults; do not decide them)
 
