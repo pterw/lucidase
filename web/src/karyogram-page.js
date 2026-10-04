@@ -12,6 +12,7 @@ import { layoutKaryogram } from "./core/karyogram.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
 import { RESULT_WORDS, escapeHtml, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
+import { initPagesMenu } from "./pages-menu.js";
 
 const SAMPLE_URL = "./demo-data/sample-karyogram-23andme.txt";
 const SAMPLE_NAME = "sample-karyogram-23andme.txt";
@@ -262,6 +263,7 @@ async function loadSample() {
 
 async function initPage() {
   initTheme();
+  initPagesMenu();
   window.__lucidaseKaryogram = {
     get layout() {
       return view.layout;

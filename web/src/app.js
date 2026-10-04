@@ -13,6 +13,7 @@
 import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "./core/inheritance.js";
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { getTheme, initTheme, setTheme } from "./theme.js";
+import { initPagesMenu } from "./pages-menu.js";
 import {
   NOT_AVAILABLE,
   acmgVersionLabel,
@@ -53,17 +54,24 @@ const state = {
   filterCategory: "all",
   searchQuery: "",
   sortBy: "magnitude",
+  // The StepNav step (0 choose your file, 1 read your results, 2 save a copy), set by the page phase.
+  step: 0,
   // Read-only view of the theme owned by theme.js (its storage reads and writes are guarded there).
   get theme() {
     return getTheme();
   }
 };
 
+// The StepNav's three steps (declared before initApp runs, which may be at module evaluation).
+const STEPS = ["Choose your file", "Read your results", "Save a copy"];
+
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
 function initApp() {
   console.log("initApp executed, readyState:", document.readyState);
   initTheme();
+  initPagesMenu();
   initEventListeners();
+  renderStepNav();
   loadManifest();
   window.__lucidase = {
     state,
@@ -217,6 +225,8 @@ function showAnalysisError(message) {
     String(message || "unknown error");
   box.classList.remove("hidden");
   setInputsDisabled(false);
+  showIntro(true);
+  setStep(0);
 }
 
 function initEventListeners() {
@@ -302,9 +312,24 @@ function initEventListeners() {
     });
   });
 
-  // Exports
-  btnExportMd.addEventListener("click", exportMarkdownReport);
-  btnExportCsv.addEventListener("click", exportCsvReport);
+  // Exports: using the save section is step 3.
+  btnExportMd.addEventListener("click", () => {
+    enterSaveStep();
+    exportMarkdownReport();
+  });
+  btnExportCsv.addEventListener("click", () => {
+    enterSaveStep();
+    exportCsvReport();
+  });
+  document.getElementById("save").addEventListener("focusin", enterSaveStep);
+
+  // Steps: the StepNav (both forms) and the two buttons by the results heading.
+  document.getElementById("stepnav").addEventListener("click", (e) => {
+    const button = e.target.closest("button[data-step]");
+    if (button) goToStep(Number(button.dataset.step));
+  });
+  document.getElementById("btn-goto-save").addEventListener("click", () => goToStep(2));
+  document.getElementById("btn-use-another-file").addEventListener("click", () => goToStep(0));
 
 
   // Detail drawer close
@@ -346,6 +371,8 @@ function processText(text, fileName) {
     setInputsDisabled(true);
     document.getElementById("progress-section").classList.remove("hidden");
     document.getElementById("results-section").classList.add("hidden");
+    showIntro(true);
+    setStep(0);
     const job = { action: "parse", text, fileName };
     startWorker(job).postMessage(job);
   } catch (err) {
@@ -387,6 +414,12 @@ function handleParseComplete(data) {
   document.getElementById("analysis-error").classList.add("hidden");
   document.getElementById("results-section").classList.remove("hidden");
   setInputsDisabled(false);
+  // The intro gives way to the results. A control in it that held focus (the example button) is gone, so focus
+  // moves to the results heading instead of falling back to the page.
+  const focusWasInIntro = document.getElementById("section-hero").contains(document.activeElement);
+  showIntro(false);
+  setStep(1);
+  if (focusWasInIntro) document.getElementById("results-h").focus();
 
   renderKbClaims(state.manifest);
   renderQC();
@@ -394,6 +427,95 @@ function handleParseComplete(data) {
   renderApoeCard();
   renderAssortmentSection();
   renderVariantsTable();
+}
+
+// StepNav (design system): the step follows the page phase. Reading, or failing to read, a file is step 1; the
+// results are step 2; the save section is step 3. Step 1 can always be revisited, steps 2 and 3 only once there are
+// results. Both forms (the list, and the narrow "Step N of 3") are in the markup; a container query shows one.
+function setStep(step) {
+  state.step = step;
+  renderStepNav();
+}
+
+function renderStepNav() {
+  const nav = document.getElementById("stepnav");
+  if (!nav) return;
+  const current = state.step;
+  const hasResults = current > 0;
+  nav.querySelector(".lds-stepnav-list").innerHTML = STEPS.map((label, i) => {
+    const status = i < current ? "done" : i === current ? "current" : "upcoming";
+    const dot = status === "done" ? `<span class="lds-icon lds-icon-14 lds-i-check"></span>` : String(i + 1);
+    const done = status === "done" ? `<span class="sr-only"> (done)</span>` : "";
+    const inner = `<span class="lds-step-dot" aria-hidden="true">${dot}</span><span>${escapeHtml(label)}${done}</span>`;
+    const canVisit = status !== "current" && (i === 0 || hasResults);
+    const item = canVisit
+      ? `<button type="button" class="lds-step-item" data-step="${i}">${inner}</button>`
+      : `<span class="lds-step-item"${status === "current" ? ` aria-current="step"` : ""}>${inner}</span>`;
+    const line = i < STEPS.length - 1 ? `<span class="lds-step-line" aria-hidden="true"></span>` : "";
+    return `<li class="lds-step" data-state="${status}">${item}${line}</li>`;
+  }).join("");
+
+  // Narrow form: the current step, "Step N of 3", a bar grown by transform, and a link back to the previous step.
+  nav.querySelector(".lds-stepnav-current").textContent = STEPS[current];
+  nav.querySelector(".lds-stepnav-count").textContent = `Step ${current + 1} of ${STEPS.length}`;
+  nav.querySelector(".lds-progress-bar").style.transform = `scaleX(${(current + 1) / STEPS.length})`;
+  const back = nav.querySelector(".lds-stepnav-back");
+  back.hidden = current === 0;
+  if (current > 0) {
+    back.dataset.step = String(current - 1);
+    back.querySelector("[data-role='back-label']").textContent = STEPS[current - 1];
+  }
+}
+
+/** A visit from the StepNav or the results heading. Step 1 returns to the file chooser; steps 2 and 3 need results. */
+function goToStep(step) {
+  if (step === 0) {
+    useAnotherFile();
+    return;
+  }
+  if (state.step === 0) return;
+  setStep(step);
+  document.getElementById(step === 2 ? "save-h" : "results-h").focus();
+}
+
+/** The person reached the save section (used a button in it, or moved focus into it). */
+function enterSaveStep() {
+  if (state.step === 1) setStep(2);
+}
+
+function showIntro(show) {
+  document.getElementById("section-hero").classList.toggle("hidden", !show);
+}
+
+/**
+ * Back to the file chooser. The previous file's results leave the page and memory, so nothing of it is left to show
+ * or export, and the intro returns with focus on "Choose your DNA file". The KB claims stay.
+ */
+function useAnotherFile() {
+  closeDrawer();
+  Object.assign(state, {
+    fileName: "",
+    qc: null,
+    records: [],
+    negativeChecks: [],
+    arrayGaps: [],
+    insufficientEvidence: [],
+    coverageSummary: null,
+    summary: null,
+    apoe: null,
+    compoundHeterozygotes: [],
+    independentAssortment: [],
+  });
+  document.getElementById("variants-tbody").replaceChildren();
+  document.getElementById("assortment-cards-container").replaceChildren();
+  document.getElementById("results-section").classList.add("hidden");
+  document.getElementById("analysis-error").classList.add("hidden");
+  document.getElementById("progress-section").classList.add("hidden");
+  document.getElementById("file-input").value = "";
+  showIntro(true);
+  setStep(0);
+  window.scrollTo(0, 0);
+  document.getElementById("btn-browse-files").focus({ preventScroll: true });
 }
 
 function renderQC() {

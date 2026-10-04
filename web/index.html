@@ -23,7 +23,7 @@
 
   <a class="lds-skip" href="#main-content-flow">Skip to content</a>
 
-  <header class="lds-header">
+  <header class="lds-header lds-header-collapse">
     <div class="lds-wrap lds-header-inner">
       <a href="index.html" class="lds-brand" data-design-id="brand.wordmark">Lucidase</a>
       <nav class="lds-nav" aria-label="Main">
@@ -32,12 +32,49 @@
       </nav>
       <div class="lds-header-spacer"></div>
       <span class="lds-localnote">Read in this browser</span>
+      <button type="button" class="lds-pages-toggle" aria-expanded="false" aria-controls="lds-pages">
+        <span class="lds-icon lds-i-menu" aria-hidden="true"></span>Pages</button>
     </div>
+    <!-- Below 680px the page links move here (src/pages-menu.js) -->
+    <nav id="lds-pages" class="lds-wrap lds-pages" aria-label="Main" hidden>
+      <a href="index.html" class="lds-navlink" aria-current="page">Analysis</a>
+      <a href="karyogram.html" class="lds-navlink">Karyogram</a>
+      <div class="lds-pages-status"><span class="lds-localnote">Read in this browser</span></div>
+    </nav>
   </header>
+
+  <!-- Steps: Choose your file, Read your results, Save a copy (state set by src/app.js) -->
+  <div class="border-b border-line">
+    <div class="lds-wrap py-3">
+      <nav id="stepnav" class="lds-stepnav" aria-label="Steps">
+        <ol class="lds-stepnav-list">
+          <li class="lds-step" data-state="current">
+            <span class="lds-step-item" aria-current="step"><span class="lds-step-dot" aria-hidden="true">1</span><span>Choose your file</span></span>
+            <span class="lds-step-line" aria-hidden="true"></span>
+          </li>
+          <li class="lds-step" data-state="upcoming">
+            <span class="lds-step-item"><span class="lds-step-dot" aria-hidden="true">2</span><span>Read your results</span></span>
+            <span class="lds-step-line" aria-hidden="true"></span>
+          </li>
+          <li class="lds-step" data-state="upcoming">
+            <span class="lds-step-item"><span class="lds-step-dot" aria-hidden="true">3</span><span>Save a copy</span></span>
+          </li>
+        </ol>
+        <div class="lds-stepnav-compact">
+          <div class="lds-stepnav-compact-head">
+            <span class="lds-stepnav-current" aria-current="step">Choose your file</span>
+            <span class="lds-stepnav-count">Step 1 of 3</span>
+          </div>
+          <div class="lds-progress-track" aria-hidden="true"><div class="lds-progress-bar" style="transform: scaleX(0.3333)"></div></div>
+          <button type="button" class="lds-stepnav-back" data-step="0" hidden><span class="lds-icon lds-i-arrow-left" aria-hidden="true"></span><span data-role="back-label">Choose your file</span></button>
+        </div>
+      </nav>
+    </div>
+  </div>
 
   <main id="main-content-flow" class="lds-wrap flex-1 flex flex-col gap-16 pt-10 pb-16" tabindex="-1">
 
-    <!-- Start: the lockup, what Lucidase does and does not do, and the drop field -->
+    <!-- Start: the lockup, what Lucidase does and does not do, and the drop field (hidden while results are shown) -->
     <section id="section-hero" class="flex flex-wrap items-start gap-12">
       <div class="flex flex-col gap-5 min-w-0" style="flex: 1 1 420px; max-width: 560px">
         <div class="lds-masthead">
@@ -113,7 +150,13 @@
     <!-- Results (populated after the analysis) -->
     <section id="results-section" class="hidden flex flex-col gap-16" aria-labelledby="results-h">
       <div class="flex flex-col gap-6">
-        <h2 id="results-h" class="lds-display">Your results</h2>
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <h1 id="results-h" class="lds-display" tabindex="-1">Your results</h1>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="btn-goto-save" class="lds-btn lds-btn-secondary lds-btn-sm"><span class="lds-icon lds-i-download" aria-hidden="true"></span>Save a copy</button>
+            <button type="button" id="btn-use-another-file" class="lds-btn lds-btn-ghost lds-btn-sm">Use another file</button>
+          </div>
+        </div>
 
         <!-- Scope notice: travels with every result -->
         <div id="coverage-guardrail-banner" class="lds-alert lds-alert-notice" role="note">
@@ -274,15 +317,6 @@
             </label>
             <div class="flex-1"></div>
             <span id="kb-provenance-badge" class="lds-localnote lds-data"><span id="kb-provenance-text">KB · Offline</span></span>
-            <div class="dropdown dropdown-end">
-              <button type="button" class="lds-btn lds-btn-secondary lds-btn-sm">
-                <span class="lds-icon lds-icon-14 lds-i-download" aria-hidden="true"></span>Save a copy<span class="lds-icon lds-icon-14 lds-i-chevron-down" aria-hidden="true"></span>
-              </button>
-              <ul tabindex="0" class="dropdown-content z-30 lds-menu">
-                <li><button type="button" id="btn-export-md" class="lds-menu-item"><span class="lds-icon lds-icon-14 lds-i-file-text" aria-hidden="true"></span>Report<span class="lds-menu-hint">.md</span></button></li>
-                <li><button type="button" id="btn-export-csv" class="lds-menu-item"><span class="lds-icon lds-icon-14 lds-i-table" aria-hidden="true"></span>Table<span class="lds-menu-hint">.csv</span></button></li>
-              </ul>
-            </div>
           </div>
 
           <div class="overflow-x-auto max-h-[600px] overflow-y-auto border-t border-line">
@@ -303,6 +337,23 @@
             </table>
           </div>
           <p id="showing-count" class="lds-meta">Showing 0 findings</p>
+        </div>
+      </section>
+
+      <!-- Save a copy (step 3): both files are made in this browser -->
+      <section id="save" class="lds-section" aria-labelledby="save-h">
+        <div class="lds-section-head">
+          <h2 id="save-h" class="lds-section-title" tabindex="-1">Save a copy</h2>
+          <p class="lds-section-aside">Files are made on this device. Nothing is sent anywhere.</p>
+        </div>
+        <div class="lds-section-body">
+          <div class="flex flex-col gap-3.5" style="max-width: var(--measure-prose)">
+            <p class="lds-prose">Both copies include every result and its limitation. The report also includes the scope notice above; the table does not.</p>
+            <div class="flex flex-wrap gap-2.5">
+              <button type="button" id="btn-export-md" class="lds-btn lds-btn-primary"><span class="lds-icon lds-i-file-text" aria-hidden="true"></span>Save the report (.md)</button>
+              <button type="button" id="btn-export-csv" class="lds-btn lds-btn-secondary"><span class="lds-icon lds-i-table" aria-hidden="true"></span>Save the table (.csv)</button>
+            </div>
+          </div>
         </div>
       </section>
     </section>
