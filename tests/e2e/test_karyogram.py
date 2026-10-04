@@ -421,6 +421,48 @@ def test_a_silent_worker_trips_the_watchdog(page):
     expect(page.locator("#karyogram-error-detail")).to_contain_text("stopped responding")
 
 
+@pytest.mark.allow_console_errors
+def test_a_sample_fetch_that_never_answers_times_out_to_the_error_and_can_be_retried(page):
+    # The first sample request is held; the fake clock runs past the 30 s budget instead of waiting it out.
+    # Later requests (the retry) go through.
+    held = []
+
+    def hold_first(route):
+        if held:
+            route.continue_()
+        else:
+            held.append(route)
+
+    page.route("**/sample-karyogram-23andme.txt", hold_first)
+    page.add_init_script(COUNT_WORKERS)
+    page.clock.install()
+    _open(page)
+    with page.expect_request("**/sample-karyogram-23andme.txt"):
+        page.locator("#btn-load-karyogram-sample").click()
+    expect(page.locator("#karyogram-progress")).to_be_visible()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "loading")
+    assert len(held) == 1, "the sample request should be held by the route"
+    page.clock.run_for(31000)
+    _assert_failed_and_inputs_free(page)
+    expect(page.locator("#karyogram-error-detail")).to_contain_text("did not load in time")
+    expect(page.locator("#karyogram-progress")).to_be_hidden()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "error")
+
+    # The held response arrives late: it must not start a job or replace the error.
+    with page.expect_response("**/sample-karyogram-23andme.txt"):
+        held[0].continue_()
+    page.wait_for_timeout(500)
+    expect(page.locator("#karyogram-error")).to_be_visible()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "error")
+    assert page.evaluate("window.__workerCount") == 0
+
+    # Trying again works.
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    expect(page.locator("#karyogram-error")).to_be_hidden()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "result")
+
+
 # The computed shape of one mark: everything that distinguishes the marks except colour.
 MARK_SHAPES = """(selector) => {
   const out = {};

@@ -247,15 +247,31 @@ function handleFileSelected(file) {
   reader.readAsText(file);
 }
 
+/**
+ * The bundled sample's text, or a rejection once the worker's time budget runs out: a request that never answers
+ * must not leave the page loading. A response that arrives after the timeout is dropped, because the race has settled.
+ */
+function fetchSampleText() {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error("The example file did not load in time.")), WORKER_TIMEOUT_MS);
+  });
+  const load = fetch(SAMPLE_URL).then((resp) => {
+    if (!resp.ok) throw new Error("Could not load the example file.");
+    return resp.text();
+  });
+  return Promise.race([load, timeout]).finally(() => clearTimeout(timer));
+}
+
 async function loadSample() {
   try {
     $("karyogram-error").classList.add("hidden");
+    // Disabled for the fetch too, so a second click or a file cannot race this load; showError frees them.
+    setInputsDisabled(true);
     setViewState("loading");
     $("karyogram-progress").classList.remove("hidden");
     updateProgress(10, "Loading the example file...");
-    const resp = await fetch(SAMPLE_URL);
-    if (!resp.ok) throw new Error("Could not load the example file.");
-    processText(await resp.text(), SAMPLE_NAME);
+    processText(await fetchSampleText(), SAMPLE_NAME);
   } catch (err) {
     showError((err && err.message) || err);
   }

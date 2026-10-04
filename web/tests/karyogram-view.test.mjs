@@ -179,6 +179,19 @@ test("centromeres align across columns and loci sit at the exact y of their bin"
   assert.deepEqual(locus("rsB").slice(1), ["42.0", "24.0"]);
 });
 
+test("a locus on a chromosome that is not drawn throws instead of rendering NaN coordinates", () => {
+  // Object.prototype members are not columns: a plain-object lookup found them and drew cx="NaN".
+  for (const chrom of ["constructor", "__proto__", "toString", "hasOwnProperty", "chrUnknown"]) {
+    const layout = handLayout();
+    layout.reference.loci[0].chrom = chrom;
+    assert.throws(
+      () => renderKaryogramSvg(layout),
+      (err) => err instanceof Error && err.message.includes(`undrawn chromosome ${chrom}`),
+      chrom,
+    );
+  }
+});
+
 test("an unknown build says the GRCh38 geometry is a fallback and the file build is unknown", () => {
   const svg = renderKaryogramSvg(sampleLayout([call("2", 5_000_001)], "unknown"));
   const unescape = (t) => t.replaceAll("&#39;", "'").replaceAll("&#x27;", "'").replaceAll("&apos;", "'");
