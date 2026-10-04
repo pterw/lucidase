@@ -167,8 +167,10 @@ def _check_gene(symbol: str, gene: Any, problems: list[str]) -> None:
     if not isinstance(gene, dict):
         problems.append(f"{p}: not an object")
         return
-    if not _is_str(gene.get("topic")):
-        problems.append(f"{p}.topic: required non-empty string")
+    # Same rule as the KB build (tools/build_canonical_kb.py): non-empty after trimming, and not padded.
+    topic = gene.get("topic")
+    if not _is_str(topic) or topic.strip() != topic or not topic.strip():
+        problems.append(f"{p}.topic: required non-empty string with no leading or trailing whitespace")
     inh = gene.get("inheritance")
     if not isinstance(inh, dict):
         problems.append(f"{p}.inheritance: required object")
