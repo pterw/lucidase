@@ -26,6 +26,7 @@ import {
   markdownReport,
   partnerModelNote,
   rowsByState,
+  summaryProse,
   testedVariantCounts,
   toViewModel,
 } from "../src/view-model.js";
@@ -703,15 +704,17 @@ test("the report groups are the design system's, in its order, and every KB gene
   assert.throws(() => { REPORT_GROUPS[0].title = "x"; }, TypeError);
 });
 
-test("the page's summary counts show the view model's words and help (no second copy can drift)", () => {
+test("the page's summary legend takes the view model's words and help (no second copy can drift)", () => {
+  // The legend is rendered by app.js from RESULT_WORDS (tests/e2e/test_summary_map.py reads it on the page), so the
+  // page carries an empty list and no copy of the help. Positive control: the same strings are in view-model.js.
   const html = readText("../index.html");
-  for (const [state, { label, help }] of Object.entries(RESULT_WORDS)) {
-    const count = html.match(
-      new RegExp(`lds-mark-${state}" aria-hidden="true"></span>([^<]*)</span>\\s*<span[^>]*>[^<]*</span>\\s*<span class="lds-count-help">([^<]*)</span>`)
-    );
-    assert.ok(count, `no summary count for ${state}`);
-    assert.deepEqual([count[1], count[2]], [label, help], state);
+  const source = readText("../src/view-model.js");
+  assert.match(html, /<ul id="summary-legend"[^>]*><\/ul>/);
+  for (const [state, { help }] of Object.entries(RESULT_WORDS)) {
+    assert.ok(source.includes(help), `${state}: the help is not in view-model.js`);
+    assert.ok(!html.includes(help), `${state}: index.html carries a second copy of the help`);
   }
+  assert.match(readText("../src/app.js"), /RESULT_WORDS\[s\]\.help/);
 });
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -1005,4 +1008,40 @@ test("a multi-locus finding whose marker is not among the findings fails fast in
   const data = demoMultiLocusData();
   const records = data.records.filter((r) => r.rsid !== "rs1799945");
   assert.throws(() => markdownReport({ ...data, records }), /rs1799945/);
+});
+
+test("the Summary sentence says each count in the result words, singular and plural, and Not on your chip only when there is one", () => {
+  const counts = (found, notFound, gaps, unclear, outside) => ({
+    supported_and_observed: found,
+    supported_not_observed: notFound,
+    not_tested_by_array: gaps,
+    insufficient_evidence: unclear,
+    outside_coverage: outside,
+  });
+  assert.equal(
+    summaryProse(counts(10, 1, 0, 2, 612)),
+    "Lucidase ran 13 checks on your file. A variant was found in 10, not found in 1, and 2 were unclear. " +
+      "612 other markers in your file were counted but not interpreted."
+  );
+  assert.equal(
+    summaryProse(counts(0, 9, 2, 1, 1)),
+    "Lucidase ran 12 checks on your file. A variant was found in 0, not found in 9, 2 were not on your chip, " +
+      "and 1 was unclear. 1 other marker in your file was counted but not interpreted."
+  );
+  assert.equal(
+    summaryProse(counts(1, 0, 1, 0, 1234567)),
+    "Lucidase ran 2 checks on your file. A variant was found in 1, not found in 0, 1 was not on your chip, " +
+      "and 0 were unclear. 1,234,567 other markers in your file were counted but not interpreted."
+  );
+  assert.match(summaryProse(counts(1, 0, 0, 0, 0)), /^Lucidase ran 1 check on your file\. /);
+  // The words are the result words.
+  const text = summaryProse(counts(1, 1, 1, 1, 1));
+  for (const state of ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"]) {
+    assert.ok(text.includes(RESULT_WORDS[state].label.toLowerCase()), state);
+  }
+  // A count that is not a non-negative integer is a bug upstream, never a sentence with NaN in it.
+  for (const bad of [undefined, null, -1, 1.5, NaN, "3"]) {
+    assert.throws(() => summaryProse({ ...counts(1, 1, 1, 1, 1), insufficient_evidence: bad }), /insufficient_evidence/);
+  }
+  assert.throws(() => summaryProse(null), /count/);
 });

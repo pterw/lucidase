@@ -24,6 +24,7 @@ Lucidase reads a raw genotype file in your browser and interprets the 14 curated
 - Compares alleles by alt-allele count against plus-strand ref/alt. A genotype that cannot be resolved unambiguously is never reported as a match.
 - Gives every curated locus one coverage state per sample: `supported_and_observed`, `supported_not_observed`, `not_tested_by_array`, `outside_coverage` or `insufficient_evidence`.
 - Shows APOE as one composite row built from rs429358 and rs7412.
+- Opens the results with a summary: the counts in one sentence, the karyogram of your file with one mark per checked locus (selecting a mark opens that result), and a key with the count for each result.
 - Shows disease or recurrence figures for inheritance only at Mendelian disease loci. Other loci get allele-transmission figures only.
 - Exports Markdown and CSV reports.
 - Has light and dark themes.

@@ -438,3 +438,15 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .kary-swatch.kary-state-not_tested_by_array { background: transparent; border: 1.75px dashed var(--kary-fill); }
 .kary-swatch.kary-state-insufficient_evidence { background: linear-gradient(90deg, var(--kary-fill) 50%, transparent 50%); border: 1.75px solid var(--kary-fill); }
 #karyogram-figure svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }
+
+/* The Summary (design system AnalysisScreen): the serif sentence with the counts, the karyogram scaled to its column
+   (as the design system's Karyogram: full width, height auto), and the legend at its 560px measure. Each mark is a
+   button: a pointer, the focus ring on its halo (an SVG group draws no outline), and the selected halo larger and
+   stronger, as in the design system's Karyogram (8.5 to 11 of its 4.25 core, 0.2 to 0.3 opacity). */
+.lds-summary-prose { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-summary-map { min-width: 0; }
+.lds-summary-map svg { display: block; width: 100%; max-width: 760px; height: auto; }
+.lds-summary-legend { max-width: 560px; }
+.lds-summary-map .kary-locus { cursor: pointer; outline: none; }
+.lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.3; }
+.lds-summary-map .kary-locus:focus-visible .kary-halo { stroke: var(--accent); stroke-width: 2; }

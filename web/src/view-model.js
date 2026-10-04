@@ -171,6 +171,39 @@ export function foundCategoryCounts(viewModels) {
 }
 
 /**
+ * The Summary sentence (design system ui_kits/web/AnalysisScreen.jsx), from the counts per result: the checks run,
+ * Found, Not found, Not on your chip (said only when some check was not on the chip), Unclear, and the markers that
+ * were counted but not interpreted. The result words are RESULT_WORDS's, in lower case. `counts` is keyed by
+ * coverage state; a count that is not a non-negative integer throws (fail fast), so the sentence never says NaN.
+ */
+export function summaryProse(counts) {
+  const n = {};
+  for (const state of [...RECORD_STATES, "outside_coverage"]) {
+    const value = counts ? counts[state] : undefined;
+    if (!Number.isInteger(value) || value < 0) throw new Error(`summaryProse: ${state} count is ${String(value)}`);
+    n[state] = value;
+  }
+  const word = (state) => RESULT_WORDS[state].label.toLowerCase();
+  const fig = groupedNumber;
+  const were = (count) => (count === 1 ? "was" : "were");
+  const checks = RECORD_STATES.reduce((sum, state) => sum + n[state], 0);
+  const clauses = [
+    `${word("supported_and_observed")} in ${fig(n.supported_and_observed)}`,
+    `${word("supported_not_observed")} in ${fig(n.supported_not_observed)}`,
+  ];
+  if (n.not_tested_by_array > 0) {
+    clauses.push(`${fig(n.not_tested_by_array)} ${were(n.not_tested_by_array)} ${word("not_tested_by_array")}`);
+  }
+  clauses.push(`${fig(n.insufficient_evidence)} ${were(n.insufficient_evidence)} ${word("insufficient_evidence")}`);
+  const outside = n.outside_coverage;
+  return (
+    `Lucidase ran ${fig(checks)} ${checks === 1 ? "check" : "checks"} on your file. ` +
+    `A variant was ${clauses.slice(0, -1).join(", ")}, and ${clauses[clauses.length - 1]}. ` +
+    `${fig(outside)} other ${outside === 1 ? "marker" : "markers"} in your file ${were(outside)} counted but not interpreted.`
+  );
+}
+
+/**
  * One FindingRow: topic (KB gene topic), gene, state and its plain word, the statement the table shows, the
  * limitation and caveats, and the technical line "<rsid> · <genotype>" per locus ("No reading" when there is none).
  * `key` is the record's rsids joined by "-", safe in an element id. `markers` names them for the Details button, since

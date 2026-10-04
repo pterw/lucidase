@@ -14,6 +14,7 @@ import { offspringDistribution, geneOutcome, penetranceAdjustedAffected } from "
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { getTheme, initTheme, setTheme } from "./theme.js";
 import { initPagesMenu } from "./pages-menu.js";
+import { renderKaryogramSvg } from "./karyogram-view.js";
 import {
   NOT_AVAILABLE,
   acmgVersionLabel,
@@ -26,14 +27,17 @@ import {
   foundCategoryCounts,
   groupedReport,
   heroScopeText,
+  karyogramStateLabels,
   kbBadge,
   markdownReport,
   multiLocusReading,
   partnerModelNote,
   rowsByState,
+  summaryProse,
   testedVariantCounts,
   toViewModel,
   MODEL_LABELS,
+  RESULT_WORDS,
 } from "./view-model.js";
 
 // Global Application State
@@ -54,6 +58,9 @@ const state = {
   genes: {},
   compoundHeterozygotes: [],
   independentAssortment: [],
+  // The Summary map's layout (core/karyogram.js), and the analysis that waits for it while the worker lays it out.
+  karyogram: null,
+  pendingAnalysis: null,
   selectedVariant: null,
   filterCategory: "all",
   searchQuery: "",
@@ -68,6 +75,9 @@ const state = {
 
 // The StepNav's three steps (declared before initApp runs, which may be at module evaluation).
 const STEPS = ["Choose your file", "Read your results", "Save a copy"];
+
+// The last stretch of the progress bar: the worker reads the file again to lay out the Summary map.
+const MAP_PROGRESS = { percent: 95, status: "Placing the checks on the map of your chromosomes" };
 
 // Initialize Application (handles both pre- and post-DOMContentLoaded module execution)
 function initApp() {
@@ -175,11 +185,27 @@ function startWorker(job, canRetry = true) {
     const data = e.data;
     if (data.type === "progress") {
       armWatchdog(fail);
-      updateProgress(data.percent, data.status);
+      if (job.action === "karyogram") updateProgress(MAP_PROGRESS.percent, MAP_PROGRESS.status);
+      else updateProgress(data.percent, data.status);
     } else if (data.type === "complete") {
-      stopWorker();
+      // The results wait for the Summary map: the same file goes to the worker's own "karyogram" action (the one
+      // karyogram.html uses), so the map is laid out exactly as on that page. Its failure is the analysis's failure.
       try {
-        handleParseComplete(data);
+        state.pendingAnalysis = data;
+        const mapJob = { action: "karyogram", text: job.text, fileName: job.fileName };
+        updateProgress(MAP_PROGRESS.percent, MAP_PROGRESS.status);
+        startWorker(mapJob).postMessage(mapJob);
+      } catch (err) {
+        stopWorker();
+        showAnalysisError((err && err.message) || err);
+      }
+    } else if (data.type === "karyogram") {
+      stopWorker();
+      const analysis = state.pendingAnalysis;
+      state.pendingAnalysis = null;
+      try {
+        if (!analysis) throw new Error("The map arrived without the analysis it belongs to.");
+        handleParseComplete(analysis, data.layout);
       } catch (err) {
         showAnalysisError((err && err.message) || err);
       }
@@ -222,6 +248,7 @@ function setInputsDisabled(disabled) {
 // The one error path: every failure (worker, KB, file read, demo fetch) shows the #analysis-error alert and no results.
 function showAnalysisError(message) {
   closeDrawer();
+  state.pendingAnalysis = null;
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("results-section").classList.add("hidden");
   const box = document.getElementById("analysis-error");
@@ -303,6 +330,20 @@ function initEventListeners() {
     const id = button.closest("article.lds-finding").dataset.findingId;
     const record = allRows().find((vm) => vm.id === id);
     if (record) openDrawer(record, button);
+  });
+
+  // The Summary map: a mark opens its record (click, or Enter / Space on the focused mark).
+  const summaryMap = document.getElementById("summary-map");
+  summaryMap.addEventListener("click", (e) => {
+    const mark = e.target.closest(".kary-locus[data-finding-id]");
+    if (mark) openMarkRecord(mark);
+  });
+  summaryMap.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const mark = e.target.closest(".kary-locus[data-finding-id]");
+    if (!mark || mark !== e.target) return;
+    e.preventDefault(); // Space must open the record, not scroll the page
+    openMarkRecord(mark);
   });
 
   // "All results as a table" opens once asked for (design system: the button gives way to the table).
@@ -389,6 +430,7 @@ function handleFileSelected(file) {
 function processText(text, fileName) {
   try {
     closeDrawer();
+    state.pendingAnalysis = null;
     document.getElementById("analysis-error").classList.add("hidden");
     setInputsDisabled(true);
     document.getElementById("progress-section").classList.remove("hidden");
@@ -413,7 +455,7 @@ function updateProgress(percent, message) {
   if (pct) pct.textContent = `${percent}%`;
 }
 
-function handleParseComplete(data) {
+function handleParseComplete(data, karyogram) {
   const listed = [...data.records, ...data.negative_checks, ...data.array_gaps, ...data.insufficient_evidence];
   if (data.apoe) listed.push(data.apoe);
   const testedCounts = testedVariantCounts(listed);
@@ -431,6 +473,7 @@ function handleParseComplete(data) {
   state.apoe = data.apoe ? toVm(data.apoe) : null;
   state.compoundHeterozygotes = data.compound_heterozygotes;
   state.independentAssortment = data.independent_assortment;
+  state.karyogram = karyogram;
 
   document.getElementById("progress-section").classList.add("hidden");
   document.getElementById("analysis-error").classList.add("hidden");
@@ -502,12 +545,20 @@ function findingRowHtml(row) {
     </article>`;
 }
 
-/** The FindingRow whose record is in the drawer is the one selected row (none when the drawer is closed). */
+/**
+ * The FindingRow whose record is in the drawer is the one selected row (none when the drawer is closed), and its
+ * marks on the Summary map are the selected marks (APOE has two).
+ */
 function markSelectedFinding(id) {
   document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
     const selected = article.dataset.findingId === id;
     article.classList.toggle("is-selected", selected);
     article.querySelector("button.lds-finding-open").setAttribute("aria-expanded", String(selected));
+  });
+  document.querySelectorAll("#summary-map .kary-locus[data-finding-id]").forEach((mark) => {
+    const selected = mark.dataset.findingId === id;
+    mark.classList.toggle("is-selected", selected);
+    mark.setAttribute("aria-expanded", String(selected));
   });
 }
 
@@ -587,8 +638,11 @@ function useAnotherFile() {
     apoe: null,
     compoundHeterozygotes: [],
     independentAssortment: [],
+    karyogram: null,
+    pendingAnalysis: null,
   });
   document.getElementById("variants-tbody").replaceChildren();
+  document.getElementById("summary-map").replaceChildren();
   document.getElementById("report-groups").replaceChildren();
   document.getElementById("assortment-cards-container").replaceChildren();
   document.getElementById("results-section").classList.add("hidden");
@@ -640,11 +694,75 @@ function renderSummaryCards() {
   set("count-risk", found.risk);
   set("count-acmg", found.acmg);
 
-  set("count-state-observed", cov.supported_and_observed_count);
-  set("count-state-negative", cov.supported_not_observed_count);
-  set("count-state-gaps", cov.not_tested_by_array_count);
-  set("count-state-outside", cov.outside_coverage_count);
-  set("count-state-insufficient", cov.insufficient_evidence_count);
+  // The sentence and the legend say the same figures: the worker's count per result.
+  const counts = {
+    supported_and_observed: cov.supported_and_observed_count,
+    supported_not_observed: cov.supported_not_observed_count,
+    not_tested_by_array: cov.not_tested_by_array_count,
+    insufficient_evidence: cov.insufficient_evidence_count,
+    outside_coverage: cov.outside_coverage_count,
+  };
+  document.getElementById("summary-prose").textContent = summaryProse(counts);
+  renderSummaryLegend(counts);
+  renderSummaryMap(state.karyogram);
+}
+
+// The legend's results in the design system's order (AnalysisScreen), each count keeping the id the tests and the
+// earlier count strip used. "Not checked" has no mark on the map: it counts the file's other markers.
+const SUMMARY_LEGEND = [
+  ["supported_and_observed", "count-state-observed"],
+  ["supported_not_observed", "count-state-negative"],
+  ["not_tested_by_array", "count-state-gaps"],
+  ["insufficient_evidence", "count-state-insufficient"],
+  ["outside_coverage", "count-state-outside"],
+];
+
+/** The KaryogramLegend (design system): mark and plain word, the count, and the word's one-line help. */
+function renderSummaryLegend(counts) {
+  document.getElementById("summary-legend").innerHTML = SUMMARY_LEGEND.map(([s, id]) => `
+    <li class="lds-legend-item" data-legend-state="${escapeHtml(s)}">
+      <span class="lds-statemark"><span class="lds-mark lds-mark-14 lds-mark-${escapeHtml(s)}" aria-hidden="true"></span>${escapeHtml(RESULT_WORDS[s].label)}</span>
+      <span id="${escapeHtml(id)}" class="lds-legend-count" data-legend-count="${escapeHtml(s)}">${escapeHtml(counts[s].toLocaleString())}</span>
+      <span class="lds-legend-help">${escapeHtml(RESULT_WORDS[s].help)}</span>
+    </li>`).join("");
+}
+
+/**
+ * The Summary map (design system Karyogram): the karyogram page's own view of the layout, with each checked locus
+ * made a button that opens its record in the Inspector. A locus belongs to the listed record with its rsid, or to the
+ * APOE record when it is one of its components; a locus with no record is a bug upstream and throws (fail fast).
+ * The figure becomes a group, not an image, so its buttons stay visible to assistive technology.
+ */
+function renderSummaryMap(layout) {
+  const box = document.getElementById("summary-map");
+  if (!layout) throw new Error("The analysis has no map layout.");
+  box.innerHTML = renderKaryogramSvg(layout, { stateLabels: karyogramStateLabels() });
+  box.querySelector("svg").setAttribute("role", "group");
+  document.getElementById("summary-density-notice").classList.toggle("hidden", layout.sample.density === "available");
+
+  const recordOf = new Map();
+  for (const vm of allRows()) for (const locus of vm.components ?? [vm]) recordOf.set(locus.rsid, vm);
+  box.querySelectorAll(".kary-locus").forEach((mark) => {
+    const rsid = mark.dataset.rsid;
+    const record = recordOf.get(rsid);
+    if (!record) throw new Error(`The map has a mark for ${rsid}, which no result carries.`);
+    const gene = state.genes[record.gene];
+    const topic = gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
+    const markState = mark.dataset.state;
+    if (!Object.hasOwn(RESULT_WORDS, markState)) throw new Error(`The map has an unknown result "${markState}" for ${rsid}.`);
+    mark.dataset.findingId = record.id;
+    mark.setAttribute("tabindex", "0");
+    mark.setAttribute("role", "button");
+    mark.setAttribute("aria-controls", "variant-drawer");
+    mark.setAttribute("aria-expanded", "false");
+    mark.setAttribute("aria-label", `${topic}, ${rsid}: ${RESULT_WORDS[markState].label}`);
+  });
+}
+
+/** Selecting a mark (click, Enter or Space) opens its record, the same way a FindingRow's Details button does. */
+function openMarkRecord(mark) {
+  const record = allRows().find((vm) => vm.id === mark.dataset.findingId);
+  if (record) openDrawer(record, mark);
 }
 
 // Badge tones (styles.css, from the design system's colour tokens). Each label is styled by an explicit map; anything
@@ -954,7 +1072,8 @@ function openDrawer(record, opener = document.activeElement) {
   if (!drawer || !side) return;
   const wasOpen = state.selectedVariant !== null;
   state.selectedVariant = record;
-  drawerOpener = opener instanceof HTMLElement && opener !== document.body ? opener : null;
+  // A map mark is an SVG element; it takes focus back like any HTML opener.
+  drawerOpener = (opener instanceof HTMLElement || opener instanceof SVGElement) && opener !== document.body ? opener : null;
 
   // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
   const gene = state.genes[record.gene];
