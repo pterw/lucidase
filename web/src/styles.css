@@ -436,7 +436,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-summary-prose { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
 /* On a narrow screen the map keeps its drawn size and scrolls sideways inside its own box (a named, focusable
    region), never the page: 672px is the SVG's own width (24 chromosome columns of 28 units), one unit per pixel, so
-   chromosome labels stay 10px and each mark's halo 20px across. */
+   chromosome labels stay 11px and each mark's halo 20px across. */
 .lds-summary-map { min-width: 0; overflow-x: auto; }
 .lds-summary-map svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; }
 .lds-summary-legend { max-width: 560px; }

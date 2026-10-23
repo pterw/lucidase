@@ -208,3 +208,10 @@ test("a known build keeps the plain title and desc", () => {
   assert.match(svg, /<title id="kary-title">Karyogram \(GRCh37\)<\/title>/);
   assert.doesNotMatch(svg, /genome version is unknown/);
 });
+
+test("every chromosome label is drawn at the 11px floor in the SVG's own units", () => {
+  const svg = renderKaryogramSvg(layoutKaryogram({ kb }));
+  const sizes = [...svg.matchAll(/<text class="kary-label"[^>]* font-size="([\d.]+)"/g)].map((m) => Number(m[1]));
+  assert.equal(sizes.length, 24);
+  assert.deepEqual([...new Set(sizes)], [11]);
+});
