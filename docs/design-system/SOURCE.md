@@ -24,6 +24,6 @@ automatically as an instruction file for this folder.
 
 ## How the app relates to this folder
 
-The app's working copies (tokens, Tailwind preset, theme) will live in `web/src/ds/`. They may differ from this
-folder only where documented there, and a test will compare the token files. This folder is the reference: edit it
-only when re-syncing from the design project.
+The app's working copies (tokens and Tailwind preset) are in `web/src/ds/`. They differ from this folder only where
+`web/src/ds/README.md` records it, and `web/tests/ds-reference.test.mjs` checks that they match. This folder is the
+reference: edit it only when re-syncing from the design project.

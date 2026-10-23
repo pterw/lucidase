@@ -7,9 +7,16 @@ mapping (see `CLAUDE.md`).
 | File | Source in the design system | Changes |
 |---|---|---|
 | `colors.css`, `typography.css`, `spacing.css`, `shape.css`, `motion.css`, `base.css` | `tokens/*.css` | none (copied unchanged) |
-| `lucidase.preset.cjs` | `tailwind/lucidase.preset.js` | motion values aligned with `motion.css` (240 ms, ease-out-quart); the original said 300 ms and another curve |
+| `lucidase.preset.cjs` | `tailwind/lucidase.preset.js` | the differences listed under "Recorded differences" below |
 | `../brand/*.svg` | `assets/logo/` (favicon, lockup, wordmark; light and dark) | none |
 | `../icons/*.svg` | Lucide `lucide-static@0.469.0` (ISC, `../icons/LICENSE`), the set the design system's `Icon` names | none; 19 icons, served same-origin instead of from a CDN |
+
+Recorded differences (`web/tests/ds-reference.test.mjs` asserts exactly these and nothing else):
+- The six token CSS files: none, byte-for-byte equal after line endings.
+- `lucidase.preset.cjs`, header comment: rewritten to say where the file comes from and why it is `.cjs`; the code after it is compared.
+- `lucidase.preset.cjs`, `transitionDuration.slow`: `240ms` (the original said `300ms`), to match `motion.css`.
+- `lucidase.preset.cjs`, `transitionTimingFunction.standard`: `cubic-bezier(.25,1,.5,1)` (ease-out-quart; the original said `cubic-bezier(.2,0,0,1)`).
+- `lucidase.preset.cjs`, `spacing`: the key is written `header`, not `"header"` (formatting only).
 
 Not copied:
 - `tokens/fonts.css`: it `@import`s the Adobe Fonts kit `gfe3vcu`, which both pages already link once in `<head>`.
