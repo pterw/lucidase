@@ -480,6 +480,7 @@ function handleParseComplete(data, karyogram) {
   renderKbClaims(state.manifest);
   renderQC();
   renderSummaryCards();
+  renderTabCounts();
   renderReportGroups();
   renderAssortmentSection();
   setTableOpen(false);
@@ -689,6 +690,27 @@ function renderSummaryCards() {
   renderSummaryMap(state.karyogram);
 }
 
+/**
+ * The table's tabs each say how many checks they list: the worker's count per result, and for "All" their sum (the
+ * checks run). The counts describe the analysis, so searching the table never changes them.
+ */
+function renderTabCounts() {
+  const cov = state.coverageSummary;
+  if (!cov) return;
+  const counts = {
+    observed: cov.supported_and_observed_count,
+    negative: cov.supported_not_observed_count,
+    gaps: cov.not_tested_by_array_count,
+    insufficient: cov.insufficient_evidence_count,
+  };
+  counts.every = counts.observed + counts.negative + counts.gaps + counts.insufficient;
+  document.querySelectorAll("[data-tab-count]").forEach((el) => {
+    const key = el.dataset.tabCount;
+    if (!Object.hasOwn(counts, key)) throw new Error(`no count for table tab "${key}"`);
+    el.textContent = counts[key].toLocaleString();
+  });
+}
+
 // The legend's results in the design system's order (AnalysisScreen), each count keeping the id the tests and the
 // earlier count strip used. "Not checked" has no mark on the map: it counts the file's other markers.
 const SUMMARY_LEGEND = [
@@ -887,8 +909,7 @@ const categoryTagClass = (r) =>
 // Evidence tiers are text in one neutral tone: a tier is not a result, so it gets no result colour.
 const TIER_TAG_CLASS = `lds-tag ${NEUTRAL_TAG} lds-data`;
 
-// The table's tabs named by a result word, and the state each lists. The "every" tab lists them all, in this order,
-// and every other tab is a category of Found checks.
+// The table's tabs named by a result word, and the state each lists. The "every" tab lists them all, in this order.
 const STATE_TABS = {
   observed: "supported_and_observed",
   negative: "supported_not_observed",
@@ -902,25 +923,16 @@ function listedRows() {
 }
 
 function renderVariantsTable() {
+  // The "every" tab lists every check; a tab named by a result word lists exactly the checks with that word.
+  // An unknown key is refused before the table is touched, so it never leaves an empty table behind.
+  const every = state.filterCategory === "every";
+  if (!every && !Object.hasOwn(STATE_TABS, state.filterCategory)) throw new Error(`unknown table tab "${state.filterCategory}"`);
   const tbody = document.getElementById("variants-tbody");
   tbody.innerHTML = "";
-
-  // The "every" tab lists every check; a tab named by a result word lists exactly the checks with that word; the
-  // category tabs narrow the Found ones.
   const byState = rowsByState(listedRows());
-  const every = state.filterCategory === "every";
-  const dataset = every
-    ? Object.values(STATE_TABS).flatMap((s) => byState[s])
-    : byState[Object.hasOwn(STATE_TABS, state.filterCategory) ? STATE_TABS[state.filterCategory] : "supported_and_observed"];
+  const dataset = every ? Object.values(STATE_TABS).flatMap((s) => byState[s]) : byState[STATE_TABS[state.filterCategory]];
 
   const filtered = dataset.filter(r => {
-    // Category filter for subcategories of the Found checks
-    if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
-    if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
-    if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
-    if (state.filterCategory === "risk" && !r.riskFilter) return false;
-    if (state.filterCategory === "acmg" && !r.acmg_actionable) return false;
-
     // Search query
     if (state.searchQuery) {
       const q = state.searchQuery;

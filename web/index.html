@@ -238,16 +238,11 @@
 
           <div id="table-panel" class="hidden flex flex-col gap-4">
             <div class="lds-tabs" role="group" aria-label="Show">
-              <button type="button" data-filter="every" class="lds-tab tab-active">All</button>
-              <button type="button" data-filter="observed" class="lds-tab">Found</button>
-              <button type="button" data-filter="negative" class="lds-tab">Not found</button>
-              <button type="button" data-filter="gaps" class="lds-tab">Not on your chip</button>
-              <button type="button" data-filter="insufficient" class="lds-tab">Unclear</button>
-              <button type="button" data-filter="carrier" class="lds-tab">Carrier status</button>
-              <button type="button" data-filter="pathogenic" class="lds-tab">Pathogenic</button>
-              <button type="button" data-filter="acmg" data-acmg-version class="lds-tab">ACMG SF</button>
-              <button type="button" data-filter="pgx" class="lds-tab">Pharmacogenomics</button>
-              <button type="button" data-filter="risk" class="lds-tab">Risk factors</button>
+              <button type="button" data-filter="every" class="lds-tab tab-active">All<span class="lds-tab-count" data-tab-count="every"></span></button>
+              <button type="button" data-filter="observed" class="lds-tab">Found<span class="lds-tab-count" data-tab-count="observed"></span></button>
+              <button type="button" data-filter="negative" class="lds-tab">Not found<span class="lds-tab-count" data-tab-count="negative"></span></button>
+              <button type="button" data-filter="gaps" class="lds-tab">Not on your chip<span class="lds-tab-count" data-tab-count="gaps"></span></button>
+              <button type="button" data-filter="insufficient" class="lds-tab">Unclear<span class="lds-tab-count" data-tab-count="insufficient"></span></button>
             </div>
 
             <label class="lds-field w-full" style="max-width: 260px">

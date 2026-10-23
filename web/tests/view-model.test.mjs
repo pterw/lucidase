@@ -548,25 +548,7 @@ function apoeWith(diplotype) {
   return toViewModel({ ...apoe, diplotype, interpretation }, kb.genes, {});
 }
 
-test("the Risk filter flag is Risk Factor OR an e3/e4 or e4/e4 APOE diplotype", () => {
-  for (const [diplotype, want] of [["e3/e4", true], ["e4/e4", true], ["e3/e3", false], ["e2/e3", false], ["atypical", false], [null, false]]) {
-    assert.equal(apoeWith(diplotype).riskFilter, want, `APOE ${diplotype}`);
-  }
-  // The diplotype rule stands on its own: it does not rely on the KB category being "Risk Factor".
-  const e4e4 = apoeWith("e4/e4");
-  const uncategorised = toViewModel({ ...e4e4, components: e4e4.components, interpretation: { ...e4e4.interpretation, category: "Carrier" } }, {}, {});
-  assert.equal(uncategorised.riskFilter, true);
-  const a = analyse(DEMO);
-  const riskFactor = a.vms.filter((v) => v.category === "Risk Factor");
-  assert.ok(riskFactor.length > 0, "the demo has Risk Factor rows");
-  assert.ok(riskFactor.every((v) => v.riskFilter === true));
-  const others = a.vms.filter((v) => v.category !== "Risk Factor");
-  assert.ok(others.length > 0 && others.every((v) => v.riskFilter === false));
-});
-
-test("PENDING OWNER DECISION: an e2/e4 APOE row is not under Risk Factors today", () => {
-  // Whether e2/e4 belongs in the Risk filter is an owner decision still open; this pins the current answer.
-  assert.equal(apoeWith("e2/e4").riskFilter, false);
+test("an e2/e4 APOE row still carries the e4 accent", () => {
   assert.equal(apoeWith("e2/e4").apoeE4Accent, true, "the card still carries the e4 accent");
 });
 

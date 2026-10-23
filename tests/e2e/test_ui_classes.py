@@ -83,10 +83,11 @@ def test_apoe_e1_e4_page_shows_no_e4_inheritance_figure(loaded_page):
     assert "inherits the e4 allele" not in text, text
 
 
-def _acmg_rows(page):
+def _found_acmg_rows(page):
+    """The Found checks that carry the ACMG pill. The table has no ACMG tab: the pill is on the row."""
     show_table(page)
-    page.locator("[data-filter='acmg']").click()
-    return page.locator("#variants-tbody tr")
+    page.locator("[data-filter='observed']").click()
+    return page.locator("#variants-tbody tr", has=page.locator("span.lds-tag-accent", has_text="ACMG"))
 
 
 def _report_row(page, rsid):
@@ -105,7 +106,7 @@ def test_two_found_variants_of_one_acmg_gene_are_two_rows_of_one_group(page):
     goto_ready(page, page.base_url)
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
-    rows = _acmg_rows(page)
+    rows = _found_acmg_rows(page)
     expect(rows).to_have_count(2)
     for rsid in ("rs1800562", "rs1799945"):
         expect(_row(page, rsid).locator(".lds-tag-state-supported_and_observed")).to_have_text("Found")
@@ -119,8 +120,8 @@ def test_an_unclear_acmg_variant_is_not_listed_as_found(loaded_page):
     page = loaded_page
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
-    # Unmodified KB: H63D is Unclear, so the ACMG SF tab, a narrowing of Found, lists only C282Y.
-    rows = _acmg_rows(page)
+    # Unmodified KB: H63D is Unclear, so the Found tab lists only C282Y among the checks with the ACMG pill.
+    rows = _found_acmg_rows(page)
     expect(rows).to_have_count(1)
     expect(_row(page, "rs1800562")).to_have_count(1)
     expect(_row(page, "rs1799945")).to_have_count(0)
@@ -129,3 +130,5 @@ def test_an_unclear_acmg_variant_is_not_listed_as_found(loaded_page):
     expect(_report_row(page, "rs1799945").locator(":scope > span.lds-mark-insufficient_evidence")).to_have_count(1)
     page.locator("[data-filter='insufficient']").click()
     expect(_row(page, "rs1799945")).to_have_count(1)
+    expect(_row(page, "rs1799945").locator(".lds-tag-state-insufficient_evidence")).to_have_text("Unclear")
+    expect(_row(page, "rs1799945").locator("span.lds-tag-accent", has_text="ACMG")).to_have_count(1)

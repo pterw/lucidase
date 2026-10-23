@@ -396,8 +396,6 @@ export function toViewModel(record, genes, testedCounts = {}) {
     category,
     isCarrier: category === "Carrier",
     apoeE4Accent: ["e4e4", "e4"].includes(apoeAccentKey(record.diplotype)),
-    // The Risk filter: Risk Factor rows plus APOE e3/e4 and e4/e4. Whether e2/e4 joins is an open owner decision.
-    riskFilter: category === "Risk Factor" || record.diplotype === "e3/e4" || record.diplotype === "e4/e4",
     significance: significanceValue ?? state.label,
     significanceValue,
     phenotype,

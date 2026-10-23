@@ -130,7 +130,7 @@ def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
     show_table(page)
     chunks = [page.locator("body").inner_text()]
-    for name in ("every", "observed", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"):
+    for name in ("every", "observed", "negative", "gaps", "insufficient"):
         page.locator(f"[data-filter='{name}']").click()
         chunks.append(page.locator("#variants-tbody").inner_text())
         for i in range(page.locator("#variants-tbody tr").count()):
@@ -434,8 +434,11 @@ def test_results_page_has_no_category_counts_and_no_acmg_label(loaded_page):
     assert page.locator(".lds-counts, .lds-count").count() == 0
     assert "What was found, by category" not in page.locator("body").text_content()
     # The ACMG SF list is not the page's vocabulary. Read the whole visible page (header, main, footer) with the
-    # Inspector left out: its per-locus ACMG notice is the one allowed place. The table panel is hidden and keeps its
-    # category tabs until a later change, so it never counts as visible text.
+    # Inspector left out: its per-locus ACMG notice is the one allowed place. The table is opened too, so its tabs
+    # count as visible text.
+    assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
+    show_table(page)
+    assert page.locator("#table-panel").is_visible()
     assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
     assert page.locator("#report-groups article.lds-finding").count() > 0
 

@@ -84,27 +84,22 @@ def test_drawer_screenshot_to_tmp(loaded_page, tmp_path):
     assert shot.stat().st_size > 0
 
 
-def test_filter_transitions(loaded_page):
-    _load_demo(loaded_page)
-    for name in ["pathogenic", "acmg", "pgx", "carrier", "risk", "observed", "every"]:
-        loaded_page.locator(f"[data-filter='{name}']").click()
-        assert "Showing" in loaded_page.locator("#showing-count").text_content(), name
-
-
-# What each filter shows today. "observed" is the Found tab and the category filters narrow it: the demo's HFE H63D
-# (rs1799945) and MTHFR (rs1801133) are variant readings with unclear evidence, so they are under Unclear, not here.
-# The Risk Factors filter keeps APOE through its e3/e4 and e4/e4 diplotype rule (S2-F6 owns that rule); the rest
-# follow the KB category. The wild-type fixture has no found variant, so every filter is empty for it.
-DEMO_FILTER_ROWS = {
-    "observed": {
-        "APOE (rs429358 + rs7412)", "rs3918290", "rs6025", "rs1799963", "rs4149056", "rs4244285",
-        "rs113993960", "rs9923231", "rs1800562", "rs4988235",
-    },
-    "pathogenic": set(),
-    "carrier": {"rs113993960", "rs1800562"},
-    "pgx": {"rs3918290", "rs4149056", "rs4244285", "rs9923231"},
-    "risk": {"APOE (rs429358 + rs7412)", "rs6025", "rs1799963"},
+# What the Found tab shows for the demo, with each row's KB category as the table's tag says it (the table has no
+# category tabs: the category is read off the row). The demo's HFE H63D (rs1799945) and MTHFR (rs1801133) are variant
+# readings with unclear evidence, so they are under Unclear, not here. The wild-type fixture has no found variant.
+DEMO_FOUND_CATEGORIES = {
+    "APOE (rs429358 + rs7412)": "Risk Factor",
+    "rs3918290": "Pharmacogenomics",
+    "rs6025": "Risk Factor",
+    "rs1799963": "Risk Factor",
+    "rs4149056": "Pharmacogenomics",
+    "rs4244285": "Pharmacogenomics",
+    "rs113993960": "Carrier",
+    "rs9923231": "Pharmacogenomics",
+    "rs1800562": "Carrier",
+    "rs4988235": "Trait",
 }
+DEMO_FILTER_ROWS = {"observed": set(DEMO_FOUND_CATEGORIES)}
 
 
 def _shown_ids(page):
@@ -144,7 +139,6 @@ STATE_TABS = [
     ("gaps", "not_tested_by_array", "Not on your chip", "count-state-gaps"),
     ("insufficient", "insufficient_evidence", "Unclear", "count-state-insufficient"),
 ]
-CATEGORY_TABS = ("pathogenic", "carrier", "pgx", "risk", "acmg")
 
 
 def _shown_rows(page):
@@ -201,27 +195,27 @@ def test_each_state_tab_lists_exactly_the_checks_with_its_word_and_agrees_with_t
         assert {row[0] for row in _shown_rows(page)} == {"rs1799945", "rs1801133"}
 
 
-def test_each_category_tab_narrows_the_found_checks_and_agrees_with_the_report_groups(loaded_page):
+def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_page):
     page = loaded_page
     _load_demo(page)
     page.locator("[data-filter='observed']").click()
-    found = {row[0] for row in _shown_rows(page)}
-    assert len(found) == _count(page, "count-state-observed") == 10
-    # The report groups hold the same Found checks, one row each.
+    rows = _shown_rows(page)
+    found = {row[0] for row in rows}
+    assert len(found) == len(rows) == _count(page, "count-state-observed") == 10
+    # The category is read off each row's own tag, not from a tab.
+    categories = page.evaluate(
+        "() => Object.fromEntries([...document.querySelectorAll('#variants-tbody tr')]"
+        ".map(r => [r.children[0].textContent.trim(),"
+        " r.children[4].querySelector('.lds-tag[class*=\"lds-tag-cat-\"]').textContent.trim()]))"
+    )
+    assert categories == DEMO_FOUND_CATEGORIES
+    # The report groups hold the same Found checks, one row each, each as a Found row.
     assert page.locator("#report-groups article.lds-finding:has(> span.lds-mark-supported_and_observed)").count() == 10
-    shown_any = False
-    for tab in CATEGORY_TABS:
-        page.locator(f"[data-filter='{tab}']").click()
-        rows = _shown_rows(page)
-        shown_any = shown_any or bool(rows)
-        assert {row[1] for row in rows} <= {"Found"}, f"{tab}: {rows}"
-        assert {row[0] for row in rows} <= found, f"{tab}: {rows}"
-        # The report groups list each of those checks as a Found row.
-        for row in rows:
-            report_row = page.locator(f'#report-groups article.lds-finding[data-finding-id="{row[0]}"]')
-            expect(report_row.locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
-        assert page.locator("#showing-count").text_content() == f"Showing {len(rows)} of {len(found)} findings", tab
-    assert shown_any, "no category tab showed a row, so this test proved nothing"
+    for rsid in found:
+        report_row = page.locator(f'#report-groups article.lds-finding[data-finding-id="{rsid}"]')
+        expect(report_row.locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
+    assert {row[1] for row in rows} == {"Found"}
+    assert page.locator("#showing-count").text_content() == "Showing 10 of 10 findings"
 
 
 def test_kb_provenance_badge_visible(loaded_page):
@@ -304,7 +298,7 @@ def test_theme_toggle_round_trip(loaded_page):
 
 
 RESULT_COUNT_IDS = ("count-state-observed", "count-state-negative", "count-state-gaps", "count-state-insufficient")
-TAB_KEYS = ["every", "observed", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"]
+TAB_KEYS = ["every", "observed", "negative", "gaps", "insufficient"]
 
 
 @pytest.mark.parametrize("sample", ["demo", "wildtype"])
@@ -359,3 +353,86 @@ def test_the_result_tabs_work_from_the_keyboard(loaded_page):
     assert {row[1] for row in _shown_rows(page)} == {"Not found"}
     assert page.locator("[data-filter='negative']").get_attribute("aria-pressed") == "true"
     assert page.locator("[data-filter='observed']").get_attribute("aria-pressed") == "false"
+
+
+def test_there_is_no_category_tab_and_no_acmg_tab(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    for key in ("pathogenic", "carrier", "pgx", "risk", "acmg"):
+        assert page.locator(f"[data-filter='{key}']").count() == 0, key
+    tabs = page.locator("#table-panel .lds-tabs")
+    text = tabs.inner_text().lower()
+    for word in ("acmg", "pathogenic", "carrier", "pharmacogenomics", "risk factors"):
+        assert word not in text, f"{word!r} in the tabs: {text}"
+    assert tabs.locator("button").count() == 5
+
+
+@pytest.mark.parametrize("sample", ["demo", "wildtype"])
+def test_each_tab_counts_the_rows_it_shows(loaded_page, sample):
+    page = loaded_page
+    page.set_input_files("#file-input", str(DEMO_FILE if sample == "demo" else FIXTURES / "wildtype-23andme.txt"))
+    expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)
+    seen = {}
+    for key in TAB_KEYS:
+        tab = page.locator(f"[data-filter='{key}']")
+        tab.click()
+        shown = len(_shown_rows(page))  # measured from the table, not from the count's own source
+        printed = tab.locator(".lds-tab-count").text_content().strip()
+        assert printed == str(shown), f"{key}: tab says {printed}, the table shows {shown}"
+        seen[key] = shown
+    # The result tabs say the summary legend's own figures, and "All" is their sum.
+    for key, count_id in zip(TAB_KEYS[1:], RESULT_COUNT_IDS):
+        assert seen[key] == _count(page, count_id), key
+    assert seen["every"] == sum(seen[key] for key in TAB_KEYS[1:])
+    assert sum(1 for count in seen.values() if count) >= 2, "too few non-empty tabs for this to prove anything"
+    # Searching narrows the rows, not the tab counts (they describe the analysis).
+    page.locator("[data-filter='every']").click()
+    page.locator("#search-input").fill("rs4244285")
+    assert len(_shown_rows(page)) <= 1
+    assert page.locator("[data-filter='every'] .lds-tab-count").text_content().strip() == str(seen["every"])
+
+
+@pytest.mark.allow_console_errors
+def test_an_unknown_tab_key_is_a_visible_error_and_leaves_the_table_alone(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    before = _shown_rows(page)
+    assert before, "the table showed no rows, so this test proved nothing"
+    page.evaluate("() => { window.__lucidase.state.filterCategory = 'all'; }")  # the retired key
+    with page.expect_event("pageerror") as raised:
+        page.locator("#search-input").fill("rs")  # any search re-renders the table
+    assert 'unknown table tab "all"' in raised.value.message
+    # The guard runs before the table is cleared: a bad key never leaves an empty table behind.
+    assert _shown_rows(page) == before
+
+
+def test_a_tab_count_with_no_figure_is_a_visible_error(loaded_page):
+    page = loaded_page
+    page.evaluate(
+        "() => { const s = document.createElement('span'); s.dataset.tabCount = 'bogus'; document.body.append(s); }"
+    )
+    page.set_input_files("#file-input", str(DEMO_FILE))
+    # The page's one error path shows it: the analysis alert names the tab, and no results are shown.
+    expect(page.locator("#analysis-error-detail")).to_contain_text('no count for table tab "bogus"')
+    expect(page.locator("#results-section")).to_be_hidden()
+
+
+def test_the_tab_counts_follow_a_second_analysis(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+
+    def printed():
+        return {key: int(page.locator(f"[data-filter='{key}'] .lds-tab-count").text_content().replace(",", ""))
+                for key in TAB_KEYS}
+
+    first = printed()
+    assert first["observed"] == STATE_TAB_COUNTS["demo"]["observed"]
+    page.set_input_files("#file-input", str(FIXTURES / "wildtype-23andme.txt"))
+    expect(page.locator("[data-filter='observed'] .lds-tab-count")).to_have_text("0")
+    second = printed()
+    legend = {key: _count(page, count_id) for key, count_id in zip(TAB_KEYS[1:], RESULT_COUNT_IDS)}
+    assert second == {"every": sum(legend.values()), **legend}
+    assert second != first
+    for tab, _state, _word, _count_id in STATE_TABS:
+        assert second[tab] == STATE_TAB_COUNTS["wildtype"][tab], tab

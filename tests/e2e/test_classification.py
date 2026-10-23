@@ -112,7 +112,8 @@ def test_results_read_in_the_plain_words(loaded_page):
     # Filter tabs for the per-state tables.
     show_table(page)
     for name, word in (("observed", "Found"), ("negative", "Not found"), ("gaps", "Not on your chip"), ("insufficient", "Unclear")):
-        expect(page.locator(f"[data-filter='{name}']")).to_have_text(word)
+        # The tab is the word and then its count (the count is pinned in test_web_adversarial).
+        expect(page.locator(f"[data-filter='{name}']")).to_have_text(re.compile(rf"^{word}\d+$"))
     # Table badges under each state filter.
     for name in ("every", "observed", "negative", "gaps", "insufficient"):
         page.locator(f"[data-filter='{name}']").click()
