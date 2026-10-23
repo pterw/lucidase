@@ -28,12 +28,12 @@ PLACEMENTS = [
     ("#section-hero", "marker", "Markers"),  # What it can't do
     ("#coverage-guardrail-banner", "chip", "chip"),  # the scope notice
     ("#summary-prose", "variant", "variant"),  # the Summary sentence (design system AnalysisScreen)
-    ("#summary .lds-counts", "allele", "alleles"),  # the Carrier status count's help line
     ("#summary-legend [data-legend-state='insufficient_evidence']", "genotype", "genotype"),  # Unclear help line
     ("#group-risk .lds-section-aside", "variant", "Variants"),
     ("#group-risk .lds-section-aside", "risk factor", "risk factor"),
     ("#group-carrier .lds-section-aside", "variant", "Variants"),
     ("#assortment-section .lds-section-aside", "variant", "variants"),
+    ("#assortment-section .lds-section-aside", "allele", "alleles"),  # the one place the word is explained
 ]
 
 GLOSSARY_JS = "async () => ({ ...(await import('./src/glossary.js')).GLOSSARY })"

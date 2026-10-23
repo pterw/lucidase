@@ -25,7 +25,6 @@ import {
   escapeHtml,
   fmtPct,
   formatRate,
-  foundCategoryCounts,
   groupedReport,
   heroScopeText,
   karyogramStateLabels,
@@ -673,26 +672,10 @@ function renderQC() {
   sexBadge.className = `lds-tag ${NEUTRAL_TAG}`;
 }
 
-/**
- * The result counts are the worker's coverage figures. The category counts sit under "What was found", so the view
- * model counts them over the Found checks only (the worker's summary also counts unclear variant readings).
- */
+/** The result counts are the worker's coverage figures, in the Summary sentence and the legend. */
 function renderSummaryCards() {
   const cov = state.coverageSummary;
   if (!state.summary || !cov) return;
-  const figure = (value) => (typeof value === "number" ? value.toLocaleString() : NOT_AVAILABLE);
-  const set = (id, value) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = figure(value);
-  };
-
-  const found = foundCategoryCounts(listedRows());
-  set("count-pathogenic", found.pathogenic);
-  set("count-carrier", found.carrier);
-  set("count-pgx", found.pgx);
-  set("count-risk", found.risk);
-  set("count-acmg", found.acmg);
-
   // The sentence and the legend say the same figures: the worker's count per result.
   const counts = {
     supported_and_observed: cov.supported_and_observed_count,

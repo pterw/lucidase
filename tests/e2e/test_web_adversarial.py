@@ -201,12 +201,14 @@ def test_each_state_tab_lists_exactly_the_checks_with_its_word_and_agrees_with_t
         assert {row[0] for row in _shown_rows(page)} == {"rs1799945", "rs1801133"}
 
 
-def test_each_category_tab_narrows_the_found_checks_and_agrees_with_its_count(loaded_page):
+def test_each_category_tab_narrows_the_found_checks_and_agrees_with_the_report_groups(loaded_page):
     page = loaded_page
     _load_demo(page)
     page.locator("[data-filter='all']").click()
     found = {row[0] for row in _shown_rows(page)}
     assert len(found) == _count(page, "count-state-observed") == 10
+    # The report groups hold the same Found checks, one row each.
+    assert page.locator("#report-groups article.lds-finding:has(> span.lds-mark-supported_and_observed)").count() == 10
     shown_any = False
     for tab in CATEGORY_TABS:
         page.locator(f"[data-filter='{tab}']").click()
@@ -214,9 +216,10 @@ def test_each_category_tab_narrows_the_found_checks_and_agrees_with_its_count(lo
         shown_any = shown_any or bool(rows)
         assert {row[1] for row in rows} <= {"Found"}, f"{tab}: {rows}"
         assert {row[0] for row in rows} <= found, f"{tab}: {rows}"
-        # The ACMG SF count counts genes; every other count counts checks.
-        shown = len({row[2] for row in rows}) if tab == "acmg" else len(rows)
-        assert _count(page, f"count-{tab}") == shown, f"{tab}: {rows}"
+        # The report groups list each of those checks as a Found row.
+        for row in rows:
+            report_row = page.locator(f'#report-groups article.lds-finding[data-finding-id="{row[0]}"]')
+            expect(report_row.locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
         assert page.locator("#showing-count").text_content() == f"Showing {len(rows)} of {len(found)} findings", tab
     assert shown_any, "no category tab showed a row, so this test proved nothing"
 

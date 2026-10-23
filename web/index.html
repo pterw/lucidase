@@ -189,8 +189,7 @@
       </section>
 
       <!-- Summary (design system AnalysisScreen): the sentence with the counts, the map of the checks on the file's
-           chromosomes and its legend (src/app.js renders all three from the analysis), then the categories of what
-           was found -->
+           chromosomes and its legend (src/app.js renders all three from the analysis) -->
       <section id="summary" class="lds-section" aria-labelledby="summary-h">
         <div class="lds-section-head">
           <h2 id="summary-h" class="lds-section-title">Summary</h2>
@@ -209,36 +208,6 @@
             </div>
             <ul id="summary-legend" class="lds-legend lds-summary-legend" aria-label="Key to the map"></ul>
           </div>
-          <div>
-            <h3 class="lds-h3 mb-2">What was found, by category</h3>
-            <div class="lds-counts">
-              <div class="lds-count">
-                <span class="lds-count-label">Pathogenic</span>
-                <span id="count-pathogenic" class="lds-count-value">0</span>
-                <span class="lds-count-help">Classed pathogenic in ClinVar</span>
-              </div>
-              <div class="lds-count">
-                <span class="lds-count-label" data-acmg-version>ACMG SF</span>
-                <span id="count-acmg" class="lds-count-value">0</span>
-                <span class="lds-count-help">Actionable genes with a finding</span>
-              </div>
-              <div class="lds-count">
-                <span class="lds-count-label">Pharmacogenomics</span>
-                <span id="count-pgx" class="lds-count-value">0</span>
-                <span class="lds-count-help">Drug-response findings (CPIC)</span>
-              </div>
-              <div class="lds-count">
-                <span class="lds-count-label">Carrier status</span>
-                <span id="count-carrier" class="lds-count-value">0</span>
-                <span class="lds-count-help">Recessive and APOE <button type="button" class="lds-term" data-term="allele">alleles</button></span>
-              </div>
-              <div class="lds-count">
-                <span class="lds-count-label">Risk factors</span>
-                <span id="count-risk" class="lds-count-value">0</span>
-                <span class="lds-count-help">Susceptibility findings</span>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -249,7 +218,7 @@
       <section id="assortment-section" class="hidden lds-section" aria-labelledby="assortment-h">
         <div class="lds-section-head">
           <h2 id="assortment-h" class="lds-section-title">Across genes</h2>
-          <p class="lds-section-aside">Two <button type="button" class="lds-term" data-term="variant">variants</button> in one gene, and variants on different chromosomes that a child could inherit together.</p>
+          <p class="lds-section-aside">Two <button type="button" class="lds-term" data-term="variant">variants</button> in one gene, and variants on different chromosomes whose <button type="button" class="lds-term" data-term="allele">alleles</button> a child could inherit together.</p>
           <span id="assortment-findings-count-badge" class="lds-meta">2 multi-locus findings</span>
         </div>
         <div id="assortment-cards-container" class="lds-section-body flex flex-col"></div>

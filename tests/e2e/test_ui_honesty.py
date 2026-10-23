@@ -397,3 +397,42 @@ def test_page_claims_say_not_available_when_the_kb_cannot_load(page):
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
     assert "Not available" in page.locator("#hero-scope").inner_text()
     assert not _violations(page.locator("body").inner_text(), STATIC_CLAIMS)
+
+
+CATEGORY_COUNT_IDS = ("count-pathogenic", "count-acmg", "count-pgx", "count-carrier", "count-risk")
+
+
+_VISIBLE_TEXT_OUTSIDE_INSPECTOR_JS = """() => {
+  const skip = document.getElementById('variant-drawer');
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const parts = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const parent = node.parentElement;
+    if (!parent || (skip && skip.contains(parent))) continue;
+    if (['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) continue;
+    if (!parent.checkVisibility({ visibilityProperty: true })) continue;
+    parts.push(node.textContent);
+  }
+  return parts.join(' ');
+}"""
+
+
+def _visible_text_outside_inspector(page):
+    return page.evaluate(_VISIBLE_TEXT_OUTSIDE_INSPECTOR_JS)
+
+
+def test_results_page_has_no_category_counts_and_no_acmg_label(loaded_page):
+    # The category counts disagreed with the report groups (the demo's "Carrier status 2" sat above a group of 3
+    # rows) and spoke in jargon, so the page shows the four groups and no counts of its own.
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible()
+    for element_id in CATEGORY_COUNT_IDS:
+        assert page.locator(f"#{element_id}").count() == 0, element_id
+    assert page.locator(".lds-counts, .lds-count").count() == 0
+    assert "What was found, by category" not in page.locator("body").text_content()
+    # The ACMG SF list is not the page's vocabulary. Read the whole visible page (header, main, footer) with the
+    # Inspector left out: its per-locus ACMG notice is the one allowed place. The table panel is hidden and keeps its
+    # category tabs until a later change, so it never counts as visible text.
+    assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
+    assert page.locator("#report-groups article.lds-finding").count() > 0

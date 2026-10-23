@@ -89,7 +89,11 @@ def _acmg_rows(page):
     return page.locator("#variants-tbody tr")
 
 
-def test_two_found_variants_of_one_acmg_gene_count_as_one_actionable_gene(page):
+def _report_row(page, rsid):
+    return page.locator(f'#report-groups article.lds-finding[data-finding-id="{rsid}"]')
+
+
+def test_two_found_variants_of_one_acmg_gene_are_two_rows_of_one_group(page):
     # The demo carries HFE C282Y (rs1800562) and H63D (rs1799945), both heterozygous. H63D's evidence is unclear in the
     # KB; with it marked sufficient here, both are Found: two variants, one gene.
     def tampered_kb(route):
@@ -105,10 +109,13 @@ def test_two_found_variants_of_one_acmg_gene_count_as_one_actionable_gene(page):
     expect(rows).to_have_count(2)
     for rsid in ("rs1800562", "rs1799945"):
         expect(_row(page, rsid).locator(".lds-tag-state-supported_and_observed")).to_have_text("Found")
-    expect(page.locator("#count-acmg")).to_have_text("1")
+        expect(_report_row(page, rsid).locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
+    # One gene, so the two Found checks sit in the same report group, one row each.
+    groups = {_report_row(page, rsid).evaluate("el => el.closest('section').id") for rsid in ("rs1800562", "rs1799945")}
+    assert len(groups) == 1, groups
 
 
-def test_an_unclear_acmg_variant_is_not_counted_as_found(loaded_page):
+def test_an_unclear_acmg_variant_is_not_listed_as_found(loaded_page):
     page = loaded_page
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
@@ -117,6 +124,8 @@ def test_an_unclear_acmg_variant_is_not_counted_as_found(loaded_page):
     expect(rows).to_have_count(1)
     expect(_row(page, "rs1800562")).to_have_count(1)
     expect(_row(page, "rs1799945")).to_have_count(0)
-    expect(page.locator("#count-acmg")).to_have_text("1")
+    # The report shows C282Y as Found and H63D as Unclear (a row, but not a finding).
+    expect(_report_row(page, "rs1800562").locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
+    expect(_report_row(page, "rs1799945").locator(":scope > span.lds-mark-insufficient_evidence")).to_have_count(1)
     page.locator("[data-filter='insufficient']").click()
     expect(_row(page, "rs1799945")).to_have_count(1)

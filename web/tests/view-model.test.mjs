@@ -18,7 +18,6 @@ import {
   csvReport,
   drawerTierText,
   escapeHtml,
-  foundCategoryCounts,
   groupIdForModel,
   groupedReport,
   karyogramStateLabels,
@@ -948,27 +947,30 @@ test("rows by state: each check once, under its own state, from the worker's ove
   assert.throws(() => rowsByState([{ ...a.byRsid.rs671, coverage_state: "outside_coverage" }]), /coverage state/);
 });
 
-test("the counts by category count Found checks only, once each, and an ACMG SF gene once", () => {
+test("each report group lists the Found checks once each; an unclear reading is a row but not Found", () => {
   const a = analyse(DEMO);
-  // HFE H63D is a heterozygous Carrier reading with unclear evidence (Tier D): it is not found, so it is not counted.
+  // HFE H63D is a heterozygous Carrier reading with unclear evidence (Tier D): a row, but not a Found one.
   assert.equal(a.byRsid.rs1799945.coverage_state, "insufficient_evidence");
   assert.equal(a.byRsid.rs1799945.sample_observation, "variant_present");
-  assert.equal(a.byRsid.rs1799945.category, "Carrier");
-  assert.deepEqual(foundCategoryCounts(workerLists(a)), { pathogenic: 0, carrier: 2, pgx: 4, risk: 3, acmg: 1 });
-  // The same rule, computed independently from the Found checks.
+  const foundIn = (report, id) => report.find((g) => g.id === id).rows.filter((r) => r.state === "supported_and_observed");
+  const report = groupedReport(workerLists(a), a.kb.genes);
+  assert.ok(report.find((g) => g.id === "carrier").rows.some((r) => r.id === "rs1799945" && r.state === "insufficient_evidence"));
+  assert.ok(!foundIn(report, "carrier").some((r) => r.id === "rs1799945"));
+  // The Found rows per group, computed independently from the Found checks and each gene's inheritance model.
   const found = a.vms.filter((vm) => vm.coverage_state === "supported_and_observed");
-  const n = (category) => found.filter((vm) => vm.category === category).length;
-  assert.deepEqual(foundCategoryCounts(workerLists(a)), {
-    pathogenic: n("Pathogenic"), carrier: n("Carrier"), pgx: n("Pharmacogenomics"), risk: n("Risk Factor"),
-    acmg: new Set(found.filter((vm) => vm.acmg_sf).map((vm) => vm.gene)).size,
-  });
-  // With H63D's evidence sufficient, both HFE variants are Found: two Carrier checks, still one ACMG SF gene.
+  assert.ok(found.length > 0);
+  for (const group of REPORT_GROUPS) {
+    const expected = found.filter((vm) => groupIdForModel(a.kb.genes[vm.gene].inheritance.model) === group.id).map((vm) => vm.id);
+    assert.deepEqual(foundIn(report, group.id).map((r) => r.id).sort(), expected.sort(), group.id);
+  }
+  assert.equal(REPORT_GROUPS.reduce((sum, g) => sum + foundIn(report, g.id).length, 0), found.length);
+  // With H63D's evidence sufficient, both HFE variants are Found: two rows in the Carrier group, one per check.
   const both = analyse(DEMO, (kb) => {
     kb.loci.rs1799945.evidence_sufficiency = "sufficient";
     return kb;
   });
-  assert.equal(both.vms.filter((vm) => vm.gene === "HFE" && vm.coverage_state === "supported_and_observed").length, 2);
-  assert.deepEqual(foundCategoryCounts(workerLists(both)), { pathogenic: 0, carrier: 3, pgx: 4, risk: 3, acmg: 1 });
+  const bothReport = groupedReport(workerLists(both), both.kb.genes);
+  assert.deepEqual(foundIn(bothReport, "carrier").filter((r) => r.gene === "HFE").map((r) => r.id).sort(), ["rs1799945", "rs1800562"]);
 });
 
 // Owner ruling 2026-10-04: a multi-locus finding may rest on an Unclear reading, but it must say so. Each component

@@ -155,23 +155,6 @@ export function rowsByState(viewModels) {
 }
 
 /**
- * The page's "What was found, by category" counts, over the Found checks only: an unclear reading of a variant is
- * not a finding. The categories are the worker's (KB interpretation category); `acmg` counts ACMG SF genes, so two
- * Found variants in one gene count once.
- */
-export function foundCategoryCounts(viewModels) {
-  const found = rowsByState(viewModels).supported_and_observed;
-  const count = (category) => found.filter((vm) => vm.category === category).length;
-  return {
-    pathogenic: count("Pathogenic"),
-    carrier: count("Carrier"),
-    pgx: count("Pharmacogenomics"),
-    risk: count("Risk Factor"),
-    acmg: new Set(found.filter((vm) => vm.acmg_sf).map((vm) => vm.gene)).size,
-  };
-}
-
-/**
  * The Summary sentence (design system ui_kits/web/AnalysisScreen.jsx), from the counts per result: the checks run,
  * Found, Not found, Not on your chip (said only when some check was not on the chip), Unclear, and the markers that
  * were counted but not interpreted. The result words are RESULT_WORDS's, in lower case. `counts` is keyed by
