@@ -86,17 +86,17 @@ def test_drawer_screenshot_to_tmp(loaded_page, tmp_path):
 
 def test_filter_transitions(loaded_page):
     _load_demo(loaded_page)
-    for name in ["pathogenic", "acmg", "pgx", "carrier", "risk", "all"]:
+    for name in ["pathogenic", "acmg", "pgx", "carrier", "risk", "observed", "every"]:
         loaded_page.locator(f"[data-filter='{name}']").click()
         assert "Showing" in loaded_page.locator("#showing-count").text_content(), name
 
 
-# What each filter shows today. "all" is the Found tab and the category filters narrow it: the demo's HFE H63D
+# What each filter shows today. "observed" is the Found tab and the category filters narrow it: the demo's HFE H63D
 # (rs1799945) and MTHFR (rs1801133) are variant readings with unclear evidence, so they are under Unclear, not here.
 # The Risk Factors filter keeps APOE through its e3/e4 and e4/e4 diplotype rule (S2-F6 owns that rule); the rest
 # follow the KB category. The wild-type fixture has no found variant, so every filter is empty for it.
 DEMO_FILTER_ROWS = {
-    "all": {
+    "observed": {
         "APOE (rs429358 + rs7412)", "rs3918290", "rs6025", "rs1799963", "rs4149056", "rs4244285",
         "rs113993960", "rs9923231", "rs1800562", "rs4988235",
     },
@@ -139,7 +139,7 @@ def test_each_filter_is_empty_for_the_wild_type_file(loaded_page):
 
 # The tabs named by a result word: (tab, state key, plain word, the summary strip's count element).
 STATE_TABS = [
-    ("all", "supported_and_observed", "Found", "count-state-observed"),
+    ("observed", "supported_and_observed", "Found", "count-state-observed"),
     ("negative", "supported_not_observed", "Not found", "count-state-negative"),
     ("gaps", "not_tested_by_array", "Not on your chip", "count-state-gaps"),
     ("insufficient", "insufficient_evidence", "Unclear", "count-state-insufficient"),
@@ -174,8 +174,8 @@ def _count(page, element_id):
 # them with the variant-present findings). Wild type: 9 Not found, 2 Not on your chip, 2 Unclear (H63D and MTHFR
 # wild type; the worker also lists them with the wild-type checks). Between them every state tab is non-empty once.
 STATE_TAB_COUNTS = {
-    "demo": {"all": 10, "negative": 1, "gaps": 0, "insufficient": 2},
-    "wildtype": {"all": 0, "negative": 9, "gaps": 2, "insufficient": 2},
+    "demo": {"observed": 10, "negative": 1, "gaps": 0, "insufficient": 2},
+    "wildtype": {"observed": 0, "negative": 9, "gaps": 2, "insufficient": 2},
 }
 
 
@@ -204,7 +204,7 @@ def test_each_state_tab_lists_exactly_the_checks_with_its_word_and_agrees_with_t
 def test_each_category_tab_narrows_the_found_checks_and_agrees_with_the_report_groups(loaded_page):
     page = loaded_page
     _load_demo(page)
-    page.locator("[data-filter='all']").click()
+    page.locator("[data-filter='observed']").click()
     found = {row[0] for row in _shown_rows(page)}
     assert len(found) == _count(page, "count-state-observed") == 10
     # The report groups hold the same Found checks, one row each.
@@ -301,3 +301,61 @@ def test_theme_toggle_round_trip(loaded_page):
     assert page.evaluate(theme) == "dark"
     page.locator("#btn-theme-toggle").click()
     assert page.evaluate(theme) == "light"
+
+
+RESULT_COUNT_IDS = ("count-state-observed", "count-state-negative", "count-state-gaps", "count-state-insufficient")
+TAB_KEYS = ["every", "observed", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"]
+
+
+@pytest.mark.parametrize("sample", ["demo", "wildtype"])
+def test_the_table_opens_on_every_check(loaded_page, sample):
+    page = loaded_page
+    page.set_input_files("#file-input", str(DEMO_FILE if sample == "demo" else FIXTURES / "wildtype-23andme.txt"))
+    expect(page.locator("#results-section")).to_be_visible()
+    show_table(page)  # no tab clicked: this is what the table opens on
+    # The number of checks is the sum of the analysis's four per-result counts, read from the summary legend.
+    checks = sum(_count(page, element_id) for element_id in RESULT_COUNT_IDS)
+    assert checks > 0, "the analysis counted no checks, so this test proved nothing"
+    rows = _shown_rows(page)
+    ids = [row[0] for row in rows]
+    assert len(ids) == len(set(ids)) == checks, f"{len(ids)} rows for {checks} checks: {ids}"
+    by_state = _ids_by_state(page)
+    assert sorted(ids) == sorted({i for state_ids in by_state.values() for i in state_ids}), ids
+    # Each check is listed under its own word, so the default view holds every word the analysis counted.
+    for _tab, state, word, count_id in STATE_TABS:
+        assert [row[1] for row in rows].count(word) == _count(page, count_id), word
+    assert page.locator("#showing-count").text_content() == f"Showing {checks} of {checks} checks"
+    assert page.locator("[data-filter='every']").get_attribute("aria-pressed") == "true"
+    assert "tab-active" in page.locator("[data-filter='every']").get_attribute("class").split()
+    assert page.locator("[data-filter].tab-active").count() == 1
+
+
+def test_the_tab_keys_are_new_and_the_old_all_key_is_gone(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    assert page.eval_on_selector_all("[data-filter]", "els => els.map(e => e.dataset.filter)") == TAB_KEYS
+    assert page.locator("[data-filter='all']").count() == 0
+    assert page.evaluate("() => window.__lucidase.state.filterCategory") == "every"
+    # The Found tab is its own key and lists only Found checks.
+    page.locator("[data-filter='observed']").click()
+    rows = _shown_rows(page)
+    assert len(rows) == 10 and {row[1] for row in rows} == {"Found"}, rows
+    assert page.evaluate("() => window.__lucidase.state.filterCategory") == "observed"
+
+
+def test_the_result_tabs_work_from_the_keyboard(loaded_page):
+    page = loaded_page
+    _load_demo(page)
+    page.locator("[data-filter='every']").focus()
+    page.keyboard.press("Tab")
+    expect(page.locator("[data-filter='observed']")).to_be_focused()
+    page.keyboard.press("Enter")
+    expect(page.locator("[data-filter='observed']")).to_be_focused()
+    assert {row[1] for row in _shown_rows(page)} == {"Found"}
+    page.keyboard.press("Tab")
+    expect(page.locator("[data-filter='negative']")).to_be_focused()
+    page.keyboard.press("Space")
+    expect(page.locator("[data-filter='negative']")).to_be_focused()
+    assert {row[1] for row in _shown_rows(page)} == {"Not found"}
+    assert page.locator("[data-filter='negative']").get_attribute("aria-pressed") == "true"
+    assert page.locator("[data-filter='observed']").get_attribute("aria-pressed") == "false"

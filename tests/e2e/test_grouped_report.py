@@ -197,7 +197,8 @@ def test_the_table_is_one_click_away_and_then_searchable(loaded_page):
     expect(button).to_have_attribute("aria-controls", "table-panel")
     assert {"lds-btn", "lds-btn-secondary", "lds-btn-sm"} <= set(button.get_attribute("class").split())
     expect(button.locator(".lds-icon.lds-i-table")).to_have_count(1)
-    for hidden in ("#table-panel", "#variants-tbody", "#search-input", "[data-filter='all']"):
+    for hidden in ("#table-panel", "#variants-tbody", "#search-input", "[data-filter='every']"):
+        expect(page.locator(hidden)).to_have_count(1)  # present in the page, so "hidden" is not an absent selector
         expect(page.locator(hidden)).to_be_hidden()
 
     button.click()

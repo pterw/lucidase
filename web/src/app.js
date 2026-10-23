@@ -63,7 +63,7 @@ const state = {
   karyogram: null,
   pendingAnalysis: null,
   selectedVariant: null,
-  filterCategory: "all",
+  filterCategory: "every",
   searchQuery: "",
   sortBy: "magnitude",
   // The StepNav step (0 choose your file, 1 read your results, 2 save a copy), set by the page phase.
@@ -887,9 +887,10 @@ const categoryTagClass = (r) =>
 // Evidence tiers are text in one neutral tone: a tier is not a result, so it gets no result colour.
 const TIER_TAG_CLASS = `lds-tag ${NEUTRAL_TAG} lds-data`;
 
-// The table's tabs named by a result word, and the state each lists. Every other tab is a category of Found checks.
+// The table's tabs named by a result word, and the state each lists. The "every" tab lists them all, in this order,
+// and every other tab is a category of Found checks.
 const STATE_TABS = {
-  all: "supported_and_observed",
+  observed: "supported_and_observed",
   negative: "supported_not_observed",
   gaps: "not_tested_by_array",
   insufficient: "insufficient_evidence"
@@ -904,9 +905,13 @@ function renderVariantsTable() {
   const tbody = document.getElementById("variants-tbody");
   tbody.innerHTML = "";
 
-  // A tab named by a result word lists exactly the checks with that word; the category tabs narrow the Found ones.
+  // The "every" tab lists every check; a tab named by a result word lists exactly the checks with that word; the
+  // category tabs narrow the Found ones.
   const byState = rowsByState(listedRows());
-  const dataset = byState[Object.hasOwn(STATE_TABS, state.filterCategory) ? STATE_TABS[state.filterCategory] : "supported_and_observed"];
+  const every = state.filterCategory === "every";
+  const dataset = every
+    ? Object.values(STATE_TABS).flatMap((s) => byState[s])
+    : byState[Object.hasOwn(STATE_TABS, state.filterCategory) ? STATE_TABS[state.filterCategory] : "supported_and_observed"];
 
   const filtered = dataset.filter(r => {
     // Category filter for subcategories of the Found checks
@@ -927,7 +932,9 @@ function renderVariantsTable() {
   });
 
   let countLabel = `Showing ${filtered.length} of ${byState.supported_and_observed.length} findings`;
-  if (state.filterCategory === "negative") {
+  if (every) {
+    countLabel = `Showing ${filtered.length} of ${dataset.length} checks`;
+  } else if (state.filterCategory === "negative") {
     countLabel = `Showing ${filtered.length} loci checked where the variant was not found`;
   } else if (state.filterCategory === "gaps") {
     countLabel = `Showing ${filtered.length} loci your chip did not read`;

@@ -130,7 +130,7 @@ def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
     show_table(page)
     chunks = [page.locator("body").inner_text()]
-    for name in ("all", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"):
+    for name in ("every", "observed", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"):
         page.locator(f"[data-filter='{name}']").click()
         chunks.append(page.locator("#variants-tbody").inner_text())
         for i in range(page.locator("#variants-tbody tr").count()):
@@ -142,7 +142,7 @@ def _screens(page) -> str:
             chunks.append(page.locator("#variant-drawer").inner_text())
             page.locator("#btn-close-drawer").click()
             wait_drawer_closed(page)
-    page.locator("[data-filter='all']").click()
+    page.locator("[data-filter='every']").click()
     return "\n".join(chunks)
 
 
