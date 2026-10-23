@@ -243,7 +243,7 @@ def test_a_kb_that_fails_validation_makes_no_page_claims(page):
     badge = page.locator("#kb-provenance-badge")
     assert MANIFEST["release"] not in badge.inner_text()
     assert MANIFEST["sha256"][:12] not in badge.get_attribute("title")
-    assert "Not available" in page.locator("#hero-scope").inner_text()
+    assert "Not available" in page.locator("#intro-scope").inner_text()
     assert any("schema_version" in e for e in errors), errors
 
 
@@ -317,9 +317,11 @@ def test_static_claims_come_from_the_kb_manifest(loaded_page):
     assert MANIFEST["sha256"][:12] in title
     assert f"{MANIFEST['locus_count']} loci in {MANIFEST['gene_count']} genes" in title
     assert "ClinVar" not in title and "dbSNP" not in title
-    hero = page.locator("#hero-scope").inner_text()
-    assert hero.endswith(f"{MANIFEST['locus_count']} loci in {MANIFEST['gene_count']} genes tested")
-    assert MANIFEST["acmg_sf_version"] in hero
+    intro = page.locator("#intro-scope").inner_text()
+    assert intro == (
+        f"Lucidase checks {MANIFEST['locus_count']} places in {MANIFEST['gene_count']} genes and explains each "
+        "result in plain words, including what it could not test."
+    )
     assert page.locator("#redis-status-indicator").count() == 0
 
 
@@ -395,7 +397,7 @@ def test_page_claims_say_not_available_when_the_kb_cannot_load(page):
     )
     goto_ready(page, page.base_url)
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
-    assert "Not available" in page.locator("#hero-scope").inner_text()
+    assert "Not available" in page.locator("#intro-scope").inner_text()
     assert not _violations(page.locator("body").inner_text(), STATIC_CLAIMS)
 
 
@@ -436,3 +438,17 @@ def test_results_page_has_no_category_counts_and_no_acmg_label(loaded_page):
     # category tabs until a later change, so it never counts as visible text.
     assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
     assert page.locator("#report-groups article.lds-finding").count() > 0
+
+
+def test_start_screen_states_the_scope_in_plain_words_with_no_acmg_chip(loaded_page):
+    # The start screen used to keep a chip "ACMG SF v3.2: 14 loci in 12 genes tested" beside an intro sentence with no
+    # numbers. The one sentence now carries the manifest's two numbers; the list's name is not the page's vocabulary.
+    page = loaded_page
+    page.wait_for_function("() => document.getElementById('kb-provenance-badge').title.includes('sha256')")
+    intro = page.locator("#intro-scope")
+    expect(intro).to_be_visible()
+    numbers = [int(n) for n in re.findall(r"\d+", intro.inner_text())]
+    assert numbers == [MANIFEST["locus_count"], MANIFEST["gene_count"]]
+    assert "acmg" not in page.locator("#section-hero").inner_text().lower()
+    assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
+    assert page.locator("#hero-scope").count() == 0

@@ -21,6 +21,7 @@ import {
   groupIdForModel,
   groupedReport,
   karyogramStateLabels,
+  introScopeText,
   kbBadge,
   markdownReport,
   partnerModelNote,
@@ -378,6 +379,29 @@ test("the KB badge text and title come from the manifest, with no source version
   assert.equal(badge.title, "Knowledge base release 2026.10.02 · sha256 b79e6a67bb68 · 14 loci in 12 genes");
   for (const bad of ["ClinVar", "dbSNP", "2024-06"]) assert.ok(!badge.text.includes(bad) && !badge.title.includes(bad), bad);
   assert.match(kbBadge({}).text, /Not available/);
+});
+
+test("the intro sentence states the manifest's places and genes in plain words, and no scope without them", () => {
+  // Counts that differ from the live KB, so a literal in the function cannot pass.
+  const text = introScopeText({ locus_count: 7, gene_count: 3, acmg_sf_version: "ACMG SF v3.2" });
+  assert.equal(text, "Lucidase checks 7 places in 3 genes and explains each result in plain words, including what it could not test.");
+  assert.doesNotMatch(text, /ACMG/);
+  assert.equal(
+    introScopeText({ locus_count: 140, gene_count: 99 }),
+    "Lucidase checks 140 places in 99 genes and explains each result in plain words, including what it could not test."
+  );
+  for (const bad of [null, {}, { locus_count: 14 }, { gene_count: 12 }, { locus_count: "14", gene_count: 12 }]) {
+    const unavailable = introScopeText(bad);
+    assert.match(unavailable, /Its tested scope is Not available\.$/, JSON.stringify(bad));
+    assert.doesNotMatch(unavailable, /\d/, JSON.stringify(bad));
+  }
+});
+
+test("the start screen's intro sentence holds no digits in its source, so its numbers can only come from the manifest", () => {
+  const html = readText("../index.html");
+  const match = html.match(/<p id="intro-scope"[^>]*>([^<]*)<\/p>/);
+  assert.ok(match, "no #intro-scope paragraph");
+  assert.doesNotMatch(match[1], /\d/);
 });
 
 test("the other parent's model is stated in words, calling them the other parent", () => {

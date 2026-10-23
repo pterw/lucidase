@@ -26,7 +26,7 @@ import {
   fmtPct,
   formatRate,
   groupedReport,
-  heroScopeText,
+  introScopeText,
   karyogramStateLabels,
   kbBadge,
   markdownReport,
@@ -121,15 +121,15 @@ function setValue(el, value, naText = NOT_AVAILABLE) {
   }
 }
 
-/** The KB claims on the page (release badge, ACMG SF scope) come from the KB manifest, never from literals. */
+/** The KB claims on the page (release badge, the intro sentence's scope) come from the KB manifest, never from literals. */
 function renderKbClaims(manifest) {
   const badge = kbBadge(manifest);
   const badgeEl = document.getElementById("kb-provenance-badge");
   const textEl = document.getElementById("kb-provenance-text");
   if (badgeEl) badgeEl.title = badge.title;
   if (textEl) textEl.textContent = badge.text;
-  const hero = document.getElementById("hero-scope");
-  if (hero) hero.textContent = heroScopeText(manifest);
+  const intro = document.getElementById("intro-scope");
+  if (intro) intro.textContent = introScopeText(manifest);
   document.querySelectorAll("[data-acmg-version]").forEach((el) => {
     el.textContent = acmgVersionLabel(manifest);
   });

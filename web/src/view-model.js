@@ -540,13 +540,16 @@ export function multiLocusReading(finding, records) {
 
 const ACMG_VERSION_FALLBACK = "ACMG SF";
 
-/** Start-page scope line: the ACMG SF version and tested scope, both from the KB manifest. No emoji (design system). */
-export function heroScopeText(manifest) {
-  const version = nonEmptyString(manifest && manifest.acmg_sf_version) ?? ACMG_VERSION_FALLBACK;
+/**
+ * The start-page intro sentence: the places and genes checked, both from the KB manifest, in plain words. A manifest
+ * that cannot give both numbers makes no claim: the scope reads "Not available".
+ */
+export function introScopeText(manifest) {
   const loci = numberOrNull(manifest && manifest.locus_count);
   const genes = numberOrNull(manifest && manifest.gene_count);
-  if (loci === null || genes === null) return `${version}: tested scope ${NOT_AVAILABLE}`;
-  return `${version}: ${loci} loci in ${genes} genes tested`;
+  const explains = "explains each result in plain words, including what it could not test.";
+  if (loci === null || genes === null) return `Lucidase ${explains} Its tested scope is ${NOT_AVAILABLE}.`;
+  return `Lucidase checks ${loci} places in ${genes} genes and ${explains}`;
 }
 
 /** The ACMG SF version label, from the manifest. */
