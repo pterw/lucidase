@@ -38,6 +38,7 @@ function setViewState(name) {
 
 function setInputsDisabled(disabled) {
   $("karyogram-file-input").disabled = disabled;
+  $("btn-karyogram-browse").disabled = disabled;
   $("btn-load-karyogram-sample").disabled = disabled;
 }
 
@@ -290,6 +291,7 @@ async function initPage() {
     if (e.target.files.length > 0) handleFileSelected(e.target.files[0]);
     fileInput.value = "";
   });
+  $("btn-karyogram-browse").addEventListener("click", () => fileInput.click());
   $("btn-load-karyogram-sample").addEventListener("click", loadSample);
   try {
     view.kb = await loadKnowledgeBase();

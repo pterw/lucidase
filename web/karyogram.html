@@ -54,10 +54,14 @@
         for each. Your file is read in this browser and never leaves it.
       </p>
       <div class="flex flex-wrap items-center gap-3">
-        <label for="karyogram-file-input" class="sr-only">Choose your DNA file</label>
-        <input type="file" id="karyogram-file-input" class="file-input file-input-bordered file-input-sm" accept=".txt,.csv,.vcf,.tsv,.gz">
-        <span class="lds-meta">or</span>
-        <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary lds-btn-sm">Try a made-up example file</button>
+        <input type="file" id="karyogram-file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
+        <button type="button" id="btn-karyogram-browse" class="lds-btn lds-btn-primary">
+          <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
+        </button>
+        <span class="inline-flex items-center gap-3">
+          <span class="lds-meta">or</span>
+          <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
+        </span>
       </div>
     </section>
 

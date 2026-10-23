@@ -237,15 +237,88 @@ def test_a_worker_that_cannot_start_shows_the_error_and_re_enables_the_inputs(pa
     assert page.locator("#karyogram-figure .kary-col").count() == 24
 
 
-def test_file_input_and_demo_button_are_reachable_by_tab(page):
+def test_file_button_and_demo_button_are_reachable_by_tab(page):
     _open(page)
     reached = []
     for _ in range(25):
         page.keyboard.press("Tab")
         ident = page.evaluate("document.activeElement && document.activeElement.id")
-        if ident in ("karyogram-file-input", "btn-load-karyogram-sample"):
+        if ident in ("btn-karyogram-browse", "btn-load-karyogram-sample", "karyogram-file-input"):
             reached.append(ident)
-    assert reached[:2] == ["karyogram-file-input", "btn-load-karyogram-sample"], reached
+    # The button is the tab stop; the hidden native input is never focused.
+    assert reached[:2] == ["btn-karyogram-browse", "btn-load-karyogram-sample"], reached
+    assert "karyogram-file-input" not in reached
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_file_button_is_a_real_button_with_a_visible_focus_ring(page, theme):
+    _open(page)
+    if theme == "dark":
+        page.locator("#btn-theme-toggle").click()
+        expect(page.locator("html")).to_have_attribute("data-theme", "dark")
+    button = page.locator("#btn-karyogram-browse")
+    expect(button).to_have_text("Choose your DNA file")
+    expect(page.locator("#karyogram-file-input")).to_be_hidden()
+    assert button.bounding_box()["height"] >= 40
+    # Reach it the way a keyboard user does: Tab from the page start until it is focused.
+    for _ in range(25):
+        page.keyboard.press("Tab")
+        if page.evaluate("document.activeElement.id") == "btn-karyogram-browse":
+            break
+    else:
+        pytest.fail("the file button was never reached by Tab")
+    _assert_focus_ring(page)
+    # The sample button is the next tab stop and carries the same ring.
+    page.keyboard.press("Tab")
+    assert page.evaluate("document.activeElement.id") == "btn-load-karyogram-sample"
+    _assert_focus_ring(page)
+
+
+def _assert_focus_ring(page):
+    ring = page.evaluate(
+        """() => {
+          const cs = getComputedStyle(document.activeElement);
+          const probe = document.createElement('i');
+          probe.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+          document.body.appendChild(probe);
+          const accent = getComputedStyle(probe).color;
+          probe.remove();
+          return { style: cs.outlineStyle, width: cs.outlineWidth, offset: cs.outlineOffset,
+                   color: cs.outlineColor, accent };
+        }"""
+    )
+    assert ring["style"] == "solid" and ring["width"] == "2px", ring
+    assert ring["offset"] == "2px", ring
+    assert ring["color"] == ring["accent"], ring
+
+
+def test_file_button_opens_the_picker(page):
+    _open(page)
+    with page.expect_file_chooser() as chooser:
+        page.locator("#btn-karyogram-browse").click()
+    chooser.value.set_files(str(DEMO_FILE))
+    _wait_result(page)
+
+
+@pytest.mark.parametrize("key", ["Enter", "Space"])
+def test_file_button_opens_the_picker_from_the_keyboard(page, key):
+    _open(page)
+    page.locator("#btn-karyogram-browse").focus()
+    with page.expect_file_chooser() as chooser:
+        page.keyboard.press(key)
+    chooser.value.set_files(str(DEMO_FILE))
+    _wait_result(page)
+
+
+def test_or_stays_with_the_sample_button_when_the_row_wraps(page):
+    page.set_viewport_size({"width": 390, "height": 800})
+    _open(page)
+    or_box = page.locator("#btn-load-karyogram-sample").locator("xpath=preceding-sibling::span").bounding_box()
+    sample = page.locator("#btn-load-karyogram-sample").bounding_box()
+    browse = page.locator("#btn-karyogram-browse").bounding_box()
+    # The row did wrap (the sample button sits below the file button) and "or" shares its line.
+    assert sample["y"] >= browse["y"] + browse["height"] - 1, (browse, sample)
+    assert or_box["y"] < sample["y"] + sample["height"] and sample["y"] < or_box["y"] + or_box["height"], (or_box, sample)
 
 
 def test_index_header_links_to_the_karyogram_page(page):

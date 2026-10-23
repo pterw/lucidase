@@ -329,11 +329,6 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-input::placeholder { color: var(--text-subtle); }
 .lds-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Native file input (daisyUI .file-input): sentence case, the secondary button's look. */
-.file-input::file-selector-button { text-transform: none; font: 700 14px var(--font-sans); letter-spacing: var(--tracking-ui);
-  background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
-.file-input { border-color: var(--border-control); background: var(--bg-panel); color: var(--text-body); font: 400 14px var(--font-sans); }
-
 /* Menu (the daisyUI dropdown keeps its focus-within behaviour, which makes the items reachable with Tab). */
 .lds-menu { min-width: 200px; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--bg-panel); border: 1px solid var(--border-default);
   box-shadow: var(--shadow-menu); border-radius: var(--radius-control); }
