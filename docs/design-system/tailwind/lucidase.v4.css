@@ -1,0 +1,35 @@
+/* Lucidase — Tailwind CSS v4 theme. Not part of styles.css (it uses v4-only at-rules).
+   In your app CSS:
+     @import "tailwindcss";
+     @import "./lucidase-ds/styles.css";
+     @import "./lucidase-ds/tailwind/lucidase.v4.css";
+     @plugin "daisyui" { themes: light --default, dark; }   (daisyUI 5, optional — then override with the radius/colour vars below)
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-paper: var(--paper); --color-paper-sunk: var(--paper-sunk); --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink); --color-ink-muted: var(--ink-muted); --color-ink-subtle: var(--ink-subtle);
+  --color-line: var(--line); --color-line-strong: var(--line-strong); --color-dot: var(--dot);
+  --color-accent: var(--accent); --color-accent-ink: var(--accent-ink); --color-accent-hover: var(--accent-hover); --color-accent-wash: var(--accent-wash); --color-accent-line: var(--accent-line); --color-on-accent: var(--on-accent);
+  --color-state-observed: var(--state-observed); --color-state-observed-ink: var(--state-observed-ink); --color-state-observed-wash: var(--state-observed-wash); --color-state-observed-line: var(--state-observed-line);
+  --color-state-not-observed: var(--state-not-observed); --color-state-not-observed-ink: var(--state-not-observed-ink); --color-state-not-observed-wash: var(--state-not-observed-wash); --color-state-not-observed-line: var(--state-not-observed-line);
+  --color-state-array-gap: var(--state-array-gap); --color-state-array-gap-ink: var(--state-array-gap-ink); --color-state-array-gap-wash: var(--state-array-gap-wash); --color-state-array-gap-line: var(--state-array-gap-line);
+  --color-state-outside: var(--state-outside); --color-state-outside-ink: var(--state-outside-ink); --color-state-outside-wash: var(--state-outside-wash); --color-state-outside-line: var(--state-outside-line);
+  --color-state-insufficient: var(--state-insufficient); --color-state-insufficient-ink: var(--state-insufficient-ink); --color-state-insufficient-wash: var(--state-insufficient-wash); --color-state-insufficient-line: var(--state-insufficient-line);
+  --color-danger-ink: var(--danger-ink); --color-danger-wash: var(--danger-wash); --color-danger-line: var(--danger-line);
+  --color-notice-ink: var(--notice-ink); --color-notice-wash: var(--notice-wash); --color-notice-line: var(--notice-line);
+  --color-ok: var(--ok);
+
+  /* literal stacks (same as tokens/typography.css) — referencing var(--font-*) here would be circular */
+  --font-serif: "orpheuspro", Georgia, serif;
+  --font-sans: "akzidenz-grotesk-next-pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "input-mono", ui-monospace, monospace;
+  --font-condensed: "akzidenz-grotesk-next-conden", "swiss-721-bt-condensed", "Arial Narrow", sans-serif;
+  --font-mono-narrow: "input-mono-narrow", "input-mono", ui-monospace, monospace;
+
+  --radius-xs: 2px; --radius-sm: 2px; --radius-md: 2px; --radius-lg: 2px; --radius-xl: 2px;
+  --radius-panel: 0; --radius-control: 2px;
+  --shadow-menu: 0 8px 24px -8px rgba(14,26,36,.18), 0 1px 2px rgba(14,26,36,.06);
+  --shadow-drawer: -16px 0 40px -16px rgba(14,26,36,.22);
+}
