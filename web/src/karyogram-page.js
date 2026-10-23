@@ -111,7 +111,7 @@ function renderLoci(layout) {
       return (
         `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
         `<td class="font-bold">${escapeHtml(l.gene)}</td><td class="lds-data">${escapeHtml(l.rsid)}</td>` +
-        `<td class="lds-data">${escapeHtml(l.chrom)}:${escapeHtml(fmt(l.pos))}</td>` +
+        `<td class="lds-data">${escapeHtml(l.chrom)}:<wbr>${escapeHtml(fmt(l.pos))}</td>` +
         `<td><span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
         `${escapeHtml(labels[state])}</span></td></tr>`
       );

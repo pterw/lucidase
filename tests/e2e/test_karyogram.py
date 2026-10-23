@@ -559,3 +559,79 @@ def test_each_result_on_the_map_has_its_own_mark_not_only_a_colour(page):
     cores = page.evaluate(MARK_SHAPES, "#karyogram-figure .kary-locus .kary-core")
     assert "kary-state-insufficient_evidence" in cores, cores  # the sample has an unclear result to check
     assert len(set(cores.values())) == len(cores), cores
+
+
+def test_on_a_phone_the_figure_keeps_its_drawn_size_and_scrolls_inside_a_named_region(page):
+    page.set_viewport_size({"width": 390, "height": 800})
+    _open(page)
+    figure = page.locator("#karyogram-figure")
+    expect(figure).to_have_attribute("role", "region")
+    expect(figure).to_have_attribute("aria-label", "Chromosome map")
+    expect(figure).to_have_attribute("tabindex", "0")
+    assert figure.evaluate("el => getComputedStyle(el).overflowX") == "auto"
+    dims = figure.evaluate("el => ({ scroll: el.scrollWidth, client: el.clientWidth })")
+    assert dims["scroll"] > dims["client"], dims
+
+    # Rendered sizes: the SVG's scale times each label's font size, and each mark's halo as drawn.
+    svg = figure.locator("svg")
+    scale = svg.evaluate("svg => svg.getBoundingClientRect().width / svg.viewBox.baseVal.width")
+    assert scale >= 1, scale
+    sizes = figure.locator(".kary-label").evaluate_all("els => els.map((t) => parseFloat(getComputedStyle(t).fontSize))")
+    assert len(sizes) == 24 and min(sizes) * scale >= 11, (sizes, scale)
+    rendered = figure.locator(".kary-label").evaluate_all(
+        "els => els.map((t) => t.getBoundingClientRect().height)"
+    )
+    assert min(rendered) >= 11 * 0.7, rendered  # glyph boxes really are drawn at that size, not shrunk by a transform
+    halos = figure.locator(".kary-locus .kary-halo").evaluate_all("els => els.map((c) => c.getBoundingClientRect().width)")
+    assert len(halos) == 14 and min(halos) >= 20, halos
+
+    # The region takes focus and scrolls from the keyboard; the page itself never scrolls sideways.
+    figure.focus()
+    page.keyboard.press("ArrowRight")
+    page.wait_for_function("() => document.getElementById('karyogram-figure').scrollLeft > 0")
+    overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
+    assert overflow <= 0, f"the page scrolls sideways by {overflow}px"
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_the_figure_region_shows_the_accent_focus_ring_from_the_keyboard(page, theme):
+    page.set_viewport_size({"width": 390, "height": 800})
+    _open(page)
+    if theme == "dark":
+        page.locator("#btn-theme-toggle").click()
+        expect(page.locator("html")).to_have_attribute("data-theme", "dark")
+    for _ in range(40):
+        page.keyboard.press("Tab")
+        if page.evaluate("document.activeElement.id") == "karyogram-figure":
+            break
+    else:
+        pytest.fail("the figure region was never reached by Tab")
+    _assert_focus_ring(page)
+
+
+def test_on_a_desktop_the_figure_needs_no_scrolling(page):
+    _open(page)
+    dims = page.locator("#karyogram-figure").evaluate("el => ({ scroll: el.scrollWidth, client: el.clientWidth })")
+    assert dims["scroll"] <= dims["client"], dims
+
+
+@pytest.mark.parametrize("loaded", [False, True])
+def test_on_a_phone_the_genes_table_never_clips_the_result_word(page, loaded):
+    page.set_viewport_size({"width": 390, "height": 800})
+    _open(page)
+    if loaded:
+        page.locator("#btn-load-karyogram-sample").click()
+        _wait_result(page)
+    wrapper = page.locator("#karyogram-loci-body").locator("xpath=ancestor::div[contains(@class,'lds-section-body')][1]")
+    box = wrapper.bounding_box()
+    assert wrapper.evaluate("el => el.scrollWidth <= el.clientWidth"), "the table scrolls inside its box"
+    cells = page.locator("#karyogram-loci-body td, .lds-table thead th")
+    rects = cells.evaluate_all("els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })")
+    assert len(rects) == 14 * 4 + 4
+    for left, right in rects:
+        assert left >= box["x"] - 0.5 and right <= box["x"] + box["width"] + 0.5, (left, right, box)
+    # The result cell shows its whole word: the text is not wider than the cell that holds it.
+    words = page.locator("#karyogram-loci-body tr td:last-child").evaluate_all(
+        "els => els.map((c) => c.scrollWidth - c.clientWidth)"
+    )
+    assert max(words) <= 0, words
