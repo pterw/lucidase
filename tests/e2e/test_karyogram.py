@@ -376,6 +376,23 @@ def test_the_result_column_says_no_file_yet_until_a_file_gives_a_result(page):
         expect(cell.locator(".lds-na-text")).to_have_count(0)
 
 
+def test_not_available_text_is_set_in_the_sans_face_not_inherited_mono(page):
+    """A muted "Not available" reads in the design system's sans face even when it sits inside monospace text."""
+    _open(page)
+    got = page.evaluate(
+        r"""() => {
+          const norm = (v) => v.replace(/["'\s]/g, "");
+          const host = document.createElement("code");
+          host.innerHTML = '<span class="lds-na-text">Not available</span>';
+          document.body.append(host);
+          const family = getComputedStyle(host.firstChild).fontFamily;
+          host.remove();
+          return [norm(family), norm(getComputedStyle(document.documentElement).getPropertyValue("--font-sans"))];
+        }"""
+    )
+    assert got[0] == got[1], got
+
+
 def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):
     # No existing fixture lacks a build comment, so strip it from one in memory.
     text = (FIXTURES / "apoe-e3e4-23andme.txt").read_text(encoding="utf-8")

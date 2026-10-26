@@ -403,7 +403,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-prob-bar { width: 100%; height: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-slow) var(--ease-standard); }
 
 /* NotAvailable: missing is said, never filled in. */
-.lds-na-text { color: var(--text-subtle); font-style: italic; font-weight: 400; }
+.lds-na-text { color: var(--text-subtle); font-family: var(--font-sans); font-style: italic; font-weight: 400; }
 
 /* 3. Karyogram (karyogram-view.js emits these classes; no inline fills). Bins keep the page's look in the design
    system's colours; curated loci are halo + core in their state colour, hollow for "not detected" and dashed for
