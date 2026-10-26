@@ -307,3 +307,13 @@ def test_a_locus_with_a_penetrance_of_one_has_no_adjusted_row_in_the_demo(loaded
     _open_record(page, cftr)
     assert _row_labels(page) == MENDELIAN_ROWS
     expect(page.locator("#drawer-sim-adjusted")).to_be_hidden()
+
+
+def test_multi_locus_card_chips_are_neutral_not_category_tones(loaded_page):
+    """"Across genes" cards say what they found in words; their chips carry no result-category colour."""
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible()
+    cards = page.locator("#assortment-cards-container")
+    expect(cards.locator(".lds-tag-neutral")).to_have_count(4)  # positive control: two neutral chips on each card
+    expect(cards.locator(".lds-tag[class*='lds-tag-cat-']")).to_have_count(0)

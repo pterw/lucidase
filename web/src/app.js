@@ -841,7 +841,7 @@ function renderAssortmentSection() {
     row.innerHTML = `
       <div class="flex flex-wrap items-center gap-2">
         <span class="lds-h3">Possible compound heterozygote · phase unknown</span>
-        <span class="lds-tag lds-tag-cat-pathogenic">${escapeHtml(ch.significance)}</span>
+        <span class="lds-tag ${NEUTRAL_TAG}">${escapeHtml(ch.significance)}</span>
         <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ch.gene)}</span>
       </div>
       <div class="flex flex-col gap-1">
@@ -866,7 +866,7 @@ function renderAssortmentSection() {
     row.innerHTML = `
       <div class="flex flex-wrap items-center gap-2">
         <span class="lds-h3">Co-occurring variant alleles</span>
-        <span class="lds-tag lds-tag-cat-risk">Multi-locus</span>
+        <span class="lds-tag ${NEUTRAL_TAG}">Multi-locus</span>
         <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
       </div>
       <div class="flex flex-col gap-1">
