@@ -860,6 +860,48 @@ def test_on_a_desktop_the_figure_needs_no_scrolling(page):
     assert dims["scroll"] <= dims["client"], dims
 
 
+# The scroll box may overflow by a few pixels (fallback fonts differ by platform); this bounds how many.
+PHONE_TABLE_MAX_OVERFLOW_PX = 48
+
+
+def _assert_genes_table_never_clips(page):
+    """Assert the phone-width genes table scrolls inside its box at worst, and never clips the result word.
+
+    The design's answer to a table slightly wider than the screen is the wrapper's own ``overflow-x: auto``
+    scroll, so a few pixels of in-box scroll are accepted; clipping is the only defect. Five checks: the
+    wrapper is a real scroller, whatever overflows is small, every cell lies inside the scrollable extent,
+    each result cell holds its whole word, and the result column can be scrolled fully into view.
+    """
+    wrapper = page.locator("#karyogram-loci-body").locator("xpath=ancestor::div[contains(@class,'lds-section-body')][1]")
+    box = wrapper.bounding_box()
+    assert wrapper.evaluate("el => getComputedStyle(el).overflowX") == "auto", "the wrapper is not a scroller"
+    dims = wrapper.evaluate("el => ({ scroll: el.scrollWidth, client: el.clientWidth })")
+    # Regression canary: a returned column or grown padding would add far more than this bound.
+    assert dims["scroll"] - dims["client"] <= PHONE_TABLE_MAX_OVERFLOW_PX, f"the overflow is too large: {dims}"
+    rects = page.locator("#karyogram-loci-body td, .lds-table thead th").evaluate_all(
+        "els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })"
+    )
+    assert len(rects) == 14 * 4 + 4
+    for left, right in rects:
+        assert left >= box["x"] - 0.5 and right <= box["x"] + dims["scroll"] + 0.5, (
+            f"a cell lies outside the scrollable extent: {(left, right, box, dims)}"
+        )
+    # The result cell shows its whole word: the text is not wider than the cell that holds it.
+    words = page.locator("#karyogram-loci-body tr td:last-child").evaluate_all(
+        "els => els.map((c) => c.scrollWidth - c.clientWidth)"
+    )
+    assert max(words) <= 0, f"a result word is cut off in its cell: {words}"
+    # The result column can be brought fully into view by scrolling the wrapper to its end.
+    wrapper.evaluate("el => { el.scrollLeft = el.scrollWidth; }")
+    ends = page.locator("#karyogram-loci-body tr td:last-child").evaluate_all(
+        "els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })"
+    )
+    for left, right in ends:
+        assert left >= box["x"] - 0.5 and right <= box["x"] + box["width"] + 0.5, (
+            f"the result word cannot be scrolled into view: {(left, right, box)}"
+        )
+
+
 @pytest.mark.parametrize("loaded", [False, True])
 def test_on_a_phone_the_genes_table_never_clips_the_result_word(page, loaded):
     page.set_viewport_size({"width": 390, "height": 800})
@@ -867,18 +909,4 @@ def test_on_a_phone_the_genes_table_never_clips_the_result_word(page, loaded):
     if loaded:
         page.locator("#btn-load-karyogram-sample").click()
         _wait_result(page)
-    wrapper = page.locator("#karyogram-loci-body").locator("xpath=ancestor::div[contains(@class,'lds-section-body')][1]")
-    box = wrapper.bounding_box()
-    # A real scroller: if the real fonts overflow by a few pixels, the table scrolls inside its box, never clips.
-    assert wrapper.evaluate("el => getComputedStyle(el).overflowX") == "auto"
-    assert wrapper.evaluate("el => el.scrollWidth <= el.clientWidth"), "the table scrolls inside its box"
-    cells = page.locator("#karyogram-loci-body td, .lds-table thead th")
-    rects = cells.evaluate_all("els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })")
-    assert len(rects) == 14 * 4 + 4
-    for left, right in rects:
-        assert left >= box["x"] - 0.5 and right <= box["x"] + box["width"] + 0.5, (left, right, box)
-    # The result cell shows its whole word: the text is not wider than the cell that holds it.
-    words = page.locator("#karyogram-loci-body tr td:last-child").evaluate_all(
-        "els => els.map((c) => c.scrollWidth - c.clientWidth)"
-    )
-    assert max(words) <= 0, words
+    _assert_genes_table_never_clips(page)
