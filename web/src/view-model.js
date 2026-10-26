@@ -592,6 +592,16 @@ function tierLetter(tier) {
 }
 
 /**
+ * The Inspector subtitle's chromosome, in words: "chromosome 19", or "chromosomes 1 and 2" when a composite's
+ * markers sit on different ones. `chromosomes` is the record's `;`-joined list; an empty one gives null.
+ */
+export function chromosomeWords(chromosomes) {
+  const names = typeof chromosomes === "string" && chromosomes !== "" ? chromosomes.split(";") : [];
+  if (names.length === 0) return null;
+  return names.length === 1 ? `chromosome ${names[0]}` : `chromosomes ${names.join(" and ")}`;
+}
+
+/**
  * Footer text for the open record's tier, in sentence case: "Evidence tier A". A composite whose components'
  * tiers differ (or one is missing) names each marker's tier.
  */

@@ -15,6 +15,7 @@ import {
   REPORT_GROUPS,
   RESULT_WORDS,
   apoeCardModel,
+  chromosomeWords,
   csvReport,
   drawerTierText,
   escapeHtml,
@@ -334,6 +335,8 @@ test("the APOE row is one composite identity with both component positions, neve
   assert.equal(apoe.exportId, "rs429358;rs7412");
   assert.deepEqual(apoe.positions.map((p) => p.pos), [45411941, 45412079]);
   assert.equal(apoe.positionText, "chr19:45,411,941 (rs429358) · chr19:45,412,079 (rs7412)");
+  // Both APOE markers sit on chromosome 19, so the Inspector subtitle names it once.
+  assert.equal(chromosomeWords(apoe.chromosomes), "chromosome 19");
   const csv = parseCsv(csvReport([apoe], a.kb.genes))[0];
   assert.equal(csv.rsID, "rs429358;rs7412");
   assert.equal(csv.Position, "45411941;45412079");
@@ -1157,4 +1160,10 @@ test("the file line names the format by its display name, the genome version, an
 
 test("a genome version the file does not state reads Not available in the file line", () => {
   assert.equal(fileLine("x.txt", { format_name: "23andme", build: "unknown" }, false), "x.txt · 23andMe · Not available");
+});
+
+test("chromosomeWords: one chromosome, several, or none", () => {
+  assert.equal(chromosomeWords("7"), "chromosome 7");
+  assert.equal(chromosomeWords("1;2"), "chromosomes 1 and 2");
+  assert.equal(chromosomeWords(""), null);
 });

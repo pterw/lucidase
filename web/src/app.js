@@ -21,6 +21,7 @@ import {
   acmgVersionLabel,
   apoeCardModel,
   csvReport,
+  chromosomeWords,
   drawerTierText,
   escapeHtml,
   fmtPct,
@@ -1082,6 +1083,7 @@ function openDrawer(record, opener = document.activeElement) {
   markerEl.dataset.recordId = record.id;
   document.getElementById("drawer-gene").textContent = record.gene;
   setValue(document.getElementById("drawer-genotype"), record.genotype);
+  setValue(document.getElementById("drawer-chrom"), chromosomeWords(record.chromosomes));
   setValue(document.getElementById("drawer-coord"), record.positionText);
   document.getElementById("drawer-significance").textContent = record.significance;
   setValue(
@@ -1092,13 +1094,8 @@ function openDrawer(record, opener = document.activeElement) {
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 
-  // Tier and Coverage State badges
-  const tierBadgeEl = document.getElementById("drawer-tier-badge");
+  // The result's StateMark; the evidence tier is shown once, in the footer.
   const covBadgeEl = document.getElementById("drawer-coverage-state-badge");
-  if (tierBadgeEl) {
-    setValue(tierBadgeEl, record.tier);
-    tierBadgeEl.className = TIER_TAG_CLASS;
-  }
   setValue(document.getElementById("drawer-footer-tier"), drawerTierText(record));
 
   // The result as the design system's StateMark with its word (the shape carries it without colour).

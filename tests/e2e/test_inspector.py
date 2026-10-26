@@ -64,7 +64,7 @@ def _record(page, finding_id):
           const r = [...s.records, ...s.negativeChecks, ...s.arrayGaps, ...s.insufficientEvidence]
             .find((x) => x.id === id);
           return { id: r.id, gene: r.gene, topic: s.genes[r.gene].topic, word: r.stateLabel,
-                   limitation: r.limitation, caveats: r.caveats, positionText: r.positionText,
+                   limitation: r.limitation, caveats: r.caveats, positionText: r.positionText, chromosomes: r.chromosomes,
                    mendelian: Boolean(r.segregation && r.segregation.mendelian_disease),
                    drug: r.drug_response, acmg: Boolean(r.acmg_actionable) };
         }""",
@@ -225,8 +225,10 @@ def test_header_sections_and_footer_follow_the_record_inspector(loaded_page):
         # Header: the KB topic, then gene · marker · position, then the StateMark with its word.
         expect(page.locator("#drawer-title")).to_have_text(rec["topic"])
         expect(page.locator(f"{INSPECTOR} .lds-inspector-sub")).to_have_text(
-            f"{rec['gene']} · {rec['id']} · {rec['positionText']}"
+            f"{rec['gene']} · {rec['id']} · chromosome {rec['chromosomes']}"
         )
+        # The exact position moved to Technical details; it is not lost.
+        expect(page.locator("#drawer-coord")).to_have_text(rec["positionText"])
         mark = page.locator(f"{INSPECTOR} .lds-inspector-meta .lds-statemark")
         expect(mark).to_have_text(rec["word"])
         expect(mark.locator(".lds-mark")).to_have_count(1)
@@ -390,18 +392,19 @@ def test_the_simulator_names_the_other_parent_and_speaks_to_the_reader(loaded_pa
     assert seen == {True, False}, "the demo covers both simulator wordings"
 
 
-def test_the_apoe_subtitle_names_the_gene_once_then_its_markers_and_positions(loaded_page):
+def test_the_apoe_subtitle_names_the_gene_once_then_its_markers_and_chromosome(loaded_page):
     page = loaded_page
     _load_demo(page)
     apoe = page.evaluate(
         "() => { const a = window.__lucidase.state.apoe;"
-        " return { id: a.id, gene: a.gene, rsids: a.components.map((c) => c.rsid), positionText: a.positionText }; }"
+        " return { id: a.id, gene: a.gene, rsids: a.components.map((c) => c.rsid), positionText: a.positionText, chromosomes: a.chromosomes }; }"
     )
     assert apoe["rsids"] == ["rs429358", "rs7412"] and apoe["positionText"]
     sub = page.locator(f"{INSPECTOR} .lds-inspector-sub")
     _details(page, apoe["id"]).click()
     wait_drawer_open(page)
-    expect(sub).to_have_text(f"{apoe['gene']} · {' + '.join(apoe['rsids'])} · {apoe['positionText']}")
+    expect(sub).to_have_text(f"{apoe['gene']} · {' + '.join(apoe['rsids'])} · chromosome {apoe['chromosomes']}")
+    expect(page.locator("#drawer-coord")).to_have_text(apoe["positionText"])
     assert sub.inner_text().count(apoe["gene"]) == 1
     expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", apoe["id"])
     # A single-marker record (same selectors): its marker is its id.
