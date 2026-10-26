@@ -11,12 +11,13 @@ Expected values come from the page's own state and the KB, never typed in.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import WAIT_TIMEOUT_MS, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import WAIT_TIMEOUT_MS, WEB_DIR, show_table, wait_drawer_closed, wait_drawer_open
 
 NARROW = {"width": 390, "height": 844}
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -435,3 +436,31 @@ def test_datalist_prose_values_are_sans_and_data_values_mono(loaded_page):
         assert family(sel) == sans, (sel, family(sel))
     for sel in DATA_VALUES:
         assert "input-mono" in family(sel), (sel, family(sel))
+
+
+def test_the_acmg_notice_names_the_manifest_list_and_is_not_a_diagnosis(loaded_page):
+    """The ACMG notice's list name comes from the KB manifest, and it points to a clinician rather than diagnosing."""
+    page = loaded_page
+    _load_demo(page)
+    acmg_id = page.evaluate("() => window.__lucidase.state.records.find((r) => r.acmg_actionable).id")
+    _details(page, acmg_id).click()
+    wait_drawer_open(page)
+    version = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"][
+        "acmg_sf_version"
+    ]
+    notice = page.locator("#drawer-acmg-box")
+    expect(notice).to_be_visible()
+    text = notice.inner_text()
+    assert "not a diagnosis" in text and "clinician" in text
+    assert "ACMG/AMP" not in text, "the notice uses plain words, not the classification criteria's name"
+    assert version in text
+
+    # The CPIC notice carries a plain-word title, not the bare jargon "Drug response".
+    drug_id = page.evaluate("() => window.__lucidase.state.records.find((r) => r.drug_response !== null).id")
+    page.keyboard.press("Escape")
+    wait_drawer_closed(page)
+    _details(page, drug_id).click()
+    wait_drawer_open(page)
+    title = page.locator("#drawer-drug-box .lds-alert-title").inner_text()
+    assert title == "How you may respond to some medicines (CPIC guideline)"
+    assert "Drug response" not in title
