@@ -51,13 +51,15 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Cache the Playwright browser
+        id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ steps.playwright.outputs.version }}-chromium
 
       - name: Install Chromium
-        run: python -m playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: python -m playwright install chromium
 
       - name: Read the Tailwind pin
         id: tailwind-pin
