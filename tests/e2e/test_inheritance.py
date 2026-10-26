@@ -150,7 +150,9 @@ def test_demo_multi_locus_cards_show_each_component_word_and_caution_on_unclear(
 
 # --- The simulator's words (design RecordInspector): rows, notes and the "How this is worked out" sentence.
 NEUTRAL_ROWS = ["Child gets two copies", "Child gets one copy", "Child gets no copy"]
+# Complete penetrance: the two-copies chance is the affected chance. Partial or unstated: only a genotype chance.
 MENDELIAN_ROWS = ["Child affected (two copies)", "Child is a carrier (one copy)", "Child gets no copy"]
+PARTIAL_PENETRANCE_ROWS = ["Child gets two copies", "Child is a carrier (one copy)", "Child gets no copy"]
 PARTNERS = ("unscreened", "carrier", "affected", "wildtype")
 
 
@@ -237,7 +239,7 @@ def test_hfe_shows_the_design_rows_and_a_penetrance_adjusted_figure_that_comes_f
     wait_drawer_open(page)
     penetrance = page.evaluate("() => window.__lucidase.state.genes.HFE.inheritance.penetrance")
     assert 0 < penetrance < 1, "HFE's stated penetrance is below 1"
-    assert _row_labels(page) == MENDELIAN_ROWS
+    assert _row_labels(page) == PARTIAL_PENETRANCE_ROWS
     adjusted = page.locator("#sim-effective-risk")
     label = adjusted.locator("xpath=preceding-sibling::span")
     expect(adjusted).to_be_visible()
@@ -276,6 +278,7 @@ def test_the_adjusted_figure_follows_the_kb_penetrance(page):
 
 def test_the_adjusted_row_is_dropped_when_the_kb_penetrance_is_one(page):
     _open_hfe_with_penetrance(page, 1)
+    assert _row_labels(page) == MENDELIAN_ROWS
     expect(page.locator("#drawer-sim-adjusted")).to_be_hidden()
     assert "penetrance" not in page.locator("#drawer-sim-method").inner_text().lower()
 
@@ -287,7 +290,7 @@ def test_moving_from_hfe_to_a_non_mendelian_locus_restores_the_neutral_view(load
     hfe_id = page.evaluate("() => window.__lucidase.state.records.find((r) => r.gene === 'HFE').id")
     _open_record(page, hfe_id)
     expect(page.locator("#drawer-sim-adjusted")).to_be_visible()
-    assert _row_labels(page) == MENDELIAN_ROWS
+    assert _row_labels(page) == PARTIAL_PENETRANCE_ROWS
     _open_record(page, _non_mendelian_ids(page)[0])
     expect(page.locator("#drawer-sim-adjusted")).to_be_hidden()
     expect(page.locator("#drawer-seg-penetrance")).to_be_hidden()

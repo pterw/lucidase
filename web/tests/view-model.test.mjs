@@ -1097,10 +1097,23 @@ test("a non-Mendelian locus gets copy-count rows and a scope line, with no disea
   assert.match(simulatorWords({ ...NON_MENDELIAN, allele: null }).scope, /the variant allele/);
 });
 
-test("a recessive Mendelian locus uses the design's rows, and shows the adjusted figure when penetrance is below 1", () => {
+test("a recessive locus says 'affected' on the first row only when that figure is an affected chance (complete penetrance)", () => {
+  const rows = (first) => [first, "Child is a carrier (one copy)", "Child gets no copy"];
+  const cases = [
+    ["complete", 1, "Child affected (two copies)", false],
+    ["partial", 0.2, "Child gets two copies", true],
+    ["unstated", null, "Child gets two copies", true],
+  ];
+  for (const [name, penetrance, first, hasAdjusted] of cases) {
+    const w = simulatorWords(AR(penetrance));
+    assert.deepEqual(w.rows, rows(first), name);
+    assert.equal(w.adjusted !== null, hasAdjusted, `${name}: the adjusted row is present exactly when the first row is not an affected chance`);
+  }
+});
+
+test("a recessive Mendelian locus shows the adjusted figure when penetrance is below 1, in plain words", () => {
   for (const penetrance of [0.2, 0.35]) {
     const w = simulatorWords(AR(penetrance));
-    assert.deepEqual(w.rows, ["Child affected (two copies)", "Child is a carrier (one copy)", "Child gets no copy"]);
     assert.match(w.adjusted, /^Child affected, adjusted/);
     assert.doesNotMatch(w.adjusted, /penetrance|2pq|Hardy/i, "the label is plain");
     assert.equal(w.scope, null);
@@ -1124,7 +1137,7 @@ test("the wording follows the mendelian_disease flag, not the model name", () =>
   assert.equal(neutral.adjusted, null);
   assert.match(neutral.scope, /say nothing about health/);
   for (const model of ["risk_factor", "pharmacogenomic", "autosomal_dominant"]) {
-    const w = simulatorWords({ mendelian_disease: true, model, penetrance: 0.5, allele: "x" });
+    const w = simulatorWords({ mendelian_disease: true, model, penetrance: 1, allele: "x" });
     assert.match(w.rows[0], /^Child affected/, model);
     assert.equal(w.scope, null, model);
   }

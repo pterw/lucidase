@@ -373,9 +373,9 @@ def test_ar_drawer_labels_the_two_affected_figures_and_states_the_partner_model(
     wait_drawer_open(page)
     first = page.locator("#sim-p-affected").locator("xpath=preceding-sibling::span").inner_text()
     adjusted = page.locator("#sim-effective-risk").locator("xpath=preceding-sibling::span").inner_text()
-    # The two affected figures stay distinct: the first is the chance of two copies, the second is that chance adjusted
-    # for the stated penetrance (said in plain words, not by the name "penetrance").
-    assert "two copies" in first.lower() and "adjusted" not in first.lower(), first
+    # HFE's penetrance is partial, so only the second figure is an affected chance: the first is the chance of two
+    # copies and does not say "affected"; the second is that chance adjusted for the stated penetrance (in plain words).
+    assert first == "Child gets two copies", first
     assert adjusted.lower().startswith("child affected, adjusted") and adjusted != first, adjusted
     note = page.locator("#drawer-partner-model-note")
     assert "unscreened" in note.inner_text().lower()

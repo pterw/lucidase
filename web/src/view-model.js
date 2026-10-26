@@ -638,7 +638,9 @@ const SIM_HOW =
 
 /**
  * The words for the offspring simulator from the gene's inheritance facts ({mendelian_disease, model, penetrance, allele}).
- * Only a Mendelian disease locus may say "affected" or speak of penetrance; any other locus gets copy counts and a line
+ * Only a Mendelian disease locus may say "affected" or speak of penetrance, and a row says "affected" only when its
+ * figure is an affected chance (a recessive first row with partial or unstated penetrance is the genotype chance, so it
+ * says "two copies"); any other locus gets copy counts and a line
  * saying they are not a statement about health (AGENTS.md 4.4). `rows` are the three probability rows in order;
  * `adjusted` is the label of the penetrance-adjusted figure's row, or null when no such row belongs (no disease, a
  * penetrance of 1, or a dominant gene whose first row is already adjusted); `scope` is the non-Mendelian line or null;
@@ -674,9 +676,12 @@ export function simulatorWords(seg) {
     penetranceClause =
       ` The adjusted figure multiplies that chance by the penetrance, the share of people with two copies who are affected (${fmtPct(seg.penetrance)}).`;
   }
+  // The two-copies chance is an affected chance only when penetrance is stated and complete; otherwise it is the
+  // genotype chance, and only the adjusted row (or its "Not available") speaks of being affected.
+  const complete = known && !partial;
   return {
-    rows: ["Child affected (two copies)", "Child is a carrier (one copy)", "Child gets no copy"],
-    adjusted: known && !partial ? null : "Child affected, adjusted (not all with two copies are affected)",
+    rows: [complete ? "Child affected (two copies)" : "Child gets two copies", "Child is a carrier (one copy)", "Child gets no copy"],
+    adjusted: complete ? null : "Child affected, adjusted (not all with two copies are affected)",
     scope: null,
     method: `${SIM_HOW} A child is affected only with two copies.${carrierFrequency}${penetranceClause}`,
   };
