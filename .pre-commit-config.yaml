@@ -39,12 +39,12 @@ repos:
         pass_filenames: false
 
       # The compiled CSS depends on the pages, scripts, stylesheet and the
-      # Tailwind config/input (tools/check_vendored_css.py).
+      # Tailwind config/input/preset (tools/check_vendored_css.py).
       - id: css-fresh
         name: vendored CSS is fresh
         entry: python tools/check_vendored_css.py
         language: system
-        files: ^web/([^/]+\.html|src/.*\.js|src/styles\.css|tailwind\.config\.js|src/tailwind\.input\.css)$
+        files: ^web/([^/]+\.html|src/.*\.js|src/styles\.css|tailwind\.config\.js|src/tailwind\.input\.css|src/ds/lucidase\.preset\.cjs)$
         pass_filenames: false
 
       - id: kb-verify
