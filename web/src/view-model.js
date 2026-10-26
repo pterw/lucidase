@@ -233,6 +233,22 @@ const nonEmptyString = (v) => (typeof v === "string" && v !== "" ? v : null);
 const numberOrNull = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const groupedNumber = (n) => n.toLocaleString("en-US");
 
+/** The display names of the formats the parser reports (qc.format_name), for on-screen text only. */
+const FORMAT_DISPLAY = { "23andme": "23andMe", ancestry: "AncestryDNA", myheritage: "MyHeritage", vcf: "VCF" };
+
+/**
+ * The line under the results heading: "name · format · genome version", plus "made-up example" when the built-in
+ * example button loaded the file. The format shows its display name; a build the file does not state reads "Not
+ * available". On screen only: the Markdown export keeps its own text.
+ */
+export function fileLine(fileName, qc, isExample) {
+  const format = FORMAT_DISPLAY[qc.format_name] ?? qc.format_name;
+  const build = qc.build === "unknown" ? NOT_AVAILABLE : qc.build;
+  const parts = [fileName, format, build];
+  if (isExample) parts.push("made-up example");
+  return parts.join(" · ");
+}
+
 /** A null rate (variants-only VCF) is "Not available". */
 export function formatRate(rate) {
   return rate === null || rate === undefined ? NOT_AVAILABLE : `${(rate * 100).toFixed(2)}%`;

@@ -18,6 +18,7 @@ import {
   csvReport,
   drawerTierText,
   escapeHtml,
+  fileLine,
   fmtPct,
   groupIdForModel,
   groupedReport,
@@ -1141,4 +1142,19 @@ test("the simulator's markup holds no digits in its text, so every figure comes 
   const text = [...html.slice(start, end).matchAll(/>([^<]+)</g)].map((m) => m[1]).join(" ");
   assert.doesNotMatch(text, /\d/, text);
   assert.doesNotMatch(text, /2pq|Hardy|affected probability/i, "no model name or old label in the markup's own text");
+});
+
+test("the file line names the format by its display name, the genome version, and flags the example only when told", () => {
+  assert.equal(fileLine("my.txt", { format_name: "23andme", build: "GRCh37" }, false), "my.txt · 23andMe · GRCh37");
+  assert.equal(fileLine("a.csv", { format_name: "ancestry", build: "GRCh37" }, false), "a.csv · AncestryDNA · GRCh37");
+  assert.equal(fileLine("m.csv", { format_name: "myheritage", build: "GRCh38" }, false), "m.csv · MyHeritage · GRCh38");
+  assert.equal(fileLine("v.vcf", { format_name: "vcf", build: "GRCh38" }, false), "v.vcf · VCF · GRCh38");
+  assert.equal(
+    fileLine("sample-23andme.txt", { format_name: "23andme", build: "GRCh37" }, true),
+    "sample-23andme.txt · 23andMe · GRCh37 · made-up example",
+  );
+});
+
+test("a genome version the file does not state reads Not available in the file line", () => {
+  assert.equal(fileLine("x.txt", { format_name: "23andme", build: "unknown" }, false), "x.txt · 23andMe · Not available");
 });

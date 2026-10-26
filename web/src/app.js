@@ -24,6 +24,7 @@ import {
   drawerTierText,
   escapeHtml,
   fmtPct,
+  fileLine,
   formatRate,
   groupedReport,
   introScopeText,
@@ -48,6 +49,7 @@ const state = {
   watchdog: null,
   workerTimeoutMs: 30000,
   fileName: "",
+  isExample: false, // true only when the built-in example button loaded the file
   qc: null,
   records: [],
   negativeChecks: [],
@@ -318,6 +320,7 @@ function initEventListeners() {
         if (!resp.ok) throw new Error("Could not load sample file.");
         const text = await resp.text();
         state.fileName = "sample-23andme.txt";
+        state.isExample = true; // set by this button only, never inferred from the file's name
         processText(text, state.fileName);
       } catch (err) {
         showAnalysisError(err.message);
@@ -403,8 +406,13 @@ function initEventListeners() {
   });
 }
 
+/**
+ * A file the person chose is read and analysed. It clears the made-up-example flag first, because only the example
+ * button may set it: a real file must never inherit it from an earlier example.
+ */
 function handleFileSelected(file) {
   state.fileName = file.name;
+  state.isExample = false;
   updateProgress(5, `Reading ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`);
 
   const reader = new FileReader();
@@ -632,6 +640,7 @@ function useAnotherFile() {
   closeDrawer();
   Object.assign(state, {
     fileName: "",
+    isExample: false,
     qc: null,
     records: [],
     negativeChecks: [],
@@ -659,10 +668,15 @@ function useAnotherFile() {
   document.getElementById("btn-browse-files").focus({ preventScroll: true });
 }
 
+/**
+ * Fills the file line under the results heading ("name · format · genome version", plus "made-up example" when the
+ * example button loaded it) and the QC "Your file" list from the analysis' QC.
+ */
 function renderQC() {
   const qc = state.qc;
   if (!qc) return;
 
+  document.getElementById("file-line").textContent = fileLine(state.fileName, qc, state.isExample);
   document.getElementById("qc-filename").textContent = state.fileName;
   document.getElementById("qc-format").textContent = `${qc.format_name.toUpperCase()} (${qc.build})`;
   document.getElementById("qc-total-snps").textContent = qc.total_snps.toLocaleString();
