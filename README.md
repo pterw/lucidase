@@ -62,7 +62,7 @@ See [Deployment Options](web/README.md#-deployment-options) and its Local Develo
 
 Rules and gates are in [`AGENTS.md`](AGENTS.md). Working notes are in [`CLAUDE.md`](CLAUDE.md). The audit and its remediation history are in [`AUDIT_LEDGER.md`](AUDIT_LEDGER.md).
 
-The `Gates` workflow (`.github/workflows/gates.yml`) runs the five gates on every pull request, and pull request bodies follow [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). Run `python -m pip install pre-commit` and then `pre-commit install` once per clone.
+The `Gates` workflow (`.github/workflows/gates.yml`) runs the five gates on every pull request and every push to `main`, and pull request bodies follow [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). Run `python -m pip install pre-commit` and then `pre-commit install` once per clone.
 
 `python run.py` serves `web/` on localhost and opens the app (`--port N`, `--no-browser`).
 

@@ -153,8 +153,12 @@ records the provisional look the design system replaced.
   randomness without a fixed seed.
 - A file named `test_*.py` must contain collected tests. Script-style
   "tests" are not allowed.
-- **Scoped runs:** pre-commit runs the unit test files a commit touches,
-  never the whole suite. The full suite is the gate before a PR leaves draft.
+- **Scoped runs:** pre-commit runs the checks a commit touches: the unit
+  tests that import or name a staged file (every unit test when a shared test
+  helper such as tests/conftest.py changes), the node tests when web code
+  changes, and the vendored-CSS and knowledge-base checks when their inputs
+  change. End-to-end tests run only in CI, which runs all five gates on every
+  pull request. The full suite is the gate before a PR leaves draft.
 
 ## 7. Gates (run before every commit)
 

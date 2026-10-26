@@ -135,8 +135,11 @@ Practical notes:
   Version, sha256 and command are in `web/src/vendor/README.md`. Any class change in `web/*.html` or `web/src/**/*.js`
   means regenerating `web/src/vendor/tailwind.css`, or `check_vendored_css.py` fails. CI downloads the pinned binary and
   exports `TAILWIND_CLI`.
-- **Setup:** run `python -m pip install pre-commit`, then `pre-commit install` once per clone. The hooks run only the
-  unit test files a commit touches, never the whole suite; the five gates run in CI. `python run.py` serves `web/` on
+- **Setup:** run `python -m pip install pre-commit`, then `pre-commit install` once per clone. The hooks call `python`
+  from PATH. Pre-commit runs the checks a commit touches: the unit tests that import or name a staged file (every unit
+  test when a shared test helper such as tests/conftest.py changes), the node tests when web code changes, and the
+  vendored-CSS and knowledge-base checks when their inputs change. End-to-end tests run only in CI, which runs all five
+  gates on every pull request. `python run.py` serves `web/` on
   localhost and opens the app (`--port N`, `--no-browser`).
 
 ## 6. Design-system work: what to know before changing the look

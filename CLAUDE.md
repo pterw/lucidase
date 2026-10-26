@@ -70,10 +70,12 @@ python tools/build_canonical_kb.py --verify-only
 python tools/check_vendored_css.py
 ```
 
-CI runs these commands in this order. In order, the gates are called pytest, node, e2e, kb-verify and css-fresh.
-Pre-commit (`python -m pip install pre-commit`, then `pre-commit install` once per clone) runs only the unit test files
-a commit touches, never the whole suite; `pre-commit run --from-ref main --to-ref HEAD` runs the hooks on a branch's
-changes.
+CI runs these commands in this order. The gates are called, in order, pytest, node, e2e, kb-verify and css-fresh.
+Pre-commit (`python -m pip install pre-commit`, then `pre-commit install` once per clone; the hooks call `python` from
+PATH) runs the checks a commit touches: the unit tests that import or name a staged file (every unit test when a shared
+test helper such as tests/conftest.py changes), the node tests when web code changes, and the vendored-CSS and
+knowledge-base checks when their inputs change. End-to-end tests run only in CI, which runs all five gates on every pull
+request. `pre-commit run --from-ref main --to-ref HEAD` runs the hooks on a branch's changes.
 
 Run e2e with a long command timeout (600000 ms). It takes about 2 minutes, longer under load, and a 120 s shell timeout
 kills it mid-run with no summary line. That looks like a failure but is not one.
