@@ -312,7 +312,9 @@ def test_static_claims_come_from_the_kb_manifest(loaded_page):
     text = page.locator("body").inner_text()
     assert not _violations(text, STATIC_CLAIMS), _violations(text, STATIC_CLAIMS)
     badge = page.locator("#kb-provenance-badge")
-    assert badge.inner_text().strip() == f"KB {MANIFEST['release']} · Offline"
+    assert badge.inner_text().strip() == f"KB {MANIFEST['release']}"
+    # The green-dot note style is reserved for the privacy message; the release is plain muted text.
+    assert "lds-localnote" not in (badge.get_attribute("class") or "")
     title = badge.get_attribute("title")
     assert MANIFEST["sha256"][:12] in title
     assert f"{MANIFEST['locus_count']} loci in {MANIFEST['gene_count']} genes" in title

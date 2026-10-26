@@ -579,7 +579,7 @@ export function kbBadge(manifest) {
   const genes = numberOrNull(manifest && manifest.gene_count);
   const scope = loci === null || genes === null ? NOT_AVAILABLE : `${loci} loci in ${genes} genes`;
   return {
-    text: `KB ${release} · Offline`,
+    text: `KB ${release}`,
     title: `Knowledge base release ${release} · sha256 ${sha} · ${scope}`,
   };
 }

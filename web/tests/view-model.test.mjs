@@ -381,7 +381,7 @@ test("escapeHtml makes markup payloads inert, and a record carrying one stays in
 
 test("the KB badge text and title come from the manifest, with no source versions", () => {
   const badge = kbBadge({ release: "2026.10.02", sha256: "b79e6a67bb68c33f43e844dea9af2a3961f5fa3c448cccf98433933be74d2d83", locus_count: 14, gene_count: 12 });
-  assert.equal(badge.text, "KB 2026.10.02 · Offline");
+  assert.equal(badge.text, "KB 2026.10.02");
   assert.equal(badge.title, "Knowledge base release 2026.10.02 · sha256 b79e6a67bb68 · 14 loci in 12 genes");
   for (const bad of ["ClinVar", "dbSNP", "2024-06"]) assert.ok(!badge.text.includes(bad) && !badge.title.includes(bad), bad);
   assert.match(kbBadge({}).text, /Not available/);
