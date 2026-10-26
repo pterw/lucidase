@@ -37,6 +37,9 @@ def test_wildtype_loci_are_not_observed_findings(loaded_page):
     # HFE H63D, VKORC1, SLCO1B1 and CYP2C19 have no alt allele in this file.
     for rsid in ("rs1799945", "rs9923231", "rs4149056", "rs4244285"):
         assert rsid not in observed, f"{rsid} is wild-type or untested but listed as an observed finding"
+    # The table opens on every check, so "not listed as found" is read on the Found tab.
+    show_table(loaded_page)
+    loaded_page.locator("[data-filter='observed']").click()
     for rsid in ("rs1799945", "rs9923231", "rs4149056"):
         expect(_row_for(loaded_page, rsid)).to_have_count(0)
 
@@ -78,6 +81,7 @@ def test_demo_mthfr_het_is_a_variant_reading_listed_under_its_own_word(loaded_pa
     show_table(loaded_page)
     # It is under Unclear, its own word, and not under Found.
     row = _row_for(loaded_page, "rs1801133")
+    loaded_page.locator("[data-filter='observed']").click()
     expect(row).to_have_count(0)
     loaded_page.locator("[data-filter='insufficient']").click()
     expect(row).to_have_count(1)
@@ -107,16 +111,17 @@ def test_results_read_in_the_plain_words(loaded_page):
         expect(page.locator(f"#summary-legend [data-legend-state='{state}'] .lds-statemark:has(.lds-mark-{state})")).to_have_text(word)
     # Filter tabs for the per-state tables.
     show_table(page)
-    for name, word in (("all", "Found"), ("negative", "Not found"), ("gaps", "Not on your chip"), ("insufficient", "Unclear")):
-        expect(page.locator(f"[data-filter='{name}']")).to_have_text(word)
+    for name, word in (("observed", "Found"), ("negative", "Not found"), ("gaps", "Not on your chip"), ("insufficient", "Unclear")):
+        # The tab is the word and then its count (the count is pinned in test_web_adversarial).
+        expect(page.locator(f"[data-filter='{name}']")).to_have_text(re.compile(rf"^{word}\d+$"))
     # Table badges under each state filter.
-    for name in ("all", "negative", "gaps", "insufficient"):
+    for name in ("every", "observed", "negative", "gaps", "insufficient"):
         page.locator(f"[data-filter='{name}']").click()
         for state, word in PLAIN_WORDS.items():
             tags = page.locator(f"#variants-tbody .lds-tag-state-{state}")
             for i in range(tags.count()):
                 expect(tags.nth(i)).to_have_text(word)
-    page.locator("[data-filter='all']").click()
+    page.locator("[data-filter='observed']").click()
     page.locator("#variants-tbody tr", has=page.locator(".lds-tag-state-supported_and_observed")).first.click()
     expect(page.locator("#drawer-coverage-state-badge")).to_have_text("Found")
     expect(page.locator("#drawer-stars")).to_have_text(re.compile(r"\d of 4 review stars|No ClinVar review status"))

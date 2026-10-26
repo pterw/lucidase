@@ -278,7 +278,7 @@ def test_no_sideways_scroll_on_a_phone_and_the_map_stays_in_its_box(browser, bas
 
 
 def test_on_a_phone_the_map_keeps_a_readable_size_and_scrolls_inside_its_own_box(browser, base_url):
-    """At 390px the map keeps its drawn size (labels at least 10px, WCAG-minded tap targets) and scrolls sideways
+    """At 390px the map keeps its drawn size (labels at least 11px, WCAG-minded tap targets) and scrolls sideways
     inside its own box, a named, keyboard-scrollable region, never the page."""
     context = browser.new_context(viewport=NARROW)
     context.set_default_timeout(WAIT_TIMEOUT_MS)
@@ -303,7 +303,7 @@ def test_on_a_phone_the_map_keeps_a_readable_size_and_scrolls_inside_its_own_box
         # Rendered sizes: the SVG's scale times each label's font size, and each mark's halo as drawn.
         scale = box.locator("svg").evaluate("svg => svg.getBoundingClientRect().width / svg.viewBox.baseVal.width")
         sizes = box.locator(".kary-label").evaluate_all("els => els.map((t) => parseFloat(getComputedStyle(t).fontSize))")
-        assert sizes and min(sizes) * scale >= 10, (sizes, scale)
+        assert sizes and min(sizes) * scale >= 11, (sizes, scale)
         halos = box.locator(".kary-locus .kary-halo").evaluate_all(
             "els => els.map((c) => c.getBoundingClientRect().width)"
         )

@@ -11,12 +11,20 @@ Expected values come from the page's own state and the KB, never typed in.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import WAIT_TIMEOUT_MS, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import (
+    WAIT_TIMEOUT_MS,
+    WEB_DIR,
+    open_gene_context,
+    show_table,
+    wait_drawer_closed,
+    wait_drawer_open,
+)
 
 NARROW = {"width": 390, "height": 844}
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -64,7 +72,7 @@ def _record(page, finding_id):
           const r = [...s.records, ...s.negativeChecks, ...s.arrayGaps, ...s.insufficientEvidence]
             .find((x) => x.id === id);
           return { id: r.id, gene: r.gene, topic: s.genes[r.gene].topic, word: r.stateLabel,
-                   limitation: r.limitation, caveats: r.caveats, positionText: r.positionText,
+                   limitation: r.limitation, caveats: r.caveats, positionText: r.positionText, chromosomes: r.chromosomes,
                    mendelian: Boolean(r.segregation && r.segregation.mendelian_disease),
                    drug: r.drug_response, acmg: Boolean(r.acmg_actionable) };
         }""",
@@ -82,8 +90,14 @@ def _expect_notices(page, rec):
 
 
 def _visible_section_titles(page):
+    """Titles of the Inspector sections a reader can see, in document order.
+
+    A title inside a closed <details> still reports client rects and passes checkVisibility although it is not
+    rendered, so the `details:not([open])` clause drops it; the <summary> is the disclosure's own visible title.
+    """
     return page.locator(f"{INSPECTOR} .lds-isec-title").evaluate_all(
-        "els => els.filter((el) => el.getClientRects().length > 0).map((el) => el.textContent.trim())"
+        "els => els.filter((el) => el.getClientRects().length > 0"
+        " && (el.tagName === 'SUMMARY' || !el.closest('details:not([open])'))).map((el) => el.textContent.trim())"
     )
 
 
@@ -225,8 +239,10 @@ def test_header_sections_and_footer_follow_the_record_inspector(loaded_page):
         # Header: the KB topic, then gene · marker · position, then the StateMark with its word.
         expect(page.locator("#drawer-title")).to_have_text(rec["topic"])
         expect(page.locator(f"{INSPECTOR} .lds-inspector-sub")).to_have_text(
-            f"{rec['gene']} · {rec['id']} · {rec['positionText']}"
+            f"{rec['gene']} · {rec['id']} · chromosome {rec['chromosomes']}"
         )
+        # The exact position moved to Technical details; it is not lost.
+        expect(page.locator("#drawer-coord")).to_have_text(rec["positionText"])
         mark = page.locator(f"{INSPECTOR} .lds-inspector-meta .lds-statemark")
         expect(mark).to_have_text(rec["word"])
         expect(mark.locator(".lds-mark")).to_have_count(1)
@@ -241,13 +257,19 @@ def test_header_sections_and_footer_follow_the_record_inspector(loaded_page):
         expected.append("If you have children" if rec["mendelian"] else "Passing it on")
         seen_mendelian |= rec["mendelian"]
         seen_transmission |= not rec["mendelian"]
-        expected += [
-            "Technical details",
-            "Gene and protein context",
+        expected += ["Technical details", "Gene and protein context"]
+        if finding_id == "rs4244285":
+            # First open of the Inspector: the context is closed by default.
+            assert _visible_section_titles(page) == expected
+            open_gene_context(page)
+        else:
+            # A reader who opened the context keeps it open for the next record.
+            expect(page.locator("#drawer-gene-context")).to_have_attribute("open", "")
+        # Open, the disclosure reveals the rest of the gene and protein sections, after its title.
+        assert _visible_section_titles(page) == expected + [
             "Human Protein Atlas expression",
             "Where the protein sits in the cell",
         ]
-        assert _visible_section_titles(page) == expected
 
         # Notices (drug, ACMG) sit at the top of the body, before the first section.
         _expect_notices(page, rec)
@@ -283,6 +305,34 @@ def test_header_sections_and_footer_follow_the_record_inspector(loaded_page):
         wait_drawer_closed(page)
     # The demo covers both simulator headings and a limitation, so each branch above was exercised.
     assert seen_limitation and seen_mendelian and seen_transmission
+
+
+def test_gene_and_protein_context_is_a_keyboard_disclosure_closed_by_default(loaded_page):
+    """The AlphaFold, Ensembl, ENCODE, Human Protein Atlas and subcellular sections sit behind one disclosure that
+    starts closed, opens and closes from the keyboard, and whose contents are hidden until it opens."""
+    page = loaded_page
+    _load_demo(page)
+    _details(page, "rs4244285").click()
+    wait_drawer_open(page)
+
+    details = page.locator("#drawer-gene-context")
+    summary = details.locator("summary")
+    expect(summary).to_have_text("Gene and protein context")
+    expect(details).not_to_have_attribute("open", "")
+    expect(page.locator("#drawer-hpa-tissues")).to_be_hidden()
+    expect(page.locator("#drawer-hpa-subcell")).to_be_hidden()
+    # All three sections live inside the disclosure, not beside it.
+    for section in ("#biotool-alphafold-card", "#biotool-ensembl-card", "#biotool-encode-card"):
+        assert details.locator(section).count() == 1, f"{section} sits outside #drawer-gene-context"
+
+    summary.focus()
+    page.keyboard.press("Enter")
+    expect(details).to_have_attribute("open", "")
+    expect(page.locator("#biotool-alphafold-card")).to_be_visible()
+    expect(page.locator("#drawer-hpa-subcell")).to_be_visible()
+    page.keyboard.press("Space")
+    expect(details).not_to_have_attribute("open", "")
+    expect(page.locator("#drawer-hpa-subcell")).to_be_hidden()
 
 
 def test_the_ligature_shows_the_apoe_record_and_only_the_apoe_record(loaded_page):
@@ -358,7 +408,7 @@ SEG_WORDS = {
         "second": "Child inherits, if the other parent has no variant",
     },
     True: {
-        "sub": "Mendelian inheritance model and recurrence calculation",
+        "sub": "The chance for each child, from your result and the other parent's status you pick.",
         "unscreened": "Risk if the other parent is unscreened (genotype probability)",
         "second": "Risk if the other parent is a carrier (genotype probability)",
     },
@@ -390,18 +440,19 @@ def test_the_simulator_names_the_other_parent_and_speaks_to_the_reader(loaded_pa
     assert seen == {True, False}, "the demo covers both simulator wordings"
 
 
-def test_the_apoe_subtitle_names_the_gene_once_then_its_markers_and_positions(loaded_page):
+def test_the_apoe_subtitle_names_the_gene_once_then_its_markers_and_chromosome(loaded_page):
     page = loaded_page
     _load_demo(page)
     apoe = page.evaluate(
         "() => { const a = window.__lucidase.state.apoe;"
-        " return { id: a.id, gene: a.gene, rsids: a.components.map((c) => c.rsid), positionText: a.positionText }; }"
+        " return { id: a.id, gene: a.gene, rsids: a.components.map((c) => c.rsid), positionText: a.positionText, chromosomes: a.chromosomes }; }"
     )
     assert apoe["rsids"] == ["rs429358", "rs7412"] and apoe["positionText"]
     sub = page.locator(f"{INSPECTOR} .lds-inspector-sub")
     _details(page, apoe["id"]).click()
     wait_drawer_open(page)
-    expect(sub).to_have_text(f"{apoe['gene']} · {' + '.join(apoe['rsids'])} · {apoe['positionText']}")
+    expect(sub).to_have_text(f"{apoe['gene']} · {' + '.join(apoe['rsids'])} · chromosome {apoe['chromosomes']}")
+    expect(page.locator("#drawer-coord")).to_have_text(apoe["positionText"])
     assert sub.inner_text().count(apoe["gene"]) == 1
     expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", apoe["id"])
     # A single-marker record (same selectors): its marker is its id.
@@ -432,3 +483,31 @@ def test_datalist_prose_values_are_sans_and_data_values_mono(loaded_page):
         assert family(sel) == sans, (sel, family(sel))
     for sel in DATA_VALUES:
         assert "input-mono" in family(sel), (sel, family(sel))
+
+
+def test_the_acmg_notice_names_the_manifest_list_and_is_not_a_diagnosis(loaded_page):
+    """The ACMG notice's list name comes from the KB manifest, and it points to a clinician rather than diagnosing."""
+    page = loaded_page
+    _load_demo(page)
+    acmg_id = page.evaluate("() => window.__lucidase.state.records.find((r) => r.acmg_actionable).id")
+    _details(page, acmg_id).click()
+    wait_drawer_open(page)
+    version = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"][
+        "acmg_sf_version"
+    ]
+    notice = page.locator("#drawer-acmg-box")
+    expect(notice).to_be_visible()
+    text = notice.inner_text()
+    assert "not a diagnosis" in text and "clinician" in text
+    assert "ACMG/AMP" not in text, "the notice uses plain words, not the classification criteria's name"
+    assert version in text
+
+    # The CPIC notice carries a plain-word title, not the bare jargon "Drug response".
+    drug_id = page.evaluate("() => window.__lucidase.state.records.find((r) => r.drug_response !== null).id")
+    page.keyboard.press("Escape")
+    wait_drawer_closed(page)
+    _details(page, drug_id).click()
+    wait_drawer_open(page)
+    title = page.locator("#drawer-drug-box .lds-alert-title").inner_text()
+    assert title == "How you may respond to some medicines (CPIC guideline)"
+    assert "Drug response" not in title

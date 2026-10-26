@@ -1,1 +1,2 @@
 tools/fixtures/upstream/real/** -text
+docs/design-system/** -text

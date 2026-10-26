@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karyogram · Lucidase</title>
+  <title>Chromosome map · Lucidase</title>
   <!-- Theme before first paint: the stored override, else the device setting (see src/theme.js) -->
   <script src="src/theme-boot.js"></script>
   <link rel="icon" type="image/svg+xml" href="src/brand/favicon-light.svg" media="(prefers-color-scheme: light)">
@@ -27,8 +27,8 @@
     <div class="lds-wrap lds-header-inner">
       <a href="index.html" class="lds-brand">Lucidase</a>
       <nav class="lds-nav" aria-label="Main">
-        <a id="link-analysis" href="index.html" class="lds-navlink">Analysis</a>
-        <a href="karyogram.html" class="lds-navlink" aria-current="page">Karyogram</a>
+        <a id="link-analysis" href="index.html" class="lds-navlink">Your results</a>
+        <a href="karyogram.html" class="lds-navlink" aria-current="page">Chromosome map</a>
       </nav>
       <div class="lds-header-spacer"></div>
       <span class="lds-localnote">Read in this browser</span>
@@ -37,8 +37,8 @@
     </div>
     <!-- Below 680px the page links move here (src/pages-menu.js) -->
     <nav id="lds-pages" class="lds-wrap lds-pages" aria-label="Main" hidden>
-      <a href="index.html" class="lds-navlink">Analysis</a>
-      <a href="karyogram.html" class="lds-navlink" aria-current="page">Karyogram</a>
+      <a href="index.html" class="lds-navlink">Your results</a>
+      <a href="karyogram.html" class="lds-navlink" aria-current="page">Chromosome map</a>
       <div class="lds-pages-status"><span class="lds-localnote">Read in this browser</span></div>
     </nav>
   </header>
@@ -47,17 +47,23 @@
   <main id="karyogram-main" data-karyogram-state="reference-only" class="lds-wrap flex-1 flex flex-col gap-12 pt-10 pb-16" tabindex="-1">
 
     <section class="flex flex-col gap-5" style="max-width: 720px">
-      <h1 class="lds-display">Where the markers in your file sit</h1>
+      <h1 class="lds-display">Chromosome map</h1>
       <p class="lds-lede">
         Each dot stands for a stretch of chromosome about 4 million DNA letters long. The more markers from your file
         fall in that stretch, the bigger the dot. Coloured rings mark the genes this report checks, with your result
         for each. Your file is read in this browser and never leaves it.
       </p>
       <div class="flex flex-wrap items-center gap-3">
-        <label for="karyogram-file-input" class="sr-only">Choose your DNA file</label>
-        <input type="file" id="karyogram-file-input" class="file-input file-input-bordered file-input-sm" accept=".txt,.csv,.vcf,.tsv,.gz">
-        <span class="lds-meta">or</span>
-        <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary lds-btn-sm">Try a made-up example file</button>
+        <input type="file" id="karyogram-file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
+        <button type="button" id="btn-karyogram-browse" class="lds-btn lds-btn-primary">
+          <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
+        </button>
+        <span id="karyogram-sample-group" class="inline-flex items-center gap-3">
+          <span class="lds-meta">or</span>
+          <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
+        </span>
+        <!-- Shown instead of the two above while a file is on the map -->
+        <button type="button" id="btn-karyogram-clear" class="lds-btn lds-btn-ghost hidden">Clear the file</button>
       </div>
     </section>
 
@@ -86,7 +92,10 @@
 
     <!-- The figure: the dot field belongs here, inside the figure, never as page texture -->
     <section class="border-t border-line pt-7">
-      <div id="karyogram-figure" class="overflow-x-auto"></div>
+      <figure class="flex flex-col gap-3">
+        <div id="karyogram-figure" role="region" aria-label="Chromosome map" tabindex="0"></div>
+        <figcaption id="karyogram-caption" class="lds-meta"></figcaption>
+      </figure>
     </section>
 
     <section class="lds-section" aria-labelledby="key-h">
@@ -125,13 +134,13 @@
         <p class="lds-section-aside">Where each one sits, and your result for it.</p>
       </div>
       <div class="lds-section-body overflow-x-auto">
-        <table class="lds-table">
+        <table class="lds-table lds-table-tight">
           <thead>
             <tr>
+              <th scope="col">Topic</th>
               <th scope="col">Gene</th>
-              <th scope="col">Marker</th>
-              <th scope="col">Position</th>
-              <th scope="col">Result</th>
+              <th scope="col">Chromosome</th>
+              <th scope="col">Your result</th>
             </tr>
           </thead>
           <tbody id="karyogram-loci-body"></tbody>

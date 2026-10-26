@@ -197,7 +197,8 @@ def test_the_table_is_one_click_away_and_then_searchable(loaded_page):
     expect(button).to_have_attribute("aria-controls", "table-panel")
     assert {"lds-btn", "lds-btn-secondary", "lds-btn-sm"} <= set(button.get_attribute("class").split())
     expect(button.locator(".lds-icon.lds-i-table")).to_have_count(1)
-    for hidden in ("#table-panel", "#variants-tbody", "#search-input", "[data-filter='all']"):
+    for hidden in ("#table-panel", "#variants-tbody", "#search-input", "[data-filter='every']"):
+        expect(page.locator(hidden)).to_have_count(1)  # present in the page, so "hidden" is not an absent selector
         expect(page.locator(hidden)).to_be_hidden()
 
     button.click()
@@ -211,6 +212,76 @@ def test_the_table_is_one_click_away_and_then_searchable(loaded_page):
     expect(rows).to_have_count(1)
     expect(rows.first.locator("td").first).to_have_text("rs4244285")
     expect(page.locator("#showing-count")).to_contain_text("Showing 1 of")
+
+
+def test_the_table_has_a_topic_column_after_result_with_each_rows_kb_topic(loaded_page, tmp_path):
+    """Topic sits right after Result, and every row (any result word) shows its gene's KB topic there."""
+    page = loaded_page
+    _load_all_states(page, tmp_path)
+    show_table(page)
+    heads = page.locator("#table-panel thead th").all_text_contents()
+    assert heads.index("Topic") == heads.index("Result") + 1
+    topic_col = heads.index("Topic")
+    expected = {check["id"]: check["topic"] for check in page.evaluate(EXPECTED_JS)["checks"]}
+    cells = page.evaluate(
+        "(col) => Object.fromEntries([...document.querySelectorAll('#variants-tbody tr')]"
+        ".map(r => [r.children[0].textContent.trim(), r.children[col].textContent.trim()]))",
+        topic_col,
+    )
+    assert cells == expected
+    # The empty-row message spans every column, Topic included.
+    page.locator("#search-input").fill("zzz-no-such-marker")
+    expect(page.locator("#variants-tbody td[colspan]")).to_have_attribute("colspan", str(len(heads)))
+
+
+def test_the_table_row_whose_details_are_open_is_the_one_selected_row(loaded_page):
+    """One table row is marked while the Inspector shows it: from the table or the report, across a re-filter, until closed."""
+    page = loaded_page
+    _load_demo(page)
+    show_table(page)
+    selected = page.locator("#variants-tbody tr.is-selected")
+    first, second = "rs4244285", "rs1801133"
+
+    def table_row(rsid):
+        """The table row whose first cell (the marker) is `rsid`."""
+        return page.locator("#variants-tbody tr", has=page.locator(f"td:first-child:text-is('{rsid}')"))
+
+    expect(selected).to_have_count(0)
+    table_row(first).click()
+    wait_drawer_open(page)
+    expect(selected).to_have_count(1)
+    expect(table_row(first)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    # Another record opened from the table moves the mark; it never stays on two rows.
+    table_row(second).click()
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", second)
+    expect(selected).to_have_count(1)
+    expect(table_row(second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    # The table is rebuilt on search; the open record's row is marked again, and the others are not.
+    page.locator("#search-input").fill("rs")
+    expect(selected).to_have_count(1)
+    expect(table_row(second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    page.locator("#search-input").fill(first)
+    expect(selected).to_have_count(0)
+    page.locator("#search-input").fill("")
+    expect(table_row(second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    # Opened from the report instead, the same table row is the marked one.
+    _row(page, first).locator("button.lds-finding-open").click()
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", first)
+    expect(selected).to_have_count(1)
+    expect(table_row(first)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    page.locator("#btn-close-drawer").click()
+    wait_drawer_closed(page)
+    expect(selected).to_have_count(0)
+    # Opened from the keyboard (Enter, then Space on another row), the mark sits on that row alone.
+    for rsid, key in ((first, "Enter"), (second, " ")):
+        table_row(rsid).focus()
+        page.keyboard.press(key)
+        wait_drawer_open(page)
+        expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", rsid)
+        expect(selected).to_have_count(1)
+        expect(table_row(rsid)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+        page.locator("#btn-close-drawer").click()
+        wait_drawer_closed(page)
 
 
 def test_the_open_table_fits_the_page_at_1440_and_390(loaded_page):

@@ -139,6 +139,8 @@ test("the karyogram state labels reuse the analysis labels and add the reference
   assert.equal(labels.not_tested_by_array, "Not on your chip");
   assert.equal(labels.insufficient_evidence, "Unclear");
   for (const text of Object.values(labels)) assert.ok(!/State \d|Observed|Array Gap|Wild-Type/.test(text), text);
+  // With no file the key's one row is the design's wording, not a "location only" phrase.
+  assert.equal(labels.reference, "Genes this report checks");
   labels.reference = "changed";
   assert.notEqual(karyogramStateLabels().reference, "changed");
 });
@@ -207,4 +209,11 @@ test("a known build keeps the plain title and desc", () => {
   const svg = renderKaryogramSvg(sampleLayout([call("2", 5_000_001)]));
   assert.match(svg, /<title id="kary-title">Karyogram \(GRCh37\)<\/title>/);
   assert.doesNotMatch(svg, /genome version is unknown/);
+});
+
+test("every chromosome label is drawn at the 11px floor in the SVG's own units", () => {
+  const svg = renderKaryogramSvg(layoutKaryogram({ kb }));
+  const sizes = [...svg.matchAll(/<text class="kary-label"[^>]* font-size="([\d.]+)"/g)].map((m) => Number(m[1]));
+  assert.equal(sizes.length, 24);
+  assert.deepEqual([...new Set(sizes)], [11]);
 });

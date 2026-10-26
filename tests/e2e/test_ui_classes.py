@@ -77,19 +77,34 @@ def test_apoe_e1_e4_page_shows_no_e4_inheritance_figure(loaded_page):
     expect(apoe_row(page)).to_be_visible()
     assert page.evaluate("() => window.__lucidase.state.apoe.diplotype") == "atypical"
     open_apoe(page)
-    for element in ("#drawer-seg-risk-unscreened", "#drawer-seg-risk-carrier", "#drawer-seg-carrier-prior"):
+    elements = (
+        "#drawer-seg-risk-unscreened",
+        "#drawer-seg-risk-carrier",
+        "#drawer-seg-carrier-prior",
+        "#sim-p-affected",
+        "#sim-p-carrier",
+        "#sim-p-wildtype",
+    )
+    for element in elements:
         assert page.locator(element).inner_text().strip() == "Not available", element
+    for row in ("affected", "carrier", "wildtype"):
+        expect(page.locator(f"#sim-bar-{row}")).to_have_css("transform", "matrix(0, 0, 0, 1, 0, 0)")
     text = page.locator("#drawer-segregation-container").inner_text().lower()
-    assert "inherits the e4 allele" not in text, text
+    assert "inheriting the e4 allele" not in text, text
 
 
-def _acmg_rows(page):
+def _found_acmg_rows(page):
+    """The Found checks that carry the ACMG pill. The table has no ACMG tab: the pill is on the row."""
     show_table(page)
-    page.locator("[data-filter='acmg']").click()
-    return page.locator("#variants-tbody tr")
+    page.locator("[data-filter='observed']").click()
+    return page.locator("#variants-tbody tr", has=page.locator("span.lds-tag-accent", has_text="ACMG"))
 
 
-def test_two_found_variants_of_one_acmg_gene_count_as_one_actionable_gene(page):
+def _report_row(page, rsid):
+    return page.locator(f'#report-groups article.lds-finding[data-finding-id="{rsid}"]')
+
+
+def test_two_found_variants_of_one_acmg_gene_are_two_rows_of_one_group(page):
     # The demo carries HFE C282Y (rs1800562) and H63D (rs1799945), both heterozygous. H63D's evidence is unclear in the
     # KB; with it marked sufficient here, both are Found: two variants, one gene.
     def tampered_kb(route):
@@ -101,22 +116,29 @@ def test_two_found_variants_of_one_acmg_gene_count_as_one_actionable_gene(page):
     goto_ready(page, page.base_url)
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
-    rows = _acmg_rows(page)
+    rows = _found_acmg_rows(page)
     expect(rows).to_have_count(2)
     for rsid in ("rs1800562", "rs1799945"):
         expect(_row(page, rsid).locator(".lds-tag-state-supported_and_observed")).to_have_text("Found")
-    expect(page.locator("#count-acmg")).to_have_text("1")
+        expect(_report_row(page, rsid).locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
+    # One gene, so the two Found checks sit in the same report group, one row each.
+    groups = {_report_row(page, rsid).evaluate("el => el.closest('section').id") for rsid in ("rs1800562", "rs1799945")}
+    assert len(groups) == 1, groups
 
 
-def test_an_unclear_acmg_variant_is_not_counted_as_found(loaded_page):
+def test_an_unclear_acmg_variant_is_not_listed_as_found(loaded_page):
     page = loaded_page
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
-    # Unmodified KB: H63D is Unclear, so the ACMG SF tab, a narrowing of Found, lists only C282Y.
-    rows = _acmg_rows(page)
+    # Unmodified KB: H63D is Unclear, so the Found tab lists only C282Y among the checks with the ACMG pill.
+    rows = _found_acmg_rows(page)
     expect(rows).to_have_count(1)
     expect(_row(page, "rs1800562")).to_have_count(1)
     expect(_row(page, "rs1799945")).to_have_count(0)
-    expect(page.locator("#count-acmg")).to_have_text("1")
+    # The report shows C282Y as Found and H63D as Unclear (a row, but not a finding).
+    expect(_report_row(page, "rs1800562").locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
+    expect(_report_row(page, "rs1799945").locator(":scope > span.lds-mark-insufficient_evidence")).to_have_count(1)
     page.locator("[data-filter='insufficient']").click()
     expect(_row(page, "rs1799945")).to_have_count(1)
+    expect(_row(page, "rs1799945").locator(".lds-tag-state-insufficient_evidence")).to_have_text("Unclear")
+    expect(_row(page, "rs1799945").locator("span.lds-tag-accent", has_text="ACMG")).to_have_count(1)

@@ -67,7 +67,7 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
       }
     }
     g.push(
-      `<text class="kary-label" x="${f(c.x)}" y="${f(binY(c, c.nBins - 1) + LABEL_GAP)}" font-size="10" text-anchor="middle">${esc(c.name)}</text>`,
+      `<text class="kary-label" x="${f(c.x)}" y="${f(binY(c, c.nBins - 1) + LABEL_GAP)}" font-size="11" text-anchor="middle">${esc(c.name)}</text>`,
     );
     g.push("</g>");
     parts.push(g.join(""));

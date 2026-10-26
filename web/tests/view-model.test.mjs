@@ -15,17 +15,21 @@ import {
   REPORT_GROUPS,
   RESULT_WORDS,
   apoeCardModel,
+  chromosomeWords,
   csvReport,
   drawerTierText,
   escapeHtml,
-  foundCategoryCounts,
+  fileLine,
+  fmtPct,
   groupIdForModel,
   groupedReport,
   karyogramStateLabels,
+  introScopeText,
   kbBadge,
   markdownReport,
   partnerModelNote,
   rowsByState,
+  simulatorWords,
   summaryProse,
   testedVariantCounts,
   toViewModel,
@@ -331,6 +335,8 @@ test("the APOE row is one composite identity with both component positions, neve
   assert.equal(apoe.exportId, "rs429358;rs7412");
   assert.deepEqual(apoe.positions.map((p) => p.pos), [45411941, 45412079]);
   assert.equal(apoe.positionText, "chr19:45,411,941 (rs429358) · chr19:45,412,079 (rs7412)");
+  // Both APOE markers sit on chromosome 19, so the Inspector subtitle names it once.
+  assert.equal(chromosomeWords(apoe.chromosomes), "chromosome 19");
   const csv = parseCsv(csvReport([apoe], a.kb.genes))[0];
   assert.equal(csv.rsID, "rs429358;rs7412");
   assert.equal(csv.Position, "45411941;45412079");
@@ -375,17 +381,42 @@ test("escapeHtml makes markup payloads inert, and a record carrying one stays in
 
 test("the KB badge text and title come from the manifest, with no source versions", () => {
   const badge = kbBadge({ release: "2026.10.02", sha256: "b79e6a67bb68c33f43e844dea9af2a3961f5fa3c448cccf98433933be74d2d83", locus_count: 14, gene_count: 12 });
-  assert.equal(badge.text, "KB 2026.10.02 · Offline");
+  assert.equal(badge.text, "KB 2026.10.02");
   assert.equal(badge.title, "Knowledge base release 2026.10.02 · sha256 b79e6a67bb68 · 14 loci in 12 genes");
   for (const bad of ["ClinVar", "dbSNP", "2024-06"]) assert.ok(!badge.text.includes(bad) && !badge.title.includes(bad), bad);
   assert.match(kbBadge({}).text, /Not available/);
 });
 
+test("the intro sentence states the manifest's places and genes in plain words, and no scope without them", () => {
+  // Counts that differ from the live KB, so a literal in the function cannot pass.
+  const text = introScopeText({ locus_count: 7, gene_count: 3, acmg_sf_version: "ACMG SF v3.2" });
+  assert.equal(text, "Lucidase checks 7 places in 3 genes and explains each result in plain words, including what it could not test.");
+  assert.doesNotMatch(text, /ACMG/);
+  assert.equal(
+    introScopeText({ locus_count: 140, gene_count: 99 }),
+    "Lucidase checks 140 places in 99 genes and explains each result in plain words, including what it could not test."
+  );
+  for (const bad of [null, {}, { locus_count: 14 }, { gene_count: 12 }, { locus_count: "14", gene_count: 12 }]) {
+    const unavailable = introScopeText(bad);
+    assert.match(unavailable, /Its tested scope is Not available\.$/, JSON.stringify(bad));
+    assert.doesNotMatch(unavailable, /\d/, JSON.stringify(bad));
+  }
+});
+
+test("the start screen's intro sentence holds no digits in its source, so its numbers can only come from the manifest", () => {
+  const html = readText("../index.html");
+  const match = html.match(/<p id="intro-scope"[^>]*>([^<]*)<\/p>/);
+  assert.ok(match, "no #intro-scope paragraph");
+  assert.doesNotMatch(match[1], /\d/);
+});
+
 test("the other parent's model is stated in words, calling them the other parent", () => {
   assert.equal(
     partnerModelNote("unscreened", 0.25),
-    "Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (25%), under Hardy-Weinberg equilibrium."
+    "Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (25%)."
   );
+  // The model's name belongs to the "How this is worked out" sentence, not to this line.
+  assert.doesNotMatch(partnerModelNote("unscreened", 0.25), /Hardy|2pq|penetrance/i);
   assert.equal(
     partnerModelNote("unscreened", null),
     `Other parent: unscreened. No gnomAD allele frequency is available for this variant, so the figures are ${NOT_AVAILABLE.toLowerCase()}.`
@@ -525,25 +556,7 @@ function apoeWith(diplotype) {
   return toViewModel({ ...apoe, diplotype, interpretation }, kb.genes, {});
 }
 
-test("the Risk filter flag is Risk Factor OR an e3/e4 or e4/e4 APOE diplotype", () => {
-  for (const [diplotype, want] of [["e3/e4", true], ["e4/e4", true], ["e3/e3", false], ["e2/e3", false], ["atypical", false], [null, false]]) {
-    assert.equal(apoeWith(diplotype).riskFilter, want, `APOE ${diplotype}`);
-  }
-  // The diplotype rule stands on its own: it does not rely on the KB category being "Risk Factor".
-  const e4e4 = apoeWith("e4/e4");
-  const uncategorised = toViewModel({ ...e4e4, components: e4e4.components, interpretation: { ...e4e4.interpretation, category: "Carrier" } }, {}, {});
-  assert.equal(uncategorised.riskFilter, true);
-  const a = analyse(DEMO);
-  const riskFactor = a.vms.filter((v) => v.category === "Risk Factor");
-  assert.ok(riskFactor.length > 0, "the demo has Risk Factor rows");
-  assert.ok(riskFactor.every((v) => v.riskFilter === true));
-  const others = a.vms.filter((v) => v.category !== "Risk Factor");
-  assert.ok(others.length > 0 && others.every((v) => v.riskFilter === false));
-});
-
-test("PENDING OWNER DECISION: an e2/e4 APOE row is not under Risk Factors today", () => {
-  // Whether e2/e4 belongs in the Risk filter is an owner decision still open; this pins the current answer.
-  assert.equal(apoeWith("e2/e4").riskFilter, false);
+test("an e2/e4 APOE row still carries the e4 accent", () => {
   assert.equal(apoeWith("e2/e4").apoeE4Accent, true, "the card still carries the e4 accent");
 });
 
@@ -948,27 +961,30 @@ test("rows by state: each check once, under its own state, from the worker's ove
   assert.throws(() => rowsByState([{ ...a.byRsid.rs671, coverage_state: "outside_coverage" }]), /coverage state/);
 });
 
-test("the counts by category count Found checks only, once each, and an ACMG SF gene once", () => {
+test("each report group lists the Found checks once each; an unclear reading is a row but not Found", () => {
   const a = analyse(DEMO);
-  // HFE H63D is a heterozygous Carrier reading with unclear evidence (Tier D): it is not found, so it is not counted.
+  // HFE H63D is a heterozygous Carrier reading with unclear evidence (Tier D): a row, but not a Found one.
   assert.equal(a.byRsid.rs1799945.coverage_state, "insufficient_evidence");
   assert.equal(a.byRsid.rs1799945.sample_observation, "variant_present");
-  assert.equal(a.byRsid.rs1799945.category, "Carrier");
-  assert.deepEqual(foundCategoryCounts(workerLists(a)), { pathogenic: 0, carrier: 2, pgx: 4, risk: 3, acmg: 1 });
-  // The same rule, computed independently from the Found checks.
+  const foundIn = (report, id) => report.find((g) => g.id === id).rows.filter((r) => r.state === "supported_and_observed");
+  const report = groupedReport(workerLists(a), a.kb.genes);
+  assert.ok(report.find((g) => g.id === "carrier").rows.some((r) => r.id === "rs1799945" && r.state === "insufficient_evidence"));
+  assert.ok(!foundIn(report, "carrier").some((r) => r.id === "rs1799945"));
+  // The Found rows per group, computed independently from the Found checks and each gene's inheritance model.
   const found = a.vms.filter((vm) => vm.coverage_state === "supported_and_observed");
-  const n = (category) => found.filter((vm) => vm.category === category).length;
-  assert.deepEqual(foundCategoryCounts(workerLists(a)), {
-    pathogenic: n("Pathogenic"), carrier: n("Carrier"), pgx: n("Pharmacogenomics"), risk: n("Risk Factor"),
-    acmg: new Set(found.filter((vm) => vm.acmg_sf).map((vm) => vm.gene)).size,
-  });
-  // With H63D's evidence sufficient, both HFE variants are Found: two Carrier checks, still one ACMG SF gene.
+  assert.ok(found.length > 0);
+  for (const group of REPORT_GROUPS) {
+    const expected = found.filter((vm) => groupIdForModel(a.kb.genes[vm.gene].inheritance.model) === group.id).map((vm) => vm.id);
+    assert.deepEqual(foundIn(report, group.id).map((r) => r.id).sort(), expected.sort(), group.id);
+  }
+  assert.equal(REPORT_GROUPS.reduce((sum, g) => sum + foundIn(report, g.id).length, 0), found.length);
+  // With H63D's evidence sufficient, both HFE variants are Found: two rows in the Carrier group, one per check.
   const both = analyse(DEMO, (kb) => {
     kb.loci.rs1799945.evidence_sufficiency = "sufficient";
     return kb;
   });
-  assert.equal(both.vms.filter((vm) => vm.gene === "HFE" && vm.coverage_state === "supported_and_observed").length, 2);
-  assert.deepEqual(foundCategoryCounts(workerLists(both)), { pathogenic: 0, carrier: 3, pgx: 4, risk: 3, acmg: 1 });
+  const bothReport = groupedReport(workerLists(both), both.kb.genes);
+  assert.deepEqual(foundIn(bothReport, "carrier").filter((r) => r.gene === "HFE").map((r) => r.id).sort(), ["rs1799945", "rs1800562"]);
 });
 
 // Owner ruling 2026-10-04: a multi-locus finding may rest on an Unclear reading, but it must say so. Each component
@@ -1061,4 +1077,106 @@ test("the Summary sentence says each count in the result words, singular and plu
     assert.throws(() => summaryProse({ ...counts(1, 1, 1, 1, 1), insufficient_evidence: bad }), /insufficient_evidence/);
   }
   assert.throws(() => summaryProse(null), /count/);
+});
+
+// ---- The simulator's words (the design's RecordInspector): Mendelian loci may say "affected", all others only copies.
+const NON_MENDELIAN = { mendelian_disease: false, model: "risk_factor", penetrance: null, allele: "e4" };
+const AR = (penetrance) => ({ mendelian_disease: true, model: "autosomal_recessive", penetrance, allele: "variant" });
+const AD = (penetrance) => ({ mendelian_disease: true, model: "autosomal_dominant", penetrance, allele: "variant" });
+const DISEASE_WORDS = /affected|disease|recurrence|condition|carrier|penetrance|2pq/i;
+
+test("a non-Mendelian locus gets copy-count rows and a scope line, with no disease word anywhere", () => {
+  const w = simulatorWords(NON_MENDELIAN);
+  assert.deepEqual(w.rows, ["Child gets two copies", "Child gets one copy", "Child gets no copy"]);
+  assert.equal(w.adjusted, null, "no penetrance-adjusted row for a locus with no disease");
+  assert.equal(w.scope, "These are chances of inheriting the e4 allele. They say nothing about health.");
+  for (const text of [...w.rows, w.scope, w.method]) assert.doesNotMatch(text, DISEASE_WORDS, text);
+  assert.match(w.method, /^How this is worked out: /);
+  assert.match(w.method, /Hardy-Weinberg/);
+  assert.equal(simulatorWords({ ...NON_MENDELIAN, allele: "c" }).scope.includes("the c allele"), true);
+  assert.match(simulatorWords({ ...NON_MENDELIAN, allele: null }).scope, /the variant allele/);
+});
+
+test("a recessive locus says 'affected' on the first row only when that figure is an affected chance (complete penetrance)", () => {
+  const rows = (first) => [first, "Child is a carrier (one copy)", "Child gets no copy"];
+  const cases = [
+    ["complete", 1, "Child affected (two copies)", false],
+    ["partial", 0.2, "Child gets two copies", true],
+    ["unstated", null, "Child gets two copies", true],
+  ];
+  for (const [name, penetrance, first, hasAdjusted] of cases) {
+    const w = simulatorWords(AR(penetrance));
+    assert.deepEqual(w.rows, rows(first), name);
+    assert.equal(w.adjusted !== null, hasAdjusted, `${name}: the adjusted row is present exactly when the first row is not an affected chance`);
+  }
+});
+
+test("a recessive Mendelian locus shows the adjusted figure when penetrance is below 1, in plain words", () => {
+  for (const penetrance of [0.2, 0.35]) {
+    const w = simulatorWords(AR(penetrance));
+    assert.match(w.adjusted, /^Child affected, adjusted/);
+    assert.doesNotMatch(w.adjusted, /penetrance|2pq|Hardy/i, "the label is plain");
+    assert.equal(w.scope, null);
+    // The penetrance in the sentence is the one passed in, formatted, never a literal.
+    assert.ok(w.method.includes(fmtPct(penetrance)), w.method);
+    assert.match(w.method, /Hardy-Weinberg/);
+    assert.match(w.method, /2 x f x \(1 - f\), where f is the allele frequency/, "the carrier frequency, with its letter defined");
+    assert.doesNotMatch(w.method, /2pq/);
+  }
+  const full = simulatorWords(AR(1));
+  assert.equal(full.adjusted, null, "penetrance 1: the adjusted figure would repeat the first row");
+  assert.doesNotMatch(full.method, /penetrance/i);
+  const unknown = simulatorWords(AR(null));
+  assert.match(unknown.adjusted, /^Child affected, adjusted/, "the row stays, and its value says Not available");
+  assert.match(unknown.method, /No penetrance is stated/);
+});
+
+test("the wording follows the mendelian_disease flag, not the model name", () => {
+  const neutral = simulatorWords({ ...NON_MENDELIAN, model: "autosomal_recessive" });
+  assert.deepEqual(neutral.rows, ["Child gets two copies", "Child gets one copy", "Child gets no copy"]);
+  assert.equal(neutral.adjusted, null);
+  assert.match(neutral.scope, /say nothing about health/);
+  for (const model of ["risk_factor", "pharmacogenomic", "autosomal_dominant"]) {
+    const w = simulatorWords({ mendelian_disease: true, model, penetrance: 1, allele: "x" });
+    assert.match(w.rows[0], /^Child affected/, model);
+    assert.equal(w.scope, null, model);
+  }
+});
+
+test("a dominant Mendelian locus says the affected figure covers one or two copies", () => {
+  assert.deepEqual(simulatorWords(AD(0.5)).rows, ["Child affected (one or two copies, adjusted)", "Child gets one copy", "Child gets no copy"]);
+  assert.equal(simulatorWords(AD(1)).rows[0], "Child affected (one or two copies)");
+  assert.equal(simulatorWords(AD(0.5)).adjusted, null, "the first row is already the adjusted figure");
+  assert.ok(simulatorWords(AD(0.5)).method.includes(fmtPct(0.5)));
+});
+
+test("the simulator's markup holds no digits in its text, so every figure comes from the analysis", () => {
+  const html = readText("../index.html");
+  const start = html.indexOf('id="drawer-segregation-container"');
+  const end = html.indexOf('id="isec-tech"');
+  assert.ok(start > 0 && end > start, "simulator section not found");
+  const text = [...html.slice(start, end).matchAll(/>([^<]+)</g)].map((m) => m[1]).join(" ");
+  assert.doesNotMatch(text, /\d/, text);
+  assert.doesNotMatch(text, /2pq|Hardy|affected probability/i, "no model name or old label in the markup's own text");
+});
+
+test("the file line names the format by its display name, the genome version, and flags the example only when told", () => {
+  assert.equal(fileLine("my.txt", { format_name: "23andme", build: "GRCh37" }, false), "my.txt · 23andMe · GRCh37");
+  assert.equal(fileLine("a.csv", { format_name: "ancestry", build: "GRCh37" }, false), "a.csv · AncestryDNA · GRCh37");
+  assert.equal(fileLine("m.csv", { format_name: "myheritage", build: "GRCh38" }, false), "m.csv · MyHeritage · GRCh38");
+  assert.equal(fileLine("v.vcf", { format_name: "vcf", build: "GRCh38" }, false), "v.vcf · VCF · GRCh38");
+  assert.equal(
+    fileLine("sample-23andme.txt", { format_name: "23andme", build: "GRCh37" }, true),
+    "sample-23andme.txt · 23andMe · GRCh37 · made-up example",
+  );
+});
+
+test("a genome version the file does not state reads Not available in the file line", () => {
+  assert.equal(fileLine("x.txt", { format_name: "23andme", build: "unknown" }, false), "x.txt · 23andMe · Not available");
+});
+
+test("chromosomeWords: one chromosome, several, or none", () => {
+  assert.equal(chromosomeWords("7"), "chromosome 7");
+  assert.equal(chromosomeWords("1;2"), "chromosomes 1 and 2");
+  assert.equal(chromosomeWords(""), null);
 });

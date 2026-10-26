@@ -155,6 +155,14 @@ def wait_drawer_open(page, timeout=WAIT_TIMEOUT_MS):
     _wait_drawer(page, "open", timeout)
 
 
+def open_gene_context(page):
+    """Open the Inspector's "Gene and protein context" disclosure (closed by default) by its summary, as a reader would."""
+    details = page.locator("#drawer-gene-context")
+    if details.get_attribute("open") is None:
+        details.locator("summary").click()
+    expect(details).to_have_attribute("open", "")
+
+
 def apoe_row(page):
     """The APOE FindingRow in the grouped report (its id is the page's own APOE record id, never typed in)."""
     expect(page.locator("#results-section")).to_be_visible()

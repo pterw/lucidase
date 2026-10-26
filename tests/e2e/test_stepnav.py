@@ -229,6 +229,27 @@ def test_narrow_stepnav_shows_the_current_step_and_a_back_link(page):
     _no_horizontal_scroll(page)
 
 
+NAV_LABELS = ["Your results", "Chromosome map"]  # the header links say where they go, on both pages
+
+
+NAV_HREFS = ["index.html", "karyogram.html"]
+
+
+@pytest.mark.parametrize("path", NAV_HREFS)
+def test_header_links_name_their_destination(page, path):
+    """The desktop header links read "Your results" / "Chromosome map" on both pages, each to its own page.
+
+    Only the link to the page being shown carries aria-current="page", so a screen reader announces where you are.
+    """
+    page.goto(f"{page.base_url}/{path}", wait_until="networkidle")
+    links = page.locator("header.lds-header .lds-header-inner > nav.lds-nav a.lds-navlink")
+    assert [t.strip() for t in links.all_inner_texts()] == NAV_LABELS
+    assert [links.nth(i).get_attribute("href") for i in range(2)] == NAV_HREFS
+    assert [links.nth(i).get_attribute("aria-current") for i in range(2)] == [
+        "page" if href == path else None for href in NAV_HREFS
+    ]
+
+
 @pytest.mark.parametrize("path", ["index.html", "karyogram.html"])
 def test_pages_disclosure_at_narrow_width(page, path):
     page.set_viewport_size(NARROW)
@@ -250,7 +271,9 @@ def test_pages_disclosure_at_narrow_width(page, path):
     expect(toggle.locator(".lds-i-x")).to_have_count(1)
     expect(panel).to_be_visible()
     expect(panel).to_have_attribute("aria-label", "Main")
-    assert [t.strip() for t in panel.locator("a.lds-navlink").all_inner_texts()] == ["Analysis", "Karyogram"]
+    panel_links = panel.locator("a.lds-navlink")
+    assert [t.strip() for t in panel_links.all_inner_texts()] == NAV_LABELS
+    assert [panel_links.nth(i).get_attribute("href") for i in range(2)] == NAV_HREFS
     expect(panel.locator("a[aria-current='page']")).to_have_count(1)
     _no_horizontal_scroll(page)
 

@@ -16,7 +16,16 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, goto_ready, open_apoe, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import (
+    DEMO_FILE,
+    WEB_DIR,
+    goto_ready,
+    open_apoe,
+    open_gene_context,
+    show_table,
+    wait_drawer_closed,
+    wait_drawer_open,
+)
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -130,7 +139,7 @@ def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
     show_table(page)
     chunks = [page.locator("body").inner_text()]
-    for name in ("all", "negative", "gaps", "insufficient", "carrier", "pathogenic", "acmg", "pgx", "risk"):
+    for name in ("every", "observed", "negative", "gaps", "insufficient"):
         page.locator(f"[data-filter='{name}']").click()
         chunks.append(page.locator("#variants-tbody").inner_text())
         for i in range(page.locator("#variants-tbody tr").count()):
@@ -139,10 +148,11 @@ def _screens(page) -> str:
                 continue
             row.click()
             wait_drawer_open(page)
+            open_gene_context(page)  # a closed <details> leaves its text out of innerText
             chunks.append(page.locator("#variant-drawer").inner_text())
             page.locator("#btn-close-drawer").click()
             wait_drawer_closed(page)
-    page.locator("[data-filter='all']").click()
+    page.locator("[data-filter='every']").click()
     return "\n".join(chunks)
 
 
@@ -243,7 +253,7 @@ def test_a_kb_that_fails_validation_makes_no_page_claims(page):
     badge = page.locator("#kb-provenance-badge")
     assert MANIFEST["release"] not in badge.inner_text()
     assert MANIFEST["sha256"][:12] not in badge.get_attribute("title")
-    assert "Not available" in page.locator("#hero-scope").inner_text()
+    assert "Not available" in page.locator("#intro-scope").inner_text()
     assert any("schema_version" in e for e in errors), errors
 
 
@@ -312,14 +322,18 @@ def test_static_claims_come_from_the_kb_manifest(loaded_page):
     text = page.locator("body").inner_text()
     assert not _violations(text, STATIC_CLAIMS), _violations(text, STATIC_CLAIMS)
     badge = page.locator("#kb-provenance-badge")
-    assert badge.inner_text().strip() == f"KB {MANIFEST['release']} · Offline"
+    assert badge.inner_text().strip() == f"KB {MANIFEST['release']}"
+    # The green-dot note style is reserved for the privacy message; the release is plain muted text.
+    assert "lds-localnote" not in (badge.get_attribute("class") or "")
     title = badge.get_attribute("title")
     assert MANIFEST["sha256"][:12] in title
     assert f"{MANIFEST['locus_count']} loci in {MANIFEST['gene_count']} genes" in title
     assert "ClinVar" not in title and "dbSNP" not in title
-    hero = page.locator("#hero-scope").inner_text()
-    assert hero.endswith(f"{MANIFEST['locus_count']} loci in {MANIFEST['gene_count']} genes tested")
-    assert MANIFEST["acmg_sf_version"] in hero
+    intro = page.locator("#intro-scope").inner_text()
+    assert intro == (
+        f"Lucidase checks {MANIFEST['locus_count']} places in {MANIFEST['gene_count']} genes and explains each "
+        "result in plain words, including what it could not test."
+    )
     assert page.locator("#redis-status-indicator").count() == 0
 
 
@@ -330,10 +344,11 @@ def test_drawer_footer_shows_the_open_records_tier(loaded_page):
     show_table(page)
     page.locator("#variants-tbody tr").first.click()
     wait_drawer_open(page)
-    tier = page.locator("#drawer-tier-badge").text_content().strip()
-    assert re.fullmatch(r"Tier [A-D]", tier), tier
-    # Sentence case around the KB tier's letter: "Evidence tier A", never "Evidence Tier A".
-    assert page.locator("#drawer-footer-tier").inner_text().strip() == f"Evidence tier {tier[-1]}"
+    # The header carries no second tier tag; the footer shows it once, in sentence case: "Evidence tier A",
+    # never "Evidence Tier A".
+    assert page.locator("#drawer-tier-badge").count() == 0
+    footer = page.locator("#drawer-footer-tier").inner_text().strip()
+    assert re.fullmatch(r"Evidence tier [A-D]", footer), footer
 
 
 def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
@@ -344,6 +359,7 @@ def test_apoe_drawer_names_both_loci_and_positions(loaded_page):
     # The subtitle names the gene once (#drawer-gene), then both markers; the record id stays on #drawer-rsid.
     assert page.locator("#drawer-rsid").inner_text().strip() == "rs429358 + rs7412"
     assert page.locator("#drawer-rsid").get_attribute("data-record-id") == "APOE (rs429358 + rs7412)"
+    assert page.locator("#variant-drawer .lds-inspector-sub").inner_text().endswith("chromosome 19")
     coord = page.locator("#drawer-coord").inner_text()
     assert "45,411,941" in coord and "45,412,079" in coord
     assert "APOE-STATUS" not in page.locator("body").inner_text()
@@ -357,11 +373,15 @@ def test_ar_drawer_labels_the_two_affected_figures_and_states_the_partner_model(
     wait_drawer_open(page)
     first = page.locator("#sim-p-affected").locator("xpath=preceding-sibling::span").inner_text()
     adjusted = page.locator("#sim-effective-risk").locator("xpath=preceding-sibling::span").inner_text()
-    assert "genotype" in first.lower() and "penetrance" not in first.lower(), first
-    assert "penetrance" in adjusted.lower(), adjusted
+    # HFE's penetrance is partial, so only the second figure is an affected chance: the first is the chance of two
+    # copies and does not say "affected"; the second is that chance adjusted for the stated penetrance (in plain words).
+    assert first == "Child gets two copies", first
+    assert adjusted.lower().startswith("child affected, adjusted") and adjusted != first, adjusted
     note = page.locator("#drawer-partner-model-note")
     assert "unscreened" in note.inner_text().lower()
-    assert "Hardy-Weinberg" in note.inner_text() and "gnomAD allele frequency" in note.inner_text()
+    assert "gnomAD allele frequency" in note.inner_text() and "Hardy-Weinberg" not in note.inner_text()
+    method = page.locator("#drawer-sim-method").inner_text()
+    assert method.startswith("How this is worked out") and "Hardy-Weinberg" in method, method
     page.locator(".partner-sim-btn[data-partner='carrier']").click()
     assert "heterozygous" in note.inner_text().lower()
 
@@ -395,5 +415,61 @@ def test_page_claims_say_not_available_when_the_kb_cannot_load(page):
     )
     goto_ready(page, page.base_url)
     page.wait_for_function("() => document.getElementById('kb-provenance-text').textContent.includes('Not available')")
-    assert "Not available" in page.locator("#hero-scope").inner_text()
+    assert "Not available" in page.locator("#intro-scope").inner_text()
     assert not _violations(page.locator("body").inner_text(), STATIC_CLAIMS)
+
+
+CATEGORY_COUNT_IDS = ("count-pathogenic", "count-acmg", "count-pgx", "count-carrier", "count-risk")
+
+
+_VISIBLE_TEXT_OUTSIDE_INSPECTOR_JS = """() => {
+  const skip = document.getElementById('variant-drawer');
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const parts = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const parent = node.parentElement;
+    if (!parent || (skip && skip.contains(parent))) continue;
+    if (['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) continue;
+    if (!parent.checkVisibility({ visibilityProperty: true })) continue;
+    parts.push(node.textContent);
+  }
+  return parts.join(' ');
+}"""
+
+
+def _visible_text_outside_inspector(page):
+    return page.evaluate(_VISIBLE_TEXT_OUTSIDE_INSPECTOR_JS)
+
+
+def test_results_page_has_no_category_counts_and_no_acmg_label(loaded_page):
+    # The category counts disagreed with the report groups (the demo's "Carrier status 2" sat above a group of 3
+    # rows) and spoke in jargon, so the page shows the four groups and no counts of its own.
+    page = loaded_page
+    page.locator("#btn-load-demo").click()
+    expect(page.locator("#results-section")).to_be_visible()
+    for element_id in CATEGORY_COUNT_IDS:
+        assert page.locator(f"#{element_id}").count() == 0, element_id
+    assert page.locator(".lds-counts, .lds-count").count() == 0
+    assert "What was found, by category" not in page.locator("body").text_content()
+    # The ACMG SF list is not the page's vocabulary. Read the whole visible page (header, main, footer) with the
+    # Inspector left out: its per-locus ACMG notice is the one allowed place. The table is opened too, so its tabs
+    # count as visible text.
+    assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
+    show_table(page)
+    assert page.locator("#table-panel").is_visible()
+    assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
+    assert page.locator("#report-groups article.lds-finding").count() > 0
+
+
+def test_start_screen_states_the_scope_in_plain_words_with_no_acmg_chip(loaded_page):
+    # The start screen used to keep a chip "ACMG SF v3.2: 14 loci in 12 genes tested" beside an intro sentence with no
+    # numbers. The one sentence now carries the manifest's two numbers; the list's name is not the page's vocabulary.
+    page = loaded_page
+    page.wait_for_function("() => document.getElementById('kb-provenance-badge').title.includes('sha256')")
+    intro = page.locator("#intro-scope")
+    expect(intro).to_be_visible()
+    numbers = [int(n) for n in re.findall(r"\d+", intro.inner_text())]
+    assert numbers == [MANIFEST["locus_count"], MANIFEST["gene_count"]]
+    assert "acmg" not in page.locator("#section-hero").inner_text().lower()
+    assert "acmg sf" not in _visible_text_outside_inspector(page).lower()
+    assert page.locator("#hero-scope").count() == 0

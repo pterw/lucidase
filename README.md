@@ -46,7 +46,7 @@ Your file is read and analysed in the browser and is never uploaded. The Content
 
 ## Run it
 
-See [Deployment Options](web/README.md#-deployment-options) and its Local Development section in [`web/README.md`](web/README.md).
+See [Deployment Options](web/README.md#deployment-options) and its Local Development section in [`web/README.md`](web/README.md).
 
 ## Repository map
 

@@ -1,0 +1,20 @@
+:root{
+/* Corners: panels/cards are square. Controls keep the source's 2px. Only data dots are round. */
+--radius-panel:0;--radius-control:2px;--radius-badge:2px;--radius-dot:9999px;
+
+--border-w:1px;--border-w-strong:2px;--focus-ring:0 0 0 2px var(--paper),0 0 0 4px var(--accent);
+
+/* Elevation: almost none. Panels sit flat on paper; only overlays lift. */
+--shadow-none:none;
+--shadow-menu:0 2px 6px rgba(14,26,36,.10);
+--shadow-sheet:0 -1px 0 var(--line);
+
+/* The karyogram dot field — for figures and the drop field only, never as page background */
+--pattern-dotfield:radial-gradient(circle at 1px 1px,var(--dot) 1px,transparent 1.4px);
+--pattern-dotfield-size:21px 16.5px;
+
+--z-header:40; /* @kind other */
+--z-menu:30; /* @kind other */
+--z-drawer:50; /* @kind other */
+--z-scrim:45; /* @kind other */
+}

@@ -21,19 +21,21 @@ import {
   acmgVersionLabel,
   apoeCardModel,
   csvReport,
+  chromosomeWords,
   drawerTierText,
   escapeHtml,
   fmtPct,
+  fileLine,
   formatRate,
-  foundCategoryCounts,
   groupedReport,
-  heroScopeText,
+  introScopeText,
   karyogramStateLabels,
   kbBadge,
   markdownReport,
   multiLocusReading,
   partnerModelNote,
   rowsByState,
+  simulatorWords,
   summaryProseParts,
   testedVariantCounts,
   toViewModel,
@@ -48,6 +50,7 @@ const state = {
   watchdog: null,
   workerTimeoutMs: 30000,
   fileName: "",
+  isExample: false, // true only when the built-in example button loaded the file
   qc: null,
   records: [],
   negativeChecks: [],
@@ -64,7 +67,7 @@ const state = {
   karyogram: null,
   pendingAnalysis: null,
   selectedVariant: null,
-  filterCategory: "all",
+  filterCategory: "every",
   searchQuery: "",
   sortBy: "magnitude",
   // The StepNav step (0 choose your file, 1 read your results, 2 save a copy), set by the page phase.
@@ -122,15 +125,15 @@ function setValue(el, value, naText = NOT_AVAILABLE) {
   }
 }
 
-/** The KB claims on the page (release badge, ACMG SF scope) come from the KB manifest, never from literals. */
+/** The KB claims on the page (release badge, the intro sentence's scope) come from the KB manifest, never from literals. */
 function renderKbClaims(manifest) {
   const badge = kbBadge(manifest);
   const badgeEl = document.getElementById("kb-provenance-badge");
   const textEl = document.getElementById("kb-provenance-text");
   if (badgeEl) badgeEl.title = badge.title;
   if (textEl) textEl.textContent = badge.text;
-  const hero = document.getElementById("hero-scope");
-  if (hero) hero.textContent = heroScopeText(manifest);
+  const intro = document.getElementById("intro-scope");
+  if (intro) intro.textContent = introScopeText(manifest);
   document.querySelectorAll("[data-acmg-version]").forEach((el) => {
     el.textContent = acmgVersionLabel(manifest);
   });
@@ -318,6 +321,7 @@ function initEventListeners() {
         if (!resp.ok) throw new Error("Could not load sample file.");
         const text = await resp.text();
         state.fileName = "sample-23andme.txt";
+        state.isExample = true; // set by this button only, never inferred from the file's name
         processText(text, state.fileName);
       } catch (err) {
         showAnalysisError(err.message);
@@ -403,8 +407,13 @@ function initEventListeners() {
   });
 }
 
+/**
+ * A file the person chose is read and analysed. It clears the made-up-example flag first, because only the example
+ * button may set it: a real file must never inherit it from an earlier example.
+ */
 function handleFileSelected(file) {
   state.fileName = file.name;
+  state.isExample = false;
   updateProgress(5, `Reading ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`);
 
   const reader = new FileReader();
@@ -481,6 +490,7 @@ function handleParseComplete(data, karyogram) {
   renderKbClaims(state.manifest);
   renderQC();
   renderSummaryCards();
+  renderTabCounts();
   renderReportGroups();
   renderAssortmentSection();
   setTableOpen(false);
@@ -546,13 +556,17 @@ function findingRowHtml(row) {
 
 /**
  * The FindingRow whose record is in the drawer is the one selected row (none when the drawer is closed), and its
- * marks on the Summary map are the selected marks (APOE has two).
+ * marks on the Summary map are the selected marks (APOE has two). So is its row in the table, when the table lists it
+ * (renderVariantsTable marks the rows it rebuilds from `state.selectedVariant`).
  */
 function markSelectedFinding(id) {
   document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
     const selected = article.dataset.findingId === id;
     article.classList.toggle("is-selected", selected);
     article.querySelector("button.lds-finding-open").setAttribute("aria-expanded", String(selected));
+  });
+  document.querySelectorAll("#variants-tbody tr[data-record-id]").forEach((tr) => {
+    tr.classList.toggle("is-selected", tr.dataset.recordId === id);
   });
   document.querySelectorAll("#summary-map .kary-locus[data-finding-id]").forEach((mark) => {
     const selected = mark.dataset.findingId === id;
@@ -627,6 +641,7 @@ function useAnotherFile() {
   closeDrawer();
   Object.assign(state, {
     fileName: "",
+    isExample: false,
     qc: null,
     records: [],
     negativeChecks: [],
@@ -654,10 +669,15 @@ function useAnotherFile() {
   document.getElementById("btn-browse-files").focus({ preventScroll: true });
 }
 
+/**
+ * Fills the file line under the results heading ("name · format · genome version", plus "made-up example" when the
+ * example button loaded it) and the QC "Your file" list from the analysis' QC.
+ */
 function renderQC() {
   const qc = state.qc;
   if (!qc) return;
 
+  document.getElementById("file-line").textContent = fileLine(state.fileName, qc, state.isExample);
   document.getElementById("qc-filename").textContent = state.fileName;
   document.getElementById("qc-format").textContent = `${qc.format_name.toUpperCase()} (${qc.build})`;
   document.getElementById("qc-total-snps").textContent = qc.total_snps.toLocaleString();
@@ -673,26 +693,10 @@ function renderQC() {
   sexBadge.className = `lds-tag ${NEUTRAL_TAG}`;
 }
 
-/**
- * The result counts are the worker's coverage figures. The category counts sit under "What was found", so the view
- * model counts them over the Found checks only (the worker's summary also counts unclear variant readings).
- */
+/** The result counts are the worker's coverage figures, in the Summary sentence and the legend. */
 function renderSummaryCards() {
   const cov = state.coverageSummary;
   if (!state.summary || !cov) return;
-  const figure = (value) => (typeof value === "number" ? value.toLocaleString() : NOT_AVAILABLE);
-  const set = (id, value) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = figure(value);
-  };
-
-  const found = foundCategoryCounts(listedRows());
-  set("count-pathogenic", found.pathogenic);
-  set("count-carrier", found.carrier);
-  set("count-pgx", found.pgx);
-  set("count-risk", found.risk);
-  set("count-acmg", found.acmg);
-
   // The sentence and the legend say the same figures: the worker's count per result.
   const counts = {
     supported_and_observed: cov.supported_and_observed_count,
@@ -704,6 +708,27 @@ function renderSummaryCards() {
   renderTermParts(document.getElementById("summary-prose"), summaryProseParts(counts));
   renderSummaryLegend(counts);
   renderSummaryMap(state.karyogram);
+}
+
+/**
+ * The table's tabs each say how many checks they list: the worker's count per result, and for "All" their sum (the
+ * checks run). The counts describe the analysis, so searching the table never changes them.
+ */
+function renderTabCounts() {
+  const cov = state.coverageSummary;
+  if (!cov) return;
+  const counts = {
+    observed: cov.supported_and_observed_count,
+    negative: cov.supported_not_observed_count,
+    gaps: cov.not_tested_by_array_count,
+    insufficient: cov.insufficient_evidence_count,
+  };
+  counts.every = counts.observed + counts.negative + counts.gaps + counts.insufficient;
+  document.querySelectorAll("[data-tab-count]").forEach((el) => {
+    const key = el.dataset.tabCount;
+    if (!Object.hasOwn(counts, key)) throw new Error(`no count for table tab "${key}"`);
+    el.textContent = counts[key].toLocaleString();
+  });
 }
 
 // The legend's results in the design system's order (AnalysisScreen), each count keeping the id the tests and the
@@ -816,7 +841,7 @@ function renderAssortmentSection() {
     row.innerHTML = `
       <div class="flex flex-wrap items-center gap-2">
         <span class="lds-h3">Possible compound heterozygote · phase unknown</span>
-        <span class="lds-tag lds-tag-cat-pathogenic">${escapeHtml(ch.significance)}</span>
+        <span class="lds-tag ${NEUTRAL_TAG}">${escapeHtml(ch.significance)}</span>
         <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ch.gene)}</span>
       </div>
       <div class="flex flex-col gap-1">
@@ -841,7 +866,7 @@ function renderAssortmentSection() {
     row.innerHTML = `
       <div class="flex flex-wrap items-center gap-2">
         <span class="lds-h3">Co-occurring variant alleles</span>
-        <span class="lds-tag lds-tag-cat-risk">Multi-locus</span>
+        <span class="lds-tag ${NEUTRAL_TAG}">Multi-locus</span>
         <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
       </div>
       <div class="flex flex-col gap-1">
@@ -904,9 +929,9 @@ const categoryTagClass = (r) =>
 // Evidence tiers are text in one neutral tone: a tier is not a result, so it gets no result colour.
 const TIER_TAG_CLASS = `lds-tag ${NEUTRAL_TAG} lds-data`;
 
-// The table's tabs named by a result word, and the state each lists. Every other tab is a category of Found checks.
+// The table's tabs named by a result word, and the state each lists. The "every" tab lists them all, in this order.
 const STATE_TABS = {
-  all: "supported_and_observed",
+  observed: "supported_and_observed",
   negative: "supported_not_observed",
   gaps: "not_tested_by_array",
   insufficient: "insufficient_evidence"
@@ -917,22 +942,33 @@ function listedRows() {
   return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence];
 }
 
+/**
+ * The KB topic of a record's gene: the plain name the report groups and the Inspector title use.
+ * A gene with no topic reads "Not available" (the KB loader rejects a blank topic, so this is a guard only).
+ */
+function topicOf(record) {
+  const gene = state.genes[record.gene];
+  return gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : "Not available";
+}
+
+/**
+ * Rebuild the "All results as a table" body from the analysis: one row per listed check (interpreted,
+ * negative, array-gap and insufficient-evidence rows), filtered by the active result-word tab and the search
+ * box, with marker, genotype, coverage state, Topic, evidence and category. The Topic column is the gene's
+ * plain-language topic from the KB (state.genes), the same word the report and the Inspector title use.
+ * Throws on an unknown tab key so a bad tab never leaves an empty table behind.
+ */
 function renderVariantsTable() {
+  // The "every" tab lists every check; a tab named by a result word lists exactly the checks with that word.
+  // An unknown key is refused before the table is touched, so it never leaves an empty table behind.
+  const every = state.filterCategory === "every";
+  if (!every && !Object.hasOwn(STATE_TABS, state.filterCategory)) throw new Error(`unknown table tab "${state.filterCategory}"`);
   const tbody = document.getElementById("variants-tbody");
   tbody.innerHTML = "";
-
-  // A tab named by a result word lists exactly the checks with that word; the category tabs narrow the Found ones.
   const byState = rowsByState(listedRows());
-  const dataset = byState[Object.hasOwn(STATE_TABS, state.filterCategory) ? STATE_TABS[state.filterCategory] : "supported_and_observed"];
+  const dataset = every ? Object.values(STATE_TABS).flatMap((s) => byState[s]) : byState[STATE_TABS[state.filterCategory]];
 
   const filtered = dataset.filter(r => {
-    // Category filter for subcategories of the Found checks
-    if (state.filterCategory === "pathogenic" && r.category !== "Pathogenic") return false;
-    if (state.filterCategory === "carrier" && (r.category !== "Carrier" && !r.isCarrier)) return false;
-    if (state.filterCategory === "pgx" && r.category !== "Pharmacogenomics") return false;
-    if (state.filterCategory === "risk" && !r.riskFilter) return false;
-    if (state.filterCategory === "acmg" && !r.acmg_actionable) return false;
-
     // Search query
     if (state.searchQuery) {
       const q = state.searchQuery;
@@ -944,7 +980,9 @@ function renderVariantsTable() {
   });
 
   let countLabel = `Showing ${filtered.length} of ${byState.supported_and_observed.length} findings`;
-  if (state.filterCategory === "negative") {
+  if (every) {
+    countLabel = `Showing ${filtered.length} of ${dataset.length} checks`;
+  } else if (state.filterCategory === "negative") {
     countLabel = `Showing ${filtered.length} loci checked where the variant was not found`;
   } else if (state.filterCategory === "gaps") {
     countLabel = `Showing ${filtered.length} loci your chip did not read`;
@@ -956,7 +994,7 @@ function renderVariantsTable() {
   if (filtered.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td colspan="8" class="py-10 text-ink-muted">No variants match your search or filter.</td>
+      <td colspan="9" class="py-10 text-ink-muted">No variants match your search or filter.</td>
     `;
     tbody.appendChild(tr);
     return;
@@ -965,6 +1003,8 @@ function renderVariantsTable() {
   filtered.forEach(r => {
     const tr = document.createElement("tr");
     tr.tabIndex = 0;
+    tr.dataset.recordId = r.id;
+    tr.classList.toggle("is-selected", state.selectedVariant?.id === r.id);
     tr.setAttribute("aria-label", `${r.gene} ${r.id}`);
     tr.onclick = () => openDrawer(r, tr);
     tr.onkeydown = (event) => {
@@ -1002,6 +1042,7 @@ function renderVariantsTable() {
       </td>
       <td class="lds-data font-bold">${valueHtml(r.genotype)}</td>
       <td>${stateTagHtml(r.coverage_state, r.stateLabel)}</td>
+      <td>${escapeHtml(topicOf(r))}</td>
       <td>
         <span class="flex flex-wrap items-center gap-1.5">${tierBadge} ${categoryBadge}</span>
       </td>
@@ -1035,15 +1076,14 @@ function openDrawer(record, opener = document.activeElement) {
   drawerOpener = (opener instanceof HTMLElement || opener instanceof SVGElement) && opener !== document.body ? opener : null;
 
   // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
-  const gene = state.genes[record.gene];
-  document.getElementById("drawer-title").textContent =
-    gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
+  document.getElementById("drawer-title").textContent = topicOf(record);
   // The subtitle names the gene once, then the markers ("rs429358 + rs7412" for APOE); the record id stays readable.
   const markerEl = document.getElementById("drawer-rsid");
   markerEl.textContent = record.markerText;
   markerEl.dataset.recordId = record.id;
   document.getElementById("drawer-gene").textContent = record.gene;
   setValue(document.getElementById("drawer-genotype"), record.genotype);
+  setValue(document.getElementById("drawer-chrom"), chromosomeWords(record.chromosomes));
   setValue(document.getElementById("drawer-coord"), record.positionText);
   document.getElementById("drawer-significance").textContent = record.significance;
   setValue(
@@ -1054,13 +1094,8 @@ function openDrawer(record, opener = document.activeElement) {
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 
-  // Tier and Coverage State badges
-  const tierBadgeEl = document.getElementById("drawer-tier-badge");
+  // The result's StateMark; the evidence tier is shown once, in the footer.
   const covBadgeEl = document.getElementById("drawer-coverage-state-badge");
-  if (tierBadgeEl) {
-    setValue(tierBadgeEl, record.tier);
-    tierBadgeEl.className = TIER_TAG_CLASS;
-  }
   setValue(document.getElementById("drawer-footer-tier"), drawerTierText(record));
 
   // The result as the design system's StateMark with its word (the shape carries it without colour).
@@ -1302,8 +1337,10 @@ function renderDrawerSegregation(record) {
     priorEl.textContent = fmtPct(seg.af);
   }
   if (penetranceEl) {
-    if (!mendelian) penetranceEl.textContent = "Not applicable";
-    else setValue(penetranceEl, seg.penetrance === null ? null : fmtPct(seg.penetrance));
+    // Penetrance is a disease-model term: the row exists only for a Mendelian disease locus.
+    const penetranceRow = document.getElementById("drawer-seg-penetrance-row");
+    if (penetranceRow) penetranceRow.hidden = !mendelian;
+    if (mendelian) setValue(penetranceEl, seg.penetrance === null ? null : fmtPct(seg.penetrance));
   }
   if (riskUnscreenedEl) setValue(riskUnscreenedEl, headline(outcomeFor("unscreened")));
   if (riskCarrierEl) setValue(riskCarrierEl, headline(outcomeFor(mendelian ? "heterozygous" : "wildtype")));
@@ -1352,53 +1389,55 @@ function updateSimulator(partnerKey, record) {
   renderPartnerNote(partnerKey, seg);
 }
 
-/** Three probability rows and the effective-penetrance line; a null outcome (no genotype) shows "Not available". */
+/**
+ * Three probability rows, the penetrance-adjusted figure where it belongs, and the notes under them; wording comes from
+ * view-model.js simulatorWords. No genotype (null outcome) shows "Not available" under the markup's neutral labels.
+ * The element ids keep the names they had when the rows were "affected / carrier / wild-type": the first row is the
+ * affected figure for a Mendelian locus and "two copies" for any other.
+ */
 function renderSimulator(out, seg) {
-  const rows = [
-    { id: "affected", label: "Affected probability", value: null },
-    { id: "carrier", label: "Carrier probability", value: null },
-    { id: "wildtype", label: "Wild-type (non-carrier)", value: null }
-  ];
-  let effective = null;
-  let effectiveLabel = "Effective penetrance, adjusted";
+  const words = seg ? simulatorWords(seg) : null;
+  const mendelian = Boolean(seg && seg.mendelian_disease);
+  let values = [null, null, null];
+  let adjusted = null;
   let reason = "";
   if (out && !out.available) {
     reason = out.reason;
-  } else if (out && out.kind === "transmission") {
-    rows[0] = { id: "affected", label: out.label, value: out.inherits_allele };
-    rows[1] = { id: "carrier", label: "Inherits one copy", value: out.one_copy };
-    rows[2] = { id: "wildtype", label: "Inherits no copy", value: out.none };
-    effective = "Not applicable";
-    effectiveLabel = "Clinical penetrance";
+  } else if (out && !mendelian) {
+    values = [out.two_copies, out.one_copy, out.none];
   } else if (out && seg.model === "autosomal_recessive") {
     // Two different "affected" figures: the genotype probability (two copies), and that probability times the stated penetrance.
-    rows[0] = { id: "affected", label: "Affected genotype probability (two copies)", value: out.affected };
-    rows[1].value = out.carrier;
-    rows[2].value = out.p0;
-    effectiveLabel = "Affected probability, adjusted for stated penetrance";
-    const adjusted = penetranceAdjustedAffected(out, seg.penetrance);
-    effective = adjusted === null ? null : fmtPct(adjusted);
+    values = [out.affected, out.carrier, out.p0];
+    const figure = penetranceAdjustedAffected(out, seg.penetrance);
+    adjusted = figure === null ? null : fmtPct(figure);
   } else if (out) {
-    rows[0] = { id: "affected", label: "Affected probability (penetrance-adjusted)", value: out.affected };
-    rows[1] = { id: "carrier", label: "Inherits one copy", value: out.p1 };
-    rows[2] = { id: "wildtype", label: "Does not inherit", value: out.p0 };
-    effective = fmtPct(out.affected);
+    values = [out.affected, out.p1, out.p0];
   }
-  for (const row of rows) {
-    const valueEl = document.getElementById(`sim-p-${row.id}`);
-    const barEl = document.getElementById(`sim-bar-${row.id}`);
-    setLabel(valueEl && valueEl.previousElementSibling, out ? row.label : null);
+  ["affected", "carrier", "wildtype"].forEach((id, i) => {
+    const valueEl = document.getElementById(`sim-p-${id}`);
+    const barEl = document.getElementById(`sim-bar-${id}`);
+    setLabel(valueEl && valueEl.previousElementSibling, words ? words.rows[i] : null);
     if (valueEl) {
-      setValue(valueEl, row.value === null ? null : fmtPct(row.value));
+      setValue(valueEl, values[i] === null ? null : fmtPct(values[i]));
       valueEl.title = reason;
     }
-    if (barEl) barEl.style.width = row.value === null ? "0%" : `${Math.min(100, Math.max(0, row.value * 100))}%`;
-  }
+    if (barEl) barEl.style.transform = `scaleX(${values[i] === null ? 0 : Math.min(1, Math.max(0, values[i]))})`;
+  });
+  const adjustedRow = document.getElementById("drawer-sim-adjusted");
   const effEl = document.getElementById("sim-effective-risk");
+  if (adjustedRow) adjustedRow.hidden = !(words && words.adjusted);
   if (effEl) {
-    setLabel(effEl.previousElementSibling, effectiveLabel);
-    setValue(effEl, effective);
+    setLabel(effEl.previousElementSibling, words && words.adjusted ? words.adjusted : null);
+    setValue(effEl, adjusted);
   }
+  // The non-Mendelian line is shown only with figures; the method sentence whenever a genotype exists.
+  const scopeEl = document.getElementById("drawer-sim-scope");
+  if (scopeEl) {
+    scopeEl.textContent = out && out.available && words && words.scope ? words.scope : "";
+    scopeEl.hidden = scopeEl.textContent === "";
+  }
+  const methodEl = document.getElementById("drawer-sim-method");
+  if (methodEl) methodEl.textContent = words ? words.method : "";
 }
 
 function renderDrawerBiotools(record) {
@@ -1447,7 +1486,7 @@ function renderDrawerBiotools(record) {
     const maxTpm = Math.max(...b.tissues.map(([, tpm]) => tpm), 100);
 
     b.tissues.forEach(([tissue, tpm]) => {
-      const pct = Math.round((tpm / maxTpm) * 100);
+      const share = Math.round((tpm / maxTpm) * 100) / 100;
       const row = document.createElement("div");
       row.className = "lds-prob";
       row.innerHTML = `
@@ -1456,7 +1495,7 @@ function renderDrawerBiotools(record) {
           <span>${escapeHtml(tpm.toLocaleString())} TPM</span>
         </div>
         <div class="lds-prob-track lds-prob-track-thin">
-          <div class="lds-prob-bar" style="width: ${pct}%"></div>
+          <div class="lds-prob-bar" style="transform: scaleX(${share})"></div>
         </div>
       `;
       encodeEl.appendChild(row);

@@ -51,7 +51,7 @@ export const RESULT_WORDS = deepFreeze({
 const RECORD_STATES = ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"];
 
 /** The reference-only marker state on the karyogram: the locus has a position but no sample is loaded. */
-const REFERENCE_STATE_LABEL = "Location only (no file loaded)";
+const REFERENCE_STATE_LABEL = "Genes this report checks";
 
 /**
  * Human label per karyogram marker state: the four per-locus coverage states reuse the result words above, plus
@@ -155,23 +155,6 @@ export function rowsByState(viewModels) {
 }
 
 /**
- * The page's "What was found, by category" counts, over the Found checks only: an unclear reading of a variant is
- * not a finding. The categories are the worker's (KB interpretation category); `acmg` counts ACMG SF genes, so two
- * Found variants in one gene count once.
- */
-export function foundCategoryCounts(viewModels) {
-  const found = rowsByState(viewModels).supported_and_observed;
-  const count = (category) => found.filter((vm) => vm.category === category).length;
-  return {
-    pathogenic: count("Pathogenic"),
-    carrier: count("Carrier"),
-    pgx: count("Pharmacogenomics"),
-    risk: count("Risk Factor"),
-    acmg: new Set(found.filter((vm) => vm.acmg_sf).map((vm) => vm.gene)).size,
-  };
-}
-
-/**
  * The Summary sentence (design system ui_kits/web/AnalysisScreen.jsx), from the counts per result: the checks run,
  * Found, Not found, Not on your chip (said only when some check was not on the chip), Unclear, and the markers that
  * were counted but not interpreted. The result words are RESULT_WORDS's, in lower case. `counts` is keyed by
@@ -249,6 +232,22 @@ function reviewStarsText(stars) {
 const nonEmptyString = (v) => (typeof v === "string" && v !== "" ? v : null);
 const numberOrNull = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const groupedNumber = (n) => n.toLocaleString("en-US");
+
+/** The display names of the formats the parser reports (qc.format_name), for on-screen text only. */
+const FORMAT_DISPLAY = { "23andme": "23andMe", ancestry: "AncestryDNA", myheritage: "MyHeritage", vcf: "VCF" };
+
+/**
+ * The line under the results heading: "name · format · genome version", plus "made-up example" when the built-in
+ * example button loaded the file. The format shows its display name; a build the file does not state reads "Not
+ * available". On screen only: the Markdown export keeps its own text.
+ */
+export function fileLine(fileName, qc, isExample) {
+  const format = FORMAT_DISPLAY[qc.format_name] ?? qc.format_name;
+  const build = qc.build === "unknown" ? NOT_AVAILABLE : qc.build;
+  const parts = [fileName, format, build];
+  if (isExample) parts.push("made-up example");
+  return parts.join(" · ");
+}
 
 /** A null rate (variants-only VCF) is "Not available". */
 export function formatRate(rate) {
@@ -413,8 +412,6 @@ export function toViewModel(record, genes, testedCounts = {}) {
     category,
     isCarrier: category === "Carrier",
     apoeE4Accent: ["e4e4", "e4"].includes(apoeAccentKey(record.diplotype)),
-    // The Risk filter: Risk Factor rows plus APOE e3/e4 and e4/e4. Whether e2/e4 joins is an open owner decision.
-    riskFilter: category === "Risk Factor" || record.diplotype === "e3/e4" || record.diplotype === "e4/e4",
     significance: significanceValue ?? state.label,
     significanceValue,
     phenotype,
@@ -557,13 +554,16 @@ export function multiLocusReading(finding, records) {
 
 const ACMG_VERSION_FALLBACK = "ACMG SF";
 
-/** Start-page scope line: the ACMG SF version and tested scope, both from the KB manifest. No emoji (design system). */
-export function heroScopeText(manifest) {
-  const version = nonEmptyString(manifest && manifest.acmg_sf_version) ?? ACMG_VERSION_FALLBACK;
+/**
+ * The start-page intro sentence: the places and genes checked, both from the KB manifest, in plain words. A manifest
+ * that cannot give both numbers makes no claim: the scope reads "Not available".
+ */
+export function introScopeText(manifest) {
   const loci = numberOrNull(manifest && manifest.locus_count);
   const genes = numberOrNull(manifest && manifest.gene_count);
-  if (loci === null || genes === null) return `${version}: tested scope ${NOT_AVAILABLE}`;
-  return `${version}: ${loci} loci in ${genes} genes tested`;
+  const explains = "explains each result in plain words, including what it could not test.";
+  if (loci === null || genes === null) return `Lucidase ${explains} Its tested scope is ${NOT_AVAILABLE}.`;
+  return `Lucidase checks ${loci} places in ${genes} genes and ${explains}`;
 }
 
 /** The ACMG SF version label, from the manifest. */
@@ -579,7 +579,7 @@ export function kbBadge(manifest) {
   const genes = numberOrNull(manifest && manifest.gene_count);
   const scope = loci === null || genes === null ? NOT_AVAILABLE : `${loci} loci in ${genes} genes`;
   return {
-    text: `KB ${release} · Offline`,
+    text: `KB ${release}`,
     title: `Knowledge base release ${release} · sha256 ${sha} · ${scope}`,
   };
 }
@@ -589,6 +589,16 @@ function tierLetter(tier) {
   const match = /^Tier ([A-D])$/.exec(tier);
   if (!match) throw new Error(`unknown evidence tier ${JSON.stringify(tier)}`);
   return match[1];
+}
+
+/**
+ * The Inspector subtitle's chromosome, in words: "chromosome 19", or "chromosomes 1 and 2" when a composite's
+ * markers sit on different ones. `chromosomes` is the record's `;`-joined list; an empty one gives null.
+ */
+export function chromosomeWords(chromosomes) {
+  const names = typeof chromosomes === "string" && chromosomes !== "" ? chromosomes.split(";") : [];
+  if (names.length === 0) return null;
+  return names.length === 1 ? `chromosome ${names[0]}` : `chromosomes ${names.join(" and ")}`;
 }
 
 /**
@@ -616,10 +626,65 @@ export function partnerModelNote(partnerModel, af) {
   if (partnerModel === "unscreened") {
     return af === null || af === undefined
       ? `Other parent: unscreened. No gnomAD allele frequency is available for this variant, so the figures are ${NOT_AVAILABLE.toLowerCase()}.`
-      : `Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (${fmtPct(af)}), under Hardy-Weinberg equilibrium.`;
+      : `Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (${fmtPct(af)}).`;
   }
   if (!Object.hasOwn(OTHER_PARENT_PHRASE, partnerModel)) throw new Error(`unknown partner model ${JSON.stringify(partnerModel)}`);
   return `Other parent: ${OTHER_PARENT_PHRASE[partnerModel]}.`;
+}
+
+const SIM_HOW =
+  "How this is worked out: each parent passes on one of their two copies, chosen at random. " +
+  "An unscreened parent's chance of passing on the variant is its population allele frequency, assuming Hardy-Weinberg equilibrium.";
+
+/**
+ * The words for the offspring simulator from the gene's inheritance facts ({mendelian_disease, model, penetrance, allele}).
+ * Only a Mendelian disease locus may say "affected" or speak of penetrance, and a row says "affected" only when its
+ * figure is an affected chance (a recessive first row with partial or unstated penetrance is the genotype chance, so it
+ * says "two copies"); any other locus gets copy counts and a line
+ * saying they are not a statement about health (AGENTS.md 4.4). `rows` are the three probability rows in order;
+ * `adjusted` is the label of the penetrance-adjusted figure's row, or null when no such row belongs (no disease, a
+ * penetrance of 1, or a dominant gene whose first row is already adjusted); `scope` is the non-Mendelian line or null;
+ * `method` is the one "How this is worked out" sentence, the only place that names the model. Every number in it is the
+ * stated penetrance, formatted.
+ */
+export function simulatorWords(seg) {
+  if (!seg.mendelian_disease) {
+    const allele = nonEmptyString(seg.allele) ?? "variant";
+    return {
+      rows: ["Child gets two copies", "Child gets one copy", "Child gets no copy"],
+      adjusted: null,
+      scope: `These are chances of inheriting the ${allele} allele. They say nothing about health.`,
+      method: SIM_HOW,
+    };
+  }
+  const known = typeof seg.penetrance === "number";
+  const partial = known && seg.penetrance < 1;
+  if (seg.model === "autosomal_dominant") {
+    return {
+      rows: [`Child affected (one or two copies${partial ? ", adjusted" : ""})`, "Child gets one copy", "Child gets no copy"],
+      adjusted: null,
+      scope: null,
+      method:
+        `${SIM_HOW} A child is affected with one or two copies` +
+        (partial ? `, and that chance is multiplied by the penetrance, the share of people with the variant who are affected (${fmtPct(seg.penetrance)}).` : "."),
+    };
+  }
+  const carrierFrequency = " The carrier frequency in the population is 2 x f x (1 - f), where f is the allele frequency.";
+  let penetranceClause = "";
+  if (!known) penetranceClause = " No penetrance is stated, so the adjusted figure is not available.";
+  else if (partial) {
+    penetranceClause =
+      ` The adjusted figure multiplies that chance by the penetrance, the share of people with two copies who are affected (${fmtPct(seg.penetrance)}).`;
+  }
+  // The two-copies chance is an affected chance only when penetrance is stated and complete; otherwise it is the
+  // genotype chance, and only the adjusted row (or its "Not available") speaks of being affected.
+  const complete = known && !partial;
+  return {
+    rows: [complete ? "Child affected (two copies)" : "Child gets two copies", "Child is a carrier (one copy)", "Child gets no copy"],
+    adjusted: complete ? null : "Child affected, adjusted (not all with two copies are affected)",
+    scope: null,
+    method: `${SIM_HOW} A child is affected only with two copies.${carrierFrequency}${penetranceClause}`,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------------------------

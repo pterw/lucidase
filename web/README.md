@@ -1,4 +1,4 @@
-# Lucidase — Zero-Knowledge Clinical Variome Explorer
+# Lucidase web app
 
 See the [root README](../README.md) for an overview of Lucidase.
 
@@ -6,7 +6,7 @@ A privacy-first consumer genomics analysis page supporting **23andMe**, **Ancest
 
 ---
 
-## 🛡️ Privacy Architecture
+## Privacy architecture
 
 **Raw DNA data never leaves your device.**
 
@@ -23,7 +23,7 @@ The one server function is `GET /api/manifest` (`web/api/manifest.js`, Vercel on
 
 ---
 
-## 🧬 Knowledge base and pipeline
+## Knowledge base and pipeline
 
 All curated genomic knowledge lives in **one file**, `web/src/knowledge-base.json`. The page loads it with a JSON module import and validates it against the schema on load (`src/core/kb.js`). No second copy of the data exists in JS or Python source.
 
@@ -67,7 +67,7 @@ Absence of a finding is never reported as absence of risk.
 
 ---
 
-## 🔒 Security Headers (Vercel and Docker)
+## Security headers (Vercel and Docker)
 
 `vercel.json` and `Dockerfile` carry the same CSP. A test compares the `vercel.json` policy with both `add_header Content-Security-Policy` values in the `Dockerfile` (the server-level one that serves `index.html` and the asset-location one). It does not check what a deployed host sends:
 
@@ -83,7 +83,7 @@ Typekit (fonts) is the only external host. daisyUI and the compiled Tailwind CSS
 
 ---
 
-## 🚀 Deployment Options
+## Deployment options
 
 ### 1. Vercel (Recommended)
 
@@ -117,7 +117,7 @@ python -m http.server 8000
 
 ---
 
-## 🧪 Gates, rebuilds
+## Gates, rebuilds
 
 Run these from the repository root before every commit (`AGENTS.md` section 7):
 
@@ -147,7 +147,7 @@ python tools/check_vendored_css.py
 
 ---
 
-## 📊 File Format Support
+## File format support
 
 | Format | Auto-Detection | Allele Merging | Genome Builds |
 |:---|:---|:---|:---|
@@ -160,7 +160,7 @@ An unrecognised format is rejected with a visible error. The parser never guesse
 
 ---
 
-## ⚠️ Known limitations
+## Known limitations
 
 These all fail closed, with a visible error or an explicit state:
 
@@ -180,11 +180,11 @@ These all fail closed, with a visible error or an explicit state:
 
 ## Visual design: the Lucidase design system
 
-The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 19 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
+The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens are vendored unchanged in `src/ds/` (see [`src/ds/README.md`](src/ds/README.md)); `src/styles.css` imports them and holds the daisyUI theme bridge and the design system's components as `lds-*` classes; `tailwind.config.js` uses its preset (`src/ds/lucidase.preset.cjs`). The logo and favicon are in `src/brand/`, and the 17 Lucide icons are served from `src/icons/`, same-origin. The theme follows the device setting; a footer link overrides it, and `src/theme-boot.js` applies the override before first paint. [`../docs/design-handoff.md`](../docs/design-handoff.md) records the provisional look this replaced.
 
 ---
 
-## 🛠️ Developer Tooling: Font Kit Studio
+## Developer tooling: Font Kit Studio
 
 Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studio/` and is **not bundled** in the production clinical app.
 
@@ -193,6 +193,6 @@ Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studi
 
 ---
 
-## 📋 Audit
+## Audit
 
 See [`AUDIT_LEDGER.md`](../AUDIT_LEDGER.md) for the full architecture and ground truth audit log, issue register, and remediation history.

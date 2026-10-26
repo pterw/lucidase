@@ -39,6 +39,11 @@
     --wa: 80.485% 0.1242 80.16; --wac: 17.44% 0.0157 248.74; --er: 72.046% 0.1494 10.13; --erc: 17.44% 0.0157 248.74;
   }
 }
+/* "More contrast" on a dark device with no theme set: ds/colors.css re-declares the dark --line and --ink-muted under
+   :root:not([data-theme="light"]), which outranks ds/base.css's :root rule, so repeat it at that specificity. */
+@media (prefers-contrast: more) {
+  :root:not([data-theme="light"]) { --line: var(--line-strong); --ink-muted: var(--ink); }
+}
 :root,
 [data-theme] {
   /* Square boxes, 2px controls, no press bounce (lucidase.daisyui.js "shared"). */
@@ -145,7 +150,6 @@ button.lds-step-item { cursor: pointer; }
 .lds-i-circle-alert { --lds-icon: url("icons/circle-alert.svg"); }
 .lds-i-triangle-alert { --lds-icon: url("icons/triangle-alert.svg"); }
 .lds-i-info { --lds-icon: url("icons/info.svg"); }
-.lds-i-chevron-down { --lds-icon: url("icons/chevron-down.svg"); }
 .lds-i-moon { --lds-icon: url("icons/moon.svg"); }
 .lds-i-sun { --lds-icon: url("icons/sun.svg"); }
 .lds-i-x { --lds-icon: url("icons/x.svg"); }
@@ -153,7 +157,6 @@ button.lds-step-item { cursor: pointer; }
 .lds-i-file-text { --lds-icon: url("icons/file-text.svg"); }
 .lds-i-table { --lds-icon: url("icons/table.svg"); }
 .lds-i-search { --lds-icon: url("icons/search.svg"); }
-.lds-i-external-link { --lds-icon: url("icons/external-link.svg"); }
 .lds-i-chevron-right { --lds-icon: url("icons/chevron-right.svg"); }
 .lds-i-menu { --lds-icon: url("icons/menu.svg"); }
 .lds-i-arrow-up-right { --lds-icon: url("icons/arrow-up-right.svg"); }
@@ -175,8 +178,6 @@ button.lds-step-item { cursor: pointer; }
 /* Button variant link (design system Button variant="link"): a text link with the button's type and icon gap. */
 .lds-btn-link, .lds-btn-link:hover { height: auto; padding: 0; background: transparent; color: var(--text-link); text-decoration: underline; text-underline-offset: 3px; }
 .lds-btn:disabled, .lds-btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
-.lds-extlink::after { content: ""; flex: none; width: 14px; height: 14px; background-color: currentColor;
-  -webkit-mask: url("icons/external-link.svg") center / contain no-repeat; mask: url("icons/external-link.svg") center / contain no-repeat; }
 .lds-iconbtn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 0;
   background: transparent; color: var(--text-muted); border-radius: var(--radius-control); cursor: pointer; }
 .lds-iconbtn:hover { background: var(--bg-hover); color: var(--text-body); }
@@ -223,6 +224,7 @@ button.lds-step-item { cursor: pointer; }
 .lds-h3 { margin: 0; font: 700 15px/1.3 var(--font-sans); color: var(--text-body); }
 .lds-prose { margin: 0; font: 400 16px/1.55 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
 .lds-meta { font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
+.lds-file-line { margin: 0; font: 400 14px/1.45 var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
 .lds-data { font-family: var(--font-mono); letter-spacing: var(--tracking-mono); }
 
 /* FindingRow: one result in plain words; mark, topic, gene, statement, the limitation (always visible), technical ids.
@@ -254,16 +256,9 @@ button.lds-step-item { cursor: pointer; }
 .lds-ligature-result { text-align: center; font: 400 22px/1.2 var(--font-serif); color: var(--text-body); }
 .lds-ligature-caption { text-align: center; font: 400 13px var(--font-sans); color: var(--text-muted); }
 
-/* Counts: large condensed numbers with a plain label; hairlines, no boxes. */
-.lds-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); column-gap: 24px; border-top: 1px solid var(--border-default); }
-.lds-count { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--border-default); }
-.lds-count-label { display: inline-flex; align-items: center; gap: 8px; font: 700 13px/1.3 var(--font-sans); color: var(--text-body); }
-.lds-count-value { font: 700 30px/1.15 var(--font-condensed); color: var(--text-body); font-variant-numeric: tabular-nums; }
-.lds-count-help { font: 400 13px/1.4 var(--font-sans); color: var(--text-muted); }
-
 /* DataList: label / value pairs. */
 .lds-datalist { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px 24px; margin: 0; }
-.lds-datalist > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lds-datalist > div:not([hidden]) { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .lds-datalist dt { font: 400 13px/1.4 var(--font-sans); color: var(--text-muted); }
 .lds-datalist dd { margin: 0; font: 700 14px/1.45 var(--font-mono); color: var(--text-body); overflow-wrap: anywhere; }
 /* A prose value (the design system DataList's mono: false) is in the sans font; rsIDs, genotypes and numbers stay mono. */
@@ -329,11 +324,6 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-input::placeholder { color: var(--text-subtle); }
 .lds-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Native file input (daisyUI .file-input): sentence case, the secondary button's look. */
-.file-input::file-selector-button { text-transform: none; font: 700 14px var(--font-sans); letter-spacing: var(--tracking-ui);
-  background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
-.file-input { border-color: var(--border-control); background: var(--bg-panel); color: var(--text-body); font: 400 14px var(--font-sans); }
-
 /* Menu (the daisyUI dropdown keeps its focus-within behaviour, which makes the items reachable with Tab). */
 .lds-menu { min-width: 200px; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--bg-panel); border: 1px solid var(--border-default);
   box-shadow: var(--shadow-menu); border-radius: var(--radius-control); }
@@ -345,8 +335,9 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 
 /* FilterTabs: plain text tabs, an accent underline on the current one. */
 .lds-tabs { display: flex; flex-wrap: wrap; gap: 2px 4px; border-bottom: 1px solid var(--border-default); }
-.lds-tab { display: inline-flex; align-items: center; min-height: 36px; padding: 0 10px; border: 0; background: transparent; cursor: pointer;
+.lds-tab { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 10px; border: 0; background: transparent; cursor: pointer;
   font: 700 14px var(--font-sans); color: var(--text-muted); white-space: nowrap; }
+.lds-tab-count { font: 400 12px var(--font-mono); color: var(--text-muted); }
 .lds-tab:hover { color: var(--text-body); }
 .lds-tab.tab-active { color: var(--text-body); box-shadow: inset 0 -2px 0 var(--accent); }
 
@@ -409,10 +400,11 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-prob-head > span:last-child { font: 700 13px var(--font-mono); }
 .lds-prob-track { height: 6px; background: var(--line); overflow: hidden; }
 .lds-prob-track-thin { height: 4px; }
-.lds-prob-bar { height: 100%; background: var(--ink); transition: width var(--dur-base) var(--ease-standard); }
+/* The fill is full width and scaled from the left (transform, not width, so it animates on the compositor). */
+.lds-prob-bar { width: 100%; height: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-slow) var(--ease-standard); }
 
 /* NotAvailable: missing is said, never filled in. */
-.lds-na-text { color: var(--text-subtle); font-style: italic; font-weight: 400; }
+.lds-na-text { color: var(--text-subtle); font-family: var(--font-sans); font-style: italic; font-weight: 400; }
 
 /* 3. Karyogram (karyogram-view.js emits these classes; no inline fills). Bins keep the page's look in the design
    system's colours; curated loci are halo + core in their state colour, hollow for "not detected" and dashed for
@@ -439,7 +431,14 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .kary-swatch.kary-state-supported_not_observed { background: transparent; border: 2px solid var(--kary-fill); }
 .kary-swatch.kary-state-not_tested_by_array { background: transparent; border: 1.75px dashed var(--kary-fill); }
 .kary-swatch.kary-state-insufficient_evidence { background: linear-gradient(90deg, var(--kary-fill) 50%, transparent 50%); border: 1.75px solid var(--kary-fill); }
-#karyogram-figure svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }
+/* On a narrow screen the figure keeps its drawn size and scrolls sideways inside its own box (a named, focusable
+   region in karyogram.html), never the page: 672px is the SVG's own width, one unit per pixel, so chromosome labels
+   stay 11px and each mark's halo 20px across. The ID selector outranks .lds-summary-map, so the minimum is set here. */
+#karyogram-figure { min-width: 0; overflow-x: auto; }
+#karyogram-figure svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; margin: 0 auto; }
+/* The genes table's four columns (Topic, Gene, Chromosome, Your result) fit a 390px phone: under 560px its cells
+   have 4px side padding instead of 8px. */
+@media (max-width: 559px) { .lds-table-tight th, .lds-table-tight td { padding-left: var(--space-1); padding-right: var(--space-1); } }
 
 /* The Summary (design system AnalysisScreen): the serif sentence with the counts, the karyogram scaled to its column
    (as the design system's Karyogram: full width, height auto), and the legend at its 560px measure. Each mark is a
@@ -448,7 +447,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-summary-prose { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
 /* On a narrow screen the map keeps its drawn size and scrolls sideways inside its own box (a named, focusable
    region), never the page: 672px is the SVG's own width (24 chromosome columns of 28 units), one unit per pixel, so
-   chromosome labels stay 10px and each mark's halo 20px across. */
+   chromosome labels stay 11px and each mark's halo 20px across. */
 .lds-summary-map { min-width: 0; overflow-x: auto; }
 .lds-summary-map svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; }
 .lds-summary-legend { max-width: 560px; }

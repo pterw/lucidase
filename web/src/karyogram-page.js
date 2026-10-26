@@ -26,7 +26,10 @@ const LEGEND_ORDER = [
 ];
 
 const labels = karyogramStateLabels();
-const view = { kb: null, layout: null, worker: null, watchdog: null };
+// source: what the map shows now ({ name, isSample }), or null for the reference view; pending: the job in flight.
+// isSample is set only by the built-in sample button, so a user's file that happens to share its name is never
+// called a made-up example.
+const view = { kb: null, layout: null, worker: null, watchdog: null, source: null, pending: null };
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString("en-US");
@@ -38,6 +41,7 @@ function setViewState(name) {
 
 function setInputsDisabled(disabled) {
   $("karyogram-file-input").disabled = disabled;
+  $("btn-karyogram-browse").disabled = disabled;
   $("btn-load-karyogram-sample").disabled = disabled;
 }
 
@@ -62,11 +66,19 @@ function stateOf(layout, rsid) {
   return state;
 }
 
+/**
+ * Draws the key under the figure. With no file it is one row, the reference state ("Genes this report checks")
+ * with the count of all genes; with a file it is four rows, one per result, each with its count and one-line help.
+ * @param {object} layout The karyogram layout; `layout.sample` is absent until a file is read.
+ */
 function renderLegend(layout) {
   const counts = Object.fromEntries(LEGEND_ORDER.map((s) => [s, 0]));
   for (const l of layout.reference.loci) counts[stateOf(layout, l.rsid)] += 1;
+  // Without a file every gene is "reference": one row, not four rows of zero. With a file the four results
+  // are listed and "reference" has no gene left.
+  const shown = LEGEND_ORDER.filter((s) => (layout.sample ? s !== "reference" : s === "reference"));
   // The design system's KaryogramLegend: mark, plain word, count, then the word's one-line help under it.
-  $("karyogram-legend").innerHTML = LEGEND_ORDER.map((s) => {
+  $("karyogram-legend").innerHTML = shown.map((s) => {
     const help = Object.hasOwn(RESULT_WORDS, s) ? RESULT_WORDS[s].help : null;
     return (
       `<li class="flex flex-wrap items-center gap-x-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
@@ -103,19 +115,48 @@ function renderTotals(layout) {
   $("karyogram-totals").classList.remove("hidden");
 }
 
+/** The KB's plain-words name for a gene's topic; "Not available" when the KB has none (the loader rejects a blank topic). */
+function topicOf(gene) {
+  const entry = view.kb.genes[gene];
+  return entry && typeof entry.topic === "string" && entry.topic !== "" ? entry.topic : "Not available";
+}
+
+/** The result cell: the swatch and the plain word with a file; the muted "No file yet" while there is no result. */
+function resultCell(layout, state) {
+  if (!layout.sample) return `<span class="lds-na-text">No file yet</span>`;
+  return (
+    `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
+    `${escapeHtml(labels[state])}</span>`
+  );
+}
+
 function renderLoci(layout) {
   $("karyogram-loci-body").innerHTML = layout.reference.loci
     .map((l) => {
       const state = stateOf(layout, l.rsid);
       return (
         `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
-        `<td class="font-bold">${escapeHtml(l.gene)}</td><td class="lds-data">${escapeHtml(l.rsid)}</td>` +
-        `<td class="lds-data">${escapeHtml(l.chrom)}:${escapeHtml(fmt(l.pos))}</td>` +
-        `<td><span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
-        `${escapeHtml(labels[state])}</span></td></tr>`
+        `<td class="font-bold">${escapeHtml(topicOf(l.gene))}</td><td class="lds-data">${escapeHtml(l.gene)}</td>` +
+        `<td class="lds-data">${escapeHtml(l.chrom)}</td>` +
+        `<td>${resultCell(layout, state)}</td></tr>`
       );
     })
     .join("");
+}
+
+/** One line under the figure: what it is drawn from, in the design system's wording. */
+function renderCaption(layout) {
+  const { build } = layout.geometry;
+  const source = view.source;
+  let text;
+  if (!source || !layout.sample) {
+    text = `No file yet: the chromosomes are drawn from the ${build} reference.`;
+  } else if (layout.sample.density === "unavailable") {
+    text = `${source.name} · no genome version in the file, so the chromosomes are drawn from the ${build} reference.`;
+  } else {
+    text = `${source.name} · ${source.isSample ? "made-up example · " : ""}drawn on ${build} chromosome lengths.`;
+  }
+  $("karyogram-caption").textContent = text;
 }
 
 function renderProvenance(layout) {
@@ -133,6 +174,15 @@ function renderProvenance(layout) {
     `Knowledge base release ${view.kb.manifest.release}.`;
 }
 
+/** The file buttons while the map is the reference; "Clear the file" while a file is on it. */
+function syncFileControls() {
+  const hasFile = view.source !== null;
+  $("btn-karyogram-browse").classList.toggle("hidden", hasFile);
+  $("karyogram-sample-group").classList.toggle("hidden", hasFile);
+  $("btn-karyogram-clear").classList.toggle("hidden", !hasFile);
+}
+
+/** Draws a layout everywhere on the page: figure, key, totals, genes table, provenance and caption. */
 function render(layout) {
   view.layout = layout;
   $("karyogram-figure").innerHTML = renderKaryogramSvg(layout, { stateLabels: labels });
@@ -140,11 +190,15 @@ function render(layout) {
   renderTotals(layout);
   renderLoci(layout);
   renderProvenance(layout);
+  renderCaption(layout);
+  syncFileControls();
 }
 
 /** The one error path: every failure shows #karyogram-error, drops any result and goes back to the reference view. */
 function showError(message) {
   stopWorker();
+  view.source = null;
+  view.pending = null;
   $("karyogram-progress").classList.add("hidden");
   $("karyogram-error-detail").textContent = String(message || "unknown error");
   $("karyogram-error").classList.remove("hidden");
@@ -206,10 +260,13 @@ function startWorker(job, canRetry = true) {
     } else if (data.type === "karyogram") {
       stopWorker();
       try {
+        view.source = view.pending;
         render(data.layout);
         $("karyogram-progress").classList.add("hidden");
         setInputsDisabled(false);
         setViewState("result");
+        // The button that started the load is hidden now; keep the keyboard on the page's one control.
+        $("btn-karyogram-clear").focus();
       } catch (err) {
         showError((err && err.message) || err);
       }
@@ -221,7 +278,9 @@ function startWorker(job, canRetry = true) {
   return worker;
 }
 
-function processText(text, fileName) {
+/** Starts the analysis of one file's text; isSample marks the built-in example so its caption can say so. */
+function processText(text, fileName, isSample = false) {
+  view.pending = { name: fileName, isSample };
   $("karyogram-error").classList.add("hidden");
   setInputsDisabled(true);
   setViewState("loading");
@@ -263,6 +322,7 @@ function fetchSampleText() {
   return Promise.race([load, timeout]).finally(() => clearTimeout(timer));
 }
 
+/** Loads the built-in made-up example through the same path as a chosen file, flagged as the example. */
 async function loadSample() {
   try {
     $("karyogram-error").classList.add("hidden");
@@ -271,10 +331,21 @@ async function loadSample() {
     setViewState("loading");
     $("karyogram-progress").classList.remove("hidden");
     updateProgress(10, "Loading the example file...");
-    processText(await fetchSampleText(), SAMPLE_NAME);
+    processText(await fetchSampleText(), SAMPLE_NAME, true);
   } catch (err) {
     showError((err && err.message) || err);
   }
+}
+
+/** Back to the reference view: nothing of the file stays on the page; focus goes to "Choose your DNA file". */
+function clearFile() {
+  stopWorker();
+  view.source = null;
+  view.pending = null;
+  render(layoutKaryogram({ kb: view.kb }));
+  setViewState("reference-only");
+  setInputsDisabled(false);
+  $("btn-karyogram-browse").focus();
 }
 
 async function initPage() {
@@ -290,7 +361,15 @@ async function initPage() {
     if (e.target.files.length > 0) handleFileSelected(e.target.files[0]);
     fileInput.value = "";
   });
+  $("btn-karyogram-browse").addEventListener("click", () => fileInput.click());
   $("btn-load-karyogram-sample").addEventListener("click", loadSample);
+  $("btn-karyogram-clear").addEventListener("click", () => {
+    try {
+      clearFile();
+    } catch (err) {
+      showError((err && err.message) || err);
+    }
+  });
   try {
     view.kb = await loadKnowledgeBase();
     render(layoutKaryogram({ kb: view.kb }));

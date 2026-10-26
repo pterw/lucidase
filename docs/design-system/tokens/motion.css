@@ -1,0 +1,14 @@
+:root{
+--ease-standard:cubic-bezier(.25,1,.5,1); /* @kind other */
+--ease-in-out:cubic-bezier(.4,0,.2,1); /* @kind other */
+--dur-instant:100ms; /* @kind other */
+--dur-fast:150ms; /* @kind other */
+--dur-base:200ms; /* @kind other */
+--dur-slow:240ms; /* @kind other */
+}
+@media (prefers-reduced-motion: reduce){:root{
+--dur-instant:0ms; /* @kind other */
+--dur-fast:0ms; /* @kind other */
+--dur-base:0ms; /* @kind other */
+--dur-slow:0ms; /* @kind other */
+}}
