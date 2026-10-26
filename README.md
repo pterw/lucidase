@@ -62,6 +62,10 @@ See [Deployment Options](web/README.md#-deployment-options) and its Local Develo
 
 Rules and gates are in [`AGENTS.md`](AGENTS.md). Working notes are in [`CLAUDE.md`](CLAUDE.md). The audit and its remediation history are in [`AUDIT_LEDGER.md`](AUDIT_LEDGER.md).
 
+The `Gates` workflow (`.github/workflows/gates.yml`) runs the five gates on every pull request, and pull request bodies follow [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). Run `python -m pip install pre-commit` and then `pre-commit install` once per clone.
+
+`python run.py` serves `web/` on localhost and opens the app (`--port N`, `--no-browser`).
+
 ## About the name
 
 Lucidase is *lucid* plus *-ase*, the enzyme suffix, as in Promethease. The arch from the c to the dot of the i in the wordmark is a ligature, and "ligature" and "ligase", the enzyme that joins DNA strands, share a root. The dot field in the banner is a stylised karyogram.

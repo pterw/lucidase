@@ -10,8 +10,8 @@ state_of_main: 745b147            # merge of PR #5 (design-system reskin); PRs #
 open_prs: design-system PR 2 (draft, branch feat/design-system-structure)
 next_work: owner review of PR 2 and its "Decisions to review"
 gates: 5 commands, all must pass before any commit (section 5)
-ci: none                          # the local gates are the check
-platform_tested: Windows 11, Python 3.13.3, Node 24, Tailwind CLI 3.4.17, Playwright bundled Chromium
+ci: Gates                         # .github/workflows/gates.yml, on every pull request and push to main
+platform_tested: Windows 11, Python 3.13.3, Node 24, Tailwind CLI 3.4.17, Playwright bundled Chromium; CI runs on Ubuntu with requirements-ci.txt
 ```
 
 ---
@@ -113,6 +113,9 @@ python tools/build_canonical_kb.py --verify-only
 python tools/check_vendored_css.py
 ```
 
+CI (the `Gates` workflow) runs these commands in this order. The gates are called pytest, node, e2e, kb-verify and
+css-fresh.
+
 Results on the design-system PR 2 branch (`feat/design-system-structure`), from the last full run:
 - pytest: 946 passed, 35 subtests;
 - node: 347 passed, fail 0;
@@ -130,7 +133,11 @@ Practical notes:
   holds. Tests must never assert on working-tree line endings.
 - **The Tailwind CLI is not committed.** Put `tailwindcss` v3.4.17 at `bin/tailwindcss.exe` (or `bin/tailwindcss`).
   Version, sha256 and command are in `web/src/vendor/README.md`. Any class change in `web/*.html` or `web/src/**/*.js`
-  means regenerating `web/src/vendor/tailwind.css`, or `check_vendored_css.py` fails.
+  means regenerating `web/src/vendor/tailwind.css`, or `check_vendored_css.py` fails. CI downloads the pinned binary and
+  exports `TAILWIND_CLI`.
+- **Setup:** run `python -m pip install pre-commit`, then `pre-commit install` once per clone. The hooks run only the
+  unit test files a commit touches, never the whole suite; the five gates run in CI. `python run.py` serves `web/` on
+  localhost and opens the app (`--port N`, `--no-browser`).
 
 ## 6. Design-system work: what to know before changing the look
 
@@ -210,7 +217,7 @@ The rest of this section describes the provisional stack it replaced, kept for r
 - **TDD with evidence:** write the failing test first, see it fail, then fix. A new test must fail if the hunk it
   guards is reverted.
 - **PRs:** merge with a merge commit (not squash), so branches that build on each other keep their shared history.
-  The owner merges.
+  The owner merges. The PR body follows `.github/PULL_REQUEST_TEMPLATE.md`.
 - **Never** commit caches, ad-hoc screenshots, downloaded binaries (`bin/` is git-ignored) or `canonical_variome.db`.
 
 ## 8. Open items (from `AUDIT_LEDGER.md`)
