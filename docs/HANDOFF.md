@@ -6,9 +6,9 @@ self-contained. Read it top to bottom once. After that, use it as a reference.
 ```yaml
 repo: pterw/lucidase              # private; formerly "genomepulse"; GitHub redirects old URLs
 default_branch: main
-state_of_main: 745b147            # merge of PR #5 (design-system reskin); PRs #1, #3, #2 and #5 are merged
-open_prs: design-system PR 2 (draft, branch feat/design-system-structure)
-next_work: owner review of PR 2 and its "Decisions to review"
+state_of_main: 481b719            # PRs #1, #3, #2, #5, #6 (design-system PR 2, 34acbe2) and #8 are merged
+open_prs: PR #7 (the design-system gap work, branch fix/ds-gaps); design-system PR 2 (#6) is merged
+next_work: owner review of PR #7; the PR 2 "Decisions to review" list stays open for the owner
 gates: 5 commands, all must pass before any commit (section 5)
 ci: Gates                         # .github/workflows/gates.yml, on every pull request and push to main
 platform_tested: Windows 11, Python 3.13.3, Node 24, Tailwind CLI 3.4.17, Playwright bundled Chromium; CI runs on Ubuntu with requirements-ci.txt
@@ -117,7 +117,7 @@ python tools/check_vendored_css.py
 CI (the `Gates` workflow) runs these commands in this order. The gates are called pytest, node, e2e, kb-verify and
 css-fresh.
 
-Results on the design-system PR 2 branch (`feat/design-system-structure`), from the last full run:
+Results on the design-system PR 2 branch (`feat/design-system-structure`, merged as #6), from the last full run:
 - pytest: 946 passed, 35 subtests;
 - node: 347 passed, fail 0;
 - e2e: 170 passed;
