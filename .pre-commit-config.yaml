@@ -51,5 +51,5 @@ repos:
         name: knowledge base verifies
         entry: python tools/build_canonical_kb.py --verify-only
         language: system
-        files: ^(tools/curation/|tools/fixtures/|tools/build_canonical_kb\.py$|web/src/knowledge-base\.json$)
+        files: ^(tools/curation/|tools/fixtures/|tools/(build_canonical_kb|coverage_taxonomy|source_adapters|variome_models)\.py$|web/src/knowledge-base\.json$)
         pass_filenames: false
