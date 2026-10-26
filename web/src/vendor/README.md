@@ -8,7 +8,9 @@ The page loads no third-party code. Both stylesheets are served from this direct
 | `tailwind.css` | Tailwind CSS 3.4.17 (generated, minified) | compiled from `web/tailwind.config.js` and `web/src/tailwind.input.css` | changes whenever classes in `index.html`, `karyogram.html` or `src/**/*.js` change |
 
 The Tailwind standalone CLI v3.4.17 is not committed. Put it at `bin/tailwindcss.exe` (or `bin/tailwindcss`);
-its sha256 for the Windows build is `67f1c5e3f5a03406a7bf5badf5ada09b79f3ae78ec43450c15f7e983068da346`.
+its sha256 for the Windows build is `67f1c5e3f5a03406a7bf5badf5ada09b79f3ae78ec43450c15f7e983068da346`, and for the
+linux-x64 build (the one CI downloads and pins in `.github/workflows/gates.yml`) it is
+`7d24f7fa191d2193b78cd5f5a42a6093e14409521908529f42d80b11fde1f1d4`.
 Download: https://github.com/tailwindlabs/tailwindcss/releases/tag/v3.4.17
 
 ## Link order in index.html (do not reorder)

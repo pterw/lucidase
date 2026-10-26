@@ -153,6 +153,12 @@ records the provisional look the design system replaced.
   randomness without a fixed seed.
 - A file named `test_*.py` must contain collected tests. Script-style
   "tests" are not allowed.
+- **Scoped runs:** pre-commit runs the checks a commit touches: the unit
+  tests that import or name a staged file (every unit test when a shared test
+  helper such as tests/conftest.py changes), the node tests when web code
+  changes, and the vendored-CSS and knowledge-base checks when their inputs
+  change. End-to-end tests run only in CI, which runs all five gates on every
+  pull request. The full suite is the gate before a PR leaves draft.
 
 ## 7. Gates (run before every commit)
 
@@ -163,6 +169,9 @@ python -m pytest tests/e2e -q -p no:cacheprovider
 python tools/build_canonical_kb.py --verify-only
 python tools/check_vendored_css.py
 ```
+
+CI (the `Gates` workflow) runs the same five commands in this order on every
+pull request; `pre-commit` runs the scoped subset.
 
 `--verify-only` rebuilds the KB in memory and fails if the result differs
 from the committed `web/src/knowledge-base.json`. That makes the build

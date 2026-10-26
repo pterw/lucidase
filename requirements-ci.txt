@@ -1,0 +1,9 @@
+# Pinned installs for CI: exactly what the five gates import (pytest, playwright, and the desktop stack the unit tests load).
+pytest==9.0.2
+playwright==1.62.0
+numpy==2.5.3
+pandas==3.0.3
+scikit-learn==1.9.1
+biopython==1.88
+networkx==3.6.1
+matplotlib==3.11.2
