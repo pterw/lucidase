@@ -147,7 +147,7 @@ Practical notes:
 
 **Status (2026-10-04).** The owner's **Lucidase design system** now owns the look; it superseded the provisional
 UI and ruling 15's font mapping. PR 1 (#5, merged) applied it on the existing DOM and view-model wording; PR 2
-(branch `feat/design-system-structure`) brings its structure: grouped report, plain result words in the view model
+(#6, merged) brought its structure: grouped report, plain result words in the view model
 and exports, Summary karyogram, docked Inspector, StepNav, glossary. See `web/src/ds/README.md` and the "Visual design" rules in `AGENTS.md` and `CLAUDE.md`.
 The rest of this section describes the provisional stack it replaced, kept for reference.
 
@@ -298,7 +298,8 @@ regression test for `_vcf_alleles` in `genomic_parser.py` is now `tests/test_vcf
 - The PR 2 "Decisions to review" list (glossary drafts, breakpoints, APOE map marks and others), in that PR's body.
 - The UI tagline.
 - The production domain in the Adobe Fonts kit `gfe3vcu`. A kit serves its fonts only to the domains listed in it, so
-  the owner must add the production domain there; until then the live site shows the fallback fonts. The kit is the
+  the owner must add the production domain there; as far as this repository records, it is not in the kit's domain list, so until
+  then the live site would fall back to the system fonts. The kit is the
   owner's, so nobody else adds it. Local and preview hosts may need the same.
 - The Vercel project `name`, and a trademark search for "Lucidase".
 - Whether AlphaGenome predictions belong in the KB. The only acceptable form is build time, on curated reference
@@ -335,4 +336,4 @@ syntax error, and it reported fabricated clinical evidence. **PR #1** made it re
 karyogram page: pinned UCSC hg19 and hg38 geometry in the KB, a deterministic synthetic sample, a pure layout and SVG
 view, the page and worker action, a whole-PR review in four areas, and plain-language copy. All three are merged at
 `30602b2`. **PR #5** applied the owner's Lucidase design system on the existing DOM (`745b147`). Design-system **PR 2**
-(`feat/design-system-structure`) brings its structure and closed the last open audit items (P1-091, P2-018, P2-019).
+(**#6**, merged) brought its structure and closed the last open audit items (P1-091, P2-018, P2-019).
