@@ -9,7 +9,7 @@ mapping (see `CLAUDE.md`).
 | `colors.css`, `typography.css`, `spacing.css`, `shape.css`, `motion.css`, `base.css` | `tokens/*.css` | none (copied unchanged) |
 | `lucidase.preset.cjs` | `tailwind/lucidase.preset.js` | the differences listed under "Recorded differences" below |
 | `../brand/*.svg` | `assets/logo/` (favicon, lockup, wordmark; light and dark) | none |
-| `../icons/*.svg` | Lucide `lucide-static@0.469.0` (ISC, `../icons/LICENSE`), the set the design system's `Icon` names | none; 19 icons, served same-origin instead of from a CDN |
+| `../icons/*.svg` | Lucide `lucide-static@0.469.0` (ISC, `../icons/LICENSE`), the set the design system's `Icon` names | none; 17 icons, served same-origin instead of from a CDN |
 
 Recorded differences (`web/tests/ds-reference.test.mjs` asserts exactly these and nothing else):
 - The six token CSS files: none, byte-for-byte equal after line endings.

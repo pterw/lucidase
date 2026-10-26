@@ -40,3 +40,15 @@ def test_every_vendored_svg_has_a_rule():
     rules = set(_rules().values())
     unused = sorted(p.stem for p in ICONS.glob("*.svg") if p.stem not in rules)
     assert not unused, f"vendored icons with no lds-i-* rule: {unused}"
+
+
+def test_every_vendored_icon_is_drawn_by_a_page():
+    """An icon whose class no page or script uses is dead weight: its rule and SVG ship but nothing draws it.
+
+    The class must appear in web/ outside styles.css (where it is only defined), so removing the last use of an
+    icon fails here until the icon and its rule go too.
+    """
+    sources = [*WEB.glob("*.html"), *(p for p in (WEB / "src").rglob("*.js") if "vendor" not in p.parts)]
+    used = {name for path in sources for name in USE.findall(path.read_text(encoding="utf-8"))}
+    unused = sorted(set(_rules()) - used)
+    assert not unused, f"icons vendored but never drawn: {unused}"
