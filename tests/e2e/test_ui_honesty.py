@@ -359,11 +359,15 @@ def test_ar_drawer_labels_the_two_affected_figures_and_states_the_partner_model(
     wait_drawer_open(page)
     first = page.locator("#sim-p-affected").locator("xpath=preceding-sibling::span").inner_text()
     adjusted = page.locator("#sim-effective-risk").locator("xpath=preceding-sibling::span").inner_text()
-    assert "genotype" in first.lower() and "penetrance" not in first.lower(), first
-    assert "penetrance" in adjusted.lower(), adjusted
+    # The two affected figures stay distinct: the first is the chance of two copies, the second is that chance adjusted
+    # for the stated penetrance (said in plain words, not by the name "penetrance").
+    assert "two copies" in first.lower() and "adjusted" not in first.lower(), first
+    assert adjusted.lower().startswith("child affected, adjusted") and adjusted != first, adjusted
     note = page.locator("#drawer-partner-model-note")
     assert "unscreened" in note.inner_text().lower()
-    assert "Hardy-Weinberg" in note.inner_text() and "gnomAD allele frequency" in note.inner_text()
+    assert "gnomAD allele frequency" in note.inner_text() and "Hardy-Weinberg" not in note.inner_text()
+    method = page.locator("#drawer-sim-method").inner_text()
+    assert method.startswith("How this is worked out") and "Hardy-Weinberg" in method, method
     page.locator(".partner-sim-btn[data-partner='carrier']").click()
     assert "heterozygous" in note.inner_text().lower()
 

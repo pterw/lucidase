@@ -358,7 +358,7 @@ SEG_WORDS = {
         "second": "Child inherits, if the other parent has no variant",
     },
     True: {
-        "sub": "Mendelian inheritance model and recurrence calculation",
+        "sub": "The chance for each child, from your result and the other parent's status you pick.",
         "unscreened": "Risk if the other parent is unscreened (genotype probability)",
         "second": "Risk if the other parent is a carrier (genotype probability)",
     },

@@ -77,10 +77,18 @@ def test_apoe_e1_e4_page_shows_no_e4_inheritance_figure(loaded_page):
     expect(apoe_row(page)).to_be_visible()
     assert page.evaluate("() => window.__lucidase.state.apoe.diplotype") == "atypical"
     open_apoe(page)
-    for element in ("#drawer-seg-risk-unscreened", "#drawer-seg-risk-carrier", "#drawer-seg-carrier-prior"):
+    elements = (
+        "#drawer-seg-risk-unscreened",
+        "#drawer-seg-risk-carrier",
+        "#drawer-seg-carrier-prior",
+        "#sim-p-affected",
+        "#sim-p-carrier",
+        "#sim-p-wildtype",
+    )
+    for element in elements:
         assert page.locator(element).inner_text().strip() == "Not available", element
     text = page.locator("#drawer-segregation-container").inner_text().lower()
-    assert "inherits the e4 allele" not in text, text
+    assert "inheriting the e4 allele" not in text, text
 
 
 def _found_acmg_rows(page):

@@ -364,14 +364,14 @@
               <div class="lds-isec-head">
                 <div>
                   <h3 id="isec-seg" class="lds-isec-title mb-1" data-role="seg-title">If you have children</h3>
-                  <p class="lds-meta">Mendelian inheritance model and recurrence calculation</p>
+                  <p class="lds-meta">The chance for each child, from your result and the other parent's status you pick.</p>
                 </div>
                 <span id="drawer-seg-mode-badge" class="lds-tag lds-tag-neutral">Not available</span>
               </div>
 
               <dl class="lds-datalist">
-                <div><dt>Carrier frequency (2pq)</dt><dd id="drawer-seg-carrier-prior">Not available</dd></div>
-                <div><dt>Penetrance</dt><dd id="drawer-seg-penetrance">Not available</dd></div>
+                <div><dt>Carrier frequency</dt><dd id="drawer-seg-carrier-prior">Not available</dd></div>
+                <div id="drawer-seg-penetrance-row"><dt>Penetrance</dt><dd id="drawer-seg-penetrance">Not available</dd></div>
                 <div><dt>Risk if the other parent is unscreened</dt><dd id="drawer-seg-risk-unscreened">Not available</dd></div>
                 <div><dt>Risk if the other parent is a carrier</dt><dd id="drawer-seg-risk-carrier">Not available</dd></div>
               </dl>
@@ -388,24 +388,28 @@
                   <button type="button" data-partner="wildtype" class="partner-sim-btn lds-segment" aria-pressed="false">No variant</button>
                 </div>
                 <p id="drawer-partner-model-note" class="lds-meta"></p>
+                <p id="drawer-sim-scope" class="lds-meta" hidden></p>
 
                 <div class="flex flex-col gap-3">
                   <div class="lds-prob">
-                    <div class="lds-prob-head"><span>Affected probability</span><span id="sim-p-affected">Not available</span></div>
+                    <div class="lds-prob-head"><span>Child gets two copies</span><span id="sim-p-affected">Not available</span></div>
                     <div class="lds-prob-track"><div id="sim-bar-affected" class="lds-prob-bar" style="width: 0%"></div></div>
                   </div>
                   <div class="lds-prob">
-                    <div class="lds-prob-head"><span>Carrier probability</span><span id="sim-p-carrier">Not available</span></div>
+                    <div class="lds-prob-head"><span>Child gets one copy</span><span id="sim-p-carrier">Not available</span></div>
                     <div class="lds-prob-track"><div id="sim-bar-carrier" class="lds-prob-bar" style="width: 0%"></div></div>
                   </div>
                   <div class="lds-prob">
-                    <div class="lds-prob-head"><span>Wild-type (non-carrier)</span><span id="sim-p-wildtype">Not available</span></div>
+                    <div class="lds-prob-head"><span>Child gets no copy</span><span id="sim-p-wildtype">Not available</span></div>
                     <div class="lds-prob-track"><div id="sim-bar-wildtype" class="lds-prob-bar" style="width: 0%"></div></div>
                   </div>
-                  <div class="lds-prob-head pt-2 border-t border-line">
-                    <span>Effective penetrance, adjusted</span><span id="sim-effective-risk">Not available</span>
+                  <div id="drawer-sim-adjusted" hidden>
+                    <div class="lds-prob-head pt-2 border-t border-line">
+                      <span>Child affected, adjusted</span><span id="sim-effective-risk">Not available</span>
+                    </div>
                   </div>
                 </div>
+                <p id="drawer-sim-method" class="lds-meta"></p>
               </div>
             </section>
 

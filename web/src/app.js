@@ -33,6 +33,7 @@ import {
   multiLocusReading,
   partnerModelNote,
   rowsByState,
+  simulatorWords,
   summaryProseParts,
   testedVariantCounts,
   toViewModel,
@@ -1304,8 +1305,10 @@ function renderDrawerSegregation(record) {
     priorEl.textContent = fmtPct(seg.af);
   }
   if (penetranceEl) {
-    if (!mendelian) penetranceEl.textContent = "Not applicable";
-    else setValue(penetranceEl, seg.penetrance === null ? null : fmtPct(seg.penetrance));
+    // Penetrance is a disease-model term: the row exists only for a Mendelian disease locus.
+    const penetranceRow = document.getElementById("drawer-seg-penetrance-row");
+    if (penetranceRow) penetranceRow.hidden = !mendelian;
+    if (mendelian) setValue(penetranceEl, seg.penetrance === null ? null : fmtPct(seg.penetrance));
   }
   if (riskUnscreenedEl) setValue(riskUnscreenedEl, headline(outcomeFor("unscreened")));
   if (riskCarrierEl) setValue(riskCarrierEl, headline(outcomeFor(mendelian ? "heterozygous" : "wildtype")));
@@ -1354,53 +1357,55 @@ function updateSimulator(partnerKey, record) {
   renderPartnerNote(partnerKey, seg);
 }
 
-/** Three probability rows and the effective-penetrance line; a null outcome (no genotype) shows "Not available". */
+/**
+ * Three probability rows, the penetrance-adjusted figure where it belongs, and the notes under them; wording comes from
+ * view-model.js simulatorWords. No genotype (null outcome) shows "Not available" under the markup's neutral labels.
+ * The element ids keep the names they had when the rows were "affected / carrier / wild-type": the first row is the
+ * affected figure for a Mendelian locus and "two copies" for any other.
+ */
 function renderSimulator(out, seg) {
-  const rows = [
-    { id: "affected", label: "Affected probability", value: null },
-    { id: "carrier", label: "Carrier probability", value: null },
-    { id: "wildtype", label: "Wild-type (non-carrier)", value: null }
-  ];
-  let effective = null;
-  let effectiveLabel = "Effective penetrance, adjusted";
+  const words = seg ? simulatorWords(seg) : null;
+  const mendelian = Boolean(seg && seg.mendelian_disease);
+  let values = [null, null, null];
+  let adjusted = null;
   let reason = "";
   if (out && !out.available) {
     reason = out.reason;
-  } else if (out && out.kind === "transmission") {
-    rows[0] = { id: "affected", label: out.label, value: out.inherits_allele };
-    rows[1] = { id: "carrier", label: "Inherits one copy", value: out.one_copy };
-    rows[2] = { id: "wildtype", label: "Inherits no copy", value: out.none };
-    effective = "Not applicable";
-    effectiveLabel = "Clinical penetrance";
+  } else if (out && !mendelian) {
+    values = [out.two_copies, out.one_copy, out.none];
   } else if (out && seg.model === "autosomal_recessive") {
     // Two different "affected" figures: the genotype probability (two copies), and that probability times the stated penetrance.
-    rows[0] = { id: "affected", label: "Affected genotype probability (two copies)", value: out.affected };
-    rows[1].value = out.carrier;
-    rows[2].value = out.p0;
-    effectiveLabel = "Affected probability, adjusted for stated penetrance";
-    const adjusted = penetranceAdjustedAffected(out, seg.penetrance);
-    effective = adjusted === null ? null : fmtPct(adjusted);
+    values = [out.affected, out.carrier, out.p0];
+    const figure = penetranceAdjustedAffected(out, seg.penetrance);
+    adjusted = figure === null ? null : fmtPct(figure);
   } else if (out) {
-    rows[0] = { id: "affected", label: "Affected probability (penetrance-adjusted)", value: out.affected };
-    rows[1] = { id: "carrier", label: "Inherits one copy", value: out.p1 };
-    rows[2] = { id: "wildtype", label: "Does not inherit", value: out.p0 };
-    effective = fmtPct(out.affected);
+    values = [out.affected, out.p1, out.p0];
   }
-  for (const row of rows) {
-    const valueEl = document.getElementById(`sim-p-${row.id}`);
-    const barEl = document.getElementById(`sim-bar-${row.id}`);
-    setLabel(valueEl && valueEl.previousElementSibling, out ? row.label : null);
+  ["affected", "carrier", "wildtype"].forEach((id, i) => {
+    const valueEl = document.getElementById(`sim-p-${id}`);
+    const barEl = document.getElementById(`sim-bar-${id}`);
+    setLabel(valueEl && valueEl.previousElementSibling, words ? words.rows[i] : null);
     if (valueEl) {
-      setValue(valueEl, row.value === null ? null : fmtPct(row.value));
+      setValue(valueEl, values[i] === null ? null : fmtPct(values[i]));
       valueEl.title = reason;
     }
-    if (barEl) barEl.style.width = row.value === null ? "0%" : `${Math.min(100, Math.max(0, row.value * 100))}%`;
-  }
+    if (barEl) barEl.style.width = values[i] === null ? "0%" : `${Math.min(100, Math.max(0, values[i] * 100))}%`;
+  });
+  const adjustedRow = document.getElementById("drawer-sim-adjusted");
   const effEl = document.getElementById("sim-effective-risk");
+  if (adjustedRow) adjustedRow.hidden = !(words && words.adjusted);
   if (effEl) {
-    setLabel(effEl.previousElementSibling, effectiveLabel);
-    setValue(effEl, effective);
+    setLabel(effEl.previousElementSibling, words && words.adjusted ? words.adjusted : null);
+    setValue(effEl, adjusted);
   }
+  // The non-Mendelian line is shown only with figures; the method sentence whenever a genotype exists.
+  const scopeEl = document.getElementById("drawer-sim-scope");
+  if (scopeEl) {
+    scopeEl.textContent = out && out.available && words && words.scope ? words.scope : "";
+    scopeEl.hidden = scopeEl.textContent === "";
+  }
+  const methodEl = document.getElementById("drawer-sim-method");
+  if (methodEl) methodEl.textContent = words ? words.method : "";
 }
 
 function renderDrawerBiotools(record) {

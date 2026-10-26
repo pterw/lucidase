@@ -600,10 +600,60 @@ export function partnerModelNote(partnerModel, af) {
   if (partnerModel === "unscreened") {
     return af === null || af === undefined
       ? `Other parent: unscreened. No gnomAD allele frequency is available for this variant, so the figures are ${NOT_AVAILABLE.toLowerCase()}.`
-      : `Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (${fmtPct(af)}), under Hardy-Weinberg equilibrium.`;
+      : `Other parent: unscreened. The chance they pass on the variant allele is taken as the gnomAD allele frequency (${fmtPct(af)}).`;
   }
   if (!Object.hasOwn(OTHER_PARENT_PHRASE, partnerModel)) throw new Error(`unknown partner model ${JSON.stringify(partnerModel)}`);
   return `Other parent: ${OTHER_PARENT_PHRASE[partnerModel]}.`;
+}
+
+const SIM_HOW =
+  "How this is worked out: each parent passes on one of their two copies, chosen at random. " +
+  "An unscreened parent's chance of passing on the variant is its population allele frequency, assuming Hardy-Weinberg equilibrium.";
+
+/**
+ * The words for the offspring simulator from the gene's inheritance facts ({mendelian_disease, model, penetrance, allele}).
+ * Only a Mendelian disease locus may say "affected" or speak of penetrance; any other locus gets copy counts and a line
+ * saying they are not a statement about health (AGENTS.md 4.4). `rows` are the three probability rows in order;
+ * `adjusted` is the label of the penetrance-adjusted figure's row, or null when no such row belongs (no disease, a
+ * penetrance of 1, or a dominant gene whose first row is already adjusted); `scope` is the non-Mendelian line or null;
+ * `method` is the one "How this is worked out" sentence, the only place that names the model. Every number in it is the
+ * stated penetrance, formatted.
+ */
+export function simulatorWords(seg) {
+  if (!seg.mendelian_disease) {
+    const allele = nonEmptyString(seg.allele) ?? "variant";
+    return {
+      rows: ["Child gets two copies", "Child gets one copy", "Child gets no copy"],
+      adjusted: null,
+      scope: `These are chances of inheriting the ${allele} allele. They say nothing about health.`,
+      method: SIM_HOW,
+    };
+  }
+  const known = typeof seg.penetrance === "number";
+  const partial = known && seg.penetrance < 1;
+  if (seg.model === "autosomal_dominant") {
+    return {
+      rows: [`Child affected (one or two copies${partial ? ", adjusted" : ""})`, "Child gets one copy", "Child gets no copy"],
+      adjusted: null,
+      scope: null,
+      method:
+        `${SIM_HOW} A child is affected with one or two copies` +
+        (partial ? `, and that chance is multiplied by the penetrance, the share of people with the variant who are affected (${fmtPct(seg.penetrance)}).` : "."),
+    };
+  }
+  const carrierFrequency = " The carrier frequency in the population is 2 x f x (1 - f), where f is the allele frequency.";
+  let penetranceClause = "";
+  if (!known) penetranceClause = " No penetrance is stated, so the adjusted figure is not available.";
+  else if (partial) {
+    penetranceClause =
+      ` The adjusted figure multiplies that chance by the penetrance, the share of people with two copies who are affected (${fmtPct(seg.penetrance)}).`;
+  }
+  return {
+    rows: ["Child affected (two copies)", "Child is a carrier (one copy)", "Child gets no copy"],
+    adjusted: known && !partial ? null : "Child affected, adjusted (not all with two copies are affected)",
+    scope: null,
+    method: `${SIM_HOW} A child is affected only with two copies.${carrierFrequency}${penetranceClause}`,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------------------------
