@@ -923,6 +923,22 @@ function listedRows() {
   return [...state.records, ...state.negativeChecks, ...state.arrayGaps, ...state.insufficientEvidence];
 }
 
+/**
+ * The KB topic of a record's gene: the plain name the report groups and the Inspector title use.
+ * A gene with no topic reads "Not available" (the KB loader rejects a blank topic, so this is a guard only).
+ */
+function topicOf(record) {
+  const gene = state.genes[record.gene];
+  return gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : "Not available";
+}
+
+/**
+ * Rebuild the "All results as a table" body from the analysis: one row per listed check (interpreted,
+ * negative, array-gap and insufficient-evidence rows), filtered by the active result-word tab and the search
+ * box, with marker, genotype, coverage state, Topic, evidence and category. The Topic column is the gene's
+ * plain-language topic from the KB (state.genes), the same word the report and the Inspector title use.
+ * Throws on an unknown tab key so a bad tab never leaves an empty table behind.
+ */
 function renderVariantsTable() {
   // The "every" tab lists every check; a tab named by a result word lists exactly the checks with that word.
   // An unknown key is refused before the table is touched, so it never leaves an empty table behind.
@@ -959,7 +975,7 @@ function renderVariantsTable() {
   if (filtered.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td colspan="8" class="py-10 text-ink-muted">No variants match your search or filter.</td>
+      <td colspan="9" class="py-10 text-ink-muted">No variants match your search or filter.</td>
     `;
     tbody.appendChild(tr);
     return;
@@ -1005,6 +1021,7 @@ function renderVariantsTable() {
       </td>
       <td class="lds-data font-bold">${valueHtml(r.genotype)}</td>
       <td>${stateTagHtml(r.coverage_state, r.stateLabel)}</td>
+      <td>${escapeHtml(topicOf(r))}</td>
       <td>
         <span class="flex flex-wrap items-center gap-1.5">${tierBadge} ${categoryBadge}</span>
       </td>
@@ -1038,9 +1055,7 @@ function openDrawer(record, opener = document.activeElement) {
   drawerOpener = (opener instanceof HTMLElement || opener instanceof SVGElement) && opener !== document.body ? opener : null;
 
   // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
-  const gene = state.genes[record.gene];
-  document.getElementById("drawer-title").textContent =
-    gene && typeof gene.topic === "string" && gene.topic !== "" ? gene.topic : record.gene;
+  document.getElementById("drawer-title").textContent = topicOf(record);
   // The subtitle names the gene once, then the markers ("rs429358 + rs7412" for APOE); the record id stays readable.
   const markerEl = document.getElementById("drawer-rsid");
   markerEl.textContent = record.markerText;

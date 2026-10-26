@@ -206,7 +206,7 @@ def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_p
     categories = page.evaluate(
         "() => Object.fromEntries([...document.querySelectorAll('#variants-tbody tr')]"
         ".map(r => [r.children[0].textContent.trim(),"
-        " r.children[4].querySelector('.lds-tag[class*=\"lds-tag-cat-\"]').textContent.trim()]))"
+        " r.children[5].querySelector('.lds-tag[class*=\"lds-tag-cat-\"]').textContent.trim()]))"
     )
     assert categories == DEMO_FOUND_CATEGORIES
     # The report groups hold the same Found checks, one row each, each as a Found row.

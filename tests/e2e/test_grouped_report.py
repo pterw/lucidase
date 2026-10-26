@@ -214,6 +214,26 @@ def test_the_table_is_one_click_away_and_then_searchable(loaded_page):
     expect(page.locator("#showing-count")).to_contain_text("Showing 1 of")
 
 
+def test_the_table_has_a_topic_column_after_result_with_each_rows_kb_topic(loaded_page, tmp_path):
+    """Topic sits right after Result, and every row (any result word) shows its gene's KB topic there."""
+    page = loaded_page
+    _load_all_states(page, tmp_path)
+    show_table(page)
+    heads = page.locator("#table-panel thead th").all_text_contents()
+    assert heads.index("Topic") == heads.index("Result") + 1
+    topic_col = heads.index("Topic")
+    expected = {check["id"]: check["topic"] for check in page.evaluate(EXPECTED_JS)["checks"]}
+    cells = page.evaluate(
+        "(col) => Object.fromEntries([...document.querySelectorAll('#variants-tbody tr')]"
+        ".map(r => [r.children[0].textContent.trim(), r.children[col].textContent.trim()]))",
+        topic_col,
+    )
+    assert cells == expected
+    # The empty-row message spans every column, Topic included.
+    page.locator("#search-input").fill("zzz-no-such-marker")
+    expect(page.locator("#variants-tbody td[colspan]")).to_have_attribute("colspan", str(len(heads)))
+
+
 def test_the_open_table_fits_the_page_at_1440_and_390(loaded_page):
     page = loaded_page
     for size in ({"width": 1440, "height": 900}, NARROW):
