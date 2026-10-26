@@ -152,6 +152,14 @@ function renderProvenance(layout) {
     `Knowledge base release ${view.kb.manifest.release}.`;
 }
 
+/** The file buttons while the map is the reference; "Clear the file" while a file is on it. */
+function syncFileControls() {
+  const hasFile = view.source !== null;
+  $("btn-karyogram-browse").classList.toggle("hidden", hasFile);
+  $("karyogram-sample-group").classList.toggle("hidden", hasFile);
+  $("btn-karyogram-clear").classList.toggle("hidden", !hasFile);
+}
+
 /** Draws a layout everywhere on the page: figure, key, totals, genes table, provenance and caption. */
 function render(layout) {
   view.layout = layout;
@@ -161,6 +169,7 @@ function render(layout) {
   renderLoci(layout);
   renderProvenance(layout);
   renderCaption(layout);
+  syncFileControls();
 }
 
 /** The one error path: every failure shows #karyogram-error, drops any result and goes back to the reference view. */
@@ -234,6 +243,8 @@ function startWorker(job, canRetry = true) {
         $("karyogram-progress").classList.add("hidden");
         setInputsDisabled(false);
         setViewState("result");
+        // The button that started the load is hidden now; keep the keyboard on the page's one control.
+        $("btn-karyogram-clear").focus();
       } catch (err) {
         showError((err && err.message) || err);
       }
@@ -304,6 +315,17 @@ async function loadSample() {
   }
 }
 
+/** Back to the reference view: nothing of the file stays on the page; focus goes to "Choose your DNA file". */
+function clearFile() {
+  stopWorker();
+  view.source = null;
+  view.pending = null;
+  render(layoutKaryogram({ kb: view.kb }));
+  setViewState("reference-only");
+  setInputsDisabled(false);
+  $("btn-karyogram-browse").focus();
+}
+
 async function initPage() {
   initTheme();
   initPagesMenu();
@@ -319,6 +341,13 @@ async function initPage() {
   });
   $("btn-karyogram-browse").addEventListener("click", () => fileInput.click());
   $("btn-load-karyogram-sample").addEventListener("click", loadSample);
+  $("btn-karyogram-clear").addEventListener("click", () => {
+    try {
+      clearFile();
+    } catch (err) {
+      showError((err && err.message) || err);
+    }
+  });
   try {
     view.kb = await loadKnowledgeBase();
     render(layoutKaryogram({ kb: view.kb }));

@@ -58,10 +58,12 @@
         <button type="button" id="btn-karyogram-browse" class="lds-btn lds-btn-primary">
           <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
         </button>
-        <span class="inline-flex items-center gap-3">
+        <span id="karyogram-sample-group" class="inline-flex items-center gap-3">
           <span class="lds-meta">or</span>
           <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
         </span>
+        <!-- Shown instead of the two above while a file is on the map -->
+        <button type="button" id="btn-karyogram-clear" class="lds-btn lds-btn-ghost hidden">Clear the file</button>
       </div>
     </section>
 

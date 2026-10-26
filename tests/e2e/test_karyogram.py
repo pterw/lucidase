@@ -176,6 +176,87 @@ def test_a_file_that_declares_GRCh38_is_captioned_with_GRCh38(page):
     expect(_caption(page)).to_have_text("build-38.txt · drawn on GRCh38 chromosome lengths.")
 
 
+def test_a_chosen_file_after_the_sample_and_a_clear_is_named_without_the_sample_label(page):
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    page.locator("#btn-karyogram-clear").click()
+    page.set_input_files("#karyogram-file-input", str(DEMO_FILE))
+    _wait_result(page)
+    expect(_caption(page)).to_contain_text(DEMO_FILE.name)
+    expect(_caption(page)).not_to_contain_text("made-up")
+
+
+def test_clear_the_file_returns_to_the_reference_view_with_nothing_left_over(page):
+    _open(page)
+    expect(page.locator("#btn-karyogram-clear")).to_be_hidden()
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    clear = page.locator("#btn-karyogram-clear")
+    expect(clear).to_be_visible()
+    expect(clear).to_have_text("Clear the file")
+    # The file pickers give way to Clear while a file is shown.
+    expect(page.locator("#btn-karyogram-browse")).to_be_hidden()
+    expect(page.locator("#btn-load-karyogram-sample")).to_be_hidden()
+    assert "reference" not in page.evaluate(LOCUS_STATES).values()
+
+    clear.click()
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "reference-only")
+    expect(page.locator("#karyogram-totals")).to_be_hidden()
+    expect(page.locator("#karyogram-density-notice")).to_be_hidden()
+    expect(page.locator("#karyogram-error")).to_be_hidden()
+    expect(page.locator("#karyogram-progress")).to_be_hidden()
+    assert set(page.evaluate(LOCUS_STATES).values()) == {"reference"}
+    assert page.locator("#karyogram-figure .kary-bin:not(.kary-bin-empty)").count() == 0
+    rows = page.locator("#karyogram-loci-body tr")
+    expect(rows).to_have_count(14)
+    assert set(rows.evaluate_all("els => els.map((r) => r.dataset.state)")) == {"reference"}
+    expect(page.locator('#karyogram-legend [data-legend-count="reference"]')).to_have_text("14")
+    for state in ("supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"):
+        expect(page.locator(f'#karyogram-legend [data-legend-count="{state}"]')).to_have_text("0")
+    expect(_caption(page)).to_have_text("No file yet: the chromosomes are drawn from the GRCh38 reference.")
+    expect(page.locator("#karyogram-provenance")).to_contain_text("Chromosome shapes: GRCh38.")
+    expect(page.locator("#karyogram-provenance")).not_to_contain_text("matching")
+    # The file buttons are back, enabled, and focus lands on the one that starts the same job again.
+    expect(clear).to_be_hidden()
+    expect(page.locator("#btn-karyogram-browse")).to_be_enabled()
+    expect(page.locator("#btn-load-karyogram-sample")).to_be_enabled()
+    assert page.evaluate("document.activeElement.id") == "btn-karyogram-browse"
+
+    # A second file loads cleanly after a clear, with its own caption.
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    expect(_caption(page)).to_contain_text("made-up example")
+    assert "reference" not in page.evaluate(LOCUS_STATES).values()
+
+
+def test_a_keyboard_load_lands_on_clear_and_clear_works_from_the_keyboard(page):
+    _open(page)
+    # Start the load from the keyboard: the sample button is the browse button's next Tab stop.
+    page.locator("#btn-karyogram-browse").focus()
+    page.keyboard.press("Tab")
+    assert page.evaluate("document.activeElement.id") == "btn-load-karyogram-sample"
+    page.keyboard.press("Enter")
+    _wait_result(page)
+    # The button that started the load is hidden now; focus must already be on the page's one control.
+    assert page.evaluate("document.activeElement.id") == "btn-karyogram-clear"
+    # Clear is a real Tab stop: step away and back by key.
+    page.keyboard.press("Shift+Tab")
+    assert page.evaluate("document.activeElement.id") != "btn-karyogram-clear"
+    page.keyboard.press("Tab")
+    assert page.evaluate("document.activeElement.id") == "btn-karyogram-clear"
+    page.keyboard.press("Enter")
+    expect(page.locator("#karyogram-main")).to_have_attribute("data-karyogram-state", "reference-only")
+    assert page.evaluate("document.activeElement.id") == "btn-karyogram-browse"
+
+
+def test_a_chosen_file_load_lands_on_clear(page):
+    _open(page)
+    page.set_input_files("#karyogram-file-input", str(DEMO_FILE))
+    _wait_result(page)
+    assert page.evaluate("document.activeElement.id") == "btn-karyogram-clear"
+
+
 # The design system's plain result words and their one-line help (components/core/hooks.js), verbatim.
 LEGEND_WORDS = {
     "supported_and_observed": ("Found", "Your file has the variant this check looks for."),
