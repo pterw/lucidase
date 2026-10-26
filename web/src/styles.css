@@ -433,9 +433,9 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    stay 11px and each mark's halo 20px across. The ID selector outranks .lds-summary-map, so the minimum is set here. */
 #karyogram-figure { min-width: 0; overflow-x: auto; }
 #karyogram-figure svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; margin: 0 auto; }
-/* The genes table fits a phone without scrolling, so the Result column is never clipped: tighter cells, and a
-   position breaks after its colon (chromosome, then base pair). */
-@media (max-width: 559px) { .lds-table-tight th, .lds-table-tight td { padding-left: var(--space-2); padding-right: var(--space-2); } }
+/* The genes table's four columns (Topic, Gene, Chromosome, Your result) fit a 390px phone: under 560px its cells
+   have 4px side padding instead of 8px. */
+@media (max-width: 559px) { .lds-table-tight th, .lds-table-tight td { padding-left: var(--space-1); padding-right: var(--space-1); } }
 
 /* The Summary (design system AnalysisScreen): the serif sentence with the counts, the karyogram scaled to its column
    (as the design system's Karyogram: full width, height auto), and the legend at its 560px measure. Each mark is a

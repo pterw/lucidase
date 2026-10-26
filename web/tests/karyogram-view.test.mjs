@@ -139,6 +139,8 @@ test("the karyogram state labels reuse the analysis labels and add the reference
   assert.equal(labels.not_tested_by_array, "Not on your chip");
   assert.equal(labels.insufficient_evidence, "Unclear");
   for (const text of Object.values(labels)) assert.ok(!/State \d|Observed|Array Gap|Wild-Type/.test(text), text);
+  // With no file the key's one row is the design's wording, not a "location only" phrase.
+  assert.equal(labels.reference, "Genes this report checks");
   labels.reference = "changed";
   assert.notEqual(karyogramStateLabels().reference, "changed");
 });

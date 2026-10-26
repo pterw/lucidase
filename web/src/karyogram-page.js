@@ -66,11 +66,19 @@ function stateOf(layout, rsid) {
   return state;
 }
 
+/**
+ * Draws the key under the figure. With no file it is one row, the reference state ("Genes this report checks")
+ * with the count of all genes; with a file it is four rows, one per result, each with its count and one-line help.
+ * @param {object} layout The karyogram layout; `layout.sample` is absent until a file is read.
+ */
 function renderLegend(layout) {
   const counts = Object.fromEntries(LEGEND_ORDER.map((s) => [s, 0]));
   for (const l of layout.reference.loci) counts[stateOf(layout, l.rsid)] += 1;
+  // Without a file every gene is "reference": one row, not four rows of zero. With a file the four results
+  // are listed and "reference" has no gene left.
+  const shown = LEGEND_ORDER.filter((s) => (layout.sample ? s !== "reference" : s === "reference"));
   // The design system's KaryogramLegend: mark, plain word, count, then the word's one-line help under it.
-  $("karyogram-legend").innerHTML = LEGEND_ORDER.map((s) => {
+  $("karyogram-legend").innerHTML = shown.map((s) => {
     const help = Object.hasOwn(RESULT_WORDS, s) ? RESULT_WORDS[s].help : null;
     return (
       `<li class="flex flex-wrap items-center gap-x-3 py-2 border-b border-line" data-legend-state="${escapeHtml(s)}">` +
@@ -107,16 +115,30 @@ function renderTotals(layout) {
   $("karyogram-totals").classList.remove("hidden");
 }
 
+/** The KB's plain-words name for a gene's topic; "Not available" when the KB has none (the loader rejects a blank topic). */
+function topicOf(gene) {
+  const entry = view.kb.genes[gene];
+  return entry && typeof entry.topic === "string" && entry.topic !== "" ? entry.topic : "Not available";
+}
+
+/** The result cell: the swatch and the plain word with a file; the muted "No file yet" while there is no result. */
+function resultCell(layout, state) {
+  if (!layout.sample) return `<span class="lds-na-text">No file yet</span>`;
+  return (
+    `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
+    `${escapeHtml(labels[state])}</span>`
+  );
+}
+
 function renderLoci(layout) {
   $("karyogram-loci-body").innerHTML = layout.reference.loci
     .map((l) => {
       const state = stateOf(layout, l.rsid);
       return (
         `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
-        `<td class="font-bold">${escapeHtml(l.gene)}</td><td class="lds-data">${escapeHtml(l.rsid)}</td>` +
-        `<td class="lds-data">${escapeHtml(l.chrom)}:<wbr>${escapeHtml(fmt(l.pos))}</td>` +
-        `<td><span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
-        `${escapeHtml(labels[state])}</span></td></tr>`
+        `<td class="font-bold">${escapeHtml(topicOf(l.gene))}</td><td class="lds-data">${escapeHtml(l.gene)}</td>` +
+        `<td class="lds-data">${escapeHtml(l.chrom)}</td>` +
+        `<td>${resultCell(layout, state)}</td></tr>`
       );
     })
     .join("");

@@ -51,7 +51,7 @@ export const RESULT_WORDS = deepFreeze({
 const RECORD_STATES = ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"];
 
 /** The reference-only marker state on the karyogram: the locus has a position but no sample is loaded. */
-const REFERENCE_STATE_LABEL = "Location only (no file loaded)";
+const REFERENCE_STATE_LABEL = "Genes this report checks";
 
 /**
  * Human label per karyogram marker state: the four per-locus coverage states reuse the result words above, plus

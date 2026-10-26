@@ -211,9 +211,8 @@ def test_clear_the_file_returns_to_the_reference_view_with_nothing_left_over(pag
     rows = page.locator("#karyogram-loci-body tr")
     expect(rows).to_have_count(14)
     assert set(rows.evaluate_all("els => els.map((r) => r.dataset.state)")) == {"reference"}
+    expect(page.locator("#karyogram-legend li")).to_have_count(1)
     expect(page.locator('#karyogram-legend [data-legend-count="reference"]')).to_have_text("14")
-    for state in ("supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"):
-        expect(page.locator(f'#karyogram-legend [data-legend-count="{state}"]')).to_have_text("0")
     expect(_caption(page)).to_have_text("No file yet: the chromosomes are drawn from the GRCh38 reference.")
     expect(page.locator("#karyogram-provenance")).to_contain_text("Chromosome shapes: GRCh38.")
     expect(page.locator("#karyogram-provenance")).not_to_contain_text("matching")
@@ -273,6 +272,38 @@ LEGEND_WORDS = {
 }
 
 
+def test_without_a_file_the_key_has_one_reference_row_not_four_empty_ones(page):
+    _open(page)
+    items = page.locator("#karyogram-legend li")
+    expect(items).to_have_count(1)
+    expect(items.first).to_have_attribute("data-legend-state", "reference")
+    expect(items.first.locator("[data-legend-label]")).to_have_text("Genes this report checks")
+    expect(items.first.locator("[data-legend-count]")).to_have_text("14")
+    expect(page.locator("#karyogram-legend [data-legend-help]")).to_have_count(0)
+    # The same label names the reference state in each marker's hover title, not only in the key.
+    marker_titles = page.locator("#karyogram-figure svg title:not(#kary-title)").evaluate_all(
+        "els => els.map((e) => e.textContent)"
+    )
+    assert len(marker_titles) == 14
+    assert all(t.endswith(": Genes this report checks") for t in marker_titles), marker_titles
+
+
+def test_with_a_file_the_key_has_the_four_results_whose_counts_add_up_to_the_genes(page):
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    items = page.locator("#karyogram-legend li")
+    expect(items).to_have_count(4)
+    assert items.evaluate_all("els => els.map((e) => e.dataset.legendState)") == list(LEGEND_WORDS)
+    counts = items.locator("[data-legend-count]").evaluate_all("els => els.map((e) => Number(e.textContent))")
+    assert sum(counts) == 14, counts
+    by_state = {}
+    for state in page.evaluate(LOCUS_STATES).values():
+        by_state[state] = by_state.get(state, 0) + 1
+    for state, n in by_state.items():
+        expect(page.locator(f'#karyogram-legend [data-legend-count="{state}"]')).to_have_text(str(n))
+
+
 def test_legend_and_loci_use_the_plain_words_with_their_help(page):
     _open(page)
     page.locator("#btn-load-karyogram-sample").click()
@@ -281,13 +312,68 @@ def test_legend_and_loci_use_the_plain_words_with_their_help(page):
         item = page.locator(f'#karyogram-legend [data-legend-state="{state}"]')
         expect(item.locator("[data-legend-label]")).to_have_text(word)
         expect(item.locator("[data-legend-help]")).to_have_text(help_text)
-    expect(page.locator('#karyogram-legend [data-legend-state="reference"] [data-legend-help]')).to_have_count(0)
+    expect(page.locator('#karyogram-legend [data-legend-state="reference"]')).to_have_count(0)
     text = page.locator("#karyogram-legend").inner_text() + page.locator("#karyogram-loci-body").inner_text()
     titles = page.locator("#karyogram-figure").inner_html()
     for old in ("Supported", "Observed", "Array Gap", "Wild-Type", "Conflicting", "State 1", "State 2", "State 3", "State 5"):
         assert old not in text and old not in titles, old
     found = page.locator('#karyogram-loci-body tr[data-state="supported_and_observed"]').first
     expect(found.locator("td").last).to_have_text("Found")
+
+
+def test_the_genes_table_has_the_design_columns_topic_gene_chromosome_your_result(page):
+    _open(page)
+    headers = page.locator(".lds-table thead th").all_inner_texts()
+    assert [h.strip() for h in headers] == ["Topic", "Gene", "Chromosome", "Your result"]
+    rows = page.locator("#karyogram-loci-body tr")
+    assert rows.count() == len(KB["loci"])
+    seen_chroms = set()
+    for i in range(rows.count()):
+        row = rows.nth(i)
+        assert row.locator("td").count() == 4  # no Marker or Position cell, hidden or not
+        gene = row.locator("td").nth(1).inner_text().strip()
+        rsid = row.get_attribute("data-rsid")
+        locus = KB["loci"][rsid]
+        assert gene == locus["gene"], (rsid, gene)
+        topic = KB["genes"][gene]["topic"]
+        assert topic and topic != gene, gene  # the KB topic is a plain-words name, not the gene symbol again
+        expect(row.locator("td").first).to_have_text(topic)
+        # The Chromosome cell is the locus's own chromosome (the one that places its marker on the map).
+        expect(row.locator("td").nth(2)).to_have_text(locus["chrom"])
+        seen_chroms.add(locus["chrom"])
+    assert len(seen_chroms) > 1, "the check is vacuous if every locus sits on one chromosome"
+    # The rsID and the position are no longer in the table's text at all.
+    table_text = page.locator(".lds-table").inner_text()
+    assert not re.search(r"\brs\d+", table_text), table_text
+    # The same topics and chromosomes stay on the rows after a file is read.
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    for i in range(rows.count()):
+        row = rows.nth(i)
+        locus = KB["loci"][row.get_attribute("data-rsid")]
+        expect(row.locator("td").first).to_have_text(KB["genes"][locus["gene"]]["topic"])
+        expect(row.locator("td").nth(2)).to_have_text(locus["chrom"])
+
+
+def test_the_result_column_says_no_file_yet_until_a_file_gives_a_result(page):
+    _open(page)
+    cells = page.locator("#karyogram-loci-body tr td:last-child")
+    assert cells.count() == len(KB["loci"])
+    for i in range(cells.count()):
+        cell = cells.nth(i)
+        expect(cell).to_have_text("No file yet")
+        expect(cell.locator(".lds-na-text")).to_have_count(1)
+        expect(cell.locator(".kary-swatch")).to_have_count(0)  # no result mark without a result
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    states = page.evaluate(LOCUS_STATES)
+    for i in range(cells.count()):
+        cell = cells.nth(i)
+        row = page.locator("#karyogram-loci-body tr").nth(i)
+        word = LEGEND_WORDS[states[row.get_attribute("data-rsid")]][0]
+        expect(cell).to_have_text(word)
+        expect(cell.locator(".kary-swatch")).to_have_count(1)
+        expect(cell.locator(".lds-na-text")).to_have_count(0)
 
 
 def test_unknown_build_shows_the_density_notice_and_keeps_locus_states(page):
@@ -696,7 +782,7 @@ def test_each_result_on_the_map_has_its_own_mark_not_only_a_colour(page):
     page.locator("#btn-load-karyogram-sample").click()
     _wait_result(page)
     swatches = page.evaluate(MARK_SHAPES, "#karyogram-legend .kary-swatch")
-    swatches.pop("kary-state-reference")  # shown only before a file is loaded, never beside the results
+    assert "kary-state-reference" not in swatches  # shown only before a file is loaded, never beside the results
     assert len(set(swatches.values())) == len(swatches), swatches
     cores = page.evaluate(MARK_SHAPES, "#karyogram-figure .kary-locus .kary-core")
     assert "kary-state-insufficient_evidence" in cores, cores  # the sample has an unclear result to check
@@ -766,6 +852,8 @@ def test_on_a_phone_the_genes_table_never_clips_the_result_word(page, loaded):
         _wait_result(page)
     wrapper = page.locator("#karyogram-loci-body").locator("xpath=ancestor::div[contains(@class,'lds-section-body')][1]")
     box = wrapper.bounding_box()
+    # A real scroller: if the real fonts overflow by a few pixels, the table scrolls inside its box, never clips.
+    assert wrapper.evaluate("el => getComputedStyle(el).overflowX") == "auto"
     assert wrapper.evaluate("el => el.scrollWidth <= el.clientWidth"), "the table scrolls inside its box"
     cells = page.locator("#karyogram-loci-body td, .lds-table thead th")
     rects = cells.evaluate_all("els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })")
