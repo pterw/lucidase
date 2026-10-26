@@ -16,7 +16,16 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import expect
 
-from conftest import DEMO_FILE, WEB_DIR, goto_ready, open_apoe, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import (
+    DEMO_FILE,
+    WEB_DIR,
+    goto_ready,
+    open_apoe,
+    open_gene_context,
+    show_table,
+    wait_drawer_closed,
+    wait_drawer_open,
+)
 
 WILDTYPE = Path(__file__).parent / "fixtures" / "wildtype-23andme.txt"
 MANIFEST = json.loads((WEB_DIR / "src" / "knowledge-base.json").read_text(encoding="utf-8"))["manifest"]
@@ -139,6 +148,7 @@ def _screens(page) -> str:
                 continue
             row.click()
             wait_drawer_open(page)
+            open_gene_context(page)  # a closed <details> leaves its text out of innerText
             chunks.append(page.locator("#variant-drawer").inner_text())
             page.locator("#btn-close-drawer").click()
             wait_drawer_closed(page)

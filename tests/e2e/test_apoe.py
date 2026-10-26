@@ -15,7 +15,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import WEB_DIR, apoe_row, open_apoe
+from conftest import WEB_DIR, apoe_row, open_apoe, open_gene_context
 
 FIXTURES = Path(__file__).parent / "fixtures"
 ATYPICAL = FIXTURES / "apoe-atypical-23andme.txt"
@@ -164,6 +164,7 @@ def test_the_apoe_card_is_folded_into_the_apoe_row_and_inspector(loaded_page):
     # Protein abundance (Human Protein Atlas): every tissue with its level.
     tissues = apoe["hpa_tissues"]
     assert tissues
+    open_gene_context(page)
     hpa_rows = page.locator("#drawer-hpa-tissues > div")
     expect(hpa_rows).to_have_count(len(tissues))
     for i, (tissue, level) in enumerate(tissues.items()):

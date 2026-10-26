@@ -17,7 +17,14 @@ from pathlib import Path
 
 from playwright.sync_api import expect
 
-from conftest import WAIT_TIMEOUT_MS, WEB_DIR, show_table, wait_drawer_closed, wait_drawer_open
+from conftest import (
+    WAIT_TIMEOUT_MS,
+    WEB_DIR,
+    open_gene_context,
+    show_table,
+    wait_drawer_closed,
+    wait_drawer_open,
+)
 
 NARROW = {"width": 390, "height": 844}
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -83,8 +90,14 @@ def _expect_notices(page, rec):
 
 
 def _visible_section_titles(page):
+    """Titles of the Inspector sections a reader can see, in document order.
+
+    A title inside a closed <details> still reports client rects and passes checkVisibility although it is not
+    rendered, so the `details:not([open])` clause drops it; the <summary> is the disclosure's own visible title.
+    """
     return page.locator(f"{INSPECTOR} .lds-isec-title").evaluate_all(
-        "els => els.filter((el) => el.getClientRects().length > 0).map((el) => el.textContent.trim())"
+        "els => els.filter((el) => el.getClientRects().length > 0"
+        " && (el.tagName === 'SUMMARY' || !el.closest('details:not([open])'))).map((el) => el.textContent.trim())"
     )
 
 
@@ -244,13 +257,19 @@ def test_header_sections_and_footer_follow_the_record_inspector(loaded_page):
         expected.append("If you have children" if rec["mendelian"] else "Passing it on")
         seen_mendelian |= rec["mendelian"]
         seen_transmission |= not rec["mendelian"]
-        expected += [
-            "Technical details",
-            "Gene and protein context",
+        expected += ["Technical details", "Gene and protein context"]
+        if finding_id == "rs4244285":
+            # First open of the Inspector: the context is closed by default.
+            assert _visible_section_titles(page) == expected
+            open_gene_context(page)
+        else:
+            # A reader who opened the context keeps it open for the next record.
+            expect(page.locator("#drawer-gene-context")).to_have_attribute("open", "")
+        # Open, the disclosure reveals the rest of the gene and protein sections, after its title.
+        assert _visible_section_titles(page) == expected + [
             "Human Protein Atlas expression",
             "Where the protein sits in the cell",
         ]
-        assert _visible_section_titles(page) == expected
 
         # Notices (drug, ACMG) sit at the top of the body, before the first section.
         _expect_notices(page, rec)
@@ -286,6 +305,34 @@ def test_header_sections_and_footer_follow_the_record_inspector(loaded_page):
         wait_drawer_closed(page)
     # The demo covers both simulator headings and a limitation, so each branch above was exercised.
     assert seen_limitation and seen_mendelian and seen_transmission
+
+
+def test_gene_and_protein_context_is_a_keyboard_disclosure_closed_by_default(loaded_page):
+    """The AlphaFold, Ensembl, ENCODE, Human Protein Atlas and subcellular sections sit behind one disclosure that
+    starts closed, opens and closes from the keyboard, and whose contents are hidden until it opens."""
+    page = loaded_page
+    _load_demo(page)
+    _details(page, "rs4244285").click()
+    wait_drawer_open(page)
+
+    details = page.locator("#drawer-gene-context")
+    summary = details.locator("summary")
+    expect(summary).to_have_text("Gene and protein context")
+    expect(details).not_to_have_attribute("open", "")
+    expect(page.locator("#drawer-hpa-tissues")).to_be_hidden()
+    expect(page.locator("#drawer-hpa-subcell")).to_be_hidden()
+    # All three sections live inside the disclosure, not beside it.
+    for section in ("#biotool-alphafold-card", "#biotool-ensembl-card", "#biotool-encode-card"):
+        assert details.locator(section).count() == 1, f"{section} sits outside #drawer-gene-context"
+
+    summary.focus()
+    page.keyboard.press("Enter")
+    expect(details).to_have_attribute("open", "")
+    expect(page.locator("#biotool-alphafold-card")).to_be_visible()
+    expect(page.locator("#drawer-hpa-subcell")).to_be_visible()
+    page.keyboard.press("Space")
+    expect(details).not_to_have_attribute("open", "")
+    expect(page.locator("#drawer-hpa-subcell")).to_be_hidden()
 
 
 def test_the_ligature_shows_the_apoe_record_and_only_the_apoe_record(loaded_page):

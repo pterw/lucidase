@@ -425,13 +425,12 @@
               </dl>
             </section>
 
-            <!-- Gene and protein context: AlphaFold DB, Ensembl VEP, ENCODE -->
+            <!-- Gene and protein context (closed by default): AlphaFold DB, Ensembl VEP, ENCODE, Human Protein Atlas -->
+            <details id="drawer-gene-context">
+            <summary class="lds-isec lds-isec-title cursor-pointer mb-0">Gene and protein context</summary>
             <section id="drawer-biotools-container" class="lds-isec flex flex-col gap-5">
               <div class="lds-isec-head">
-                <div>
-                  <h3 class="lds-isec-title mb-1">Gene and protein context</h3>
-                  <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
-                </div>
+                <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
                 <span id="drawer-biotool-gene-badge" class="lds-tag lds-tag-neutral lds-data">Gene</span>
               </div>
 
@@ -486,6 +485,7 @@
               <h3 class="lds-isec-title">Where the protein sits in the cell</h3>
               <div id="drawer-hpa-subcell" class="flex flex-wrap gap-1.5"></div>
             </section>
+            </details>
           </div>
 
           <div class="lds-inspector-foot">
