@@ -547,13 +547,17 @@ function findingRowHtml(row) {
 
 /**
  * The FindingRow whose record is in the drawer is the one selected row (none when the drawer is closed), and its
- * marks on the Summary map are the selected marks (APOE has two).
+ * marks on the Summary map are the selected marks (APOE has two). So is its row in the table, when the table lists it
+ * (renderVariantsTable marks the rows it rebuilds from `state.selectedVariant`).
  */
 function markSelectedFinding(id) {
   document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
     const selected = article.dataset.findingId === id;
     article.classList.toggle("is-selected", selected);
     article.querySelector("button.lds-finding-open").setAttribute("aria-expanded", String(selected));
+  });
+  document.querySelectorAll("#variants-tbody tr[data-record-id]").forEach((tr) => {
+    tr.classList.toggle("is-selected", tr.dataset.recordId === id);
   });
   document.querySelectorAll("#summary-map .kary-locus[data-finding-id]").forEach((mark) => {
     const selected = mark.dataset.findingId === id;
@@ -984,6 +988,8 @@ function renderVariantsTable() {
   filtered.forEach(r => {
     const tr = document.createElement("tr");
     tr.tabIndex = 0;
+    tr.dataset.recordId = r.id;
+    tr.classList.toggle("is-selected", state.selectedVariant?.id === r.id);
     tr.setAttribute("aria-label", `${r.gene} ${r.id}`);
     tr.onclick = () => openDrawer(r, tr);
     tr.onkeydown = (event) => {

@@ -234,6 +234,56 @@ def test_the_table_has_a_topic_column_after_result_with_each_rows_kb_topic(loade
     expect(page.locator("#variants-tbody td[colspan]")).to_have_attribute("colspan", str(len(heads)))
 
 
+def test_the_table_row_whose_details_are_open_is_the_one_selected_row(loaded_page):
+    """One table row is marked while the Inspector shows it: from the table or the report, across a re-filter, until closed."""
+    page = loaded_page
+    _load_demo(page)
+    show_table(page)
+    selected = page.locator("#variants-tbody tr.is-selected")
+    first, second = "rs4244285", "rs1801133"
+
+    def table_row(rsid):
+        """The table row whose first cell (the marker) is `rsid`."""
+        return page.locator("#variants-tbody tr", has=page.locator(f"td:first-child:text-is('{rsid}')"))
+
+    expect(selected).to_have_count(0)
+    table_row(first).click()
+    wait_drawer_open(page)
+    expect(selected).to_have_count(1)
+    expect(table_row(first)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    # Another record opened from the table moves the mark; it never stays on two rows.
+    table_row(second).click()
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", second)
+    expect(selected).to_have_count(1)
+    expect(table_row(second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    # The table is rebuilt on search; the open record's row is marked again, and the others are not.
+    page.locator("#search-input").fill("rs")
+    expect(selected).to_have_count(1)
+    expect(table_row(second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    page.locator("#search-input").fill(first)
+    expect(selected).to_have_count(0)
+    page.locator("#search-input").fill("")
+    expect(table_row(second)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    # Opened from the report instead, the same table row is the marked one.
+    _row(page, first).locator("button.lds-finding-open").click()
+    expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", first)
+    expect(selected).to_have_count(1)
+    expect(table_row(first)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+    page.locator("#btn-close-drawer").click()
+    wait_drawer_closed(page)
+    expect(selected).to_have_count(0)
+    # Opened from the keyboard (Enter, then Space on another row), the mark sits on that row alone.
+    for rsid, key in ((first, "Enter"), (second, " ")):
+        table_row(rsid).focus()
+        page.keyboard.press(key)
+        wait_drawer_open(page)
+        expect(page.locator("#drawer-rsid")).to_have_attribute("data-record-id", rsid)
+        expect(selected).to_have_count(1)
+        expect(table_row(rsid)).to_have_class(re.compile(r"(^|\s)is-selected(\s|$)"))
+        page.locator("#btn-close-drawer").click()
+        wait_drawer_closed(page)
+
+
 def test_the_open_table_fits_the_page_at_1440_and_390(loaded_page):
     page = loaded_page
     for size in ({"width": 1440, "height": 900}, NARROW):
