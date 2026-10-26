@@ -1,0 +1,55 @@
+# Fast, scoped checks on staged files. CI (.github/workflows/gates.yml) runs
+# the full gates; these hooks only run what the staged files can affect.
+# No formatter or linter: `ruff check .` already fails on files this config
+# does not touch. e2e is not a hook; CI runs it.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Only scans while a merge is in progress, so it is free otherwise.
+      - id: check-merge-conflict
+      - id: check-yaml
+        files: \.ya?ml$
+
+  - repo: local
+    hooks:
+      # Runs only the unit tests the staged files map to (tools/precommit_scope.py).
+      - id: pytest-scoped
+        name: pytest (scoped to staged files)
+        entry: python tools/precommit_scope.py
+        language: system
+        files: ^(tests/.*|.*\.py|web/.*)$
+        exclude: ^tests/e2e/
+        pass_filenames: true
+
+      # A staged node test file runs by itself.
+      - id: node-test-files
+        name: node tests (staged test files)
+        entry: node --test --test-reporter=spec
+        language: system
+        files: ^web/tests/.*\.test\.mjs$
+        pass_filenames: true
+
+      # A staged source file can break any node test, so run them all.
+      - id: node-test-src
+        name: node tests (web source changed)
+        entry: node --test --test-reporter=spec "web/tests/**/*.test.mjs"
+        language: system
+        files: ^web/src/(?!vendor/).*
+        pass_filenames: false
+
+      # The compiled CSS depends on the pages, scripts, stylesheet and the
+      # Tailwind config/input (tools/check_vendored_css.py).
+      - id: css-fresh
+        name: vendored CSS is fresh
+        entry: python tools/check_vendored_css.py
+        language: system
+        files: ^web/([^/]+\.html|src/.*\.js|src/styles\.css|tailwind\.config\.js|src/tailwind\.input\.css)$
+        pass_filenames: false
+
+      - id: kb-verify
+        name: knowledge base verifies
+        entry: python tools/build_canonical_kb.py --verify-only
+        language: system
+        files: ^(tools/curation/|tools/fixtures/|tools/build_canonical_kb\.py$|web/src/knowledge-base\.json$)
+        pass_filenames: false
