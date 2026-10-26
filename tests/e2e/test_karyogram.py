@@ -71,6 +71,13 @@ def test_load_shows_reference_only_karyogram(page):
     expect(page.locator("#btn-load-karyogram-sample")).to_have_text("Try a made-up example file")
 
 
+def test_the_page_is_the_chromosome_map_in_its_title_and_heading(page):
+    _open(page)
+    expect(page).to_have_title("Chromosome map · Lucidase")
+    expect(page.locator("main h1")).to_have_count(1)
+    expect(page.locator("main h1")).to_have_text("Chromosome map")
+
+
 def test_synthetic_sample_matches_the_file_and_the_main_app(page):
     sample_rows = _data_rows(KARYOGRAM_SAMPLE)
     lengths = {n: c["length"] for n, c in KB["assemblies"]["GRCh37"]["chromosomes"].items()}
