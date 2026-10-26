@@ -122,6 +122,60 @@ def test_demo_file_loads_through_the_file_input(page):
     expect(page.locator("#karyogram-legend")).to_contain_text("Found")
 
 
+def _caption(page):
+    """The line under the chromosome map that says what the map is drawn from."""
+    return page.locator("figure:has(#karyogram-figure) figcaption")
+
+
+def _load_named(page, name, text):
+    """Chooses a file of the given name and text through the page's file input and waits for the result."""
+    page.set_input_files(
+        "#karyogram-file-input", files=[{"name": name, "mimeType": "text/plain", "buffer": text.encode()}]
+    )
+    _wait_result(page)
+
+
+def test_the_figure_has_a_caption_that_names_the_reference_before_any_file(page):
+    _open(page)
+    expect(page.locator("figure:has(#karyogram-figure)")).to_have_count(1)
+    expect(_caption(page)).to_have_text("No file yet: the chromosomes are drawn from the GRCh38 reference.")
+
+
+def test_the_caption_says_made_up_example_only_for_the_built_in_sample(page):
+    _open(page)
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+    expect(_caption(page)).to_have_text(
+        "sample-karyogram-23andme.txt · made-up example · drawn on GRCh37 chromosome lengths."
+    )
+
+
+def test_a_file_named_like_the_sample_is_not_called_a_made_up_example(page):
+    _open(page)
+    _load_named(page, "sample-karyogram-23andme.txt", KARYOGRAM_SAMPLE.read_text(encoding="utf-8"))
+    expect(_caption(page)).to_have_text("sample-karyogram-23andme.txt · drawn on GRCh37 chromosome lengths.")
+    expect(_caption(page)).not_to_contain_text("made-up")
+
+
+def test_a_file_that_does_not_name_its_build_is_captioned_with_the_reference_it_was_drawn_on(page):
+    text = (FIXTURES / "apoe-e3e4-23andme.txt").read_text(encoding="utf-8")
+    no_build = "\n".join(line for line in text.splitlines() if "build" not in line.lower()) + "\n"
+    _open(page)
+    _load_named(page, "no-build.txt", no_build)
+    expect(_caption(page)).to_have_text(
+        "no-build.txt · no genome version in the file, so the chromosomes are drawn from the GRCh38 reference."
+    )
+
+
+def test_a_file_that_declares_GRCh38_is_captioned_with_GRCh38(page):
+    """A small synthetic file (the APOE fixture with its build header changed), never a real person's data."""
+    text = (FIXTURES / "apoe-e3e4-23andme.txt").read_text(encoding="utf-8")
+    assert "# build 37" in text
+    _open(page)
+    _load_named(page, "build-38.txt", text.replace("# build 37", "# build 38"))
+    expect(_caption(page)).to_have_text("build-38.txt · drawn on GRCh38 chromosome lengths.")
+
+
 # The design system's plain result words and their one-line help (components/core/hooks.js), verbatim.
 LEGEND_WORDS = {
     "supported_and_observed": ("Found", "Your file has the variant this check looks for."),

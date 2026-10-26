@@ -26,7 +26,10 @@ const LEGEND_ORDER = [
 ];
 
 const labels = karyogramStateLabels();
-const view = { kb: null, layout: null, worker: null, watchdog: null };
+// source: what the map shows now ({ name, isSample }), or null for the reference view; pending: the job in flight.
+// isSample is set only by the built-in sample button, so a user's file that happens to share its name is never
+// called a made-up example.
+const view = { kb: null, layout: null, worker: null, watchdog: null, source: null, pending: null };
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString("en-US");
@@ -119,6 +122,21 @@ function renderLoci(layout) {
     .join("");
 }
 
+/** One line under the figure: what it is drawn from, in the design system's wording. */
+function renderCaption(layout) {
+  const { build } = layout.geometry;
+  const source = view.source;
+  let text;
+  if (!source || !layout.sample) {
+    text = `No file yet: the chromosomes are drawn from the ${build} reference.`;
+  } else if (layout.sample.density === "unavailable") {
+    text = `${source.name} · no genome version in the file, so the chromosomes are drawn from the ${build} reference.`;
+  } else {
+    text = `${source.name} · ${source.isSample ? "made-up example · " : ""}drawn on ${build} chromosome lengths.`;
+  }
+  $("karyogram-caption").textContent = text;
+}
+
 function renderProvenance(layout) {
   const { build } = layout.geometry;
   const assembly = view.kb.assemblies[build];
@@ -134,6 +152,7 @@ function renderProvenance(layout) {
     `Knowledge base release ${view.kb.manifest.release}.`;
 }
 
+/** Draws a layout everywhere on the page: figure, key, totals, genes table, provenance and caption. */
 function render(layout) {
   view.layout = layout;
   $("karyogram-figure").innerHTML = renderKaryogramSvg(layout, { stateLabels: labels });
@@ -141,11 +160,14 @@ function render(layout) {
   renderTotals(layout);
   renderLoci(layout);
   renderProvenance(layout);
+  renderCaption(layout);
 }
 
 /** The one error path: every failure shows #karyogram-error, drops any result and goes back to the reference view. */
 function showError(message) {
   stopWorker();
+  view.source = null;
+  view.pending = null;
   $("karyogram-progress").classList.add("hidden");
   $("karyogram-error-detail").textContent = String(message || "unknown error");
   $("karyogram-error").classList.remove("hidden");
@@ -207,6 +229,7 @@ function startWorker(job, canRetry = true) {
     } else if (data.type === "karyogram") {
       stopWorker();
       try {
+        view.source = view.pending;
         render(data.layout);
         $("karyogram-progress").classList.add("hidden");
         setInputsDisabled(false);
@@ -222,7 +245,9 @@ function startWorker(job, canRetry = true) {
   return worker;
 }
 
-function processText(text, fileName) {
+/** Starts the analysis of one file's text; isSample marks the built-in example so its caption can say so. */
+function processText(text, fileName, isSample = false) {
+  view.pending = { name: fileName, isSample };
   $("karyogram-error").classList.add("hidden");
   setInputsDisabled(true);
   setViewState("loading");
@@ -264,6 +289,7 @@ function fetchSampleText() {
   return Promise.race([load, timeout]).finally(() => clearTimeout(timer));
 }
 
+/** Loads the built-in made-up example through the same path as a chosen file, flagged as the example. */
 async function loadSample() {
   try {
     $("karyogram-error").classList.add("hidden");
@@ -272,7 +298,7 @@ async function loadSample() {
     setViewState("loading");
     $("karyogram-progress").classList.remove("hidden");
     updateProgress(10, "Loading the example file...");
-    processText(await fetchSampleText(), SAMPLE_NAME);
+    processText(await fetchSampleText(), SAMPLE_NAME, true);
   } catch (err) {
     showError((err && err.message) || err);
   }
