@@ -39,6 +39,11 @@
     --wa: 80.485% 0.1242 80.16; --wac: 17.44% 0.0157 248.74; --er: 72.046% 0.1494 10.13; --erc: 17.44% 0.0157 248.74;
   }
 }
+/* "More contrast" on a dark device with no theme set: ds/colors.css re-declares the dark --line and --ink-muted under
+   :root:not([data-theme="light"]), which outranks ds/base.css's :root rule, so repeat it at that specificity. */
+@media (prefers-contrast: more) {
+  :root:not([data-theme="light"]) { --line: var(--line-strong); --ink-muted: var(--ink); }
+}
 :root,
 [data-theme] {
   /* Square boxes, 2px controls, no press bounce (lucidase.daisyui.js "shared"). */

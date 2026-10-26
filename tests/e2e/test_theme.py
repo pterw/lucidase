@@ -79,3 +79,17 @@ def test_a_legacy_light_value_does_not_pin_a_dark_device(page):
     page.locator("#btn-theme-toggle").click()
     goto_ready(page, page.base_url)
     expect(page.locator("html")).to_have_attribute("data-theme", "light")
+
+
+def test_more_contrast_strengthens_lines_on_a_dark_device_before_any_theme_is_set(page):
+    """With no data-theme (no JS, or first paint) on a dark device, "more contrast" still darkens --line to --line-strong."""
+    page.emulate_media(color_scheme="dark", contrast="more")
+    goto_ready(page, page.base_url)
+    page.evaluate("() => document.documentElement.removeAttribute('data-theme')")
+    line, strong = page.evaluate(
+        """() => {
+          const s = getComputedStyle(document.documentElement);
+          return [s.getPropertyValue("--line").trim(), s.getPropertyValue("--line-strong").trim()];
+        }"""
+    )
+    assert line == strong, (line, strong)
