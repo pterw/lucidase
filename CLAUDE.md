@@ -9,7 +9,7 @@ working here needs on top of that.
 PRs #1, #3, #2 and #5 (design-system reskin) are merged (`main` at `745b147`). Design-system PR 2 is on branch
 `feat/design-system-structure` as a draft PR. The current state, the open items and the design-system
 notes are in `docs/HANDOFF.md`; read it after `AGENTS.md`. The controller pushes only commits that passed all five
-gates, by explicit SHA, with `git push --atomic`. Implementers never push. There is no CI.
+gates, by explicit SHA, with `git push --atomic`. Implementers never push. The `Gates` workflow (`.github/workflows/gates.yml`) runs the five gates on every pull request and on pushes to `main`.
 
 Two untracked items at the repo root belong to the owner, and both are excluded locally in `.git/info/exclude`:
 - `workspace/`: the owner's separate Gemini agent's research database. Never edit, stage or plug it in. It has real
@@ -70,6 +70,13 @@ python tools/build_canonical_kb.py --verify-only
 python tools/check_vendored_css.py
 ```
 
+CI runs these commands in this order. The gates are called, in order, pytest, node, e2e, kb-verify and css-fresh.
+Pre-commit (`python -m pip install pre-commit`, then `pre-commit install` once per clone; the hooks call `python` from
+PATH) runs the checks a commit touches: the unit tests that import or name a staged file (every unit test when a shared
+test helper such as tests/conftest.py changes), the node tests when web code changes, and the vendored-CSS and
+knowledge-base checks when their inputs change. End-to-end tests run only in CI, which runs all five gates on every pull
+request. `pre-commit run --from-ref main --to-ref HEAD` runs the hooks on a branch's changes.
+
 Run e2e with a long command timeout (600000 ms). It takes about 2 minutes, longer under load, and a 120 s shell timeout
 kills it mid-run with no summary line. That looks like a failure but is not one.
 
@@ -77,7 +84,8 @@ kills it mid-run with no summary line. That looks like a failure but is not one.
 
 - Tailwind CLI: `bin/tailwindcss.exe` (v3.4.17, git-ignored). Any class change in `web/*.html` or
   `web/src/**/*.js` means regenerating `web/src/vendor/tailwind.css` with the command in `web/src/vendor/README.md`.
-  Worktrees have no `bin/`, so code phases set `TAILWIND_CLI` to the absolute path.
+  Worktrees have no `bin/`, so code phases set `TAILWIND_CLI` to the absolute path. CI downloads the pinned binary
+  and exports `TAILWIND_CLI`.
 - CSS link order is fixed: daisyUI, then `src/styles.css`, then `src/vendor/tailwind.css` (guarded by
   `tests/e2e/test_cascade.py`).
 - e2e tests serve `web/` on an ephemeral port with bundled Chromium. They stub only Typekit; the vendored CSS is real.
