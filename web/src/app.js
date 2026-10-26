@@ -1421,7 +1421,7 @@ function renderSimulator(out, seg) {
       setValue(valueEl, values[i] === null ? null : fmtPct(values[i]));
       valueEl.title = reason;
     }
-    if (barEl) barEl.style.width = values[i] === null ? "0%" : `${Math.min(100, Math.max(0, values[i] * 100))}%`;
+    if (barEl) barEl.style.transform = `scaleX(${values[i] === null ? 0 : Math.min(1, Math.max(0, values[i]))})`;
   });
   const adjustedRow = document.getElementById("drawer-sim-adjusted");
   const effEl = document.getElementById("sim-effective-risk");
@@ -1486,7 +1486,7 @@ function renderDrawerBiotools(record) {
     const maxTpm = Math.max(...b.tissues.map(([, tpm]) => tpm), 100);
 
     b.tissues.forEach(([tissue, tpm]) => {
-      const pct = Math.round((tpm / maxTpm) * 100);
+      const share = Math.round((tpm / maxTpm) * 100) / 100;
       const row = document.createElement("div");
       row.className = "lds-prob";
       row.innerHTML = `
@@ -1495,7 +1495,7 @@ function renderDrawerBiotools(record) {
           <span>${escapeHtml(tpm.toLocaleString())} TPM</span>
         </div>
         <div class="lds-prob-track lds-prob-track-thin">
-          <div class="lds-prob-bar" style="width: ${pct}%"></div>
+          <div class="lds-prob-bar" style="transform: scaleX(${share})"></div>
         </div>
       `;
       encodeEl.appendChild(row);

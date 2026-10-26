@@ -87,6 +87,8 @@ def test_apoe_e1_e4_page_shows_no_e4_inheritance_figure(loaded_page):
     )
     for element in elements:
         assert page.locator(element).inner_text().strip() == "Not available", element
+    for row in ("affected", "carrier", "wildtype"):
+        expect(page.locator(f"#sim-bar-{row}")).to_have_css("transform", "matrix(0, 0, 0, 1, 0, 0)")
     text = page.locator("#drawer-segregation-container").inner_text().lower()
     assert "inheriting the e4 allele" not in text, text
 
