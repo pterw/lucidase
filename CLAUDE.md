@@ -6,12 +6,13 @@ working here needs on top of that.
 
 ## Active work
 
-PRs #1, #3, #2, #5 (design-system reskin) and #6 (design-system structure) are merged. Branch `fix/ds-gaps` (PR #7)
-closes the gaps a review found between the app and the design system: header links "Your results" / "Chromosome map",
-the karyogram page ("Chromosome map": file button, clear, genes table, 390 px), a Topic column and an open-row mark
-in the results table, plain-words inheritance chances and notices, and the Inspector's gene and protein context
-behind a disclosure. Its decisions and non-adoptions are in `docs/HANDOFF.md` section 6. The current state, the open items and the design-system
-notes are in `docs/HANDOFF.md`; read it after `AGENTS.md`. The controller pushes only commits that passed all five
+PRs #1, #3, #2, #5 (design-system reskin), #6 (design-system structure), #7 (design-system gaps), #8 (CI, PR
+template, pre-commit, `python run.py`) and #9 are merged. `main` is at `c1f2fac`; no PR is open. PR #7 closed the gaps
+a review found between the app and the design system: header links "Your results" / "Chromosome map", the karyogram
+page ("Chromosome map": file button, clear, genes table, 390 px), a Topic column and an open-row mark in the results
+table, plain-words inheritance chances and notices, and the Inspector's gene and protein context behind a
+disclosure. Its decisions and non-adoptions are in `docs/HANDOFF.md` section 6. The current state, the open owner
+decisions and the design-system notes are in `docs/HANDOFF.md`; read it after `AGENTS.md`. The controller pushes only commits that passed all five
 gates, by explicit SHA, with `git push --atomic`. Implementers never push. The `Gates` workflow (`.github/workflows/gates.yml`) runs the five gates on every pull request and on pushes to `main`.
 
 Two untracked items at the repo root belong to the owner, and both are excluded locally in `.git/info/exclude`:
@@ -48,7 +49,7 @@ Two untracked items at the repo root belong to the owner, and both are excluded 
     Regenerate the screenshots with `python tools/capture_readme_screenshot.py`;
   - the karyogram page (ruling 13).
 - The design system lands in two steps. PR 1 (#5, merged) applied it on the existing DOM, flow and view-model
-  wording. PR 2 (`feat/design-system-structure`) brings its structure: the grouped report (Pharmacology, Health risk factors, Carrier status, Traits),
+  wording. PR 2 (#6, merged) brought its structure: the grouped report (Pharmacology, Health risk factors, Carrier status, Traits),
   the plain result words (Found, Not found, Not on your chip, Unclear, Not checked) in the view model and exports,
   the docked Inspector and the three-step StepNav.
 - Product goal: "a real useful tool that does not charge for analyzing uploaded docs". Docs and UI describe only
