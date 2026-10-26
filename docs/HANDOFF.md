@@ -1,4 +1,4 @@
-# Handoff: Lucidase, state at 2026-10-04
+# Handoff: Lucidase, state at 2026-10-26
 
 For any coding or design agent (Claude, Codex, Qwen, Kimi, Gemini and others) picking up this repository. It is
 self-contained. Read it top to bottom once. After that, use it as a reference.
@@ -6,9 +6,9 @@ self-contained. Read it top to bottom once. After that, use it as a reference.
 ```yaml
 repo: pterw/lucidase              # private; formerly "genomepulse"; GitHub redirects old URLs
 default_branch: main
-state_of_main: 481b719            # PRs #1, #3, #2, #5, #6 (design-system PR 2, 34acbe2) and #8 are merged
-open_prs: PR #7 (the design-system gap work, branch fix/ds-gaps); design-system PR 2 (#6) is merged
-next_work: owner review of PR #7; the PR 2 "Decisions to review" list stays open for the owner
+state_of_main: c1f2fac            # PRs #1, #3, #2, #5, #6, #7 (design-system gaps, fbbe09f), #8 and #9 are merged
+open_prs: none
+next_work: the owner's open decisions (the PR 2 "Decisions to review" list and the "Decisions from the design-system gap work" section, both in this file); the pending items in CLAUDE.md's "Owner decisions still pending" list
 gates: 5 commands, all must pass before any commit (section 5)
 ci: Gates                         # .github/workflows/gates.yml, on every pull request and push to main
 platform_tested: Windows 11, Python 3.13.3, Node 24, Tailwind CLI 3.4.17, Playwright bundled Chromium; CI runs on Ubuntu with requirements-ci.txt
@@ -117,10 +117,10 @@ python tools/check_vendored_css.py
 CI (the `Gates` workflow) runs these commands in this order. The gates are called pytest, node, e2e, kb-verify and
 css-fresh.
 
-Results on the design-system PR 2 branch (`feat/design-system-structure`, merged as #6), from the last full run:
-- pytest: 946 passed, 35 subtests;
-- node: 347 passed, fail 0;
-- e2e: 170 passed;
+Results on `main` at c1f2fac (PR #7 merged), from the last full run on 2026-10-26:
+- pytest: 978 passed, 35 subtests passed;
+- node: pass 369, fail 0;
+- e2e: 228 passed;
 - KB: up to date;
 - vendored CSS: up to date.
 
@@ -209,7 +209,7 @@ The rest of this section describes the provisional stack it replaced, kept for r
 - The karyogram's dot sizing is functional, not designed.
 - The UI tagline is still an open owner decision.
 
-### Decisions from the design-system gap work (branch `fix/ds-gaps`)
+### Decisions from the design-system gap work (PR #7, merged)
 
 A review compared the app with the design project and this branch closed what it found. The product decisions it
 recorded, so nobody reopens them by accident:
