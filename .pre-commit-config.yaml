@@ -30,12 +30,14 @@ repos:
         files: ^web/tests/.*\.test\.mjs$
         pass_filenames: true
 
-      # A staged source file can break any node test, so run them all.
+      # A staged source file, or a test helper (any file under web/tests/
+      # that is not itself a .test.mjs file), can break any node test, so
+      # run them all.
       - id: node-test-src
         name: node tests (web source changed)
         entry: node --test --test-reporter=spec "web/tests/**/*.test.mjs"
         language: system
-        files: ^web/src/(?!vendor/).*
+        files: ^(web/src/(?!vendor/).*|web/tests/(?!.*\.test\.mjs$).*)$
         pass_filenames: false
 
       # The compiled CSS depends on the pages, scripts, stylesheet and the
