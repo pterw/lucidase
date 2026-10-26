@@ -6,8 +6,11 @@ working here needs on top of that.
 
 ## Active work
 
-PRs #1, #3, #2 and #5 (design-system reskin) are merged (`main` at `745b147`). Design-system PR 2 is on branch
-`feat/design-system-structure` as a draft PR. The current state, the open items and the design-system
+PRs #1, #3, #2, #5 (design-system reskin) and #6 (design-system structure) are merged. Branch `fix/ds-gaps` (PR #7)
+closes the gaps a review found between the app and the design system: header links "Your results" / "Chromosome map",
+the karyogram page ("Chromosome map": file button, clear, genes table, 390 px), a Topic column and an open-row mark
+in the results table, plain-words inheritance chances and notices, and the Inspector's gene and protein context
+behind a disclosure. Its decisions and non-adoptions are in `docs/HANDOFF.md` section 6. The current state, the open items and the design-system
 notes are in `docs/HANDOFF.md`; read it after `AGENTS.md`. The controller pushes only commits that passed all five
 gates, by explicit SHA, with `git push --atomic`. Implementers never push. There is no CI.
 
