@@ -57,10 +57,10 @@ def test_load_shows_reference_only_karyogram(page):
     _open(page)
     assert page.locator("#karyogram-figure .kary-col").count() == 24
     states = page.evaluate(LOCUS_STATES)
-    assert len(states) == 14
+    assert len(states) == len(KB["loci"])
     assert set(states.values()) == {"reference"}
     expect(page.locator("#karyogram-error")).to_be_hidden()
-    expect(page.locator("#karyogram-loci-body tr")).to_have_count(14)
+    expect(page.locator("#karyogram-loci-body tr")).to_have_count(len(KB["loci"]))
     expect(page.locator("#karyogram-provenance")).to_contain_text("hg38")
     expect(page.locator("#karyogram-provenance")).to_contain_text(KB["manifest"]["release"])
     expect(page.locator("#karyogram-provenance")).to_contain_text("2026-10-03")
@@ -107,7 +107,7 @@ def test_synthetic_sample_matches_the_file_and_the_main_app(page):
     page.set_input_files("#file-input", str(KARYOGRAM_SAMPLE))
     expect(page.locator("#results-section")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
     app_states = page.evaluate(APP_LOCUS_STATES)
-    assert len(app_states) == 14
+    assert len(app_states) == len(KB["loci"])
     assert karyogram_states == app_states
 
 
@@ -209,10 +209,10 @@ def test_clear_the_file_returns_to_the_reference_view_with_nothing_left_over(pag
     assert set(page.evaluate(LOCUS_STATES).values()) == {"reference"}
     assert page.locator("#karyogram-figure .kary-bin:not(.kary-bin-empty)").count() == 0
     rows = page.locator("#karyogram-loci-body tr")
-    expect(rows).to_have_count(14)
+    expect(rows).to_have_count(len(KB["loci"]))
     assert set(rows.evaluate_all("els => els.map((r) => r.dataset.state)")) == {"reference"}
     expect(page.locator("#karyogram-legend li")).to_have_count(1)
-    expect(page.locator('#karyogram-legend [data-legend-count="reference"]')).to_have_text("14")
+    expect(page.locator('#karyogram-legend [data-legend-count="reference"]')).to_have_text(str(len(KB["loci"])))
     expect(_caption(page)).to_have_text("No file yet: the chromosomes are drawn from the GRCh38 reference.")
     expect(page.locator("#karyogram-provenance")).to_contain_text("Chromosome shapes: GRCh38.")
     expect(page.locator("#karyogram-provenance")).not_to_contain_text("matching")
@@ -278,13 +278,13 @@ def test_without_a_file_the_key_has_one_reference_row_not_four_empty_ones(page):
     expect(items).to_have_count(1)
     expect(items.first).to_have_attribute("data-legend-state", "reference")
     expect(items.first.locator("[data-legend-label]")).to_have_text("Genes this report checks")
-    expect(items.first.locator("[data-legend-count]")).to_have_text("14")
+    expect(items.first.locator("[data-legend-count]")).to_have_text(str(len(KB["loci"])))
     expect(page.locator("#karyogram-legend [data-legend-help]")).to_have_count(0)
     # The same label names the reference state in each marker's hover title, not only in the key.
     marker_titles = page.locator("#karyogram-figure svg title:not(#kary-title)").evaluate_all(
         "els => els.map((e) => e.textContent)"
     )
-    assert len(marker_titles) == 14
+    assert len(marker_titles) == len(KB["loci"])
     assert all(t.endswith(": Genes this report checks") for t in marker_titles), marker_titles
 
 
@@ -296,7 +296,7 @@ def test_with_a_file_the_key_has_the_four_results_whose_counts_add_up_to_the_gen
     expect(items).to_have_count(4)
     assert items.evaluate_all("els => els.map((e) => e.dataset.legendState)") == list(LEGEND_WORDS)
     counts = items.locator("[data-legend-count]").evaluate_all("els => els.map((e) => Number(e.textContent))")
-    assert sum(counts) == 14, counts
+    assert sum(counts) == len(KB["loci"]), counts
     by_state = {}
     for state in page.evaluate(LOCUS_STATES).values():
         by_state[state] = by_state.get(state, 0) + 1
@@ -828,7 +828,7 @@ def test_on_a_phone_the_figure_keeps_its_drawn_size_and_scrolls_inside_a_named_r
     )
     assert min(rendered) >= 11 * 0.7, rendered  # glyph boxes really are drawn at that size, not shrunk by a transform
     halos = figure.locator(".kary-locus .kary-halo").evaluate_all("els => els.map((c) => c.getBoundingClientRect().width)")
-    assert len(halos) == 14 and min(halos) >= 20, halos
+    assert len(halos) == len(KB["loci"]) and min(halos) >= 20, halos
 
     # The region takes focus and scrolls from the keyboard; the page itself never scrolls sideways.
     figure.focus()
@@ -881,7 +881,7 @@ def _assert_genes_table_never_clips(page):
     rects = page.locator("#karyogram-loci-body td, .lds-table thead th").evaluate_all(
         "els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })"
     )
-    assert len(rects) == 14 * 4 + 4
+    assert len(rects) == len(KB["loci"]) * 4 + 4
     for left, right in rects:
         assert left >= box["x"] - 0.5 and right <= box["x"] + dims["scroll"] + 0.5, (
             f"a cell lies outside the scrollable extent: {(left, right, box, dims)}"

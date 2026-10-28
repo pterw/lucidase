@@ -90,7 +90,10 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
     const col = colByName.get(l.chrom);
     const idx = binIndex(l.pos, binSize);
     const peers = groups.get(`${l.chrom}:${idx}`);
-    const x = col.x + (peers.indexOf(l.rsid) - (peers.length - 1) / 2) * LOCUS_STEP;
+    const minX = col.x - ((peers.length - 1) / 2) * LOCUS_STEP;
+    const maxX = col.x + ((peers.length - 1) / 2) * LOCUS_STEP;
+    const shift = minX < 10 ? 10 - minX : maxX > width - 10 ? width - 10 - maxX : 0;
+    const x = col.x + (peers.indexOf(l.rsid) - (peers.length - 1) / 2) * LOCUS_STEP + shift;
     const y = binY(col, idx);
     const state = sample ? sample.observations[l.rsid] : "reference";
     stateCounts.set(state, (stateCounts.get(state) ?? 0) + 1);

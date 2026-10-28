@@ -120,7 +120,7 @@ def test_exports_list_each_check_once_under_its_own_word(loaded_page, sample):
     page = loaded_page
     _analyse(page, DEMO_FILE if sample == "demo" else WILDTYPE)
     strip = {word: int(page.locator(f"#{el}").text_content().replace(",", "")) for word, el in STATE_WORDS.items()}
-    assert strip["Unclear"] == 2, "both files have two unclear checks, each also in another worker list"
+    assert strip["Unclear"] == 4, "both files have four unclear checks, each also in another worker list"
     sections = _markdown_sections(_export(page, "exportMarkdownReport"))
     ids = []
     for word, count in strip.items():
@@ -308,7 +308,7 @@ def test_tested_wildtype_rows_state_the_count_and_the_limitation(loaded_page):
     page.locator("[data-filter='negative']").click()
     dpyd = page.locator("#variants-tbody tr", has=page.locator("td:first-child:text-is('rs3918290')"))
     text = dpyd.inner_text()
-    assert "rs3918290 variant not detected (1 variant tested in DPYD)" in text
+    assert "rs3918290 variant not detected (4 variants tested in DPYD)" in text
     assert "normal" not in text.lower()
     assert "Single-variant test" in dpyd.locator("[data-role='limitation']").get_attribute("title")
     dpyd.click()
