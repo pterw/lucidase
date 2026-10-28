@@ -13,10 +13,41 @@ const TOP_PAD = 24;
 const LABEL_GAP = 14;
 const BOTTOM_PAD = 10;
 const CEN_TICK = 6;
-const LOCUS_STEP = 14;
 const R_MIN = 0.9;
 const R_MARKED_MIN = 1.6; // a bin with even one marker must read as larger than an empty bin
 const R_MARKED_SPAN = 1.6; // R_MARKED_MIN + R_MARKED_SPAN = 3.2, the busiest bin
+
+function getLocusOffset(count, index) {
+  if (count <= 1) return { dx: 0, dy: 0 };
+  if (count === 2) {
+    return { dx: index === 0 ? -6.5 : 6.5, dy: 0 };
+  }
+  if (count === 3) {
+    const pattern = [
+      { dx: -6.5, dy: -4.5 },
+      { dx: 6.5, dy: -4.5 },
+      { dx: 0, dy: 4.5 },
+    ];
+    return pattern[index];
+  }
+  if (count === 4) {
+    const pattern = [
+      { dx: -6.5, dy: -5.5 },
+      { dx: 6.5, dy: -5.5 },
+      { dx: -6.5, dy: 5.5 },
+      { dx: 6.5, dy: 5.5 },
+    ];
+    return pattern[index];
+  }
+  const colIndex = index % 2;
+  const rowIndex = Math.floor(index / 2);
+  const totalRows = Math.ceil(count / 2);
+  const dy = (rowIndex - (totalRows - 1) / 2) * 6.5;
+  if (index === count - 1 && count % 2 === 1) {
+    return { dx: 0, dy };
+  }
+  return { dx: colIndex === 0 ? -6.5 : 6.5, dy };
+}
 
 const f = (n) => n.toFixed(1);
 const esc = escapeHtml;
@@ -73,7 +104,7 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
     parts.push(g.join(""));
   }
 
-  // Loci: group by chromosome bin, spread horizontally in 10 px steps, centred on the column.
+  // Loci: group by chromosome bin, arranged in compact lane-bounded clusters.
   // A Map, not a plain object: a chromosome named "constructor" or "__proto__" must not find an Object.prototype member.
   const colByName = new Map(cols.map((c) => [c.name, c]));
   const groups = new Map();
@@ -90,11 +121,9 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
     const col = colByName.get(l.chrom);
     const idx = binIndex(l.pos, binSize);
     const peers = groups.get(`${l.chrom}:${idx}`);
-    const minX = col.x - ((peers.length - 1) / 2) * LOCUS_STEP;
-    const maxX = col.x + ((peers.length - 1) / 2) * LOCUS_STEP;
-    const shift = minX < 10 ? 10 - minX : maxX > width - 10 ? width - 10 - maxX : 0;
-    const x = col.x + (peers.indexOf(l.rsid) - (peers.length - 1) / 2) * LOCUS_STEP + shift;
-    const y = binY(col, idx);
+    const { dx, dy } = getLocusOffset(peers.length, peers.indexOf(l.rsid));
+    const x = col.x + dx;
+    const y = binY(col, idx) + dy;
     const state = sample ? sample.observations[l.rsid] : "reference";
     stateCounts.set(state, (stateCounts.get(state) ?? 0) + 1);
     parts.push(

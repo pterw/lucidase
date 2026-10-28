@@ -239,7 +239,7 @@ button.lds-step-item { cursor: pointer; }
 .lds-finding-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
 .lds-finding-topic { margin: 0; font: 700 16px/1.35 var(--font-sans); color: var(--text-body); }
 .lds-finding-gene { font: 400 13px var(--font-mono); color: var(--text-muted); }
-.lds-finding-statement { margin: 0; font: 400 16px/1.55 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-finding-statement { margin: 0; font: 400 15px/1.55 var(--font-sans); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
 .lds-finding-limit { display: flex; gap: 8px; margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--notice-ink); max-width: var(--measure-prose); }
 .lds-finding-limit > .lds-icon { width: 15px; height: 15px; margin-top: 2px; }
 .lds-finding-tech { font: 400 13px var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
@@ -358,7 +358,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-inspector { background: var(--bg-panel); border-left: 1px solid var(--border-default); color: var(--text-body);
   transition: transform var(--dur-slow) var(--ease-standard); }
 .lds-inspector-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 14px; border-bottom: 1px solid var(--border-default); }
-.lds-inspector-title { margin: 0; font: 400 26px/1.15 var(--font-serif); letter-spacing: var(--tracking-heading); color: var(--text-body); overflow-wrap: anywhere; }
+.lds-inspector-title { margin: 0; font: 400 1.25rem/1.25 var(--font-serif); letter-spacing: var(--tracking-heading); color: var(--text-body); text-wrap: balance; word-break: break-word; }
 .lds-inspector-sub { margin: 0; font: 400 13px var(--font-mono); color: var(--text-muted); }
 .lds-inspector-body { padding: 4px 20px 20px; }
 .lds-inspector-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--border-default); }
@@ -366,7 +366,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-isec-title { margin: 0 0 8px; font: 700 15px/1.3 var(--font-sans); color: var(--text-body); }
 .lds-isec-sub { margin: -4px 0 10px; font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
 .lds-isec-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.lds-isec-body { display: flex; flex-direction: column; gap: 10px; font: 400 16px/1.55 var(--font-serif); color: var(--text-body); }
+.lds-isec-body { display: flex; flex-direction: column; gap: 10px; font: 400 14px/1.5 var(--font-sans); color: var(--text-body); }
 .lds-inspector-heading { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .lds-inspector-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 2px; }
 
@@ -376,7 +376,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    below the list at full width and stops sticking. */
 .lds-results { container: lds-results / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; width: 100%; }
 .lds-results-main { flex: 1 1 560px; min-width: 0; }
-.lds-results-side { flex: 0 1 var(--inspector-w); min-width: 0; align-self: stretch; }
+.lds-results-side { flex: 0 0 var(--inspector-w); min-width: 0; align-self: stretch; margin-left: auto; }
 .lds-inspector-docked { position: sticky; top: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 32px);
   border: 1px solid var(--border-default); transition: none; }
 .lds-inspector-docked:focus { outline: none; }
@@ -420,7 +420,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .kary-bin-empty { fill: var(--border-strong); fill-opacity: 0.45; }
 .kary-cen { stroke: var(--ink-subtle); stroke-width: 1.5; }
 .kary-label { fill: var(--ink-muted); font-family: var(--font-mono); }
-.kary-halo { fill: var(--kary-fill); fill-opacity: 0.2; }
+.kary-halo { fill: var(--kary-fill); fill-opacity: 0.1; transition: fill-opacity var(--dur-fast) ease; }
 .kary-core { fill: var(--kary-fill); stroke: var(--kary-fill); stroke-width: 1; }
 .kary-state-supported_not_observed .kary-core,
 .kary-state-not_tested_by_array .kary-core { fill: var(--bg-canvas); stroke-width: 1.75; }
@@ -444,13 +444,14 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    (as the design system's Karyogram: full width, height auto), and the legend at its 560px measure. Each mark is a
    button: a pointer, the focus ring on its halo (an SVG group draws no outline), and the selected halo larger and
    stronger, as in the design system's Karyogram (8.5 to 11 of its 4.25 core, 0.2 to 0.3 opacity). */
-.lds-summary-prose { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
-/* On a narrow screen the map keeps its drawn size and scrolls sideways inside its own box (a named, focusable
-   region), never the page: 672px is the SVG's own width (24 chromosome columns of 28 units), one unit per pixel, so
-   chromosome labels stay 11px and each mark's halo 20px across. */
+.lds-summary-prose { margin: 0; font: 400 16px/1.55 var(--font-sans); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
+#summary { flex-direction: column; gap: 20px; }
+#summary .lds-section-head { flex: none; width: 100%; max-width: none; }
+#summary .lds-section-body { flex: none; width: 100%; }
 .lds-summary-map { min-width: 0; overflow-x: auto; }
 .lds-summary-map svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; }
 .lds-summary-legend { max-width: 560px; }
 .lds-summary-map .kary-locus { cursor: pointer; outline: none; }
-.lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.3; }
-.lds-summary-map .kary-locus:focus-visible .kary-halo { stroke: var(--accent); stroke-width: 2; }
+.lds-summary-map .kary-locus:hover .kary-halo { fill-opacity: 0.28; }
+.lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.35; }
+.lds-summary-map .kary-locus:focus-visible .kary-halo { stroke: var(--accent); stroke-width: 2; fill-opacity: 0.35; }
