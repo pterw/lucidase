@@ -42,8 +42,21 @@ export function classify(parseResult, kb) {
 
   const records = kb.lociList.map((locus) => {
     const calls = byRsid.get(locus.rsid) || [];
-    const call = calls[0];
-    const conflicting = calls.some((c) => !sameAlleles(c, call));
+
+    // If an array indel locus specifies allele_codes, prefer calls using those codes (D/I)
+    // over coincident SNV bystander calls that happen to share genomic coordinates.
+    let candidates = calls;
+    if (parseResult.assay !== "vcf" && locus.allele_codes) {
+      const codes = locus.allele_codes;
+      const codeCalls = calls.filter((c) => c.alleles && c.alleles.every((a) => a in codes));
+      if (codeCalls.length > 0) candidates = codeCalls;
+    }
+
+    const exact = candidates.filter((c) => c.rsid === locus.rsid);
+    if (exact.length > 0) candidates = exact;
+
+    const call = candidates[0];
+    const conflicting = call !== undefined && candidates.some((c) => !sameAlleles(c, call));
 
     let resolution;
     if (call && call.alleles !== null) {

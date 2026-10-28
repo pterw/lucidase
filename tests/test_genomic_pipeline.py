@@ -487,6 +487,28 @@ class TestAnnotation(unittest.TestCase):
         wrong = self.annotator.annotate_genome(parse_genotype_file(head.replace("GRCh38", "GRCh37") + row))
         self.assertEqual(self.record(wrong, "rs4244285").coverage_state, "not_tested_by_array")
 
+    def test_coincident_bystander_probe_does_not_conflict_with_compatible_probe(self):
+        # rs113993960 in CFTR is at 7:117199644 (GRCh37) with allele codes D/I.
+        # A 23andMe file containing a bystander SNV probe rs1801178 (AA) and the actual
+        # indel probe i4000292 (II) at the same position should resolve cleanly to wild-type.
+        from genomic_parser import ParseResult, ParseStats, Call
+        parse = ParseResult(
+            format="23andme",
+            build="GRCh37",
+            assay="array",
+            calls=[
+                Call("rs1801178", "7", 117199644, ["A", "A"]),
+                Call("i4000292", "7", 117199644, ["I", "I"]),
+            ],
+            stats=ParseStats(total_lines=2, data_rows=2, called=2),
+        )
+        report = self.annotator.annotate_genome(parse)
+        cftr = self.record(report, "rs113993960")
+        self.assertEqual(cftr.coverage_state, "supported_not_observed")
+        self.assertEqual(cftr.alt_count, 0)
+        self.assertEqual(cftr.genotype, "I/I")
+
+
 
 class TestInheritanceArithmetic(unittest.TestCase):
     """PY-S4 / PY-S5: the removed unscreened arithmetic (0.51) and the invented 0.85."""
