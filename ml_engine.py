@@ -12,6 +12,7 @@ Provides data-driven statistical and machine learning methods for NGS de Bruijn 
 
 from __future__ import annotations
 
+import itertools
 import statistics
 from collections import Counter
 
@@ -125,7 +126,7 @@ def extract_kmer_features(seq: str, k: int = 3) -> np.ndarray:
     """Extract normalized k-mer frequency vector for contig composition analysis."""
     seq = seq.upper()
     bases = "ACGT"
-    all_kmers = [a + b + c for a in bases for b in bases for c in bases]
+    all_kmers = ["".join(p) for p in itertools.product(bases, repeat=k)]
     kmer_idx = {km: i for i, km in enumerate(all_kmers)}
     vec = np.zeros(len(all_kmers), dtype=float)
     if len(seq) >= k:

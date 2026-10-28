@@ -407,3 +407,152 @@ def test_gui_and_cli_share_one_default_k():
 
     assert d.DEFAULT_K == gc.DEFAULT_K == 3
     assert "IntVar(value=DEFAULT_K)" in open(os.path.join(ROOT, "gui.py"), encoding="utf-8").read()
+
+
+# ---------------------------------------------------------------------------
+# Audited fixes: viewport autoscale, smaller nodes, label centering, gzip, k<2
+# ---------------------------------------------------------------------------
+def test_render_autoscales_viewport_and_generates_smaller_nodes():
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    kmers, notes = gc.collect_kmers("LEMONLEMONADE", "seq", 3, False, False)
+    m = gc.analyze(kmers, notes)
+    fig = Figure(figsize=(8.5, 5.6), dpi=100)
+    FigureCanvasAgg(fig)
+    gc.render(fig, m)
+    fig.canvas.draw()
+    ax = fig.axes[0]
+
+    # Pre-fix bug: render never autoscaled view limits, so y was stuck at (0.0, 1.0)
+    # and all nodes with y < 0 (half the graph) were clipped off the canvas.
+    ymin, ymax = ax.get_ylim()
+    assert ymin < -0.9, f"ymin {ymin} should encompass nodes extending to -1.0"
+    assert ymax > 0.9, f"ymax {ymax} should encompass nodes extending to +1.0"
+
+    # Node size: nodes should be smaller and not giant balloons taking 24% of canvas.
+    # Radius of nodes should be <= 0.12 in data units.
+    circles = [p for p in ax.patches if isinstance(p, gc.Circle)]
+    assert circles, "Graph should contain Circle patches for nodes"
+    assert all(c.radius <= 0.12 for c in circles), f"Node radius {[c.radius for c in circles]} is too large"
+
+
+def test_render_edge_label_positions_centered_between_nodes():
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    kmers, notes = gc.collect_kmers("AAAAAC", "seq", 3, False, False)
+    m = gc.analyze(kmers, notes)
+    fig = Figure(figsize=(8.5, 5.6), dpi=100)
+    FigureCanvasAgg(fig)
+    gc.render(fig, m)
+    fig.canvas.draw()
+    ax = fig.axes[0]
+
+    # Node AA is at (-1, 0) and AC is at (1, 0).
+    # The label for edge AA -> AC ("AAC (#4)") must be placed near the mathematical
+    # midpoint (x approx 0), not offset near x=0.5 or 1.0 from untransformed unit arrow vertices.
+    texts = [t for t in ax.texts if "AAC" in t.get_text()]
+    assert len(texts) == 1
+    t_pos = texts[0].get_position()
+    assert abs(t_pos[0]) < 0.15, f"Edge label x-position {t_pos[0]} is not centered near x=0.0"
+
+
+def test_collect_kmers_k_less_than_two_fails_fast():
+    for bad_k in [1, 0, -2]:
+        with pytest.raises(ValueError, match="k must be at least 2"):
+            gc.collect_kmers("ACGTACGT", "seq", bad_k, False, False)
+        with pytest.raises(ValueError, match="k must be at least 2"):
+            gc.collect_kmers("AC GT", "kmers", bad_k, False, False)
+
+
+def test_load_sequences_as_fasta_supports_gzip(tmp_path):
+    import gzip
+    from bio_engine import load_sequences_as_fasta
+
+    fa_gz = tmp_path / "reads.fasta.gz"
+    with gzip.open(fa_gz, "wt", encoding="utf-8") as f:
+        f.write(">r1\nACGTACGT\n>r2\nCGTACGTA\n")
+
+    text, note = load_sequences_as_fasta(str(fa_gz))
+    assert ">r1" in text and ">r2" in text
+    assert "Loaded 2 record(s)" in note
+
+    fq_gz = tmp_path / "sample.fq.gz"
+    with gzip.open(fq_gz, "wt", encoding="utf-8") as f:
+        f.write("@read1\nACGT\n+\nIIII\n")
+
+    fq_text, fq_note = load_sequences_as_fasta(str(fq_gz))
+    assert ">read1" in fq_text
+    assert "fastq" in fq_note.lower()
+
+
+def test_extract_kmer_features_arbitrary_k():
+    from ml_engine import extract_kmer_features
+
+    vec2 = extract_kmer_features("ACGTACGT", k=2)
+    assert len(vec2) == 16
+    assert abs(vec2.sum() - 1.0) < 1e-6
+
+    vec3 = extract_kmer_features("ACGTACGT", k=3)
+    assert len(vec3) == 64
+    assert abs(vec3.sum() - 1.0) < 1e-6
+
+
+def test_render_dense_graph_declutters_redundant_edge_labels_and_adapts_radius():
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    # 67 bp sequence with k=5 gives 62 nodes and 62 edges (> 25 edges)
+    seq = "AAACAAGAATACACGACTAGAGGAGTATATGATTCCCGCCTCGCGTCTGCTCTTGGGTGTGTTTAA"
+    kmers, notes = gc.collect_kmers(seq, "seq", 5, False, False)
+    m = gc.analyze(kmers, notes)
+    fig = Figure(figsize=(8.5, 5.6), dpi=100)
+    FigureCanvasAgg(fig)
+    gc.render(fig, m)
+    fig.canvas.draw()
+    ax = fig.axes[0]
+
+    # In dense graphs with >25 edges, edge labels should not overwhelm the canvas
+    # Instead of drawing 62 overlapping text boxes over nodes, only parallel, self-loop
+    # and active edges have labels.
+    edge_label_texts = [
+        t.get_text() for t in ax.texts
+        if any(char in t.get_text() for char in ["#", "AAAC", "TGTT"])
+    ]
+    assert len(edge_label_texts) < 62, f"Dense graphs should declutter non-branching edge labels, got {len(edge_label_texts)}"
+
+    # Node circles must adapt dynamically and not exceed spacing bounds
+    circles = [p for p in ax.patches if isinstance(p, gc.Circle)]
+    assert circles
+    assert all(c.radius <= 0.09 for c in circles)
+
+    # In graphs with >40 nodes, intermediate non-branching node labels are decluttered
+    node_texts = [t.get_text() for t in ax.texts if t.get_text() not in edge_label_texts]
+    assert len(node_texts) < 62, f"Dense graphs should declutter intermediate node labels, got {len(node_texts)}"
+
+
+def test_render_large_multi_copy_graph_landmarks():
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    # 4 copies of a 105 bp sequence with k=13 gives 94 nodes and 372 edges
+    seq = "ATGAACTTTATTATCAATAAAGATATTTACAATGAAATCATTAATGATAAGTTTATAAACGAATACATCAACAATAAATTTATCGATGATAGCTTCATTAACTAA\n" * 4
+    kmers, notes = gc.collect_kmers(seq, "seq", 13, False, False)
+    m = gc.analyze(kmers, notes)
+    fig = Figure(figsize=(10, 6), dpi=100)
+    FigureCanvasAgg(fig)
+    gc.render(fig, m)
+    fig.canvas.draw()
+    ax = fig.axes[0]
+
+    # Circles must be scaled and not collide
+    circles = [p for p in ax.patches if isinstance(p, gc.Circle)]
+    assert len(circles) == 94
+    assert all(c.radius <= 0.09 for c in circles)
+
+    # Parallel coverage edges (>25 edges) must not create 372 edge text labels
+    edge_labels = [t for t in ax.texts if "ATG" in t.get_text() and "#" in t.get_text()]
+    assert len(edge_labels) <= 2
+
+

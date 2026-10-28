@@ -101,6 +101,8 @@ def collect_kmers(text: str, mode: str, k: int, both: bool, unique: bool):
 
     The MAX_KMERS limit is enforced while k-mers are generated, so an oversized
     input is rejected without first building the whole list."""
+    if k < 2:
+        raise ValueError("k must be at least 2.")
     notes: list[str] = []
     if mode == "kmers":
         # FASTA header lines are dropped whole, so header words never become k-mers.
@@ -506,7 +508,7 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
     fig.clear()
     ax = fig.add_subplot(111)
     ax.set_facecolor(PITH)
-    ax.set_aspect("equal", adjustable="datalim")
+    ax.set_aspect("equal", adjustable="box")
     ax.axis("off")
 
     pos = m.pos
@@ -525,9 +527,16 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
         return
 
     n_nodes = max(len(pos), 1)
-    base_r = max(0.06, min(0.24, 1.4 / math.sqrt(n_nodes)))
-    font_s = max(6.0, min(11.0, base_r * 55))
-    edge_fs = max(5.0, min(9.5, font_s - 1.5))
+    dists = [
+        math.hypot(pos[v][0] - pos[u][0], pos[v][1] - pos[u][1])
+        for u, v in m.g.edges()
+        if u != v and u in pos and v in pos
+    ]
+    min_dist = min(dists) if dists else 0.25
+    max_r_from_dist = min_dist * 0.38
+    base_r = max(0.010, min(0.09, 0.55 / math.sqrt(n_nodes), max(0.010, max_r_from_dist)))
+    font_s = max(5.5, min(9.5, 4.2 + base_r * 50))
+    edge_fs = max(4.8, min(8.0, font_s - 1.0))
     multi_trail = len(m.trails) > 1
     upto_step = m.total if upto is None else upto
 
@@ -570,13 +579,13 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
                     if past
                     else FUTURE
                 )
-                lw = 2.6 if active else 1.8 if past else 1.0
+                lw = 2.4 if active else 1.6 if past else 1.0
                 patch = FancyArrowPatch(
                     p_start,
                     p_end,
-                    connectionstyle=f"arc3,rad=-1.3",
+                    connectionstyle="arc3,rad=-1.3",
                     arrowstyle="-|>",
-                    mutation_scale=12 if past else 9,
+                    mutation_scale=11 if past else 8,
                     color=color,
                     lw=lw,
                     zorder=3 if past else 1,
@@ -586,7 +595,7 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
                 lbl = f"{kmer} (#{g_step})" if past else kmer
                 ax.text(
                     p_mid[0],
-                    p_mid[1] + 0.04,
+                    p_mid[1] + 0.03,
                     lbl,
                     ha="center",
                     va="bottom",
@@ -594,7 +603,7 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
                     color=INK if past else FUTURE_TXT,
                     weight="bold" if active else "normal",
                     zorder=5,
-                    bbox=dict(boxstyle="round,pad=0.15", facecolor=PITH, edgecolor="none", alpha=0.8),
+                    bbox=dict(boxstyle="round,pad=0.15", facecolor=PITH, edgecolor="none", alpha=0.85),
                 )
             continue
 
@@ -610,76 +619,106 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
                 if past
                 else FUTURE
             )
-            lw = 2.8 if active else 1.8 if past else 1.0
+            lw = 2.4 if active else 1.6 if past else 1.0
             patch = FancyArrowPatch(
                 (x1, y1),
                 (x2, y2),
                 connectionstyle=f"arc3,rad={rad}",
                 arrowstyle="-|>",
-                mutation_scale=13 if past else 9,
+                mutation_scale=11 if past else 8,
                 color=color,
                 lw=lw,
-                shrinkA=base_r * 60,
-                shrinkB=base_r * 60,
+                shrinkA=base_r * 80,
+                shrinkB=base_r * 80,
                 zorder=3 if past else 1,
             )
             ax.add_patch(patch)
-            verts = patch.get_path().vertices
-            mx, my = (
-                verts[len(verts) // 2]
-                if len(verts)
-                else ((x1 + x2) / 2, (y1 + y2) / 2)
-            )
-            dx, dy = -(y2 - y1), x2 - x1
+            x12, y12 = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+            dx, dy = x2 - x1, y2 - y1
             dist = math.hypot(dx, dy) or 1.0
-            off = 0.05 * (1 if rad >= 0 else -1)
-            lx, ly = mx + dx / dist * off, my + dy / dist * off
-            kmer = m.g.edges[u, v, k_id]["kmer"]
-            lbl = f"{kmer} (#{g_step})" if past else kmer
-            ax.text(
-                lx,
-                ly,
-                lbl,
-                ha="center",
-                va="center",
-                fontsize=edge_fs,
-                color=INK if past else FUTURE_TXT,
-                weight="bold" if active else "normal",
-                zorder=5,
-                bbox=dict(boxstyle="round,pad=0.15", facecolor=PITH, edgecolor="none", alpha=0.8),
-            )
+            mx = x12 + 0.5 * rad * dy
+            my = y12 - 0.5 * rad * dx
+            if abs(rad) < 1e-4:
+                lx = mx - (dy / dist) * 0.04
+                ly = my + (dx / dist) * 0.04
+            else:
+                lx = mx + (dy / dist) * (0.04 if rad > 0 else -0.04)
+                ly = my - (dx / dist) * (0.04 if rad > 0 else -0.04)
+
+            # In dense graphs (>25 edges), avoid plastering dozens or hundreds of
+            # overlapping text boxes over straight segments or repeated coverage copies.
+            # Keep labels on the active step or self-loops in compact graphs.
+            show_label = True
+            if m.g.number_of_edges() > 25:
+                show_label = active or (u == v and len(m.g) <= 40)
+
+            if show_label:
+                kmer = m.g.edges[u, v, k_id]["kmer"]
+                lbl = f"{kmer} (#{g_step})" if past else kmer
+                ax.text(
+                    lx,
+                    ly,
+                    lbl,
+                    ha="center",
+                    va="center",
+                    fontsize=edge_fs,
+                    color=INK if past else FUTURE_TXT,
+                    weight="bold" if active else "normal",
+                    zorder=5,
+                    bbox=dict(boxstyle="round,pad=0.15", facecolor=PITH, edgecolor="none", alpha=0.85),
+                )
+
+    # Identify landmark branch / junction nodes
+    branch_nodes = set()
+    for n in m.g:
+        if len(set(m.g.predecessors(n))) > 1 or len(set(m.g.successors(n))) > 1:
+            branch_nodes.add(n)
 
     # Draw nodes
     for node, (x, y) in pos.items():
         is_start = node in m.starts
         is_end = node in m.ends
+        is_branch = node in branch_nodes
         fill = (
             LIME
             if (is_start and not is_end)
             else ORANGE
             if (is_end and not is_start)
-            else LEMON
+            else ("#E11D48" if is_branch and n_nodes > 40 else LEMON)
         )
         circ = Circle(
             (x, y),
-            base_r,
+            base_r * (1.3 if (is_start or is_end or is_branch) and n_nodes > 40 else 1.0),
             facecolor=fill,
             edgecolor=RIND,
-            linewidth=1.8,
+            linewidth=1.2 if (is_start or is_end or is_branch) and n_nodes > 40 else 1.5,
             zorder=4,
         )
         ax.add_patch(circ)
-        ax.text(
-            x,
-            y,
-            node,
-            ha="center",
-            va="center",
-            fontsize=font_s,
-            weight="bold",
-            color=INK,
-            zorder=6,
-        )
+
+        # In dense graphs (>40 nodes), suppress intermediate non-branching chain labels
+        # to avoid solid walls of text; preserve start, end, and multi-way branch nodes.
+        should_label_node = True
+        if n_nodes > 40:
+            should_label_node = is_start or is_end or is_branch
+
+        if should_label_node:
+            lbl = node if n_nodes <= 40 else (node[:3] + ".." + node[-2:] if len(node) > 7 else node)
+            ax.text(
+                x,
+                y,
+                lbl,
+                ha="center",
+                va="center",
+                fontsize=font_s,
+                weight="bold",
+                color=INK,
+                zorder=6,
+                bbox=dict(boxstyle="round,pad=0.15", facecolor=PITH, edgecolor=RIND, lw=0.6, alpha=0.9) if n_nodes > 40 else None,
+            )
+
+    ax.margins(0.12)
+    ax.autoscale_view()
 
     # Legend / Title
     elements = []
@@ -715,6 +754,19 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
                 markeredgecolor=RIND,
                 markersize=9,
                 label="end",
+            )
+        )
+    if any(node in branch_nodes for node in pos) and n_nodes > 40:
+        elements.append(
+            Line2D(
+                [0],
+                [0],
+                marker="o",
+                color="w",
+                markerfacecolor="#E11D48",
+                markeredgecolor=RIND,
+                markersize=9,
+                label="branch / junction",
             )
         )
     elements.append(Line2D([0], [0], color=FUTURE, lw=1.2, label="future edge"))
