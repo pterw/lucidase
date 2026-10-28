@@ -84,6 +84,8 @@ EXPECTED = {
     "rs2395029": (31431779, {"T", "G"}, 31464002, {"T", "G"}, "T", "G"),
     "rs1061235": (29913297, {"A", "T"}, 29945520, {"A", "T"}, "A", "T"),
     "rs9263726": (31106498, {"G", "A", "C"}, 31138721, {"G", "A", "C"}, "G", "A"),
+    "rs1799807": (165548528, {"T", "A", "C"}, 165830740, {"T", "A", "C"}, "T", "C"),
+    "rs2306283": (21329737, {"A", "C", "G", "T"}, 21176803, {"A", "C", "G", "T"}, "A", "G"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -121,7 +123,10 @@ EXPECTED_CLINVAR = {
     "rs2395029": "VCV000014910",
     "rs1061235": "VCV000029755",
     "rs9263726": "VCV003059106",
+    "rs1799807": "VCV000013215",
+    "rs2306283": "VCV000259983",
 }
+
 
 FORBIDDEN_KEYS = {"coverage_state", "sample_observation", "assay_coverage", "curation_scope"}
 INTERP_KEYS = {"category", "significance", "magnitude", "repute", "phenotype", "drug_response", "caveats"}
@@ -443,6 +448,7 @@ EXPECTED_MODELS = {
     "HLA-B": ("pharmacogenomic", False),
     "HLA-A": ("pharmacogenomic", False),
     "PSORS1C1": ("pharmacogenomic", False),
+    "BCHE": ("pharmacogenomic", False),
 }
 
 
@@ -494,7 +500,9 @@ EXPECTED_TOPICS = {
     "HLA-B": "Abacavir hypersensitivity (HLA-B*57:01)",
     "HLA-A": "Carbamazepine hypersensitivity (HLA-A*31:01)",
     "PSORS1C1": "Allopurinol hypersensitivity (HLA-B*58:01)",
+    "BCHE": "Pseudocholinesterase deficiency (anesthesia apnea)",
 }
+
 
 
 def test_every_gene_carries_its_plain_language_topic(built):
@@ -597,6 +605,7 @@ EXPECTED_TIERS = {
     "rs1801131": "Tier C", "rs4680": "Tier C",
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
     "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
+    "rs1799807": "Tier B", "rs2306283": "Tier A",
 }
 
 
@@ -622,7 +631,7 @@ def test_locus_tier_source_follows_the_gene_inheritance_model(built):
             assert locus["tier_citation"], rsid
             assert not re.search(r"PMID|doi|10\.\d{4}", locus["tier_citation"], re.I), rsid
         if gene["model"] == "pharmacogenomic":
-            assert locus["evidence"]["cpic"]["level"] == "A", rsid
+            assert locus["evidence"]["cpic"]["level"] in ("A", "B"), rsid
             assert locus["evidence"]["cpic"]["provenance"]["curation_mode"] == "manually_curated"
 
 
@@ -663,11 +672,13 @@ def test_tier_source_values_per_locus(built):
         "rs2108622", "rs2231142",
         "rs1800462", "rs1142345", "rs1800460", "rs116855232",
         "rs2395029", "rs1061235", "rs9263726",
+        "rs1799807", "rs2306283",
     }
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
         "rs1801131", "rs4680"
     }
+
 
 
 def test_qc_rejects_a_stray_curated_tier_on_a_pharmacogenomic_locus(curation):
@@ -900,7 +911,9 @@ TIERS_BEFORE_OVERLAY = {
     "rs1801131": "Tier C", "rs4680": "Tier C",
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
     "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
+    "rs1799807": "Tier B", "rs2306283": "Tier A",
 }
+
 
 
 def write_curation(tmp_path, doc):

@@ -586,6 +586,47 @@
       },
       "topic": "Alzheimer’s disease risk"
     },
+    "BCHE": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Butyrylcholinesterase / Pseudocholinesterase Deficiency",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "177400",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Catalytic α/β hydrolase fold: residues 29–532 (catalytic triad Ser226, Glu353, His466)",
+            "Tetramerization C-terminal domain: residues 533–602"
+          ],
+          "flexible_joints": "N-terminal signal peptide (residues 1–28) cleaved in mature enzyme",
+          "folding_status": "Confidently Folded Alpha/Beta Hydrolase Core",
+          "global_plddt": 93.4
+        },
+        "encode": {
+          "top_tissues": {
+            "blood": 840.2,
+            "liver": 5120.5
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000114200",
+          "sift_prediction": "tolerated (0.24)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "UniProt P06276, AlphaFold AF-P06276-F1, Ensembl ENSG00000114200",
+          "url": null
+        },
+        "uniprot_id": "P06276"
+      },
+      "topic": "Pseudocholinesterase deficiency (anesthesia apnea)"
+    },
     "CFTR": {
       "acmg_sf": false,
       "inheritance": {
@@ -2150,6 +2191,144 @@
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
     },
+    "rs1799807": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "3",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000013215",
+          "provenance": {
+            "accession": "VCV000013215.107",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T18:21:21Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=13215&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Likely pathogenic",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "succinylcholine, mivacurium",
+          "level": "B",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level B (CPIC guideline / gene-drug table for BCHE and succinylcholine/mivacurium)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 165548529,
+          "pos_grch38": 165830741,
+          "provenance": {
+            "accession": "rs1799807",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T18:21:19Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1799807"
+          }
+        },
+        "gnomad": {
+          "af": 0.016023480368587757,
+          "constraint_provenance": {
+            "accession": "BCHE",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T18:21:58Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.1904081336438848,
+          "pli": 7.554666770002979e-16,
+          "provenance": {
+            "accession": "3-165830741-T-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T18:21:27Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for BCHE; liver expression and plasma secretion)",
+            "url": null
+          },
+          "subcellular": [
+            "Secreted"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4255,
+          "mane_select_ensembl": "ENST00000264381",
+          "mane_select_refseq": "NM_000055.4",
+          "provenance": {
+            "accession": "rs1799807",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T18:21:26Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1799807?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "BCHE",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No BCHE c.293A>G (Atypical / Asp98Gly) allele detected at this position. Other BCHE deficiency variants (e.g., silent or fluoride-resistant alleles) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Succinylcholine / Mivacurium: Moderate sensitivity (mildly prolonged paralysis possible)",
+          "magnitude": 2.5,
+          "phenotype": "Heterozygous for the atypical BCHE allele (c.293A>G / p.Asp98Gly). Intermediate plasma cholinesterase activity; usually mild prolongation of neuromuscular blockade with succinylcholine or mivacurium.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Succinylcholine / Mivacurium: Severe sensitivity (prolonged apnea / post-anesthetic paralysis; ventilatory support required)",
+          "magnitude": 5.0,
+          "phenotype": "Homozygous for the atypical BCHE allele (c.293A>G / p.Asp98Gly). Markedly reduced plasma cholinesterase activity; high risk of prolonged post-anesthetic apnea (paralysis lasting 1 to 4 hours) following standard succinylcholine or mivacurium administration.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: BCHE c.293A>G (Atypical / p.Asp98Gly) is the most common cause of prolonged succinylcholine apnea, but silent (activity-deficient) alleles and other BCHE variants are not tested by this single variant.",
+      "pos_grch37": 165548529,
+      "pos_grch38": 165830741,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs1799807",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for succinylcholine and BCHE",
+      "tier_rationale": "CPIC lists BCHE and succinylcholine/mivacurium at level B; ClinVar classifies c.293A>G with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
     "rs1799853": {
       "allele_codes": null,
       "alt": "T",
@@ -3478,6 +3657,143 @@
       "rsid": "rs2231142",
       "tier_citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update",
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs2306283": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "12",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000259983",
+          "provenance": {
+            "accession": "VCV000259983.32",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T18:21:29Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=259983&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "simvastatin, atorvastatin, pravastatin, rosuvastatin",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline for SLCO1B1 and statins)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 21329738,
+          "pos_grch38": 21176804,
+          "provenance": {
+            "accession": "rs2306283",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T18:21:27Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2306283"
+          }
+        },
+        "gnomad": {
+          "af": 0.41845509539320613,
+          "constraint_provenance": {
+            "accession": "SLCO1B1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3897183564496676,
+          "pli": 1.0599735911178368e-31,
+          "provenance": {
+            "accession": "12-21176804-A-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T18:21:47Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (same gene as rs4149056; hepatocyte basolateral membrane expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Plasma membrane"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0673,
+          "mane_select_ensembl": "ENST00000256958",
+          "mane_select_refseq": "NM_006446.5",
+          "provenance": {
+            "accession": "rs2306283",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T18:21:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2306283?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "SLCO1B1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No SLCO1B1 c.388G (*1b) allele detected at this position (homozygous reference A/A). Baseline OATP1B1 transporter sequence at this locus.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Statins: Normal OATP1B1 transporter function (standard dosing guideline applies in absence of *5)",
+          "magnitude": 1.0,
+          "phenotype": "Heterozygous for SLCO1B1 c.388A>G (*1b, Asn130Asp). Normal to slightly increased hepatic statin uptake transporter function.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Statins: Normal or slightly increased hepatic uptake (standard dosing guideline applies in absence of *5)",
+          "magnitude": 1.0,
+          "phenotype": "Homozygous for SLCO1B1 c.388A>G (*1b/*1b, Asn130Asp). Preserved or slightly increased hepatic uptake of statins (atorvastatin, pravastatin, rosuvastatin, simvastatin).",
+          "repute": "Good",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant test: SLCO1B1 c.388A>G (*1b) is a common variant with normal or slightly enhanced hepatic statin uptake. It is frequently co-inherited with c.521T>C (*5) defining the *15 haplotype.",
+      "pos_grch37": 21329738,
+      "pos_grch38": 21176804,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs2306283",
+      "tier_citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update",
+      "tier_rationale": "CPIC lists SLCO1B1 and statins at level A; rs2306283 defines the *1b allele.",
       "tier_source": "cpic_level"
     },
     "rs2395029": {
@@ -5636,16 +5952,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 21,
+    "gene_count": 22,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 32,
+    "locus_count": 34,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "64ab3b3c090040a5f98fd02c94ef5df0acd0cca1b15dacb615177c69587f03b2"
+    "sha256": "37185f1663190c50316552ca2a65869505b5eef6f833b01ec9884efc96fc9381"
   },
   "schema_version": 2
 }
