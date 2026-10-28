@@ -22,7 +22,7 @@ test("reference-only layout is GRCh38, 24 chromosomes in order, loci at pos_grch
     [...CHROMOSOME_ORDER],
   );
   assert.equal(layout.geometry.chromosomes[0].length, kb.assemblies.GRCh38.chromosomes["1"].length);
-  assert.equal(layout.reference.loci.length, 25);
+  assert.equal(layout.reference.loci.length, 29);
   for (const l of layout.reference.loci) assert.equal(l.pos, kb.loci[l.rsid].pos_grch38);
   assert.equal(layout.sample, null);
   for (const l of layout.reference.loci) assert.deepEqual(Object.keys(l), ["rsid", "gene", "chrom", "pos"]);

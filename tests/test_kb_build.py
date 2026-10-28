@@ -77,6 +77,10 @@ EXPECTED = {
     "rs2231142": (89052322, {"G", "T", "A", "C"}, 88131170, {"G", "T", "A", "C"}, "G", "T"),
     "rs1801131": (11854475, {"T", "A", "C", "G"}, 11794418, {"T", "A", "C", "G"}, "T", "G"),
     "rs4680": (19951270, {"G", "A"}, 19963747, {"G", "A"}, "G", "A"),
+    "rs1800462": (18143954, {"C", "G"}, 18143723, {"C", "G"}, "C", "G"),
+    "rs1142345": (18130917, {"T", "A", "C", "G"}, 18130686, {"T", "A", "C", "G"}, "T", "C"),
+    "rs1800460": (18139227, {"C", "A", "G", "T"}, 18138996, {"C", "A", "G", "T"}, "C", "T"),
+    "rs116855232": (48619854, {"C", "T"}, 48045718, {"C", "T"}, "C", "T"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -107,6 +111,10 @@ EXPECTED_CLINVAR = {
     "rs2231142": "VCV000030389",
     "rs1801131": "VCV000003521",
     "rs4680": "VCV000017591",
+    "rs1800462": "VCV000012721",
+    "rs1142345": "VCV000012722",
+    "rs1800460": "VCV000012722",
+    "rs116855232": "VCV000225201",
 }
 
 FORBIDDEN_KEYS = {"coverage_state", "sample_observation", "assay_coverage", "curation_scope"}
@@ -380,6 +388,8 @@ EXPECTED_MODELS = {
     "MCM6": ("trait", False),
     "ALDH2": ("trait", False),
     "COMT": ("trait", False),
+    "TPMT": ("pharmacogenomic", False),
+    "NUDT15": ("pharmacogenomic", False),
 }
 
 
@@ -426,6 +436,8 @@ EXPECTED_TOPICS = {
     "MCM6": "Lactose tolerance",
     "ALDH2": "Alcohol flush reaction",
     "COMT": "Dopamine & catecholamine metabolism (COMT)",
+    "TPMT": "Thiopurine drug toxicity (TPMT)",
+    "NUDT15": "Thiopurine drug toxicity (NUDT15)",
 }
 
 
@@ -527,6 +539,7 @@ EXPECTED_TIERS = {
     "rs429358": "Tier A", "rs7412": "Tier A", "rs6025": "Tier A", "rs1799963": "Tier A",
     "rs1801133": "Tier C", "rs4988235": "Tier A", "rs671": "Tier A",
     "rs1801131": "Tier C", "rs4680": "Tier C",
+    "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
 }
 
 
@@ -590,7 +603,8 @@ def test_tier_source_values_per_locus(built):
     assert {r for r, v in sources.items() if v == "cpic_level"} == {
         "rs4244285", "rs9923231", "rs4149056", "rs3918290", "rs4986893", "rs12248560",
         "rs1799853", "rs1057910", "rs55886062", "rs67376798", "rs56038477",
-        "rs2108622", "rs2231142"
+        "rs2108622", "rs2231142",
+        "rs1800462", "rs1142345", "rs1800460", "rs116855232"
     }
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
@@ -826,6 +840,7 @@ TIERS_BEFORE_OVERLAY = {
     "rs55886062": "Tier A", "rs67376798": "Tier A", "rs56038477": "Tier A",
     "rs2108622": "Tier A", "rs2231142": "Tier A",
     "rs1801131": "Tier C", "rs4680": "Tier C",
+    "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
 }
 
 

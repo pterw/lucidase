@@ -1021,6 +1021,48 @@
       },
       "topic": "Folate metabolism (MTHFR)"
     },
+    "NUDT15": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Nudix Hydrolase 15 Deficiency / Thiopurine-Induced Early Leukopenia",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "615792",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Nudix Homology Domain: residues 8–150 (Length: 143 AAs; catalytic Nudix box motif at residues 38–59; Arg139Cys disrupts homodimer stability)"
+          ],
+          "flexible_joints": "Flexible C-terminal tail: residues 151–164",
+          "folding_status": "High-Confidence Nudix Hydrolase Dimer",
+          "global_plddt": 92.8
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 2100.0,
+            "liver": 1250.0,
+            "lymphoblastoid": 1680.0,
+            "spleen": 2450.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000136159",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "Q9NV35"
+      },
+      "topic": "Thiopurine drug toxicity (NUDT15)"
+    },
     "SLCO1B1": {
       "acmg_sf": false,
       "inheritance": {
@@ -1062,6 +1104,48 @@
         "uniprot_id": "Q9Y6L6"
       },
       "topic": "Simvastatin muscle side effects"
+    },
+    "TPMT": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Thiopurine S-Methyltransferase Deficiency / Thiopurine Toxicity",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "610460",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Catalytic Methyltransferase Core: residues 15–245 (Length: 231 AAs; binds SAM cofactor and thiopurine substrates; *2 Ala80Pro, *3B Ala154Thr, and *3C Tyr240Cys destabilize tertiary fold)"
+          ],
+          "flexible_joints": "Disordered N-terminal extension: residues 1–14",
+          "folding_status": "Confidently Folded S-Adenosylmethionine-Dependent Methyltransferase",
+          "global_plddt": 94.9
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 980.0,
+            "kidney": 1850.0,
+            "liver": 3120.0,
+            "spleen": 1420.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000137364",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P51580"
+      },
+      "topic": "Thiopurine drug toxicity (TPMT)"
     },
     "VKORC1": {
       "acmg_sf": false,
@@ -1373,6 +1457,286 @@
       "tier_citation": null,
       "tier_rationale": null,
       "tier_source": "clinvar_review"
+    },
+    "rs1142345": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012722",
+          "provenance": {
+            "accession": "VCV000012722.3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:25:26Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=12725%2C12722&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "drug response",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine / thioguanine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 18130918,
+          "pos_grch38": 18130687,
+          "provenance": {
+            "accession": "rs1142345",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:25:24Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1142345"
+          }
+        },
+        "gnomad": {
+          "af": 0.042818153345960536,
+          "constraint_provenance": {
+            "accession": "TPMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7812458989174523,
+          "pli": 0.003349644352690476,
+          "provenance": {
+            "accession": "6-18130687-T-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:25:36Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4277,
+          "mane_select_ensembl": "ENST00000309983",
+          "mane_select_refseq": "NM_000367.5",
+          "provenance": {
+            "accession": "rs1142345",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:25:36Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1142345?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "TPMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No TPMT *3C (c.719A>G) allele detected at this position. Other TPMT and NUDT15 alleles are evaluated separately.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing standard starting dose by 30–80%",
+          "magnitude": 5.5,
+          "phenotype": "One TPMT*3C (c.719A>G, p.Tyr240Cys) allele detected (*3C alone or part of composite *3A haplotype). Most common deficient allele in East Asian and African ancestries (~2–5%). Associated with intermediate TPMT activity and increased risk of thiopurine myelosuppression. CPIC recommends reducing standard starting dose by 30–80%.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or ≥90% dose reduction",
+          "magnitude": 7.0,
+          "phenotype": "Two TPMT*3C (c.719A>G) alleles detected (Poor Metabolizer phenotype). Severe deficiency in TPMT methylation causes accumulation of toxic thioguanine metabolites and life-threatening bone marrow suppression on standard thiopurine dosing. CPIC recommends alternative therapy or a ≥90% dose reduction.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers TPMT c.719A>G (*3C). Note that *3C alone defines the *3C allele, but co-occurrence with c.460G>A (rs1800460) in cis forms the composite *3A haplotype. Array data without phasing cannot distinguish *3A/*1 from *3B/*3C.",
+      "pos_grch37": 18130918,
+      "pos_grch38": 18130687,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs1142345",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs116855232": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "13",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000225201",
+          "provenance": {
+            "accession": "VCV000225201.107",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:24:45Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=225201&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 48619855,
+          "pos_grch38": 48045719,
+          "provenance": {
+            "accession": "rs116855232",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:24:44Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/116855232"
+          }
+        },
+        "gnomad": {
+          "af": 0.011740228675784585,
+          "constraint_provenance": {
+            "accession": "NUDT15",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:19Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2867519453472984,
+          "pli": 3.2711812929382365e-05,
+          "provenance": {
+            "accession": "13-48045719-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:25:10Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleoplasm"
+          ],
+          "tissues": {
+            "bone marrow": "High",
+            "liver": "Medium",
+            "lymph node": "High",
+            "spleen": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1589,
+          "mane_select_ensembl": "ENST00000258662",
+          "mane_select_refseq": "NM_018283.4",
+          "provenance": {
+            "accession": "rs116855232",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:25:09Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs116855232?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "NUDT15",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No NUDT15 *3 (c.415C>T) allele detected at this position. Does not exclude thiopurine toxicity related to other NUDT15 or TPMT variants.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing starting dose by 30–50%",
+          "magnitude": 5.5,
+          "phenotype": "One NUDT15*3 (c.415C>T, p.Arg139Cys) no-function allele detected (Intermediate Metabolizer phenotype). NUDT15 hydrolyzes cytotoxic thiopurine metabolites (dTGTP/TGTP). Reduced activity leads to excessive DNA-incorporated thioguanine and severe early-onset leukopenia, particularly prevalent in East Asian and Hispanic populations (~10–15% carrier frequency). CPIC recommends a 30–50% starting dose reduction for mercaptopurine or azathioprine.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative therapy or a ≥80–90% dose reduction",
+          "magnitude": 7.0,
+          "phenotype": "Two NUDT15*3 (c.415C>T, p.Arg139Cys) no-function alleles detected (Poor Metabolizer phenotype). Profound deficiency in NUDT15 activity causes catastrophic, life-threatening bone marrow suppression and severe alopecia shortly after initiation of standard thiopurine therapy. CPIC recommends alternative therapy or a ≥80–90% dose reduction.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers NUDT15 c.415C>T (*3), the major determinant of thiopurine-induced early leukopenia in East Asian and Hispanic ancestries. Other rare NUDT15 variants and TPMT are tested separately.",
+      "pos_grch37": 48619855,
+      "pos_grch38": 48045719,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs116855232",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
     },
     "rs12248560": {
       "allele_codes": null,
@@ -1900,6 +2264,284 @@
       "tier_citation": "EGAPP Working Group 2011 recommendation statement on Factor V Leiden and prothrombin 20210G>A testing in adults with a history of idiopathic venous thromboembolism, Genetics in Medicine",
       "tier_rationale": "Prothrombin G20210A is an established inherited risk factor for venous thromboembolism.",
       "tier_source": "curated"
+    },
+    "rs1800460": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012722",
+          "provenance": {
+            "accession": "VCV000012722.3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:23:58Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=37126%2C12722&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "drug response",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine / thioguanine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 18139228,
+          "pos_grch38": 18138997,
+          "provenance": {
+            "accession": "rs1800460",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:23:57Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1800460"
+          }
+        },
+        "gnomad": {
+          "af": 0.03508394210854833,
+          "constraint_provenance": {
+            "accession": "TPMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7812458989174523,
+          "pli": 0.003349644352690476,
+          "provenance": {
+            "accession": "6-18138997-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:25:17Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.5682,
+          "mane_select_ensembl": "ENST00000309983",
+          "mane_select_refseq": "NM_000367.5",
+          "provenance": {
+            "accession": "rs1800460",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:24:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1800460?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "TPMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No TPMT *3B (c.460G>A) allele detected at this position. Other TPMT and NUDT15 alleles are evaluated separately.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing standard starting dose by 30–80%",
+          "magnitude": 5.5,
+          "phenotype": "One TPMT*3B (c.460G>A, p.Ala154Thr) allele detected (present alone as *3B or with rs1142345 as *3A). Encodes an unstable enzyme with accelerated proteasomal degradation, reducing thiopurine clearance and predisposing to leukopenia. CPIC recommends reducing standard starting dose by 30–80%.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or ≥90% dose reduction",
+          "magnitude": 7.0,
+          "phenotype": "Two TPMT*3B (c.460G>A) alleles detected (Poor Metabolizer phenotype). Severe loss of TPMT activity leads to severe thiopurine toxicity under standard doses. CPIC recommends alternative therapy or a ≥90% dose reduction.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers TPMT c.460G>A (*3B). Co-occurrence with c.719A>G (rs1142345) in cis forms the common composite haplotype *3A. Unphased arrays cannot distinguish *3A from compound heterozygotes.",
+      "pos_grch37": 18139228,
+      "pos_grch38": 18138997,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1800460",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs1800462": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012721",
+          "provenance": {
+            "accession": "VCV000012721.105",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:40Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=12721&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "drug response",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine / thioguanine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 18143955,
+          "pos_grch38": 18143724,
+          "provenance": {
+            "accession": "rs1800462",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:22:39Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1800462"
+          }
+        },
+        "gnomad": {
+          "af": 0.002138187243491881,
+          "constraint_provenance": {
+            "accession": "TPMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7812458989174523,
+          "pli": 0.003349644352690476,
+          "provenance": {
+            "accession": "6-18143724-C-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:22:52Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.8779,
+          "mane_select_ensembl": "ENST00000309983",
+          "mane_select_refseq": "NM_000367.5",
+          "provenance": {
+            "accession": "rs1800462",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:51Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1800462?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "TPMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No TPMT *2 (c.238G>C) allele detected at this position. Other TPMT and NUDT15 alleles are evaluated separately.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing standard starting dose by 30–80%",
+          "magnitude": 5.5,
+          "phenotype": "One TPMT*2 (c.238G>C, p.Ala80Pro) non-functional allele detected (Intermediate Metabolizer phenotype if paired with a normal function allele). Substantially reduced TPMT enzyme stability leads to accumulation of cytotoxic thioguanine nucleotides on standard thiopurine therapy (azathioprine, 6-mercaptopurine, thioguanine). CPIC recommends 30–80% dosage reduction.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or ≥90% dose reduction",
+          "magnitude": 7.0,
+          "phenotype": "Two TPMT*2 (c.238G>C, p.Ala80Pro) non-functional alleles detected (Poor Metabolizer phenotype). Near-complete deficiency of TPMT methylation results in life-threatening, fatal myelosuppression with standard thiopurine dosing. CPIC strongly recommends non-thiopurine alternatives, or a ≥90% dose reduction with intensive CBC monitoring.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only TPMT c.238G>C (*2). TPMT activity also depends on other alleles (such as *3A, *3B, *3C) and NUDT15 variants that this locus alone does not determine.",
+      "pos_grch37": 18143955,
+      "pos_grch38": 18143724,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1800462",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
     },
     "rs1800562": {
       "allele_codes": null,
@@ -4439,16 +5081,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 16,
+    "gene_count": 18,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 25,
+    "locus_count": 29,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "35e3b834059ba68cd2f67ee00e3ffb7ab91cf554607bd55c29fb1f575819e7b3"
+    "sha256": "f8e8100b95f15da896c9b3def5463b700aab4621e1f4d25301682940e45e454f"
   },
   "schema_version": 2
 }
