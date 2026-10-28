@@ -363,7 +363,12 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `fae5c19` | Roadmap | `docs(roadmap): record audit remediations, roadmap, handoff updates, and gitignore` |
 | `a0994cb` | Phase 1 (Tier 2B) | `feat(kb): add TPMT and NUDT15 thiopurine pharmacogenomics (Phase 1 / Tier 2B)` |
 | `da59dc9` | Phase 2 (Tier 3) | `feat(kb): add HLA-B*57:01, HLA-A*31:01, and HLA-B*58:01 severe ADR immune tag alleles (Phase 2 / Tier 3)` |
+| `e284cd4` | P2-022 | `fix(debruijn): use approved design token for branch node styling (P2-022)` |
+| `494c717` | P1-094, P2-023 | `fix(kb): align CYP2C19, TPMT, DPYD, ABCG2, and HLA interpretations with guidelines (P1-094, P2-023)` |
+| `0b2808f` | Docs | `docs(audit): record audit ledger entries for P1-093, P1-094, P2-022, and P2-023` |
+| `7e20dcb` | P2-024 | `fix(test): eliminate focus race in karyogram keyboard file picker test (P2-024)` |
 
 ---
 
 *Ledger maintained in ISO YYYY-MM-DD order. All P0, P1 and P2 issues are remediated.*
+
