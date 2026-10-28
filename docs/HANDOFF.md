@@ -6,9 +6,9 @@ self-contained. Read it top to bottom once. After that, use it as a reference.
 ```yaml
 repo: pterw/lucidase              # private; formerly "genomepulse"; GitHub redirects old URLs
 default_branch: main
-state_of_main: c1f2fac            # PRs #1, #3, #2, #5, #6, #7 (design-system gaps, fbbe09f), #8 and #9 are merged
+state_of_main: 1ed4273            # PRs #1, #3, #2, #5, #6, #7 (design-system gaps, fbbe09f), #8, #9 and #10 are merged
 open_prs: none
-next_work: the owner's open decisions (the PR 2 "Decisions to review" list and the "Decisions from the design-system gap work" section, both in this file); the pending items in CLAUDE.md's "Owner decisions still pending" list
+next_work: the roadmap in docs/superpowers/specs/2026-10-26-lucidase-roadmap-design.md (near term: evidence and provenance per locus, build-time enrichment, PWA and offline proof, small UI fixes; then the Learn page; then tiered breadth); the owner's open decisions (the PR 2 "Decisions to review" list, the "Decisions from the design-system gap work" section, the spec's section 6, and CLAUDE.md's "Owner decisions still pending")
 gates: 5 commands, all must pass before any commit (section 5)
 ci: Gates                         # .github/workflows/gates.yml, on every pull request and push to main
 platform_tested: Windows 11, Python 3.13.3, Node 24, Tailwind CLI 3.4.17, Playwright bundled Chromium; CI runs on Ubuntu with requirements-ci.txt

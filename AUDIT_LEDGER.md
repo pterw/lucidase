@@ -131,6 +131,8 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-089 | `docs/design-handoff.md` | The handoff described behaviour the code did not have: theme storage "not wrapped in try/catch" (`theme.js` guards both), a single-page app, rows "not keyboard operable", "no focus return", a CPIC box with caveat text, a 1% minimum on simulator bars, export items as `<a>` without `href`. Most `file:line` cites were stale after the hardening merge, and several were wrong before it. | REMEDIATED (`b9bcb7c` corrects the theme, pages and storage statements; `d0a9768` re-measures 296 cites at the merged tree and corrects nine prose rows against `app.js` and `index.html`) |
 | P1-090 | `web/README.md`, `docs/design-handoff.md`, `CLAUDE.md` | `web/README.md` said the only same-origin fetch is the demo file, but the karyogram page makes a second GET of its own bundled sample (`SAMPLE_URL` in `karyogram-page.js`; `_FETCH_ALLOWED` pins both). Neither carries user data, so the privacy claim held and the count was wrong. The handoff banner named only the hardening branch. | REMEDIATED (`f6c021e` counts both bundled demo fetches and names both branches) |
 | P1-091 | `tools/fetch_upstream.py` | A failed recapture can overwrite pinned fixtures. `Capturer.run` writes the body and its meta before it checks the status, so a failed or garbage response replaces a good pinned file. Only the UCSC gzip check runs a validator before the write (see P2-015). Every other source is affected. | REMEDIATED (`9c0f4ea`) |
+| P1-092 | `web/src/core/classify.js`, `variant_annotator.py`, `web/tests/classify.test.mjs`, `tests/test_genomic_pipeline.py` | Coincident probes at the same genomic coordinates (e.g. 23andMe v5 indel probe `i4000292` and bystander SNV probe `rs1801178` at `chr7:117199644` in CFTR) both matched by position, generating conflicting alleles (`AA` vs `II`) and causing the classifier to fail closed to `unresolvable` / `call_unavailable`. | REMEDIATED (prefer exact rsID matches, and prefer calls using declared `allele_codes` (D/I) for array indel loci over coincident SNV bystander calls; verified with Python and Node regression tests) |
+
 
 ---
 
@@ -158,6 +160,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-018 | `web/src/karyogram-page.js` | A demo-sample fetch that never resolves leaves the page on its loading state. The watchdog is armed in `startWorker`, after the fetch, so nothing times the fetch out. | REMEDIATED (`1a6d14b`) |
 | P2-019 | `tools/build_canonical_kb.py`, `web/src/karyogram-view.js` | Two unreachable lookups stay loose. `build_kb(curation, upstream_root=None)` omits `assemblies` without saying so (the web loader would reject the result). `colByName` in `karyogram-view.js` is a plain object keyed by chromosome name, so `constructor` would yield NaN coordinates instead of throwing; `validateKb` now rejects such a locus first. | REMEDIATED (`cbc7444`, `1a6d14b`) |
 | P2-020 | `web/karyogram.html`, `web/src/karyogram-page.js`, `web/src/view-model.js`, `tests/e2e/test_karyogram.py` | The karyogram page's own copy mixed pipeline terms with plain language for people with a consumer DNA file: "Curated loci", "Density / Available / Unavailable", "Rows", "Mitochondrial (MT)", "Unplaced, by name", "Out of bounds", "4 Mb" and "synthetic karyogram sample". The no-sample provenance branch and the "matching your file" branch were also unpinned, so the no-file page could say "matching your file" and pass. | REMEDIATED (bf51643: legend, totals, loci heading, intro and sample button reworded; tests assert the no-sample provenance "Chromosome shapes: GRCh38." with no "matching" and no "doesn't say", and the known-build "matching your file") |
+| P2-021 | `graph_core.py`, `bio_engine.py`, `ml_engine.py`, `tests/test_debruijn.py` | de Bruijn explorer rendering, scaling and input bugs: `render()` failed to autoscale view limits causing the bottom half of graphs to be clipped off-canvas; nodes were oversized (`base_r` up to 0.24) and clustered/overlapping; dense graphs plastered hundreds of overlapping edge text boxes over nodes (especially with repeated coverage copies); node labels smothered beads in large graphs; edge labels used raw untransformed patch vertices instead of mathematical midpoints; `load_sequences_as_fasta` failed on `.gz` files with binary-read `ValueError`; `extract_kmer_features` hardcoded 3-mers ignoring parameter `k`; `collect_kmers` did not fail fast on `k < 2`. | REMEDIATED (autoscaled viewport with margins, node radii adaptively bounded by neighbor distance down to 0.010, redundant edge labels and parallel coverage copies decluttered in dense graphs, landmark node badges for start/end/junctions with branch color coding, mathematical edge midpoints for label placement, gzip file stream support, dynamic k-mer product in feature extraction, fail fast on k < 2; verified with 7 regression tests) |
 
 ---
 
@@ -336,6 +339,23 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `9c0f4ea` | P1-091 | `fix(fetch): write a recapture only after its status and body check out` |
 | `cbc7444` | P2-019 | `fix(kb): refuse a build without pinned payloads instead of omitting assemblies` |
 | `1a6d14b` | P2-018, P2-019 | `fix(karyogram): time out a sample fetch that never answers, and fail fast on an undrawn chromosome name` |
+
+
+### 2026-10-27
+
+| Commit | Scope | Description |
+|---|---|---|
+| `ba2e81c` | P1-092 | `fix(classify): resolve coincident array probe collision by allele code compatibility` |
+| `4029461` | P2-021 | `fix(debruijn): autoscale viewport, adapt node sizes, declutter dense labels, center edge labels, support gzip, and validate k` |
+
+
+### 2026-10-28
+
+| Commit | Scope | Description |
+|---|---|---|
+| `c5bf364` | Tiers 1A–4 | `feat(kb): expand knowledge base with pharmacogenomics and one-carbon metabolism (Tiers 1A, 1B, 1C, 2A, 4)` |
+| `3635cbc` | Web & E2E | `fix(web): clamp clustered karyogram marks to canvas and harmonize e2e tests` |
+
 
 ---
 

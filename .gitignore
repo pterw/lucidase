@@ -58,3 +58,4 @@ Thumbs.db
 # Local secrets (never commit)
 .env
 .env.*
+alpha_genome api.txt
