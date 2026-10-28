@@ -474,7 +474,7 @@
           ],
           "drug_response": null,
           "magnitude": 3.5,
-          "phenotype": "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic predisposition to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
+          "phenotype": "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic susceptibility to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
           "repute": "Bad",
           "significance": "Protective AD / Lipid Risk"
         },
@@ -1567,7 +1567,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No HLA-A*31:01 tag (rs1061235 T) allele detected at this position. Standard risk for carbamazepine-induced cutaneous adverse reactions. Does not evaluate HLA-B*15:02 (associated with carbamazepine SJS/TEN).",
+          "phenotype": "No HLA-A*31:01 surrogate tag (rs1061235 T) allele detected at this position. Absence of this surrogate marker does not establish drug safety or rule out carbamazepine hypersensitivity reactions (nor does it evaluate HLA-B*15:02).",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -1845,18 +1845,18 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing standard starting dose by 30–80%",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced TPMT function variant (one *3C allele; diplotyping required for dosing)",
           "magnitude": 5.5,
-          "phenotype": "One TPMT*3C (c.719A>G, p.Tyr240Cys) allele detected (*3C alone or part of composite *3A haplotype). Most common deficient allele in East Asian and African ancestries (~2–5%). Associated with intermediate TPMT activity and increased risk of thiopurine myelosuppression. CPIC recommends reducing standard starting dose by 30–80%.",
+          "phenotype": "One TPMT*3C (rs1142345) allele detected (c.719A>G, p.Tyr240Cys). Conveys loss of TPMT enzyme function from this allele. Because c.719A>G and c.460G>A (rs1800460) can occur in cis (*3A) or in trans (*3B/*3C), metabolizer status and thiopurine dosing cannot be assigned without phased diplotyping.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or ≥90% dose reduction",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or start with <=10% of normal dose",
           "magnitude": 7.0,
-          "phenotype": "Two TPMT*3C (c.719A>G) alleles detected (Poor Metabolizer phenotype). Severe deficiency in TPMT methylation causes accumulation of toxic thioguanine metabolites and life-threatening bone marrow suppression on standard thiopurine dosing. CPIC recommends alternative therapy or a ≥90% dose reduction.",
+          "phenotype": "Two TPMT*3C (rs1142345) alleles detected (c.719A>G). Two copies of this non-functional variant confer severe deficiency in TPMT methylation. CPIC strongly recommends non-thiopurine alternatives, or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
           "repute": "Bad",
           "significance": "Drug Response (Critical)"
         }
@@ -1986,18 +1986,18 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing starting dose by 30–50%",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced NUDT15 function variant (one *3 allele; diplotyping required for dosing)",
           "magnitude": 5.5,
-          "phenotype": "One NUDT15*3 (c.415C>T, p.Arg139Cys) no-function allele detected (Intermediate Metabolizer phenotype). NUDT15 hydrolyzes cytotoxic thiopurine metabolites (dTGTP/TGTP). Reduced activity leads to excessive DNA-incorporated thioguanine and severe early-onset leukopenia, particularly prevalent in East Asian and Hispanic populations (~10–15% carrier frequency). CPIC recommends a 30–50% starting dose reduction for mercaptopurine or azathioprine.",
+          "phenotype": "One NUDT15*3 (rs116855232) allele detected (c.415C>T, p.Arg139Cys). Conveys loss of NUDT15 function from this allele and increases risk of early-onset thiopurine-induced leukopenia. A metabolizer status and thiopurine dosing recommendation require full NUDT15 and TPMT diplotyping, which this single-variant test does not establish.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative therapy or a ≥80–90% dose reduction",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative therapy or start with <=10% of normal dose",
           "magnitude": 7.0,
-          "phenotype": "Two NUDT15*3 (c.415C>T, p.Arg139Cys) no-function alleles detected (Poor Metabolizer phenotype). Profound deficiency in NUDT15 activity causes catastrophic, life-threatening bone marrow suppression and severe alopecia shortly after initiation of standard thiopurine therapy. CPIC recommends alternative therapy or a ≥80–90% dose reduction.",
+          "phenotype": "Two NUDT15*3 (rs116855232) alleles detected (c.415C>T, p.Arg139Cys). Two copies of this no-function allele confer profound deficiency in NUDT15 activity and high risk of life-threatening myelosuppression. CPIC recommends alternative therapy or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
           "repute": "Bad",
           "significance": "Drug Response (Critical)"
         }
@@ -2117,25 +2117,25 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No CYP2C19 *17 allele detected at this position (-806C>T promoter variant). Baseline promoter transcription without increased expression.",
+          "phenotype": "No CYP2C19 *17 allele detected at this position (-806C>T promoter variant). Other CYP2C19 alleles (for example *2, *3) are not tested here, so a metabolizer phenotype cannot be inferred.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Clopidogrel: Increased activation / Rapid metabolism (one *17 allele)",
+          "drug_response": "Clopidogrel: Increased activation variant (one *17 allele)",
           "magnitude": 2.5,
-          "phenotype": "One CYP2C19*17 (rs12248560) allele detected. This promoter variant causes increased gene transcription and enzyme activity. Paired with *1, produces rapid metabolizer status with enhanced clopidogrel activation and accelerated clearance of select antidepressants.",
+          "phenotype": "One CYP2C19*17 (rs12248560) allele detected. This promoter variant is associated with increased transcription and elevated enzyme activity, but metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
           "repute": "Neutral",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Clopidogrel: Ultra-rapid activation (*17/*17; enhanced substrate clearance)",
+          "drug_response": "Clopidogrel: Increased activation variant (two *17 alleles)",
           "magnitude": 3.0,
-          "phenotype": "Two CYP2C19*17 (rs12248560) alleles detected (*17/*17 ultra-rapid metabolizer). Markedly elevated CYP2C19 expression. High clopidogrel active metabolite formation and rapid clearance of substrates (such as voriconazole and PPIs).",
+          "phenotype": "Two CYP2C19*17 (rs12248560) alleles detected. Two copies of this promoter variant are associated with elevated CYP2C19 expression, but metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
           "repute": "Neutral",
           "significance": "Drug Response"
         }
@@ -2398,7 +2398,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 2.5,
-          "phenotype": "HFE H63D homozygote: Slight predisposition to mildly elevated serum ferritin.",
+          "phenotype": "HFE H63D homozygote: Slight susceptibility to mildly elevated serum ferritin.",
           "repute": "Bad",
           "significance": "Risk Factor"
         }
@@ -2652,18 +2652,18 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing standard starting dose by 30–80%",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced TPMT function variant (one *3B allele; diplotyping required for dosing)",
           "magnitude": 5.5,
-          "phenotype": "One TPMT*3B (c.460G>A, p.Ala154Thr) allele detected (present alone as *3B or with rs1142345 as *3A). Encodes an unstable enzyme with accelerated proteasomal degradation, reducing thiopurine clearance and predisposing to leukopenia. CPIC recommends reducing standard starting dose by 30–80%.",
+          "phenotype": "One TPMT*3B (rs1800460) allele detected (c.460G>A, p.Ala154Thr). Conveys reduced TPMT enzyme stability and loss of function from this allele. Because c.460G>A and c.719A>G (rs1142345) can occur in cis (*3A) or in trans (*3B/*3C), metabolizer status and thiopurine dosing cannot be assigned without phased diplotyping.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or ≥90% dose reduction",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or start with <=10% of normal dose",
           "magnitude": 7.0,
-          "phenotype": "Two TPMT*3B (c.460G>A) alleles detected (Poor Metabolizer phenotype). Severe loss of TPMT activity leads to severe thiopurine toxicity under standard doses. CPIC recommends alternative therapy or a ≥90% dose reduction.",
+          "phenotype": "Two TPMT*3B (rs1800460) alleles detected (c.460G>A). Two copies of this non-functional variant confer severe deficiency in TPMT methylation. CPIC strongly recommends non-thiopurine alternatives, or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
           "repute": "Bad",
           "significance": "Drug Response (Critical)"
         }
@@ -2791,18 +2791,18 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends reducing standard starting dose by 30–80%",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced TPMT function variant (one *2 allele; diplotyping required for dosing)",
           "magnitude": 5.5,
-          "phenotype": "One TPMT*2 (c.238G>C, p.Ala80Pro) non-functional allele detected (Intermediate Metabolizer phenotype if paired with a normal function allele). Substantially reduced TPMT enzyme stability leads to accumulation of cytotoxic thioguanine nucleotides on standard thiopurine therapy (azathioprine, 6-mercaptopurine, thioguanine). CPIC recommends 30–80% dosage reduction.",
+          "phenotype": "One TPMT*2 (rs1800462) allele detected (c.238G>C, p.Ala80Pro). Conveys reduced TPMT enzyme stability and loss of function from this allele. A metabolizer status and thiopurine dosing recommendation require full TPMT and NUDT15 diplotyping, which this single-variant test does not establish.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or ≥90% dose reduction",
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or start with <=10% of normal dose",
           "magnitude": 7.0,
-          "phenotype": "Two TPMT*2 (c.238G>C, p.Ala80Pro) non-functional alleles detected (Poor Metabolizer phenotype). Near-complete deficiency of TPMT methylation results in life-threatening, fatal myelosuppression with standard thiopurine dosing. CPIC strongly recommends non-thiopurine alternatives, or a ≥90% dose reduction with intensive CBC monitoring.",
+          "phenotype": "Two TPMT*2 (rs1800462) alleles detected (c.238G>C). Two copies of this non-functional variant confer severe deficiency in TPMT methylation. CPIC strongly recommends non-thiopurine alternatives, or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
           "repute": "Bad",
           "significance": "Drug Response (Critical)"
         }
@@ -3187,7 +3187,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 2,
-          "phenotype": "MTHFR 677TT homozygote (~30% residual enzyme activity): Predisposition to elevated homocysteine if folate intake is deficient.",
+          "phenotype": "MTHFR 677TT homozygote (~30% residual enzyme activity): Susceptibility to elevated homocysteine if folate intake is deficient.",
           "repute": "Bad",
           "significance": "Trait"
         }
@@ -3454,18 +3454,18 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Rosuvastatin: Increased systemic exposure (Moderate SAMS risk; consider starting dose ≤20mg daily)",
+          "drug_response": "Rosuvastatin: Increased systemic exposure (Moderate SAMS risk; consider alternative statin if dose >20 mg daily needed)",
           "magnitude": 2.5,
-          "phenotype": "Intermediate ABCG2 transporter function (G/T, c.421C>A, p.Gln141Lys). Impaired efflux transporter activity increases systemic exposure to rosuvastatin and atorvastatin, moderately increasing risk of statin-associated musculoskeletal symptoms (SAMS). CPIC recommends considering a lower starting dose (≤20mg) for rosuvastatin.",
+          "phenotype": "Intermediate ABCG2 transporter function (G/T, c.421C>A, p.Gln141Lys). Impaired efflux transporter activity increases systemic exposure to rosuvastatin and atorvastatin, moderately increasing risk of statin-associated musculoskeletal symptoms (SAMS). CPIC recommends initiating at the desired starting dose; if doses >20 mg daily are needed, consider an alternative statin.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Rosuvastatin: High systemic exposure / myopathy risk (Initiate rosuvastatin at ≤10mg daily or switch agent)",
+          "drug_response": "Rosuvastatin: High systemic exposure / myopathy risk (Initiate rosuvastatin at <=20 mg daily or switch agent)",
           "magnitude": 4.0,
-          "phenotype": "Poor ABCG2 transporter function (T/T, c.421C>A, p.Gln141Lys). Severely impaired efflux transporter activity leads to an approximate 2-fold elevation in rosuvastatin plasma concentrations. CPIC recommends selecting an alternative statin or initiating rosuvastatin at a reduced dose (≤10mg daily).",
+          "phenotype": "Poor ABCG2 transporter function (T/T, c.421C>A, p.Gln141Lys). Severely impaired efflux transporter activity leads to an approximate 2-fold elevation in rosuvastatin plasma concentrations. CPIC recommends selecting an alternative statin or initiating rosuvastatin at a starting dose of <=20 mg daily.",
           "repute": "Bad",
           "significance": "Drug Response"
         }
@@ -3588,7 +3588,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No HLA-B*57:01 tag (rs2395029 G) allele detected at this position. Low risk for abacavir-induced hypersensitivity reaction, though rare tag-negative HLA-B*57:01 alleles may occur particularly in non-European ancestries.",
+          "phenotype": "No HLA-B*57:01 surrogate tag (rs2395029 G) allele detected at this position. Absence of this surrogate marker does not establish drug safety or rule out abacavir hypersensitivity, and does not replace diagnostic HLA-B typing.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -4397,7 +4397,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No CYP2C19 *3 allele detected at this position. Other CYP2C19 alleles (for example *2, *17) must be evaluated for full diplotype determination.",
+          "phenotype": "No CYP2C19 *3 allele detected at this position. Other CYP2C19 alleles (for example *2, *17) are not tested here, so a metabolizer phenotype cannot be inferred.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -4406,7 +4406,7 @@
           "caveats": [],
           "drug_response": "Clopidogrel: Reduced activation (one *3 non-functional allele)",
           "magnitude": 3.0,
-          "phenotype": "One CYP2C19*3 (rs4986893) allele detected. This nonsense variant (p.Trp212Ter) confers complete loss of CYP2C19 function. Impairs activation of clopidogrel; alternative antiplatelet therapy is indicated if combined with another non-functional allele.",
+          "phenotype": "One CYP2C19*3 (rs4986893) allele detected. This nonsense variant (p.Trp212Ter) is associated with loss of CYP2C19 function, but metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
@@ -4415,7 +4415,7 @@
           "caveats": [],
           "drug_response": "Clopidogrel: Impaired activation (two *3 loss-of-function alleles; alternative drug recommended)",
           "magnitude": 4.5,
-          "phenotype": "Two CYP2C19*3 (rs4986893) alleles detected. Homozygous poor metabolizer with complete lack of CYP2C19 activity. Significantly impaired clopidogrel activation; CPIC guidelines strongly recommend an alternative antiplatelet (prasugrel or ticagrelor).",
+          "phenotype": "Two CYP2C19*3 (rs4986893) alleles detected. Two copies of this nonsense variant (p.Trp212Ter) are associated with complete loss of CYP2C19 function, and CPIC indicates an alternative antiplatelet (ticagrelor/prasugrel). A metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
           "repute": "Bad",
           "significance": "Drug Response"
         }
@@ -4810,9 +4810,9 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 25% to 50%",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 50% followed by titration based on toxicity",
           "magnitude": 4,
-          "phenotype": "One DPYD c.1236G>A (rs56038477, HapB3 tag) allele detected. This exonic marker tags the HapB3 haplotype containing a deep intronic splice-altering variant, conferring decreased DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends a 25% to 50% dose reduction. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "phenotype": "One DPYD c.1236G>A (rs56038477, HapB3 tag) allele detected. This exonic marker tags the HapB3 haplotype containing a deep intronic splice-altering variant, conferring decreased DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends reducing the starting dose by 50% followed by dose titration based on clinical toxicity or therapeutic drug monitoring. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
@@ -5202,9 +5202,9 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 25% to 50%",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 50% followed by titration based on toxicity",
           "magnitude": 4,
-          "phenotype": "One DPYD c.2846A>T (rs67376798) allele detected. This decreased-function variant is associated with reduced DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends a 25% to 50% dose reduction. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "phenotype": "One DPYD c.2846A>T (rs67376798) allele detected. This decreased-function variant is associated with reduced DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends reducing the starting dose by 50% followed by dose titration based on clinical toxicity or therapeutic drug monitoring. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
           "repute": "Bad",
           "significance": "Drug Response"
         },
@@ -5462,7 +5462,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No HLA-B*58:01 tag (rs9263726 A) allele detected at this position. Significantly reduced risk for allopurinol-induced severe cutaneous adverse reactions (SCAR / SJS / TEN), though rare unlinked HLA-B*58:01 alleles may occur.",
+          "phenotype": "No HLA-B*58:01 surrogate tag (rs9263726 A) allele detected at this position. Absence of this surrogate marker does not establish drug safety or rule out allopurinol-induced severe cutaneous adverse reactions (SCAR), and does not replace diagnostic HLA-B typing.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -5645,7 +5645,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "f58fe82f398d635bcfa6c04bbc3351282091a05280d1c23b880ddb6cf3c1aa07"
+    "sha256": "64ab3b3c090040a5f98fd02c94ef5df0acd0cca1b15dacb615177c69587f03b2"
   },
   "schema_version": 2
 }

@@ -305,17 +305,19 @@ def test_lactase_count_zero_is_an_absence_not_a_phenotype(built):
 
 
 def test_cyp2c19_states_one_snp_observation_and_assigns_no_metabolizer(built):
-    """S5a-C-3: a single rs4244285 call cannot establish *1/*2 or *2/*2, so no metabolizer label is shown."""
-    interps = built["loci"]["rs4244285"]["interpretations"]
-    assert interps["1"]["phenotype"].startswith("One CYP2C19*2 (rs4244285) allele detected.")
-    assert interps["2"]["phenotype"].startswith("Two CYP2C19*2 (rs4244285) alleles detected.")
-    for count, interp in interps.items():
-        text = interp["phenotype"] + " " + (interp["drug_response"] or "")
-        assert not re.search(r"Metabolizer\s*\(|\*1/\*2|\*2/\*2", text), (count, text)
-        assert not re.search(r"(Intermediate|Poor|Normal|Rapid|Ultrarapid) Metabolizer", text), (count, text)
-    for count in ("1", "2"):
-        assert "star-allele diplotyping" in interps[count]["phenotype"], count
-    assert built["loci"]["rs4244285"]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
+    """Single CYP2C19 SNP calls (*2, *3, *17) cannot establish full diplotype, so no metabolizer label is shown."""
+    for rsid, star in (("rs4244285", "*2"), ("rs4986893", "*3"), ("rs12248560", "*17")):
+        interps = built["loci"][rsid]["interpretations"]
+        assert interps["1"]["phenotype"].startswith(f"One CYP2C19{star} ({rsid}) allele detected.")
+        assert interps["2"]["phenotype"].startswith(f"Two CYP2C19{star} ({rsid}) alleles detected.")
+        for count, interp in interps.items():
+            text = interp["phenotype"] + " " + (interp["drug_response"] or "")
+            assert not re.search(r"Metabolizer\s*\(|\*1/\*2|\*2/\*2|\*1/\*3|\*3/\*3|\*1/\*17|\*17/\*17", text), (rsid, count, text)
+            assert not re.search(r"(Intermediate|Poor|Normal|Rapid|Ultrarapid) Metabolizer", text), (rsid, count, text)
+        for count in ("1", "2"):
+            assert "star-allele diplotyping" in interps[count]["phenotype"], (rsid, count)
+        assert built["loci"][rsid]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
+
 
 
 def test_cyp2c9_states_one_snp_observation_and_assigns_no_metabolizer(built):
@@ -342,6 +344,48 @@ def test_dpyd_states_one_snp_observation_and_assigns_no_deficiency_label(built):
         text = interps[count]["phenotype"] + " " + (interps[count]["drug_response"] or "")
         assert "Deficiency" not in text, (count, text)
         assert "other DPYD variants that this array does not test" in interps[count]["phenotype"], count
+
+
+def test_tpmt_and_nudt15_state_one_snp_observation_and_withhold_unphased_dosing(built):
+    """Heterozygous TPMT and NUDT15 calls cannot assign diplotypes or unphased dosing."""
+    for rsid, star in (("rs1800462", "*2"), ("rs1142345", "*3C"), ("rs1800460", "*3B")):
+        interps = built["loci"][rsid]["interpretations"]
+        assert "diplotyping" in interps["1"]["phenotype"]
+        assert "diplotyping required" in (interps["1"]["drug_response"] or "")
+        # Must not state misleading reduction "by 30-80%"
+        assert "reducing standard starting dose by 30" not in (interps["1"]["drug_response"] or "")
+
+    nudt15 = built["loci"]["rs116855232"]["interpretations"]
+    assert "diplotyping" in nudt15["1"]["phenotype"]
+    assert "diplotyping required" in (nudt15["1"]["drug_response"] or "")
+
+
+def test_dpyd_starting_dose_reduction_matches_cpic_2018_update(built):
+    """Nov 2018 CPIC update recommends reducing starting dose by 50% (replacing 25-50%)."""
+    for rsid in ("rs67376798", "rs56038477"):
+        interps = built["loci"][rsid]["interpretations"]
+        assert "50%" in interps["1"]["phenotype"]
+        assert "25%" not in interps["1"]["phenotype"]
+        assert "50%" in interps["1"]["drug_response"]
+        assert "25%" not in interps["1"]["drug_response"]
+
+
+def test_hla_tag_alleles_keep_negative_results_scoped_to_tested_marker(built):
+    """Negative HLA surrogate markers must never assert low patient risk or drug safety."""
+    for rsid in ("rs2395029", "rs1061235", "rs9263726"):
+        interp0 = built["loci"][rsid]["interpretations"]["0"]
+        text = interp0["phenotype"]
+        assert not re.search(r"(Low|Standard|Significantly reduced) risk", text, re.IGNORECASE), (rsid, text)
+        assert "does not establish drug safety" in text, (rsid, text)
+
+
+def test_abcg2_rosuvastatin_dose_matches_cpic_single_gene_table(built):
+    """ABCG2 poor function alone recommends <=20mg (<=10mg is only with SLCO1B1 decreased/poor)."""
+    interps = built["loci"]["rs2231142"]["interpretations"]
+    assert "<=20 mg" in (interps["2"]["drug_response"] or "")
+    assert "<=10 mg" not in (interps["2"]["drug_response"] or "")
+    assert "desired starting dose" in interps["1"]["phenotype"]
+
 
 
 def test_apoe_wording_labels_relative_and_absolute_risk_apart(built):
