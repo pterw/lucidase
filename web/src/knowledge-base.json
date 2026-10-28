@@ -967,6 +967,96 @@
       },
       "topic": "Haemochromatosis (iron overload)"
     },
+    "HLA-A": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Carbamazepine Hypersensitivity / SJS / TEN / DRESS",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "608579",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "alpha-1 and alpha-2 Antigen Binding Cleft: residues 25–205 (binds antigenic self/foreign peptides and interacts with carbamazepine)",
+            "alpha-3 Domain: residues 206–298 (immunoglobulin-like fold binding beta-2M)",
+            "Transmembrane Domain: residues 309–332",
+            "Cytoplasmic Domain: residues 333–365"
+          ],
+          "flexible_joints": "Flexible connecting loop between alpha-2 and alpha-3 (residues 202–206)",
+          "folding_status": "Confidently Folded MHC Class I Antigen Presenting Core",
+          "global_plddt": 87.1
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 6150.0,
+            "lymph node": 9120.0,
+            "peripheral blood": 5820.0,
+            "spleen": 8640.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000206503",
+          "sift_prediction": "not applicable (3' UTR variant)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P04439"
+      },
+      "topic": "Carbamazepine hypersensitivity (HLA-A*31:01)"
+    },
+    "HLA-B": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Abacavir Hypersensitivity Reaction",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "608107",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Extracellular alpha-1 and alpha-2 Domains: residues 25–205 (forms the antigen recognition cleft where abacavir binds non-covalently in the F-pocket)",
+            "Extracellular alpha-3 Immunoglobulin-like Domain: residues 206–299 (binds beta-2 microglobulin and CD8 co-receptor)",
+            "Transmembrane Region: residues 309–332",
+            "Cytoplasmic Tail: residues 333–362"
+          ],
+          "flexible_joints": "Inter-domain linker between alpha-2 and alpha-3 domains (residues 201–205)",
+          "folding_status": "Confidently Folded MHC Class I Antigen Recognition Heterodimer",
+          "global_plddt": 88.1
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 5930.0,
+            "lung": 4210.0,
+            "lymph node": 7850.0,
+            "spleen": 8420.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000234745",
+          "sift_prediction": "not applicable (tag SNP)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P01889"
+      },
+      "topic": "Abacavir hypersensitivity (HLA-B*57:01)"
+    },
     "MCM6": {
       "acmg_sf": false,
       "inheritance": {
@@ -1062,6 +1152,49 @@
         "uniprot_id": "Q9NV35"
       },
       "topic": "Thiopurine drug toxicity (NUDT15)"
+    },
+    "PSORS1C1": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Allopurinol Severe Cutaneous Adverse Reactions (SCAR) / SJS / TEN",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "614588",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "N-terminal Putative Structured Segment: residues 1–45 (contains p.Arg37His / rs9263726 missense site)",
+            "Disordered C-terminal Region: residues 46–152 (highly flexible non-globular segment)"
+          ],
+          "flexible_joints": "Extended flexible region (residues 46–152)",
+          "folding_status": "Intrinsically Disordered MHC-Linked Regulatory Protein",
+          "global_plddt": 59.4
+        },
+        "encode": {
+          "top_tissues": {
+            "esophagus": 1940.0,
+            "lymph node": 980.0,
+            "skin": 2850.0,
+            "spleen": 1120.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000204540",
+          "sift_prediction": "tolerated (0.65)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "Q9UBC0"
+      },
+      "topic": "Allopurinol hypersensitivity (HLA-B*58:01)"
     },
     "SLCO1B1": {
       "acmg_sf": false,
@@ -1324,6 +1457,147 @@
       "rsid": "rs1057910",
       "tier_citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update",
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs1061235": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000029755",
+          "provenance": {
+            "accession": "VCV000029755.1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:16Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=29755&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "risk factor",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "carbamazepine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 29913298,
+          "pos_grch38": 29945521,
+          "provenance": {
+            "accession": "rs1061235",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T15:41:15Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1061235"
+          }
+        },
+        "gnomad": {
+          "af": 0.007888639737625085,
+          "constraint_provenance": {
+            "accession": "HLA-A",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:42:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.9556726835240154,
+          "pli": 1.6434119619635055e-07,
+          "provenance": {
+            "accession": "6-29945521-A-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T15:41:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "lymph node": "High",
+            "peripheral blood": "Medium",
+            "spleen": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000376809",
+          "mane_select_refseq": "NM_002116.8",
+          "provenance": {
+            "accession": "rs1061235",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:17Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1061235?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "HLA-A",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HLA-A*31:01 tag (rs1061235 T) allele detected at this position. Standard risk for carbamazepine-induced cutaneous adverse reactions. Does not evaluate HLA-B*15:02 (associated with carbamazepine SJS/TEN).",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Carbamazepine: If carbamazepine-naive, consider alternative agent not associated with HLA-A*31:01 reactions.",
+          "magnitude": 7.0,
+          "phenotype": "One HLA-A*31:01 tag (rs1061235 T) allele detected. Significantly increased risk for carbamazepine-induced cutaneous adverse reactions, including DRESS (Drug Reaction with Eosinophilia and Systemic Symptoms), Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), and maculopapular eruptions. CPIC recommends alternative anticonvulsant therapy if patient is carbamazepine-naive.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Carbamazepine: If carbamazepine-naive, avoid carbamazepine and use alternative anticonvulsant therapy.",
+          "magnitude": 7.0,
+          "phenotype": "Two HLA-A*31:01 tag (rs1061235 T) alleles detected. High risk for carbamazepine-induced DRESS, SJS, TEN, and severe hypersensitivity. CPIC recommends alternative anticonvulsants if patient is carbamazepine-naive.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant tag test: rs1061235 (3' UTR) is a surrogate marker for HLA-A*31:01. Does not detect HLA-B*15:02 (tested separately for carbamazepine SJS/TEN risk) and does not replace diagnostic sequence-based HLA typing.",
+      "pos_grch37": 29913298,
+      "pos_grch38": 29945521,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs1061235",
+      "tier_citation": "CPIC guideline for carbamazepine and HLA-A and HLA-B, 2014 update (Leckband et al., Clinical Pharmacology and Therapeutics)",
+      "tier_rationale": "CPIC Guideline for Carbamazepine and Oxcarbazepine with HLA-A and HLA-B (Level A).",
       "tier_source": "cpic_level"
     },
     "rs113993960": {
@@ -3206,6 +3480,147 @@
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
     },
+    "rs2395029": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000014910",
+          "provenance": {
+            "accession": "VCV000014910.5",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:13Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=14910&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "Conflicting classifications of pathogenicity",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "abacavir",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 31431780,
+          "pos_grch38": 31464003,
+          "provenance": {
+            "accession": "rs2395029",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T15:41:12Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2395029"
+          }
+        },
+        "gnomad": {
+          "af": 0.02866843584139869,
+          "constraint_provenance": {
+            "accession": "HLA-B",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:42:04Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0077872489667163,
+          "pli": 1.469637089807812e-08,
+          "provenance": {
+            "accession": "6-31464003-T-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T15:41:14Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "lung": "Medium",
+            "lymph node": "High",
+            "spleen": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": null,
+          "mane_select_refseq": null,
+          "provenance": {
+            "accession": "rs2395029",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:14Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2395029?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "HLA-B",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HLA-B*57:01 tag (rs2395029 G) allele detected at this position. Low risk for abacavir-induced hypersensitivity reaction, though rare tag-negative HLA-B*57:01 alleles may occur particularly in non-European ancestries.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Abacavir: Contraindicated. Use an alternative antiretroviral regimen not containing abacavir.",
+          "magnitude": 8.5,
+          "phenotype": "One HLA-B*57:01 tag (rs2395029 G) allele detected. Carriage of HLA-B*57:01 is associated with a 45–55% absolute risk of life-threatening abacavir hypersensitivity reaction (fever, severe rash, constitutional symptoms, gastrointestinal and respiratory distress). Rechallenge after reaction can be fatal. CPIC and FDA strongly mandate abacavir contraindication.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Abacavir: Contraindicated. Select an alternative antiretroviral regimen.",
+          "magnitude": 8.5,
+          "phenotype": "Two HLA-B*57:01 tag (rs2395029 G) alleles detected. Severe, life-threatening risk for abacavir-induced hypersensitivity reaction. CPIC and FDA strongly mandate that abacavir is contraindicated.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant tag test: rs2395029 (c.5534+294T>G in HCP5) is an array surrogate in strong linkage disequilibrium with HLA-B*57:01 (near 100% negative predictive value in European and Hispanic ancestries, ~90–95% in African ancestry). This assay does not substitute for sequence-based HLA typing.",
+      "pos_grch37": 31431780,
+      "pos_grch38": 31464003,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs2395029",
+      "tier_citation": "CPIC guideline for HLA-B and abacavir, 2014 update (Martin et al., Clinical Pharmacology and Therapeutics)",
+      "tier_rationale": "CPIC Guideline for HLA-B and Abacavir (Level A); FDA boxed warning mandates HLA-B*57:01 screening prior to abacavir initiation.",
+      "tier_source": "cpic_level"
+    },
     "rs3918290": {
       "allele_codes": null,
       "alt": "T",
@@ -4940,6 +5355,146 @@
       "tier_rationale": "APOE e2 vs e3/e4 effects on Alzheimer risk and type III hyperlipoproteinemia are replicated in large meta-analyses.",
       "tier_source": "curated"
     },
+    "rs9263726": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV003059106",
+          "provenance": {
+            "accession": "VCV003059106.2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:19Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=3059106&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "Benign",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "allopurinol",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 31106499,
+          "pos_grch38": 31138722,
+          "provenance": {
+            "accession": "rs9263726",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T15:41:18Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/9263726"
+          }
+        },
+        "gnomad": {
+          "af": 0.12610426884469603,
+          "constraint_provenance": {
+            "accession": "PSORS1C1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:42:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3993626661951688,
+          "pli": 0.00873418090649623,
+          "provenance": {
+            "accession": "6-31138722-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T15:41:55Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "esophagus": "Medium",
+            "lymph node": "Low",
+            "skin": "Medium",
+            "spleen": "Low"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000259881",
+          "mane_select_refseq": "NM_014068.3",
+          "provenance": {
+            "accession": "rs9263726",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:54Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs9263726?content-type=application/json&mane=1&canonical=1&hgvs=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "PSORS1C1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HLA-B*58:01 tag (rs9263726 A) allele detected at this position. Significantly reduced risk for allopurinol-induced severe cutaneous adverse reactions (SCAR / SJS / TEN), though rare unlinked HLA-B*58:01 alleles may occur.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Allopurinol: Contraindicated. Consider non-allopurinol urate-lowering alternatives such as febuxostat.",
+          "magnitude": 8.0,
+          "phenotype": "One HLA-B*58:01 tag (rs9263726 A) allele detected. Highly elevated risk (OR ~80–100) for allopurinol-induced severe cutaneous adverse reactions (SCAR), including Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), and DRESS. High mortality rate (up to 25%). CPIC and ACR guidelines recommend allopurinol is contraindicated; consider alternative urate-lowering therapy (e.g., febuxostat).",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Allopurinol: Contraindicated. Avoid allopurinol and select alternative urate-lowering therapy.",
+          "magnitude": 8.0,
+          "phenotype": "Two HLA-B*58:01 tag (rs9263726 A) alleles detected. Severe, critical risk for allopurinol-induced SCAR (SJS/TEN/DRESS). CPIC and ACR guidelines strongly advise avoiding allopurinol; use non-allopurinol urate-lowering alternatives.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant tag test: rs9263726 (c.110G>A, p.Arg37His in PSORS1C1) is an array surrogate in strong linkage disequilibrium with HLA-B*58:01 in Asian and European ancestries. It does not replace direct sequence-based HLA-B typing.",
+      "pos_grch37": 31106499,
+      "pos_grch38": 31138722,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs9263726",
+      "tier_citation": "CPIC guideline for allopurinol and HLA-B, 2015 update (Hershfield et al., Clinical Pharmacology and Therapeutics)",
+      "tier_rationale": "CPIC Guideline for Allopurinol and HLA-B (Level A). High-risk allele for allopurinol-induced severe cutaneous adverse reactions (SCAR).",
+      "tier_source": "cpic_level"
+    },
     "rs9923231": {
       "allele_codes": null,
       "alt": "T",
@@ -5081,16 +5636,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 18,
+    "gene_count": 21,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 29,
+    "locus_count": 32,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "f8e8100b95f15da896c9b3def5463b700aab4621e1f4d25301682940e45e454f"
+    "sha256": "f58fe82f398d635bcfa6c04bbc3351282091a05280d1c23b880ddb6cf3c1aa07"
   },
   "schema_version": 2
 }

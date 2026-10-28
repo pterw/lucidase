@@ -81,6 +81,9 @@ EXPECTED = {
     "rs1142345": (18130917, {"T", "A", "C", "G"}, 18130686, {"T", "A", "C", "G"}, "T", "C"),
     "rs1800460": (18139227, {"C", "A", "G", "T"}, 18138996, {"C", "A", "G", "T"}, "C", "T"),
     "rs116855232": (48619854, {"C", "T"}, 48045718, {"C", "T"}, "C", "T"),
+    "rs2395029": (31431779, {"T", "G"}, 31464002, {"T", "G"}, "T", "G"),
+    "rs1061235": (29913297, {"A", "T"}, 29945520, {"A", "T"}, "A", "T"),
+    "rs9263726": (31106498, {"G", "A", "C"}, 31138721, {"G", "A", "C"}, "G", "A"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -115,6 +118,9 @@ EXPECTED_CLINVAR = {
     "rs1142345": "VCV000012722",
     "rs1800460": "VCV000012722",
     "rs116855232": "VCV000225201",
+    "rs2395029": "VCV000014910",
+    "rs1061235": "VCV000029755",
+    "rs9263726": "VCV003059106",
 }
 
 FORBIDDEN_KEYS = {"coverage_state", "sample_observation", "assay_coverage", "curation_scope"}
@@ -390,6 +396,9 @@ EXPECTED_MODELS = {
     "COMT": ("trait", False),
     "TPMT": ("pharmacogenomic", False),
     "NUDT15": ("pharmacogenomic", False),
+    "HLA-B": ("pharmacogenomic", False),
+    "HLA-A": ("pharmacogenomic", False),
+    "PSORS1C1": ("pharmacogenomic", False),
 }
 
 
@@ -438,6 +447,9 @@ EXPECTED_TOPICS = {
     "COMT": "Dopamine & catecholamine metabolism (COMT)",
     "TPMT": "Thiopurine drug toxicity (TPMT)",
     "NUDT15": "Thiopurine drug toxicity (NUDT15)",
+    "HLA-B": "Abacavir hypersensitivity (HLA-B*57:01)",
+    "HLA-A": "Carbamazepine hypersensitivity (HLA-A*31:01)",
+    "PSORS1C1": "Allopurinol hypersensitivity (HLA-B*58:01)",
 }
 
 
@@ -540,6 +552,7 @@ EXPECTED_TIERS = {
     "rs1801133": "Tier C", "rs4988235": "Tier A", "rs671": "Tier A",
     "rs1801131": "Tier C", "rs4680": "Tier C",
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
+    "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
 }
 
 
@@ -604,7 +617,8 @@ def test_tier_source_values_per_locus(built):
         "rs4244285", "rs9923231", "rs4149056", "rs3918290", "rs4986893", "rs12248560",
         "rs1799853", "rs1057910", "rs55886062", "rs67376798", "rs56038477",
         "rs2108622", "rs2231142",
-        "rs1800462", "rs1142345", "rs1800460", "rs116855232"
+        "rs1800462", "rs1142345", "rs1800460", "rs116855232",
+        "rs2395029", "rs1061235", "rs9263726",
     }
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
@@ -841,6 +855,7 @@ TIERS_BEFORE_OVERLAY = {
     "rs2108622": "Tier A", "rs2231142": "Tier A",
     "rs1801131": "Tier C", "rs4680": "Tier C",
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
+    "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
 }
 
 

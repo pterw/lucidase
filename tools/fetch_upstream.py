@@ -81,6 +81,9 @@ RSIDS = (
     "rs1142345",
     "rs1800460",
     "rs116855232",
+    "rs2395029",
+    "rs1061235",
+    "rs9263726",
 )
 # Gene symbols behind the loci ("MCM6 / LCT" is queried as both genes).
 GENES = (
@@ -103,6 +106,9 @@ GENES = (
     "COMT",
     "TPMT",
     "NUDT15",
+    "HLA-B",
+    "HLA-A",
+    "PSORS1C1",
 )
 
 DEFAULT_OUT = Path(__file__).resolve().parent / "fixtures" / "upstream" / "real"
@@ -399,9 +405,9 @@ def _capture_locus(cap: Capturer, rsid: str) -> None:
     # as evidence under its own key (a meta with no body), never over the pinned `<rsid>.meta.json`, and the request
     # is repeated once without the flag; that repeat must be 200.
     spec = vep_request(rsid)
-    status, body, _ = cap.run("ensembl", rsid, spec, allow_status=(400,))
-    if status == 400:
-        cap.log(f"{rsid}: VEP rejected request; error payload kept in meta, retrying without AlphaMissense")
+    status, body, _ = cap.run("ensembl", rsid, spec, allow_status=(400, 500))
+    if status in (400, 500):
+        cap.log(f"{rsid}: VEP rejected request (status {status}); error payload kept in meta, retrying without AlphaMissense")
         write_capture(cap.out_dir, "ensembl", f"{rsid}.alphamissense_rejected", spec, status, body)
         cap.run("ensembl", rsid, vep_request(rsid, alphamissense=False))
 
