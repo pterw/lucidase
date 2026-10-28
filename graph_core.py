@@ -61,6 +61,7 @@ FUTURE = "#D6CBA0"  # not-yet-traversed edges
 FUTURE_TXT = "#B3A678"
 PANEL = "#FFF1BF"
 TRAIL_COLORS = ["#2F7D32", "#D9480F", "#C2255C", "#1C7ED6", "#9C36B5", "#8C6D1F"]
+BRANCH = "#B53A55"  # branch / junction node in dense graphs (design system --state-insufficient token)
 
 DEFAULT_K = 3  # the one default k for the GUI, the Python API and the CLI
 MAX_KMERS = 500_000  # cap for total k-mers (raised for real assembly use)
@@ -684,7 +685,7 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
             if (is_start and not is_end)
             else ORANGE
             if (is_end and not is_start)
-            else ("#E11D48" if is_branch and n_nodes > 40 else LEMON)
+            else (BRANCH if is_branch and n_nodes > 40 else LEMON)
         )
         circ = Circle(
             (x, y),
@@ -763,7 +764,7 @@ def render(fig: Figure, m: Model, upto: int | None = None) -> None:
                 [0],
                 marker="o",
                 color="w",
-                markerfacecolor="#E11D48",
+                markerfacecolor=BRANCH,
                 markeredgecolor=RIND,
                 markersize=9,
                 label="branch / junction",
