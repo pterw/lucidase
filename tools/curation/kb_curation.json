@@ -504,6 +504,155 @@
       "insights_provenance": {
         "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values) carried over from the previous web knowledge base; not verified against upstream"
       }
+    },
+    "CYP2C9": {
+      "topic": "Warfarin and phenytoin metabolism",
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Warfarin / Phenytoin Sensitivity",
+        "omim": "601130",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P11712",
+        "alphafold": {
+          "global_plddt": 91.5,
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
+          "domains": [
+            "Transmembrane Anchor: residues 1–44",
+            "Catalytic P450 Core: residues 45–490 (Heme-binding Cys435)"
+          ],
+          "flexible_joints": "Substrate recognition loops B-C and F-G"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000138109",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 4250.0,
+            "small intestine": 320.0
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream"
+      }
+    },
+    "CYP4F2": {
+      "topic": "Warfarin dose requirement (CYP4F2)",
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Warfarin Sensitivity / Dose Requirement",
+        "omim": "604770",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P78329",
+        "alphafold": {
+          "global_plddt": 90.8,
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
+          "domains": [
+            "N-terminal Transmembrane Anchor: residues 1–46",
+            "Catalytic P450 Core: residues 47–520 (Heme-binding Cys468; Val433Met in substrate recognition site 6)"
+          ],
+          "flexible_joints": "Membrane-spanning anchor loop and flexible substrate access channel"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000186115",
+          "sift_prediction": "deleterious (0.02)"
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 4820.0,
+            "kidney": 2150.0,
+            "skin": 340.0
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream"
+      }
+    },
+    "ABCG2": {
+      "topic": "Statin-induced myopathy (ABCG2)",
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Statin-Induced Myopathy / Hyperuricemia",
+        "omim": "603788",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "Q9UNQ0",
+        "alphafold": {
+          "global_plddt": 88.4,
+          "folding_status": "High-Confidence ABC Half-Transporter Homodimer",
+          "domains": [
+            "N-terminal Nucleotide-Binding Domain (NBD): residues 35–300 (Walker A motif at residues 80–88; Gln141Lys is at NBD-TMD interface)",
+            "Transmembrane Domain (TMD): residues 380–655 (6 transmembrane helices forming substrate translocation pore)"
+          ],
+          "flexible_joints": "Intracellular connecting peptide linking NBD and TMD (residues 301–379)"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000118777",
+          "sift_prediction": "tolerated (0.18)"
+        },
+        "encode": {
+          "top_tissues": {
+            "placenta": 6450.0,
+            "small intestine": 4210.0,
+            "liver": 3890.0,
+            "kidney": 1120.0
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream"
+      }
+    },
+    "COMT": {
+      "topic": "Dopamine & catecholamine metabolism (COMT)",
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": "Prefrontal Dopamine & Catecholamine Catabolism Variation",
+        "omim": "116790",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P21964",
+        "alphafold": {
+          "global_plddt": 91.5,
+          "folding_status": "Alpha/Beta Rossmann Fold Methyltransferase",
+          "domains": [
+            "Catalytic core: residues 1–221 (S-COMT) / 51–271 (MB-COMT)",
+            "Active site: SAM-binding pocket and catechol substrate binding site (coordinated with Mg2+)"
+          ],
+          "flexible_joints": "N-terminal membrane anchor (residues 1–50 in MB-COMT)"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000093010",
+          "sift_prediction": "tolerated (0.42)"
+        },
+        "encode": {
+          "top_tissues": {
+            "prefrontal cortex": 1420.5,
+            "liver": 1850.2,
+            "kidney": 1310.0,
+            "adrenal gland": 980.4
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream"
+      }
     }
   },
   "loci": {
@@ -1611,6 +1760,915 @@
         "rationale": "ALDH2*2 (Glu504Lys) is the established cause of the alcohol flushing response.",
         "citation": "Brooks et al. 2009, The alcohol flushing response: an unrecognized risk factor for esophageal cancer from alcohol consumption, PLoS Medicine"
       }
+    },
+    "rs4986893": {
+      "gene": "CYP2C19",
+      "chrom": "10",
+      "pos_grch37": 96540410,
+      "pos_grch38": 94780653,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "INCOMPLETE_STAR_ALLELE_REFUSAL",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CYP2C19 *3 allele detected at this position. Other CYP2C19 alleles (for example *2, *17) must be evaluated for full diplotype determination.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3.0,
+          "repute": "Bad",
+          "phenotype": "One CYP2C19*3 (rs4986893) allele detected. This nonsense variant (p.Trp212Ter) confers complete loss of CYP2C19 function. Impairs activation of clopidogrel; alternative antiplatelet therapy is indicated if combined with another non-functional allele.",
+          "drug_response": "Clopidogrel: Reduced activation (one *3 non-functional allele)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.5,
+          "repute": "Bad",
+          "phenotype": "Two CYP2C19*3 (rs4986893) alleles detected. Homozygous poor metabolizer with complete lack of CYP2C19 activity. Significantly impaired clopidogrel activation; CPIC guidelines strongly recommend an alternative antiplatelet (prasugrel or ticagrelor).",
+          "drug_response": "Clopidogrel: Impaired activation (two *3 loss-of-function alleles; alternative drug recommended)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016899",
+          "review_status": "practice guideline",
+          "stars": 4,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000016899 (pinned capture clinvar/rs4986893.json)",
+            "accession": "VCV000016899",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/16899/"
+          }
+        },
+        "gnomad": {
+          "af": 0.00294,
+          "provenance": {
+            "source": "gnomAD (exome+genome ac/an from pinned capture gnomad/rs4986893.json)",
+            "accession": "10-94780653-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "duodenum": "Medium"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "clopidogrel",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for CYP2C19 and clopidogrel, 2022 update"
+      }
+    },
+    "rs12248560": {
+      "gene": "CYP2C19",
+      "chrom": "10",
+      "pos_grch37": 96521657,
+      "pos_grch38": 94761900,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "INCOMPLETE_STAR_ALLELE_REFUSAL",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CYP2C19 *17 allele detected at this position (-806C>T promoter variant). Baseline promoter transcription without increased expression.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.5,
+          "repute": "Neutral",
+          "phenotype": "One CYP2C19*17 (rs12248560) allele detected. This promoter variant causes increased gene transcription and enzyme activity. Paired with *1, produces rapid metabolizer status with enhanced clopidogrel activation and accelerated clearance of select antidepressants.",
+          "drug_response": "Clopidogrel: Increased activation / Rapid metabolism (one *17 allele)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3.0,
+          "repute": "Neutral",
+          "phenotype": "Two CYP2C19*17 (rs12248560) alleles detected (*17/*17 ultra-rapid metabolizer). Markedly elevated CYP2C19 expression. High clopidogrel active metabolite formation and rapid clearance of substrates (such as voriconazole and PPIs).",
+          "drug_response": "Clopidogrel: Ultra-rapid activation (*17/*17; enhanced substrate clearance)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000633860",
+          "review_status": "practice guideline",
+          "stars": 4,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000633860 (pinned capture clinvar/rs12248560.json)",
+            "accession": "VCV000633860",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/633860/"
+          }
+        },
+        "gnomad": {
+          "af": 0.19998,
+          "provenance": {
+            "source": "gnomAD (exome+genome ac/an from pinned capture gnomad/rs12248560.json)",
+            "accession": "10-94761900-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "duodenum": "Medium"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "clopidogrel",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for CYP2C19 and clopidogrel, 2022 update"
+      }
+    },
+    "rs1799853": {
+      "gene": "CYP2C9",
+      "chrom": "10",
+      "pos_grch37": 96702047,
+      "pos_grch38": 94942290,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "INCOMPLETE_STAR_ALLELE_REFUSAL",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CYP2C9 *2 allele detected at this position. Other CYP2C9 alleles (for example *3) and VKORC1 genotypes are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3.0,
+          "repute": "Bad",
+          "phenotype": "One CYP2C9*2 (rs1799853) allele detected. This missense variant (p.Arg144Cys) is associated with ~30–40% reduced CYP2C9 enzymatic clearance. Warfarin dose requirements are typically lower, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Warfarin: Reduced clearance (one *2 allele; lower initial dose typically indicated)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.5,
+          "repute": "Bad",
+          "phenotype": "Two CYP2C9*2 (rs1799853) alleles detected. Two copies of this variant confer substantially reduced CYP2C9 activity with markedly reduced warfarin clearance and heightened sensitivity. A metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Warfarin: Markedly reduced clearance (two *2 alleles; substantial dose reduction indicated)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000008409",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Likely benign; drug response; other",
+          "provenance": {
+            "source": "ClinVar VCV000008409 (pinned capture clinvar/rs1799853.json)",
+            "accession": "VCV000008409",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/8409/"
+          }
+        },
+        "gnomad": {
+          "af": 0.11479,
+          "provenance": {
+            "source": "gnomAD (exome+genome ac/an from pinned capture gnomad/rs1799853.json)",
+            "accession": "10-94942290-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "warfarin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update"
+      }
+    },
+    "rs1057910": {
+      "gene": "CYP2C9",
+      "chrom": "10",
+      "pos_grch37": 96741053,
+      "pos_grch38": 94981296,
+      "ref": "A",
+      "alt": "C",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation_ref": "INCOMPLETE_STAR_ALLELE_REFUSAL",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CYP2C9 *3 allele detected at this position. Other CYP2C9 alleles (for example *2) and VKORC1 genotypes are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3.5,
+          "repute": "Bad",
+          "phenotype": "One CYP2C9*3 (rs1057910) allele detected. This missense variant (p.Ile359Leu) confers a severe (~80–90%) reduction in substrate clearance. Lower initial warfarin doses and increased monitoring are indicated, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Warfarin: Markedly reduced clearance (one *3 allele; conservative starting dose indicated)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response (Critical)",
+          "magnitude": 5.5,
+          "repute": "Bad",
+          "phenotype": "Two CYP2C9*3 (rs1057910) alleles detected. Two copies of this variant result in profound impairment of CYP2C9 metabolism and very low warfarin clearance with elevated bleeding risk. A metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "drug_response": "Warfarin: Profoundly impaired clearance (two *3 alleles; alternative anticoagulant or major dose reduction indicated)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000008408",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "drug response; other",
+          "provenance": {
+            "source": "ClinVar VCV000008408 (pinned capture clinvar/rs1057910.json)",
+            "accession": "VCV000008408",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/8408/"
+          }
+        },
+        "gnomad": {
+          "af": 0.06341,
+          "provenance": {
+            "source": "gnomAD (exome+genome ac/an from pinned capture gnomad/rs1057910.10-94981296-A-C.json)",
+            "accession": "10-94981296-A-C"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "warfarin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update"
+      }
+    },
+    "rs55886062": {
+      "gene": "DPYD",
+      "chrom": "1",
+      "pos_grch37": 97981343,
+      "pos_grch38": 97515787,
+      "ref": "A",
+      "alt": "C",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: this assay covers only DPYD c.1679T>G (*13), one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No DPYD *13 (c.1679T>G) allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 5,
+          "repute": "Bad",
+          "phenotype": "One DPYD*13 (rs55886062) allele detected. This complete loss-of-function variant is associated with a high risk of life-threatening toxicity on fluoropyrimidines, and CPIC recommends a ≥50% starting dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response (Critical)",
+          "magnitude": 6.5,
+          "repute": "Bad",
+          "phenotype": "Two DPYD*13 (rs55886062) alleles detected. Two copies of this non-functional variant result in complete DPD enzyme deficiency and severe, potentially fatal toxicity with standard fluoropyrimidine dosing; CPIC strongly recommends avoiding 5-FU/capecitabine (alternative therapy). DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends avoiding standard dosing (alternative therapy)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000088975",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000088975 (hand-transcribed from pinned capture clinvar/rs55886062.json)",
+            "accession": "VCV000088975",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/88975/"
+          }
+        },
+        "gnomad": {
+          "af": 0.000655,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs55886062.json)",
+            "accession": "1-97515787-A-C"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "colon": "Medium"
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update"
+      }
+    },
+    "rs67376798": {
+      "gene": "DPYD",
+      "chrom": "1",
+      "pos_grch37": 97547947,
+      "pos_grch38": 97082391,
+      "ref": "T",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: this assay covers only DPYD c.2846A>T, one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No DPYD c.2846A>T allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4,
+          "repute": "Bad",
+          "phenotype": "One DPYD c.2846A>T (rs67376798) allele detected. This decreased-function variant is associated with reduced DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends a 25% to 50% dose reduction. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 25% to 50%",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response (Critical)",
+          "magnitude": 6.0,
+          "repute": "Bad",
+          "phenotype": "Two DPYD c.2846A>T (rs67376798) alleles detected. Homozygotes have significantly reduced DPD enzyme activity (activity score 1.0) and high risk of fluoropyrimidine toxicity; CPIC recommends a ≥50% dose reduction or alternative therapy based on clinical judgment. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a ≥50% starting dose reduction or alternative therapy",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000088974",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000088974 (hand-transcribed from pinned capture clinvar/rs67376798.json)",
+            "accession": "VCV000088974",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/88974/"
+          }
+        },
+        "gnomad": {
+          "af": 0.005044,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs67376798.json)",
+            "accession": "1-97082391-T-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "colon": "Medium"
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update"
+      }
+    },
+    "rs56038477": {
+      "gene": "DPYD",
+      "chrom": "1",
+      "pos_grch37": 98039419,
+      "pos_grch38": 97573863,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: this assay covers only DPYD c.1236G>A (HapB3 tag), one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No DPYD c.1236G>A (HapB3 tag) allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4,
+          "repute": "Bad",
+          "phenotype": "One DPYD c.1236G>A (rs56038477, HapB3 tag) allele detected. This exonic marker tags the HapB3 haplotype containing a deep intronic splice-altering variant, conferring decreased DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends a 25% to 50% dose reduction. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 25% to 50%",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response (Critical)",
+          "magnitude": 6.0,
+          "repute": "Bad",
+          "phenotype": "Two DPYD c.1236G>A (rs56038477, HapB3 tag) alleles detected. Homozygosity for HapB3 confers significantly reduced DPD enzyme activity and high risk of severe fluoropyrimidine toxicity; CPIC recommends a ≥50% dose reduction or alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a ≥50% starting dose reduction or alternative therapy",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000100100",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000100100 (hand-transcribed from pinned capture clinvar/rs56038477.json)",
+            "accession": "VCV000100100",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/100100/"
+          }
+        },
+        "gnomad": {
+          "af": 0.018777,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs56038477.json)",
+            "accession": "1-97573863-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "colon": "Medium"
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update"
+      }
+    },
+    "rs2108622": {
+      "gene": "CYP4F2",
+      "chrom": "19",
+      "pos_grch37": 15990431,
+      "pos_grch38": 15879621,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: CYP4F2 c.1297G>A (*3, p.Val433Met) is one factor in warfarin dose requirements. VKORC1 and CYP2C9 genotypes, patient age, weight, and clinical factors also significantly influence warfarin dosing.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CYP4F2 *3 (c.1297G>A, p.Val433Met) allele detected at this position (C/C). Baseline warfarin dose requirement for this locus.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.0,
+          "repute": "Bad",
+          "phenotype": "One CYP4F2 *3 (rs2108622) allele detected (C/T, c.1297G>A, p.Val433Met). Reduced vitamin K oxidation elevates baseline vitamin K levels; CPIC warfarin dosing algorithms typically recommend a modest 5% to 10% dose increase over wild-type to reach therapeutic anticoagulation.",
+          "drug_response": "Warfarin: Modest dose increase required (~5% to 10% higher maintenance dose)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 3.0,
+          "repute": "Bad",
+          "phenotype": "Two CYP4F2 *3 (rs2108622) alleles detected (T/T, c.1297G>A, p.Val433Met). Significantly reduced vitamin K oxidation; CPIC warfarin dosing algorithms typically recommend an approximate 15% to 25% dose increase over wild-type to reach therapeutic anticoagulation.",
+          "drug_response": "Warfarin: Dose increase required (~15% to 25% higher maintenance dose)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000225969",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000225969 (hand-transcribed from pinned capture clinvar/rs2108622.json)",
+            "accession": "VCV000225969",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/225969/"
+          }
+        },
+        "gnomad": {
+          "af": 0.287517,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs2108622.json)",
+            "accession": "19-15879621-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "warfarin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update"
+      }
+    },
+    "rs2231142": {
+      "gene": "ABCG2",
+      "chrom": "4",
+      "pos_grch37": 89052323,
+      "pos_grch38": 88131171,
+      "ref": "G",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: ABCG2 c.421C>A (p.Gln141Lys, *1/*2) is one determinant of statin exposure and hyperuricemia. SLCO1B1 and CYP2C9 genotypes also contribute to statin disposition.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No ABCG2 c.421A (p.Gln141Lys, *2) allele detected at this position (G/G). Standard ABCG2 transporter activity and baseline statin exposure profile.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.5,
+          "repute": "Bad",
+          "phenotype": "Intermediate ABCG2 transporter function (G/T, c.421C>A, p.Gln141Lys). Impaired efflux transporter activity increases systemic exposure to rosuvastatin and atorvastatin, moderately increasing risk of statin-associated musculoskeletal symptoms (SAMS). CPIC recommends considering a lower starting dose (≤20mg) for rosuvastatin.",
+          "drug_response": "Rosuvastatin: Increased systemic exposure (Moderate SAMS risk; consider starting dose ≤20mg daily)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 4.0,
+          "repute": "Bad",
+          "phenotype": "Poor ABCG2 transporter function (T/T, c.421C>A, p.Gln141Lys). Severely impaired efflux transporter activity leads to an approximate 2-fold elevation in rosuvastatin plasma concentrations. CPIC recommends selecting an alternative statin or initiating rosuvastatin at a reduced dose (≤10mg daily).",
+          "drug_response": "Rosuvastatin: High systemic exposure / myopathy risk (Initiate rosuvastatin at ≤10mg daily or switch agent)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000030389",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "drug response",
+          "provenance": {
+            "source": "ClinVar VCV000030389 (hand-transcribed from pinned capture clinvar/rs2231142.json)",
+            "accession": "VCV000030389",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/30389/"
+          }
+        },
+        "gnomad": {
+          "af": 0.111852,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs2231142.4-88131171-G-T.json)",
+            "accession": "4-88131171-G-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "placenta": "High",
+            "small intestine": "High",
+            "liver": "High"
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Apical cell membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "rosuvastatin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      },
+      "tier": {
+        "rationale": "CPIC lists this gene-drug pair at level A.",
+        "citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update"
+      }
+    },
+    "rs1801131": {
+      "gene": "MTHFR",
+      "chrom": "1",
+      "pos_grch37": 11854476,
+      "pos_grch38": 11794419,
+      "ref": "T",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No MTHFR A1298C allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1,
+          "repute": "Good",
+          "phenotype": "MTHFR 1298AC heterozygote: Generally benign alone; retains ~80% enzyme activity with adequate dietary folate. Compound heterozygosity with 677CT confers ~50-60% overall MTHFR activity.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Bad",
+          "phenotype": "MTHFR 1298CC homozygote (~60% residual enzyme activity): Moderate reduction in enzyme activity; does not typically elevate plasma homocysteine in the absence of severe folate deficiency.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000003521",
+          "review_status": "criteria provided, conflicting classifications",
+          "stars": 1,
+          "significance": "Conflicting classifications of pathogenicity; other",
+          "provenance": {
+            "source": "ClinVar VCV000003521 (hand-transcribed from pinned capture clinvar/rs1801131.json)",
+            "accession": "VCV000003521",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3521/"
+          }
+        },
+        "gnomad": {
+          "af": 0.303238,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1801131.json)",
+            "accession": "1-11794419-T-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "cerebral cortex": "Medium"
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleus"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier C",
+        "rationale": "MTHFR A1298C has weak, contested clinical utility and ACMG advises against clinical testing for MTHFR polymorphisms.",
+        "citation": "ACMG 2013 practice guideline on MTHFR polymorphism testing (Hickey et al.), Genetics in Medicine"
+      }
+    },
+    "rs4680": {
+      "gene": "COMT",
+      "chrom": "22",
+      "pos_grch37": 19951271,
+      "pos_grch38": 19963748,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": null,
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No COMT Val158Met (A) allele detected at this position (G/G Val158Val, 'Warrior' high-activity genotype). Prefrontal dopamine is cleared rapidly via high enzymatic activity; dependent on SAMe as methyl donor.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1,
+          "repute": "Good",
+          "phenotype": "COMT Val158Met (A/G): Intermediate COMT enzymatic activity. Provides a balanced baseline dopamine tone and moderate stress clearance in the prefrontal cortex.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "COMT Met158Met (A/A, 'Worrier'): Reduced (~3-4 fold lower) COMT enzymatic activity leading to slower prefrontal dopamine clearance. Associated with enhanced executive function, attention, and working memory in calm environments, with higher sensitivity to stress and pain.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017591",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign",
+          "provenance": {
+            "source": "ClinVar VCV000017591 (hand-transcribed from pinned capture clinvar/rs4680.json)",
+            "accession": "VCV000017591",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17591/"
+          }
+        },
+        "gnomad": {
+          "af": 0.49048,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs4680.json)",
+            "accession": "22-19963748-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "Medium",
+            "cerebral cortex": "Medium"
+          },
+          "subcellular": [
+            "Cytoplasm",
+            "Membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)"
+          }
+        }
+      },
+      "tier": {
+        "curated_tier": "Tier C",
+        "rationale": "Common neurochemical trait modifier with established physiological influence on catecholamine catabolism, but no standalone clinical diagnostic indication.",
+        "citation": "Nature Neuroscience / Molecular Psychiatry COMT Val158Met functional characterization (Egan et al. / Chen et al.)"
+      }
     }
   }
 }
+

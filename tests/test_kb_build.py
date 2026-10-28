@@ -66,6 +66,17 @@ EXPECTED = {
     "rs671": (112241765, {"G", "A"}, 111803961, {"G", "A"}, "G", "A"),
     "rs7412": (45412078, {"C", "T"}, 44908821, {"C", "T"}, "C", "T"),
     "rs9923231": (31107688, {"C", "A", "G", "T"}, 31096367, {"C", "A", "G", "T"}, "C", "T"),
+    "rs4986893": (96540409, {"G", "A", "T"}, 94780652, {"G", "A", "T"}, "G", "A"),
+    "rs12248560": (96521656, {"C", "A", "T"}, 94761899, {"C", "A", "T"}, "C", "T"),
+    "rs1799853": (96702046, {"C", "A", "T"}, 94942289, {"C", "A", "T"}, "C", "T"),
+    "rs1057910": (96741052, {"A", "C", "G"}, 94981295, {"A", "C", "G"}, "A", "C"),
+    "rs55886062": (97981342, {"C", "A", "T"}, 97515786, {"C", "A", "T"}, "A", "C"),
+    "rs67376798": (97547946, {"A", "T"}, 97082390, {"A", "T"}, "T", "A"),
+    "rs56038477": (98039418, {"C", "G", "A", "T"}, 97573862, {"C", "G", "A", "T"}, "C", "T"),
+    "rs2108622": (15990430, {"C", "T", "A", "G"}, 15879620, {"C", "T", "A", "G"}, "C", "T"),
+    "rs2231142": (89052322, {"G", "T", "A", "C"}, 88131170, {"G", "T", "A", "C"}, "G", "T"),
+    "rs1801131": (11854475, {"T", "A", "C", "G"}, 11794418, {"T", "A", "C", "G"}, "T", "G"),
+    "rs4680": (19951270, {"G", "A"}, 19963747, {"G", "A"}, "G", "A"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -85,6 +96,17 @@ EXPECTED_CLINVAR = {
     "rs671": "VCV000018390",
     "rs7412": "VCV000017848",
     "rs9923231": "VCV000002211",
+    "rs4986893": "VCV000016899",
+    "rs12248560": "VCV000633860",
+    "rs1799853": "VCV000008409",
+    "rs1057910": "VCV000008408",
+    "rs55886062": "VCV000088975",
+    "rs67376798": "VCV000088974",
+    "rs56038477": "VCV000100100",
+    "rs2108622": "VCV000225969",
+    "rs2231142": "VCV000030389",
+    "rs1801131": "VCV000003521",
+    "rs4680": "VCV000017591",
 }
 
 FORBIDDEN_KEYS = {"coverage_state", "sample_observation", "assay_coverage", "curation_scope"}
@@ -282,6 +304,21 @@ def test_cyp2c19_states_one_snp_observation_and_assigns_no_metabolizer(built):
     assert built["loci"]["rs4244285"]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
 
 
+def test_cyp2c9_states_one_snp_observation_and_assigns_no_metabolizer(built):
+    """A single CYP2C9 SNP call cannot establish a metabolizer diplotype, so no metabolizer label is shown."""
+    for rsid, star in (("rs1799853", "*2"), ("rs1057910", "*3")):
+        interps = built["loci"][rsid]["interpretations"]
+        assert interps["1"]["phenotype"].startswith(f"One CYP2C9{star} ({rsid}) allele detected.")
+        assert interps["2"]["phenotype"].startswith(f"Two CYP2C9{star} ({rsid}) alleles detected.")
+        for count, interp in interps.items():
+            text = interp["phenotype"] + " " + (interp["drug_response"] or "")
+            assert not re.search(r"Metabolizer\s*\(|\*1/\*2|\*2/\*2|\*1/\*3|\*3/\*3", text), (rsid, count, text)
+            assert not re.search(r"(Intermediate|Poor|Normal|Rapid|Ultrarapid) Metabolizer", text), (rsid, count, text)
+        for count in ("1", "2"):
+            assert "star-allele diplotyping" in interps[count]["phenotype"], (rsid, count)
+        assert built["loci"][rsid]["limitation"] == INCOMPLETE_STAR_ALLELE_REFUSAL
+
+
 def test_dpyd_states_one_snp_observation_and_assigns_no_deficiency_label(built):
     """CLEANUP-1 item 1 (same rule as S5a-C-3): one rs3918290 call cannot establish DPD activity."""
     interps = built["loci"]["rs3918290"]["interpretations"]
@@ -333,12 +370,16 @@ EXPECTED_MODELS = {
     "F5": ("risk_factor", False),
     "F2": ("risk_factor", False),
     "CYP2C19": ("pharmacogenomic", False),
+    "CYP2C9": ("pharmacogenomic", False),
     "VKORC1": ("pharmacogenomic", False),
     "SLCO1B1": ("pharmacogenomic", False),
     "DPYD": ("pharmacogenomic", False),
+    "CYP4F2": ("pharmacogenomic", False),
+    "ABCG2": ("pharmacogenomic", False),
     "MTHFR": ("trait", False),
     "MCM6": ("trait", False),
     "ALDH2": ("trait", False),
+    "COMT": ("trait", False),
 }
 
 
@@ -371,9 +412,12 @@ def test_gene_insights_are_curated_and_null_when_absent(built):
 EXPECTED_TOPICS = {
     "APOE": "Alzheimer’s disease risk",
     "CYP2C19": "Clopidogrel (Plavix) response",
+    "CYP2C9": "Warfarin and phenytoin metabolism",
     "SLCO1B1": "Simvastatin muscle side effects",
     "VKORC1": "Warfarin dose sensitivity",
     "DPYD": "Fluorouracil (5-FU) side effects",
+    "CYP4F2": "Warfarin dose requirement (CYP4F2)",
+    "ABCG2": "Statin-induced myopathy (ABCG2)",
     "HFE": "Haemochromatosis (iron overload)",
     "CFTR": "Cystic fibrosis",
     "F2": "Blood clots (prothrombin)",
@@ -381,6 +425,7 @@ EXPECTED_TOPICS = {
     "MTHFR": "Folate metabolism (MTHFR)",
     "MCM6": "Lactose tolerance",
     "ALDH2": "Alcohol flush reaction",
+    "COMT": "Dopamine & catecholamine metabolism (COMT)",
 }
 
 
@@ -472,11 +517,16 @@ def test_derive_evidence_sufficiency(tier, expected):
 EXPECTED_TIERS = {
     # Mendelian-disease genes: ClinVar stars rule.
     "rs113993960": "Tier A", "rs1800562": "Tier B", "rs1799945": "Tier D",
-    # Pharmacogenomic genes: CPIC level (all four gene-drug pairs are level A).
+    # Pharmacogenomic genes: CPIC level (all eight gene-drug pairs are level A).
     "rs4244285": "Tier A", "rs9923231": "Tier A", "rs4149056": "Tier A", "rs3918290": "Tier A",
+    "rs4986893": "Tier A", "rs12248560": "Tier A",
+    "rs1799853": "Tier A", "rs1057910": "Tier A",
+    "rs55886062": "Tier A", "rs67376798": "Tier A", "rs56038477": "Tier A",
+    "rs2108622": "Tier A", "rs2231142": "Tier A",
     # Risk-factor and trait genes: curated tier (constraints L7).
     "rs429358": "Tier A", "rs7412": "Tier A", "rs6025": "Tier A", "rs1799963": "Tier A",
     "rs1801133": "Tier C", "rs4988235": "Tier A", "rs671": "Tier A",
+    "rs1801131": "Tier C", "rs4680": "Tier C",
 }
 
 
@@ -537,9 +587,15 @@ def test_qc_rejects_a_citation_that_looks_like_a_pmid(curation):
 def test_tier_source_values_per_locus(built):
     sources = {r: l["tier_source"] for r, l in built["loci"].items()}
     assert {r for r, v in sources.items() if v == "clinvar_review"} == {"rs113993960", "rs1800562", "rs1799945"}
-    assert {r for r, v in sources.items() if v == "cpic_level"} == {"rs4244285", "rs9923231", "rs4149056", "rs3918290"}
+    assert {r for r, v in sources.items() if v == "cpic_level"} == {
+        "rs4244285", "rs9923231", "rs4149056", "rs3918290", "rs4986893", "rs12248560",
+        "rs1799853", "rs1057910", "rs55886062", "rs67376798", "rs56038477",
+        "rs2108622", "rs2231142"
+    }
     assert {r for r, v in sources.items() if v == "curated"} == {
-        "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671"}
+        "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
+        "rs1801131", "rs4680"
+    }
 
 
 def test_qc_rejects_a_stray_curated_tier_on_a_pharmacogenomic_locus(curation):
@@ -765,6 +821,11 @@ TIERS_BEFORE_OVERLAY = {
     "rs1801133": "Tier C", "rs3918290": "Tier A", "rs4149056": "Tier A", "rs4244285": "Tier A",
     "rs429358": "Tier A", "rs4988235": "Tier A", "rs6025": "Tier A", "rs671": "Tier A",
     "rs7412": "Tier A", "rs9923231": "Tier A",
+    "rs4986893": "Tier A", "rs12248560": "Tier A",
+    "rs1799853": "Tier A", "rs1057910": "Tier A",
+    "rs55886062": "Tier A", "rs67376798": "Tier A", "rs56038477": "Tier A",
+    "rs2108622": "Tier A", "rs2231142": "Tier A",
+    "rs1801131": "Tier C", "rs4680": "Tier C",
 }
 
 

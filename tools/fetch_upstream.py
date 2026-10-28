@@ -66,8 +66,19 @@ RSIDS = (
     "rs4988235",
     "rs671",
     "rs113993960",
+    "rs4986893",
+    "rs12248560",
+    "rs1799853",
+    "rs1057910",
+    "rs55886062",
+    "rs67376798",
+    "rs56038477",
+    "rs2108622",
+    "rs2231142",
+    "rs1801131",
+    "rs4680",
 )
-# Gene symbols behind the 14 loci ("MCM6 / LCT" is queried as both genes).
+# Gene symbols behind the loci ("MCM6 / LCT" is queried as both genes).
 GENES = (
     "APOE",
     "HFE",
@@ -82,6 +93,10 @@ GENES = (
     "MCM6",
     "LCT",
     "ALDH2",
+    "CYP2C9",
+    "CYP4F2",
+    "ABCG2",
+    "COMT",
 )
 
 DEFAULT_OUT = Path(__file__).resolve().parent / "fixtures" / "upstream" / "real"
@@ -435,6 +450,18 @@ def main(argv=None, opener=None, sleep=time.sleep) -> int:
         help="re-capture only ClinVar esearch+esummary for these rsIDs (must be curated rsIDs)",
     )
     modes.add_argument(
+        "--locus-only",
+        nargs="+",
+        metavar="RSID",
+        help="capture upstream payloads (dbSNP, ClinVar, VEP, gnomAD) for these rsIDs (must be approved rsIDs)",
+    )
+    modes.add_argument(
+        "--gene-only",
+        nargs="+",
+        metavar="GENE",
+        help="capture gnomAD constraint for these genes",
+    )
+    modes.add_argument(
         "--ucsc-only",
         action="store_true",
         help="capture only the four UCSC hg19/hg38 chromInfo and cytoBand tables",
@@ -449,6 +476,17 @@ def main(argv=None, opener=None, sleep=time.sleep) -> int:
                 if rsid not in RSIDS:
                     raise SystemExit(f"{rsid} is not one of the approved rsIDs")
                 cap.attempt(capture_clinvar, rsid)
+        elif args.locus_only:
+            for rsid in args.locus_only:
+                if rsid not in RSIDS:
+                    raise SystemExit(f"{rsid} is not one of the approved rsIDs")
+                cap.attempt(_capture_locus, rsid)
+            capture_gnomad_multiallelic(cap, args.locus_only)
+        elif args.gene_only:
+            for gene in args.gene_only:
+                if gene not in GENES:
+                    raise SystemExit(f"{gene} is not one of the approved genes")
+                cap.attempt(_capture_constraint, gene)
         elif args.gnomad_multiallelic_only:
             capture_gnomad_multiallelic(cap)
         else:
