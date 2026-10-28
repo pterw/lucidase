@@ -548,9 +548,11 @@ def test_file_button_opens_the_picker(page):
 @pytest.mark.parametrize("key", ["Enter", "Space"])
 def test_file_button_opens_the_picker_from_the_keyboard(page, key):
     _open(page)
-    page.locator("#btn-karyogram-browse").focus()
+    button = page.locator("#btn-karyogram-browse")
+    button.focus()
+    expect(button).to_be_focused()
     with page.expect_file_chooser() as chooser:
-        page.keyboard.press(key)
+        button.press(key)
     chooser.value.set_files(str(DEMO_FILE))
     _wait_result(page)
 
