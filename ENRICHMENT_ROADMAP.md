@@ -2,7 +2,7 @@
 
 > **Status:** Active Reference & Execution Plan  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 25 curated loci across 16 genes.
+> **Current KB State:** 29 curated loci across 18 genes.
 
 ---
 
@@ -33,21 +33,22 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 - [x] **Tier 1C: DPYD Complete Fluoropyrimidine Toxicity Panel**: `DPYD*13` (rs55886062), `c.2846A>T` (rs67376798), `HapB3` tag (rs56038477).
 - [x] **Tier 2A: Cardiovascular & Statin Transporters**: `CYP4F2*3` (rs2108622, completing warfarin triad), `ABCG2 Q141K` (rs2231142, rosuvastatin transport).
 - [x] **Tier 4: One-Carbon Folate & Catecholamine Catabolism**: `MTHFR A1298C` (rs1801131, compound heterozygote pair), `COMT Val158Met` (rs4680, prefrontal dopamine clearance).
+- [x] **Phase 1 (Tier 2B): Thiopurine Toxicity (TPMT & NUDT15)**: `TPMT*2` (rs1800462), `TPMT*3C` (rs1142345), `TPMT*3B` (rs1800460), `NUDT15*3` (rs116855232).
 
 ---
 
 ## 3. Remaining Database Enrichment Tasks
 
-### Phase 1: Thiopurine S-Methyltransferase & Nudix Hydrolase (Tier 2B — Parked)
+### Phase 1: Thiopurine S-Methyltransferase & Nudix Hydrolase (Tier 2B — Completed)
 
 * **Clinical Rationale**: Thiopurine drugs (azathioprine, 6-mercaptopurine, thioguanine) are standard immunosuppressants for IBD, rheumatoid arthritis, and leukemias. Patients with inherited deficiency in `TPMT` or `NUDT15` accumulate cytotoxic thioguanine nucleotides (TGN), resulting in life-threatening, fatal myelosuppression and pancytopenia. CPIC Level A guideline and FDA boxed warning mandate pre-treatment testing or substantial dose reduction (up to 90%).
 * **Inheritance Model**: Autosomal co-dominant / intermediate metabolizer risk.
 * **Target Loci**:
-  - [ ] **`TPMT*2` (`rs1800462`)**: chr6:18139228 (GRCh38) / chr6:18149129 (GRCh37), c.238G>C (p.Ala80Pro). Rare in all populations (~0.5%), causes 100-fold reduction in protein stability.
-  - [ ] **`TPMT*3C` (`rs1142345`)**: chr6:18130918 (GRCh38) / chr6:18140819 (GRCh37), c.719A>G (p.Tyr240Cys). Most common deficient allele in East Asian and African populations (~2–5%).
-  - [ ] **`TPMT*3B` (`rs1800460`)**: chr6:18138997 (GRCh38) / chr6:18148898 (GRCh37), c.460G>A (p.Ala154Thr). Rare alone; along with `*3C` forms the composite haplotype `*3A`.
-  - [ ] **`NUDT15*3` (`rs116855232`)**: chr13:48037750 (GRCh38) / chr13:48611952 (GRCh37), c.415C>T (p.Arg139Cys). Critical in East Asian (MAF ~10%) and Hispanic populations where thiopurine leukopenia is driven primarily by NUDT15 rather than TPMT.
-* **Upstream Sources**: ClinVar (VCV000012586, VCV000012585, VCV000203020), CPIC Level A guidelines, PharmGKB, dbSNP.
+  - [x] **`TPMT*2` (`rs1800462`)**: chr6:18143724 (GRCh38) / chr6:18143955 (GRCh37), c.238G>C (p.Ala80Pro). Rare in all populations (~0.5%), causes 100-fold reduction in protein stability.
+  - [x] **`TPMT*3C` (`rs1142345`)**: chr6:18130687 (GRCh38) / chr6:18130918 (GRCh37), c.719A>G (p.Tyr240Cys). Most common deficient allele in East Asian and African populations (~2–5%).
+  - [x] **`TPMT*3B` (`rs1800460`)**: chr6:18138997 (GRCh38) / chr6:18139228 (GRCh37), c.460G>A (p.Ala154Thr). Rare alone; along with `*3C` forms the composite haplotype `*3A`.
+  - [x] **`NUDT15*3` (`rs116855232`)**: chr13:48045719 (GRCh38) / chr13:48619855 (GRCh37), c.415C>T (p.Arg139Cys). Critical in East Asian (MAF ~10%) and Hispanic populations where thiopurine leukopenia is driven primarily by NUDT15 rather than TPMT.
+* **Upstream Sources**: ClinVar (VCV000012721, VCV000012722, VCV000225201), CPIC Level A guidelines, PharmGKB, dbSNP.
 
 ---
 

@@ -355,6 +355,8 @@ Each finding was closed test-first: a regression test written against the pre-fi
 |---|---|---|
 | `c5bf364` | Tiers 1A–4 | `feat(kb): expand knowledge base with pharmacogenomics and one-carbon metabolism (Tiers 1A, 1B, 1C, 2A, 4)` |
 | `3635cbc` | Web & E2E | `fix(web): clamp clustered karyogram marks to canvas and harmonize e2e tests` |
+| `fae5c19` | Roadmap | `docs(roadmap): record audit remediations, roadmap, handoff updates, and gitignore` |
+| `a0994cb` | Phase 1 (Tier 2B) | `feat(kb): add TPMT and NUDT15 thiopurine pharmacogenomics (Phase 1 / Tier 2B)` |
 
 
 ---
