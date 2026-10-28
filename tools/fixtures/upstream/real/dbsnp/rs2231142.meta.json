@@ -1,0 +1,9 @@
+{
+  "bytes": 149803,
+  "http_status": 200,
+  "method": "GET",
+  "request_body": null,
+  "retrieved_at": "2026-10-28T05:18:11Z",
+  "sha256_of_body": "9dbe26480794c07b04d1925d87362abed13bc11534078df9a02192f815acfca4",
+  "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2231142"
+}

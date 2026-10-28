@@ -62,7 +62,7 @@ def test_disagreeing_apoe_component_tiers_do_not_wear_the_tier_d_class(page):
     page.set_input_files("#file-input", str(DEMO_FILE))
     expect(page.locator("#results-section")).to_be_visible()
     show_table(page)
-    cell = page.locator("#variants-tbody tr").first.locator("span.lds-tag", has_text="rs7412: Tier C")
+    cell = _row(page, "APOE (rs429358 + rs7412)").locator("span.lds-tag", has_text="rs7412: Tier C")
     expect(cell).to_be_visible()
     classes = cell.get_attribute("class").split()
     assert NEUTRAL_TAG in classes, classes

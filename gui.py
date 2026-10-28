@@ -427,6 +427,9 @@ class ExplorerApp:
         tb.grid(row=1, column=0, sticky="ew")
         self.toolbar = NavigationToolbar2Tk(self.canvas, tb, pack_toolbar=False)
         self.toolbar.pack(side="left")
+        ttk.Button(tb, text="Zoom In (+)", width=11, command=self._zoom_in).pack(side="left", padx=(6, 2))
+        ttk.Button(tb, text="Zoom Out (-)", width=12, command=self._zoom_out).pack(side="left", padx=2)
+        ttk.Button(tb, text="Reset View", width=10, command=self._reset_view).pack(side="left", padx=2)
         ttk.Button(tb, text="Save figure…", command=self.save_figure).pack(
             side="right", padx=4
         )
@@ -574,6 +577,9 @@ class ExplorerApp:
 
         self._resize_job = None
         self.canvas.get_tk_widget().bind("<Configure>", self._on_resize, add="+")
+        self.canvas.get_tk_widget().bind("<MouseWheel>", self._on_scroll, add="+")
+        self.canvas.get_tk_widget().bind("<Button-4>", self._on_scroll, add="+")
+        self.canvas.get_tk_widget().bind("<Button-5>", self._on_scroll, add="+")
         root.bind("<Control-Return>", lambda e: self.build())
         self.load_example(next(iter(EXAMPLES)))
 
@@ -898,6 +904,33 @@ class ExplorerApp:
         if self._resize_job:
             self.root.after_cancel(self._resize_job)
         self._resize_job = self.root.after(180, self._redraw)
+
+    def _zoom(self, factor: float):
+        if not hasattr(self, "fig") or not self.fig.axes or not self.model or self.model.pos is None:
+            return
+        ax = self.fig.axes[0]
+        xlim, ylim = ax.get_xlim(), ax.get_ylim()
+        cx, cy = (xlim[0] + xlim[1]) / 2.0, (ylim[0] + ylim[1]) / 2.0
+        w, h = (xlim[1] - xlim[0]) * factor, (ylim[1] - ylim[0]) * factor
+        ax.set_xlim(cx - w / 2.0, cx + w / 2.0)
+        ax.set_ylim(cy - h / 2.0, cy + h / 2.0)
+        if hasattr(self, "canvas") and self.canvas is not None:
+            self.canvas.draw_idle()
+
+    def _zoom_in(self):
+        self._zoom(0.75)
+
+    def _zoom_out(self):
+        self._zoom(1.33)
+
+    def _reset_view(self):
+        self._redraw(keep_view=False)
+
+    def _on_scroll(self, event):
+        if getattr(event, "delta", 0) > 0 or getattr(event, "num", None) == 4:
+            self._zoom(0.85)
+        elif getattr(event, "delta", 0) < 0 or getattr(event, "num", None) == 5:
+            self._zoom(1.18)
 
     # ---- stepping
     def set_step(self, n: int):

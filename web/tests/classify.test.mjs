@@ -120,3 +120,59 @@ test("deriveCoverageState follows the C4 order", () => {
 test("summarizeCoverage rejects a record in an unknown state instead of dropping it", () => {
   assert.throws(() => summarizeCoverage([{ coverage_state: "bogus" }], 0), /bogus/);
 });
+
+test("coincident bystander probe does not conflict with compatible probe at same coordinate", () => {
+  const rawKb = structuredClone(KB_JSON);
+  rawKb.loci.rs113993960 = {
+    rsid: "rs113993960",
+    gene: "HFE",
+    chrom: "7",
+    pos_grch37: 117199644,
+    pos_grch38: 117559590,
+    ref: "ATCT",
+    alt: "A",
+    allele_codes: { D: "alt", I: "ref" },
+    interpretations: {
+      0: { category: "Not detected", significance: "Not detected", magnitude: 0, repute: "Neutral", phenotype: "None", drug_response: null, caveats: [] },
+      1: { category: "Carrier", significance: "Carrier", magnitude: 1, repute: "Bad", phenotype: "Carrier", drug_response: null, caveats: [] },
+      2: { category: "Pathogenic", significance: "Pathogenic", magnitude: 4, repute: "Bad", phenotype: "Affected", drug_response: null, caveats: [] }
+    },
+    evidence: { clinvar: { stars: 4, review_status: "practice guideline" } },
+    evidence_tier: "Tier A",
+    tier_source: "clinvar_review",
+    tier_rationale: null,
+    tier_citation: null,
+    evidence_sufficiency: "sufficient",
+    limitation: null,
+    role: "standard",
+  };
+  const k = validateKb(withAssemblies(rawKb));
+
+  const out = classify(
+    parse([
+      call("rs1801178", "7", 117199644, ["A", "A"]),
+      call("i4000292", "7", 117199644, ["I", "I"]),
+    ]),
+    k
+  );
+  const rec = out.records.find((r) => r.rsid === "rs113993960");
+  assert.equal(rec.coverage_state, COVERAGE_STATES.SUPPORTED_NOT_OBSERVED);
+  assert.equal(rec.altCount, 0);
+  assert.equal(rec.genotype_display, "I/I");
+});
+
+test("an exact-rsID call plus a contradictory position-matched call fails closed to unresolvable", () => {
+  const k = kb();
+  // rs1799945 is at 6:26091179 in the mini test KB. Two coincident calls with different genotypes must not be silently resolved by rsID.
+  const out = classify(
+    parse([
+      call("rs1799945", "6", 26091179, ["C", "C"]),
+      call("i12345", "6", 26091179, ["C", "G"]),
+    ]),
+    k
+  );
+  const rec = out.records.find((r) => r.rsid === "rs1799945");
+  assert.equal(rec.altCount, null);
+  assert.equal(rec.sample_observation, "call_unavailable");
+});
+

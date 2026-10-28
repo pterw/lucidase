@@ -1,0 +1,9 @@
+{
+  "bytes": 140,
+  "http_status": 200,
+  "method": "POST",
+  "request_body": "{\"query\":\"query($variantId: String!) { variant(variantId: $variantId, dataset: gnomad_r4) { variant_id rsid exome { ac an } genome { ac an } } }\",\"variables\":{\"variantId\":\"6-31138722-G-A\"}}",
+  "retrieved_at": "2026-10-28T15:41:55Z",
+  "sha256_of_body": "78d4297103ee004128ae921de39e7907d61d8326b4223a98e22731992254cd16",
+  "url": "https://gnomad.broadinstitute.org/api"
+}

@@ -9,6 +9,7 @@ reference alignment evaluation using Bio.Align.PairwiseAligner.
 
 from __future__ import annotations
 
+import gzip
 import os
 import re
 from typing import TYPE_CHECKING
@@ -51,8 +52,11 @@ def parse_records(text: str) -> list[str]:
 
 
 def load_sequences_as_fasta(path: str) -> tuple[str, str]:
-    """Read FASTA / FASTQ / GenBank / EMBL with Biopython -> (fasta_text, note)."""
-    ext = os.path.splitext(path)[1].lower()
+    """Read FASTA / FASTQ / GenBank / EMBL (including .gz) with Biopython -> (fasta_text, note)."""
+    p_lower = path.lower()
+    if p_lower.endswith(".gz"):
+        p_lower = p_lower[:-3]
+    ext = os.path.splitext(p_lower)[1]
     fmt = {
         ".fq": "fastq",
         ".fastq": "fastq",
@@ -62,14 +66,17 @@ def load_sequences_as_fasta(path: str) -> tuple[str, str]:
         ".embl": "embl",
     }.get(ext, "fasta")
     parts, total, count, truncated = [], 0, 0, False
-    for rec in SeqIO.parse(path, fmt):
-        s = str(rec.seq).upper()
-        if total + len(s) > MAX_LOAD_CHARS:
-            truncated = True
-            break
-        parts.append(f">{rec.id}\n{s}")
-        total += len(s)
-        count += 1
+    is_gz = path.lower().endswith(".gz")
+    opener = (lambda p: gzip.open(p, "rt", encoding="utf-8", errors="replace")) if is_gz else (lambda p: open(p, "rt", encoding="utf-8", errors="replace"))
+    with opener(path) as handle:
+        for rec in SeqIO.parse(handle, fmt):
+            s = str(rec.seq).upper()
+            if total + len(s) > MAX_LOAD_CHARS:
+                truncated = True
+                break
+            parts.append(f">{rec.id}\n{s}")
+            total += len(s)
+            count += 1
     if not parts:
         raise ValueError(
             f"No usable {fmt.upper()} records found (or the first one exceeds "

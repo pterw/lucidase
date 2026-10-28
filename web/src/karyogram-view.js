@@ -13,7 +13,7 @@ const TOP_PAD = 24;
 const LABEL_GAP = 14;
 const BOTTOM_PAD = 10;
 const CEN_TICK = 6;
-const LOCUS_STEP = 10;
+const LOCUS_STEP = 14;
 const R_MIN = 0.9;
 const R_MARKED_MIN = 1.6; // a bin with even one marker must read as larger than an empty bin
 const R_MARKED_SPAN = 1.6; // R_MARKED_MIN + R_MARKED_SPAN = 3.2, the busiest bin
@@ -90,7 +90,10 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
     const col = colByName.get(l.chrom);
     const idx = binIndex(l.pos, binSize);
     const peers = groups.get(`${l.chrom}:${idx}`);
-    const x = col.x + (peers.indexOf(l.rsid) - (peers.length - 1) / 2) * LOCUS_STEP;
+    const minX = col.x - ((peers.length - 1) / 2) * LOCUS_STEP;
+    const maxX = col.x + ((peers.length - 1) / 2) * LOCUS_STEP;
+    const shift = minX < 10 ? 10 - minX : maxX > width - 10 ? width - 10 - maxX : 0;
+    const x = col.x + (peers.indexOf(l.rsid) - (peers.length - 1) / 2) * LOCUS_STEP + shift;
     const y = binY(col, idx);
     const state = sample ? sample.observations[l.rsid] : "reference";
     stateCounts.set(state, (stateCounts.get(state) ?? 0) + 1);

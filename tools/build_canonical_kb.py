@@ -80,7 +80,7 @@ LIMITATION_REFS = {
     "INCOMPLETE_STAR_ALLELE_REFUSAL": INCOMPLETE_STAR_ALLELE_REFUSAL,
     "ACMG_SINGLE_LOCUS_CAVEAT": ACMG_SINGLE_LOCUS_CAVEAT,
 }
-STAR_ALLELE_GENES = frozenset({"CYP2C19"})
+STAR_ALLELE_GENES = frozenset({"CYP2C19", "CYP2C9"})
 
 INHERITANCE_MODELS = frozenset(
     {"autosomal_recessive", "autosomal_dominant", "risk_factor", "pharmacogenomic", "trait"}

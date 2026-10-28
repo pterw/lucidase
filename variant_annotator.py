@@ -437,8 +437,18 @@ def classify(parse: ParseResult, kb: KnowledgeBase) -> dict:
     records = []
     for locus in kb.loci_list:
         calls = by_rsid.get(locus["rsid"], [])
-        call = calls[0] if calls else None
-        conflicting = call is not None and any(not _same_alleles(c, call) for c in calls)
+
+        # If an array indel locus specifies allele_codes, prefer calls using those codes (D/I)
+        # over coincident SNV bystander calls that happen to share genomic coordinates.
+        candidates = calls
+        if parse.assay != "vcf" and locus.get("allele_codes"):
+            codes = locus["allele_codes"]
+            code_calls = [c for c in calls if c.alleles and all(a in codes for a in c.alleles)]
+            if code_calls:
+                candidates = code_calls
+
+        call = candidates[0] if candidates else None
+        conflicting = call is not None and any(not _same_alleles(c, call) for c in candidates)
 
         resolution = None
         if call is not None and call.alleles is not None:
@@ -447,6 +457,7 @@ def classify(parse: ParseResult, kb: KnowledgeBase) -> dict:
                 resolution = {"ok": False, "reason": "unresolvable"}
             else:
                 resolution = resolve_alt_count(locus, call.alleles, parse.assay)
+
         state = _derive_state(parse.assay, call, resolution, locus["evidence_sufficiency"])
 
         resolved = resolution is not None and resolution["ok"]

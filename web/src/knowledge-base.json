@@ -376,6 +376,49 @@
     }
   },
   "genes": {
+    "ABCG2": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Statin-Induced Myopathy / Hyperuricemia",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "603788",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "N-terminal Nucleotide-Binding Domain (NBD): residues 35–300 (Walker A motif at residues 80–88; Gln141Lys is at NBD-TMD interface)",
+            "Transmembrane Domain (TMD): residues 380–655 (6 transmembrane helices forming substrate translocation pore)"
+          ],
+          "flexible_joints": "Intracellular connecting peptide linking NBD and TMD (residues 301–379)",
+          "folding_status": "High-Confidence ABC Half-Transporter Homodimer",
+          "global_plddt": 88.4
+        },
+        "encode": {
+          "top_tissues": {
+            "kidney": 1120.0,
+            "liver": 3890.0,
+            "placenta": 6450.0,
+            "small intestine": 4210.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000118777",
+          "sift_prediction": "tolerated (0.18)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "Q9UNQ0"
+      },
+      "topic": "Statin-induced myopathy (ABCG2)"
+    },
     "ALDH2": {
       "acmg_sf": false,
       "inheritance": {
@@ -431,7 +474,7 @@
           ],
           "drug_response": null,
           "magnitude": 3.5,
-          "phenotype": "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic predisposition to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
+          "phenotype": "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic susceptibility to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
           "repute": "Bad",
           "significance": "Protective AD / Lipid Risk"
         },
@@ -586,6 +629,49 @@
       },
       "topic": "Cystic fibrosis"
     },
+    "COMT": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Prefrontal Dopamine & Catecholamine Catabolism Variation",
+        "mendelian_disease": false,
+        "model": "trait",
+        "omim": "116790",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Catalytic core: residues 1–221 (S-COMT) / 51–271 (MB-COMT)",
+            "Active site: SAM-binding pocket and catechol substrate binding site (coordinated with Mg2+)"
+          ],
+          "flexible_joints": "N-terminal membrane anchor (residues 1–50 in MB-COMT)",
+          "folding_status": "Alpha/Beta Rossmann Fold Methyltransferase",
+          "global_plddt": 91.5
+        },
+        "encode": {
+          "top_tissues": {
+            "adrenal gland": 980.4,
+            "kidney": 1310.0,
+            "liver": 1850.2,
+            "prefrontal cortex": 1420.5
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000093010",
+          "sift_prediction": "tolerated (0.42)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P21964"
+      },
+      "topic": "Dopamine & catecholamine metabolism (COMT)"
+    },
     "CYP2C19": {
       "acmg_sf": false,
       "inheritance": {
@@ -626,6 +712,89 @@
         "uniprot_id": "P33261"
       },
       "topic": "Clopidogrel (Plavix) response"
+    },
+    "CYP2C9": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Warfarin / Phenytoin Sensitivity",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "601130",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Transmembrane Anchor: residues 1–44",
+            "Catalytic P450 Core: residues 45–490 (Heme-binding Cys435)"
+          ],
+          "flexible_joints": "Substrate recognition loops B-C and F-G",
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
+          "global_plddt": 91.5
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 4250.0,
+            "small intestine": 320.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000138109",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P11712"
+      },
+      "topic": "Warfarin and phenytoin metabolism"
+    },
+    "CYP4F2": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Warfarin Sensitivity / Dose Requirement",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "604770",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "N-terminal Transmembrane Anchor: residues 1–46",
+            "Catalytic P450 Core: residues 47–520 (Heme-binding Cys468; Val433Met in substrate recognition site 6)"
+          ],
+          "flexible_joints": "Membrane-spanning anchor loop and flexible substrate access channel",
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
+          "global_plddt": 90.8
+        },
+        "encode": {
+          "top_tissues": {
+            "kidney": 2150.0,
+            "liver": 4820.0,
+            "skin": 340.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000186115",
+          "sift_prediction": "deleterious (0.02)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P78329"
+      },
+      "topic": "Warfarin dose requirement (CYP4F2)"
     },
     "DPYD": {
       "acmg_sf": false,
@@ -798,6 +967,96 @@
       },
       "topic": "Haemochromatosis (iron overload)"
     },
+    "HLA-A": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Carbamazepine Hypersensitivity / SJS / TEN / DRESS",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "608579",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "alpha-1 and alpha-2 Antigen Binding Cleft: residues 25–205 (binds antigenic self/foreign peptides and interacts with carbamazepine)",
+            "alpha-3 Domain: residues 206–298 (immunoglobulin-like fold binding beta-2M)",
+            "Transmembrane Domain: residues 309–332",
+            "Cytoplasmic Domain: residues 333–365"
+          ],
+          "flexible_joints": "Flexible connecting loop between alpha-2 and alpha-3 (residues 202–206)",
+          "folding_status": "Confidently Folded MHC Class I Antigen Presenting Core",
+          "global_plddt": 87.1
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 6150.0,
+            "lymph node": 9120.0,
+            "peripheral blood": 5820.0,
+            "spleen": 8640.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000206503",
+          "sift_prediction": "not applicable (3' UTR variant)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P04439"
+      },
+      "topic": "Carbamazepine hypersensitivity (HLA-A*31:01)"
+    },
+    "HLA-B": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Abacavir Hypersensitivity Reaction",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "608107",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Extracellular alpha-1 and alpha-2 Domains: residues 25–205 (forms the antigen recognition cleft where abacavir binds non-covalently in the F-pocket)",
+            "Extracellular alpha-3 Immunoglobulin-like Domain: residues 206–299 (binds beta-2 microglobulin and CD8 co-receptor)",
+            "Transmembrane Region: residues 309–332",
+            "Cytoplasmic Tail: residues 333–362"
+          ],
+          "flexible_joints": "Inter-domain linker between alpha-2 and alpha-3 domains (residues 201–205)",
+          "folding_status": "Confidently Folded MHC Class I Antigen Recognition Heterodimer",
+          "global_plddt": 88.1
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 5930.0,
+            "lung": 4210.0,
+            "lymph node": 7850.0,
+            "spleen": 8420.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000234745",
+          "sift_prediction": "not applicable (tag SNP)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P01889"
+      },
+      "topic": "Abacavir hypersensitivity (HLA-B*57:01)"
+    },
     "MCM6": {
       "acmg_sf": false,
       "inheritance": {
@@ -852,6 +1111,91 @@
       },
       "topic": "Folate metabolism (MTHFR)"
     },
+    "NUDT15": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Nudix Hydrolase 15 Deficiency / Thiopurine-Induced Early Leukopenia",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "615792",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Nudix Homology Domain: residues 8–150 (Length: 143 AAs; catalytic Nudix box motif at residues 38–59; Arg139Cys disrupts homodimer stability)"
+          ],
+          "flexible_joints": "Flexible C-terminal tail: residues 151–164",
+          "folding_status": "High-Confidence Nudix Hydrolase Dimer",
+          "global_plddt": 92.8
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 2100.0,
+            "liver": 1250.0,
+            "lymphoblastoid": 1680.0,
+            "spleen": 2450.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000136159",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "Q9NV35"
+      },
+      "topic": "Thiopurine drug toxicity (NUDT15)"
+    },
+    "PSORS1C1": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Allopurinol Severe Cutaneous Adverse Reactions (SCAR) / SJS / TEN",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "614588",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "N-terminal Putative Structured Segment: residues 1–45 (contains p.Arg37His / rs9263726 missense site)",
+            "Disordered C-terminal Region: residues 46–152 (highly flexible non-globular segment)"
+          ],
+          "flexible_joints": "Extended flexible region (residues 46–152)",
+          "folding_status": "Intrinsically Disordered MHC-Linked Regulatory Protein",
+          "global_plddt": 59.4
+        },
+        "encode": {
+          "top_tissues": {
+            "esophagus": 1940.0,
+            "lymph node": 980.0,
+            "skin": 2850.0,
+            "spleen": 1120.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000204540",
+          "sift_prediction": "tolerated (0.65)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "Q9UBC0"
+      },
+      "topic": "Allopurinol hypersensitivity (HLA-B*58:01)"
+    },
     "SLCO1B1": {
       "acmg_sf": false,
       "inheritance": {
@@ -893,6 +1237,48 @@
         "uniprot_id": "Q9Y6L6"
       },
       "topic": "Simvastatin muscle side effects"
+    },
+    "TPMT": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Thiopurine S-Methyltransferase Deficiency / Thiopurine Toxicity",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "610460",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Catalytic Methyltransferase Core: residues 15–245 (Length: 231 AAs; binds SAM cofactor and thiopurine substrates; *2 Ala80Pro, *3B Ala154Thr, and *3C Tyr240Cys destabilize tertiary fold)"
+          ],
+          "flexible_joints": "Disordered N-terminal extension: residues 1–14",
+          "folding_status": "Confidently Folded S-Adenosylmethionine-Dependent Methyltransferase",
+          "global_plddt": 94.9
+        },
+        "encode": {
+          "top_tissues": {
+            "bone marrow": 980.0,
+            "kidney": 1850.0,
+            "liver": 3120.0,
+            "spleen": 1420.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000137364",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream",
+          "url": null
+        },
+        "uniprot_id": "P51580"
+      },
+      "topic": "Thiopurine drug toxicity (TPMT)"
     },
     "VKORC1": {
       "acmg_sf": false,
@@ -936,6 +1322,284 @@
     }
   },
   "loci": {
+    "rs1057910": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "10",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000008408",
+          "provenance": {
+            "accession": "VCV000008408.14",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:29:30Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=242623%2C177709%2C163021%2C163020%2C8408&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "warfarin",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 96741053,
+          "pos_grch38": 94981296,
+          "provenance": {
+            "accession": "rs1057910",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:29:29Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1057910"
+          }
+        },
+        "gnomad": {
+          "af": 0.06340828681012957,
+          "constraint_provenance": {
+            "accession": "CYP2C9",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:28:59Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.614565168801593,
+          "pli": 4.863055099115174e-22,
+          "provenance": {
+            "accession": "10-94981296-A-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:30:04Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1487,
+          "mane_select_ensembl": "ENST00000260682",
+          "mane_select_refseq": "NM_000771.4",
+          "provenance": {
+            "accession": "rs1057910",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:30:03Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1057910?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2C9",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2C9 *3 allele detected at this position. Other CYP2C9 alleles (for example *2) and VKORC1 genotypes are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Warfarin: Markedly reduced clearance (one *3 allele; conservative starting dose indicated)",
+          "magnitude": 3.5,
+          "phenotype": "One CYP2C9*3 (rs1057910) allele detected. This missense variant (p.Ile359Leu) confers a severe (~80–90%) reduction in substrate clearance. Lower initial warfarin doses and increased monitoring are indicated, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Warfarin: Profoundly impaired clearance (two *3 alleles; alternative anticoagulant or major dose reduction indicated)",
+          "magnitude": 5.5,
+          "phenotype": "Two CYP2C9*3 (rs1057910) alleles detected. Two copies of this variant result in profound impairment of CYP2C9 metabolism and very low warfarin clearance with elevated bleeding risk. A metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 96741053,
+      "pos_grch38": 94981296,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs1057910",
+      "tier_citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs1061235": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000029755",
+          "provenance": {
+            "accession": "VCV000029755.1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:16Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=29755&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "risk factor",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "carbamazepine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 29913298,
+          "pos_grch38": 29945521,
+          "provenance": {
+            "accession": "rs1061235",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T15:41:15Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1061235"
+          }
+        },
+        "gnomad": {
+          "af": 0.007888639737625085,
+          "constraint_provenance": {
+            "accession": "HLA-A",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:42:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.9556726835240154,
+          "pli": 1.6434119619635055e-07,
+          "provenance": {
+            "accession": "6-29945521-A-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T15:41:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "lymph node": "High",
+            "peripheral blood": "Medium",
+            "spleen": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000376809",
+          "mane_select_refseq": "NM_002116.8",
+          "provenance": {
+            "accession": "rs1061235",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:17Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1061235?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "HLA-A",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HLA-A*31:01 surrogate tag (rs1061235 T) allele detected at this position. Absence of this surrogate marker does not establish drug safety or rule out carbamazepine hypersensitivity reactions (nor does it evaluate HLA-B*15:02).",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Carbamazepine: If carbamazepine-naive, consider alternative agent not associated with HLA-A*31:01 reactions.",
+          "magnitude": 7.0,
+          "phenotype": "One HLA-A*31:01 tag (rs1061235 T) allele detected. Significantly increased risk for carbamazepine-induced cutaneous adverse reactions, including DRESS (Drug Reaction with Eosinophilia and Systemic Symptoms), Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), and maculopapular eruptions. CPIC recommends alternative anticonvulsant therapy if patient is carbamazepine-naive.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Carbamazepine: If carbamazepine-naive, avoid carbamazepine and use alternative anticonvulsant therapy.",
+          "magnitude": 7.0,
+          "phenotype": "Two HLA-A*31:01 tag (rs1061235 T) alleles detected. High risk for carbamazepine-induced DRESS, SJS, TEN, and severe hypersensitivity. CPIC recommends alternative anticonvulsants if patient is carbamazepine-naive.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant tag test: rs1061235 (3' UTR) is a surrogate marker for HLA-A*31:01. Does not detect HLA-B*15:02 (tested separately for carbamazepine SJS/TEN risk) and does not replace diagnostic sequence-based HLA typing.",
+      "pos_grch37": 29913298,
+      "pos_grch38": 29945521,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs1061235",
+      "tier_citation": "CPIC guideline for carbamazepine and HLA-A and HLA-B, 2014 update (Leckband et al., Clinical Pharmacology and Therapeutics)",
+      "tier_rationale": "CPIC Guideline for Carbamazepine and Oxcarbazepine with HLA-A and HLA-B (Level A).",
+      "tier_source": "cpic_level"
+    },
     "rs113993960": {
       "allele_codes": {
         "D": "alt",
@@ -1068,6 +1732,561 @@
       "tier_rationale": null,
       "tier_source": "clinvar_review"
     },
+    "rs1142345": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012722",
+          "provenance": {
+            "accession": "VCV000012722.3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:25:26Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=12725%2C12722&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "drug response",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine / thioguanine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 18130918,
+          "pos_grch38": 18130687,
+          "provenance": {
+            "accession": "rs1142345",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:25:24Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1142345"
+          }
+        },
+        "gnomad": {
+          "af": 0.042818153345960536,
+          "constraint_provenance": {
+            "accession": "TPMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7812458989174523,
+          "pli": 0.003349644352690476,
+          "provenance": {
+            "accession": "6-18130687-T-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:25:36Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4277,
+          "mane_select_ensembl": "ENST00000309983",
+          "mane_select_refseq": "NM_000367.5",
+          "provenance": {
+            "accession": "rs1142345",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:25:36Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1142345?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "TPMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No TPMT *3C (c.719A>G) allele detected at this position. Other TPMT and NUDT15 alleles are evaluated separately.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced TPMT function variant (one *3C allele; diplotyping required for dosing)",
+          "magnitude": 5.5,
+          "phenotype": "One TPMT*3C (rs1142345) allele detected (c.719A>G, p.Tyr240Cys). Conveys loss of TPMT enzyme function from this allele. Because c.719A>G and c.460G>A (rs1800460) can occur in cis (*3A) or in trans (*3B/*3C), metabolizer status and thiopurine dosing cannot be assigned without phased diplotyping.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or start with <=10% of normal dose",
+          "magnitude": 7.0,
+          "phenotype": "Two TPMT*3C (rs1142345) alleles detected (c.719A>G). Two copies of this non-functional variant confer severe deficiency in TPMT methylation. CPIC strongly recommends non-thiopurine alternatives, or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers TPMT c.719A>G (*3C). Note that *3C alone defines the *3C allele, but co-occurrence with c.460G>A (rs1800460) in cis forms the composite *3A haplotype. Array data without phasing cannot distinguish *3A/*1 from *3B/*3C.",
+      "pos_grch37": 18130918,
+      "pos_grch38": 18130687,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs1142345",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs116855232": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "13",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000225201",
+          "provenance": {
+            "accession": "VCV000225201.107",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:24:45Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=225201&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 48619855,
+          "pos_grch38": 48045719,
+          "provenance": {
+            "accession": "rs116855232",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:24:44Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/116855232"
+          }
+        },
+        "gnomad": {
+          "af": 0.011740228675784585,
+          "constraint_provenance": {
+            "accession": "NUDT15",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:19Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2867519453472984,
+          "pli": 3.2711812929382365e-05,
+          "provenance": {
+            "accession": "13-48045719-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:25:10Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleoplasm"
+          ],
+          "tissues": {
+            "bone marrow": "High",
+            "liver": "Medium",
+            "lymph node": "High",
+            "spleen": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1589,
+          "mane_select_ensembl": "ENST00000258662",
+          "mane_select_refseq": "NM_018283.4",
+          "provenance": {
+            "accession": "rs116855232",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:25:09Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs116855232?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "NUDT15",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No NUDT15 *3 (c.415C>T) allele detected at this position. Does not exclude thiopurine toxicity related to other NUDT15 or TPMT variants.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced NUDT15 function variant (one *3 allele; diplotyping required for dosing)",
+          "magnitude": 5.5,
+          "phenotype": "One NUDT15*3 (rs116855232) allele detected (c.415C>T, p.Arg139Cys). Conveys loss of NUDT15 function from this allele and increases risk of early-onset thiopurine-induced leukopenia. A metabolizer status and thiopurine dosing recommendation require full NUDT15 and TPMT diplotyping, which this single-variant test does not establish.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative therapy or start with <=10% of normal dose",
+          "magnitude": 7.0,
+          "phenotype": "Two NUDT15*3 (rs116855232) alleles detected (c.415C>T, p.Arg139Cys). Two copies of this no-function allele confer profound deficiency in NUDT15 activity and high risk of life-threatening myelosuppression. CPIC recommends alternative therapy or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers NUDT15 c.415C>T (*3), the major determinant of thiopurine-induced early leukopenia in East Asian and Hispanic ancestries. Other rare NUDT15 variants and TPMT are tested separately.",
+      "pos_grch37": 48619855,
+      "pos_grch38": 48045719,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs116855232",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs12248560": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "10",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000633860",
+          "provenance": {
+            "accession": "VCV000633860.7",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:08:41Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=638790%2C634420%2C634419%2C634384%2C634383%2C634342%2C634308%2C634251%2C634217%2C634216%2C634215%2C634170%2C634169%2C634168%2C634167%2C634166%2C634165%2C634023%2C634022%2C634021%2C634020%2C634015%2C633989%2C633988%2C633987%2C633986%2C633916%2C633915%2C633914%2C633877%2C633876%2C633871%2C633868%2C633861%2C633860%2C39357&retmode=json"
+          },
+          "review_status": "practice guideline",
+          "significance": "drug response",
+          "stars": 4
+        },
+        "cpic": {
+          "drug": "clopidogrel",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 96521657,
+          "pos_grch38": 94761900,
+          "provenance": {
+            "accession": "rs12248560",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:08:39Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/12248560"
+          }
+        },
+        "gnomad": {
+          "af": 0.19998025536395947,
+          "constraint_provenance": {
+            "accession": "CYP2C19",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:06Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.7936723070559686,
+          "pli": 9.948487222945463e-27,
+          "provenance": {
+            "accession": "10-94761900-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:08:48Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "tissues": {
+            "duodenum": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000371321",
+          "mane_select_refseq": "NM_000769.4",
+          "provenance": {
+            "accession": "rs12248560",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:08:47Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs12248560?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2C19",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2C19 *17 allele detected at this position (-806C>T promoter variant). Other CYP2C19 alleles (for example *2, *3) are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Clopidogrel: Increased activation variant (one *17 allele)",
+          "magnitude": 2.5,
+          "phenotype": "One CYP2C19*17 (rs12248560) allele detected. This promoter variant is associated with increased transcription and elevated enzyme activity, but metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Clopidogrel: Increased activation variant (two *17 alleles)",
+          "magnitude": 3.0,
+          "phenotype": "Two CYP2C19*17 (rs12248560) alleles detected. Two copies of this promoter variant are associated with elevated CYP2C19 expression, but metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 96521657,
+      "pos_grch38": 94761900,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs12248560",
+      "tier_citation": "CPIC guideline for CYP2C19 and clopidogrel, 2022 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs1799853": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "10",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000008409",
+          "provenance": {
+            "accession": "VCV000008409.14",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:29:06Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=242622%2C177709%2C163021%2C163020%2C8409&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "warfarin",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 96702047,
+          "pos_grch38": 94942290,
+          "provenance": {
+            "accession": "rs1799853",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:29:05Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1799853"
+          }
+        },
+        "gnomad": {
+          "af": 0.11478821047830796,
+          "constraint_provenance": {
+            "accession": "CYP2C9",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:28:59Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.614565168801593,
+          "pli": 4.863055099115174e-22,
+          "provenance": {
+            "accession": "10-94942290-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:29:28Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.2301,
+          "mane_select_ensembl": "ENST00000260682",
+          "mane_select_refseq": "NM_000771.4",
+          "provenance": {
+            "accession": "rs1799853",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:29:28Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1799853?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2C9",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2C9 *2 allele detected at this position. Other CYP2C9 alleles (for example *3) and VKORC1 genotypes are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Warfarin: Reduced clearance (one *2 allele; lower initial dose typically indicated)",
+          "magnitude": 3.0,
+          "phenotype": "One CYP2C9*2 (rs1799853) allele detected. This missense variant (p.Arg144Cys) is associated with ~30–40% reduced CYP2C9 enzymatic clearance. Warfarin dose requirements are typically lower, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Warfarin: Markedly reduced clearance (two *2 alleles; substantial dose reduction indicated)",
+          "magnitude": 4.5,
+          "phenotype": "Two CYP2C9*2 (rs1799853) alleles detected. Two copies of this variant confer substantially reduced CYP2C9 activity with markedly reduced warfarin clearance and heightened sensitivity. A metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 96702047,
+      "pos_grch38": 94942290,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1799853",
+      "tier_citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
     "rs1799945": {
       "allele_codes": null,
       "alt": "G",
@@ -1179,7 +2398,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 2.5,
-          "phenotype": "HFE H63D homozygote: Slight predisposition to mildly elevated serum ferritin.",
+          "phenotype": "HFE H63D homozygote: Slight susceptibility to mildly elevated serum ferritin.",
           "repute": "Bad",
           "significance": "Risk Factor"
         }
@@ -1320,6 +2539,284 @@
       "tier_rationale": "Prothrombin G20210A is an established inherited risk factor for venous thromboembolism.",
       "tier_source": "curated"
     },
+    "rs1800460": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012722",
+          "provenance": {
+            "accession": "VCV000012722.3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:23:58Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=37126%2C12722&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "drug response",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine / thioguanine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 18139228,
+          "pos_grch38": 18138997,
+          "provenance": {
+            "accession": "rs1800460",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:23:57Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1800460"
+          }
+        },
+        "gnomad": {
+          "af": 0.03508394210854833,
+          "constraint_provenance": {
+            "accession": "TPMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7812458989174523,
+          "pli": 0.003349644352690476,
+          "provenance": {
+            "accession": "6-18138997-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:25:17Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.5682,
+          "mane_select_ensembl": "ENST00000309983",
+          "mane_select_refseq": "NM_000367.5",
+          "provenance": {
+            "accession": "rs1800460",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:24:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1800460?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "TPMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No TPMT *3B (c.460G>A) allele detected at this position. Other TPMT and NUDT15 alleles are evaluated separately.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced TPMT function variant (one *3B allele; diplotyping required for dosing)",
+          "magnitude": 5.5,
+          "phenotype": "One TPMT*3B (rs1800460) allele detected (c.460G>A, p.Ala154Thr). Conveys reduced TPMT enzyme stability and loss of function from this allele. Because c.460G>A and c.719A>G (rs1142345) can occur in cis (*3A) or in trans (*3B/*3C), metabolizer status and thiopurine dosing cannot be assigned without phased diplotyping.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or start with <=10% of normal dose",
+          "magnitude": 7.0,
+          "phenotype": "Two TPMT*3B (rs1800460) alleles detected (c.460G>A). Two copies of this non-functional variant confer severe deficiency in TPMT methylation. CPIC strongly recommends non-thiopurine alternatives, or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers TPMT c.460G>A (*3B). Co-occurrence with c.719A>G (rs1142345) in cis forms the common composite haplotype *3A. Unphased arrays cannot distinguish *3A from compound heterozygotes.",
+      "pos_grch37": 18139228,
+      "pos_grch38": 18138997,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1800460",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs1800462": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012721",
+          "provenance": {
+            "accession": "VCV000012721.105",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:40Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=12721&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "drug response",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "azathioprine / mercaptopurine / thioguanine",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 18143955,
+          "pos_grch38": 18143724,
+          "provenance": {
+            "accession": "rs1800462",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T14:22:39Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1800462"
+          }
+        },
+        "gnomad": {
+          "af": 0.002138187243491881,
+          "constraint_provenance": {
+            "accession": "TPMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7812458989174523,
+          "pli": 0.003349644352690476,
+          "provenance": {
+            "accession": "6-18143724-C-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T14:22:52Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.8779,
+          "mane_select_ensembl": "ENST00000309983",
+          "mane_select_refseq": "NM_000367.5",
+          "provenance": {
+            "accession": "rs1800462",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T14:22:51Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1800462?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "TPMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No TPMT *2 (c.238G>C) allele detected at this position. Other TPMT and NUDT15 alleles are evaluated separately.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: Reduced TPMT function variant (one *2 allele; diplotyping required for dosing)",
+          "magnitude": 5.5,
+          "phenotype": "One TPMT*2 (rs1800462) allele detected (c.238G>C, p.Ala80Pro). Conveys reduced TPMT enzyme stability and loss of function from this allele. A metabolizer status and thiopurine dosing recommendation require full TPMT and NUDT15 diplotyping, which this single-variant test does not establish.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Azathioprine / 6-Mercaptopurine: CPIC recommends alternative non-thiopurine therapy or start with <=10% of normal dose",
+          "magnitude": 7.0,
+          "phenotype": "Two TPMT*2 (rs1800462) alleles detected (c.238G>C). Two copies of this non-functional variant confer severe deficiency in TPMT methylation. CPIC strongly recommends non-thiopurine alternatives, or a drastically reduced dose (start with 10% or less of normal dose) with intensive CBC monitoring.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only TPMT c.238G>C (*2). TPMT activity also depends on other alleles (such as *3A, *3B, *3C) and NUDT15 variants that this locus alone does not determine.",
+      "pos_grch37": 18143955,
+      "pos_grch38": 18143724,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1800462",
+      "tier_citation": "CPIC guideline for thiopurines and TPMT and NUDT15, 2018 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
     "rs1800562": {
       "allele_codes": null,
       "alt": "A",
@@ -1449,6 +2946,134 @@
       "tier_rationale": null,
       "tier_source": "clinvar_review"
     },
+    "rs1801131": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "1",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000003521",
+          "provenance": {
+            "accession": "VCV000003521.148",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:47:23Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=3521%2C3520&retmode=json"
+          },
+          "review_status": "criteria provided, conflicting classifications",
+          "significance": "Conflicting classifications of pathogenicity; other",
+          "stars": 1
+        },
+        "dbsnp": {
+          "pos_grch37": 11854476,
+          "pos_grch38": 11794419,
+          "provenance": {
+            "accession": "rs1801131",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T05:47:22Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1801131"
+          }
+        },
+        "gnomad": {
+          "af": 0.30323784568359546,
+          "constraint_provenance": {
+            "accession": "MTHFR",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:08Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.9172636726566925,
+          "pli": 1.047047121188445e-12,
+          "provenance": {
+            "accession": "1-11794419-T-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T05:47:25Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleus"
+          ],
+          "tissues": {
+            "cerebral cortex": "Medium",
+            "kidney": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0816,
+          "mane_select_ensembl": "ENST00000376590",
+          "mane_select_refseq": "NM_005957.5",
+          "provenance": {
+            "accession": "rs1801131",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:47:24Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1801131?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "insufficient",
+      "evidence_tier": "Tier C",
+      "gene": "MTHFR",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No MTHFR A1298C allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1,
+          "phenotype": "MTHFR 1298AC heterozygote: Generally benign alone; retains ~80% enzyme activity with adequate dietary folate. Compound heterozygosity with 677CT confers ~50-60% overall MTHFR activity.",
+          "repute": "Good",
+          "significance": "Trait"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "MTHFR 1298CC homozygote (~60% residual enzyme activity): Moderate reduction in enzyme activity; does not typically elevate plasma homocysteine in the absence of severe folate deficiency.",
+          "repute": "Bad",
+          "significance": "Trait"
+        }
+      },
+      "limitation": null,
+      "pos_grch37": 11854476,
+      "pos_grch38": 11794419,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs1801131",
+      "tier_citation": "ACMG 2013 practice guideline on MTHFR polymorphism testing (Hickey et al.), Genetics in Medicine",
+      "tier_rationale": "MTHFR A1298C has weak, contested clinical utility and ACMG advises against clinical testing for MTHFR polymorphisms.",
+      "tier_source": "curated"
+    },
     "rs1801133": {
       "allele_codes": null,
       "alt": "A",
@@ -1562,7 +3187,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 2,
-          "phenotype": "MTHFR 677TT homozygote (~30% residual enzyme activity): Predisposition to elevated homocysteine if folate intake is deficient.",
+          "phenotype": "MTHFR 677TT homozygote (~30% residual enzyme activity): Susceptibility to elevated homocysteine if folate intake is deficient.",
           "repute": "Bad",
           "significance": "Trait"
         }
@@ -1576,6 +3201,425 @@
       "tier_citation": "ACMG 2013 practice guideline on MTHFR polymorphism testing (Hickey et al.), Genetics in Medicine",
       "tier_rationale": "MTHFR C677T has weak, contested clinical utility and ACMG advises against clinical testing.",
       "tier_source": "curated"
+    },
+    "rs2108622": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "19",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000225969",
+          "provenance": {
+            "accession": "VCV000225969.12",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:17:52Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=225969&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "warfarin",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 15990431,
+          "pos_grch38": 15879621,
+          "provenance": {
+            "accession": "rs2108622",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T05:17:51Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2108622"
+          }
+        },
+        "gnomad": {
+          "af": 0.2875169310576009,
+          "constraint_provenance": {
+            "accession": "CYP4F2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:17:45Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2252790265705595,
+          "pli": 6.542871222532074e-20,
+          "provenance": {
+            "accession": "19-15879621-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T05:18:10Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.2954,
+          "mane_select_ensembl": "ENST00000221700",
+          "mane_select_refseq": "NM_001082.5",
+          "provenance": {
+            "accession": "rs2108622",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:18:09Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2108622?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP4F2",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP4F2 *3 (c.1297G>A, p.Val433Met) allele detected at this position (C/C). Baseline warfarin dose requirement for this locus.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Warfarin: Modest dose increase required (~5% to 10% higher maintenance dose)",
+          "magnitude": 2.0,
+          "phenotype": "One CYP4F2 *3 (rs2108622) allele detected (C/T, c.1297G>A, p.Val433Met). Reduced vitamin K oxidation elevates baseline vitamin K levels; CPIC warfarin dosing algorithms typically recommend a modest 5% to 10% dose increase over wild-type to reach therapeutic anticoagulation.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Warfarin: Dose increase required (~15% to 25% higher maintenance dose)",
+          "magnitude": 3.0,
+          "phenotype": "Two CYP4F2 *3 (rs2108622) alleles detected (T/T, c.1297G>A, p.Val433Met). Significantly reduced vitamin K oxidation; CPIC warfarin dosing algorithms typically recommend an approximate 15% to 25% dose increase over wild-type to reach therapeutic anticoagulation.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant test: CYP4F2 c.1297G>A (*3, p.Val433Met) is one factor in warfarin dose requirements. VKORC1 and CYP2C9 genotypes, patient age, weight, and clinical factors also significantly influence warfarin dosing.",
+      "pos_grch37": 15990431,
+      "pos_grch38": 15879621,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs2108622",
+      "tier_citation": "CPIC guideline for pharmacogenetics-guided warfarin dosing (CYP2C9, VKORC1, CYP4F2), 2017 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs2231142": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "4",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000030389",
+          "provenance": {
+            "accession": "VCV000030389.8",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:18:12Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=30389&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "rosuvastatin",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 89052323,
+          "pos_grch38": 88131171,
+          "provenance": {
+            "accession": "rs2231142",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T05:18:11Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2231142"
+          }
+        },
+        "gnomad": {
+          "af": 0.11185150577437612,
+          "constraint_provenance": {
+            "accession": "ABCG2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:17:45Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.310000030315375,
+          "pli": 7.75462993876809e-30,
+          "provenance": {
+            "accession": "4-88131171-G-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T05:18:18Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Apical cell membrane"
+          ],
+          "tissues": {
+            "liver": "High",
+            "placenta": "High",
+            "small intestine": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1201,
+          "mane_select_ensembl": "ENST00000237612",
+          "mane_select_refseq": "NM_004827.3",
+          "provenance": {
+            "accession": "rs2231142",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:18:15Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2231142?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "ABCG2",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No ABCG2 c.421A (p.Gln141Lys, *2) allele detected at this position (G/G). Standard ABCG2 transporter activity and baseline statin exposure profile.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rosuvastatin: Increased systemic exposure (Moderate SAMS risk; consider alternative statin if dose >20 mg daily needed)",
+          "magnitude": 2.5,
+          "phenotype": "Intermediate ABCG2 transporter function (G/T, c.421C>A, p.Gln141Lys). Impaired efflux transporter activity increases systemic exposure to rosuvastatin and atorvastatin, moderately increasing risk of statin-associated musculoskeletal symptoms (SAMS). CPIC recommends initiating at the desired starting dose; if doses >20 mg daily are needed, consider an alternative statin.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rosuvastatin: High systemic exposure / myopathy risk (Initiate rosuvastatin at <=20 mg daily or switch agent)",
+          "magnitude": 4.0,
+          "phenotype": "Poor ABCG2 transporter function (T/T, c.421C>A, p.Gln141Lys). Severely impaired efflux transporter activity leads to an approximate 2-fold elevation in rosuvastatin plasma concentrations. CPIC recommends selecting an alternative statin or initiating rosuvastatin at a starting dose of <=20 mg daily.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant test: ABCG2 c.421C>A (p.Gln141Lys, *1/*2) is one determinant of statin exposure and hyperuricemia. SLCO1B1 and CYP2C9 genotypes also contribute to statin disposition.",
+      "pos_grch37": 89052323,
+      "pos_grch38": 88131171,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs2231142",
+      "tier_citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs2395029": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000014910",
+          "provenance": {
+            "accession": "VCV000014910.5",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:13Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=14910&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "Conflicting classifications of pathogenicity",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "abacavir",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 31431780,
+          "pos_grch38": 31464003,
+          "provenance": {
+            "accession": "rs2395029",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T15:41:12Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2395029"
+          }
+        },
+        "gnomad": {
+          "af": 0.02866843584139869,
+          "constraint_provenance": {
+            "accession": "HLA-B",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:42:04Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0077872489667163,
+          "pli": 1.469637089807812e-08,
+          "provenance": {
+            "accession": "6-31464003-T-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T15:41:14Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "lung": "Medium",
+            "lymph node": "High",
+            "spleen": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": null,
+          "mane_select_refseq": null,
+          "provenance": {
+            "accession": "rs2395029",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:14Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2395029?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "HLA-B",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HLA-B*57:01 surrogate tag (rs2395029 G) allele detected at this position. Absence of this surrogate marker does not establish drug safety or rule out abacavir hypersensitivity, and does not replace diagnostic HLA-B typing.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Abacavir: Contraindicated. Use an alternative antiretroviral regimen not containing abacavir.",
+          "magnitude": 8.5,
+          "phenotype": "One HLA-B*57:01 tag (rs2395029 G) allele detected. Carriage of HLA-B*57:01 is associated with a 45–55% absolute risk of life-threatening abacavir hypersensitivity reaction (fever, severe rash, constitutional symptoms, gastrointestinal and respiratory distress). Rechallenge after reaction can be fatal. CPIC and FDA strongly mandate abacavir contraindication.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Abacavir: Contraindicated. Select an alternative antiretroviral regimen.",
+          "magnitude": 8.5,
+          "phenotype": "Two HLA-B*57:01 tag (rs2395029 G) alleles detected. Severe, life-threatening risk for abacavir-induced hypersensitivity reaction. CPIC and FDA strongly mandate that abacavir is contraindicated.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant tag test: rs2395029 (c.5534+294T>G in HCP5) is an array surrogate in strong linkage disequilibrium with HLA-B*57:01 (near 100% negative predictive value in European and Hispanic ancestries, ~90–95% in African ancestry). This assay does not substitute for sequence-based HLA typing.",
+      "pos_grch37": 31431780,
+      "pos_grch38": 31464003,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs2395029",
+      "tier_citation": "CPIC guideline for HLA-B and abacavir, 2014 update (Martin et al., Clinical Pharmacology and Therapeutics)",
+      "tier_rationale": "CPIC Guideline for HLA-B and Abacavir (Level A); FDA boxed warning mandates HLA-B*57:01 screening prior to abacavir initiation.",
+      "tier_source": "cpic_level"
     },
     "rs3918290": {
       "allele_codes": null,
@@ -2120,6 +4164,272 @@
       "tier_rationale": "APOE e4 is the strongest common genetic risk factor for late-onset Alzheimer disease, replicated in large case-control meta-analyses.",
       "tier_source": "curated"
     },
+    "rs4680": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017591",
+          "provenance": {
+            "accession": "VCV000017591.19",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:47:27Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=17591&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 19951271,
+          "pos_grch38": 19963748,
+          "provenance": {
+            "accession": "rs4680",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T05:47:26Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/4680"
+          }
+        },
+        "gnomad": {
+          "af": 0.49047984463781935,
+          "constraint_provenance": {
+            "accession": "COMT",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:47:17Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0937332046013144,
+          "pli": 0.0006985519161479326,
+          "provenance": {
+            "accession": "22-19963748-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T05:47:29Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytoplasm",
+            "Membrane"
+          ],
+          "tissues": {
+            "cerebral cortex": "Medium",
+            "kidney": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1213,
+          "mane_select_ensembl": "ENST00000361682",
+          "mane_select_refseq": "NM_000754.4",
+          "provenance": {
+            "accession": "rs4680",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T05:47:28Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs4680?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "insufficient",
+      "evidence_tier": "Tier C",
+      "gene": "COMT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No COMT Val158Met (A) allele detected at this position (G/G Val158Val, 'Warrior' high-activity genotype). Prefrontal dopamine is cleared rapidly via high enzymatic activity; dependent on SAMe as methyl donor.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1,
+          "phenotype": "COMT Val158Met (A/G): Intermediate COMT enzymatic activity. Provides a balanced baseline dopamine tone and moderate stress clearance in the prefrontal cortex.",
+          "repute": "Good",
+          "significance": "Trait"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "COMT Met158Met (A/A, 'Worrier'): Reduced (~3-4 fold lower) COMT enzymatic activity leading to slower prefrontal dopamine clearance. Associated with enhanced executive function, attention, and working memory in calm environments, with higher sensitivity to stress and pain.",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": null,
+      "pos_grch37": 19951271,
+      "pos_grch38": 19963748,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs4680",
+      "tier_citation": "Nature Neuroscience / Molecular Psychiatry COMT Val158Met functional characterization (Egan et al. / Chen et al.)",
+      "tier_rationale": "Common neurochemical trait modifier with established physiological influence on catecholamine catabolism, but no standalone clinical diagnostic indication.",
+      "tier_source": "curated"
+    },
+    "rs4986893": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "10",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016899",
+          "provenance": {
+            "accession": "VCV000016899.15",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:08:12Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=638253%2C634416%2C634415%2C634392%2C634391%2C634301%2C634300%2C634299%2C634250%2C634249%2C634248%2C634241%2C634240%2C634239%2C634214%2C634148%2C634147%2C634146%2C634145%2C634144%2C634016%2C634015%2C634014%2C634013%2C633980%2C633979%2C633978%2C633910%2C633909%2C633908%2C633907%2C633906%2C633866%2C633858%2C16899&retmode=json"
+          },
+          "review_status": "practice guideline",
+          "significance": "drug response",
+          "stars": 4
+        },
+        "cpic": {
+          "drug": "clopidogrel",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 96540410,
+          "pos_grch38": 94780653,
+          "provenance": {
+            "accession": "rs4986893",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:08:11Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/4986893"
+          }
+        },
+        "gnomad": {
+          "af": 0.0029437502014144873,
+          "constraint_provenance": {
+            "accession": "CYP2C19",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:06Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.7936723070559686,
+          "pli": 9.948487222945463e-27,
+          "provenance": {
+            "accession": "10-94780653-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:08:38Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum membrane"
+          ],
+          "tissues": {
+            "duodenum": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000371321",
+          "mane_select_refseq": "NM_000769.4",
+          "provenance": {
+            "accession": "rs4986893",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:08:38Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs4986893?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2C19",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2C19 *3 allele detected at this position. Other CYP2C19 alleles (for example *2, *17) are not tested here, so a metabolizer phenotype cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Clopidogrel: Reduced activation (one *3 non-functional allele)",
+          "magnitude": 3.0,
+          "phenotype": "One CYP2C19*3 (rs4986893) allele detected. This nonsense variant (p.Trp212Ter) is associated with loss of CYP2C19 function, but metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Clopidogrel: Impaired activation (two *3 loss-of-function alleles; alternative drug recommended)",
+          "magnitude": 4.5,
+          "phenotype": "Two CYP2C19*3 (rs4986893) alleles detected. Two copies of this nonsense variant (p.Trp212Ter) are associated with complete loss of CYP2C19 function, and CPIC indicates an alternative antiplatelet (ticagrelor/prasugrel). A metabolizer status needs CYP2C19 star-allele diplotyping, which this single-variant test does not do.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 96540410,
+      "pos_grch38": 94780653,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs4986893",
+      "tier_citation": "CPIC guideline for CYP2C19 and clopidogrel, 2022 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
     "rs4988235": {
       "allele_codes": null,
       "alt": "A",
@@ -2247,6 +4557,284 @@
       "tier_citation": "Enattah et al. 2002, Identification of a variant associated with adult-type hypolactasia, Nature Genetics",
       "tier_rationale": "The -13910 variant is the established cause of lactase persistence in European-ancestry populations.",
       "tier_source": "curated"
+    },
+    "rs55886062": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "1",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000088975",
+          "provenance": {
+            "accession": "VCV000088975.135",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:51:15Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=88975&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 97981343,
+          "pos_grch38": 97515787,
+          "provenance": {
+            "accession": "rs55886062",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:51:14Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/55886062"
+          }
+        },
+        "gnomad": {
+          "af": 0.0006546815309132435,
+          "constraint_provenance": {
+            "accession": "DPYD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0997871251550417,
+          "pli": 5.141188106751485e-35,
+          "provenance": {
+            "accession": "1-97515787-A-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:51:17Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "colon": "Medium",
+            "kidney": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.8504,
+          "mane_select_ensembl": "ENST00000370192",
+          "mane_select_refseq": "NM_000110.4",
+          "provenance": {
+            "accession": "rs55886062",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:51:16Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs55886062?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "DPYD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No DPYD *13 (c.1679T>G) allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
+          "magnitude": 5,
+          "phenotype": "One DPYD*13 (rs55886062) allele detected. This complete loss-of-function variant is associated with a high risk of life-threatening toxicity on fluoropyrimidines, and CPIC recommends a ≥50% starting dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends avoiding standard dosing (alternative therapy)",
+          "magnitude": 6.5,
+          "phenotype": "Two DPYD*13 (rs55886062) alleles detected. Two copies of this non-functional variant result in complete DPD enzyme deficiency and severe, potentially fatal toxicity with standard fluoropyrimidine dosing; CPIC strongly recommends avoiding 5-FU/capecitabine (alternative therapy). DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only DPYD c.1679T>G (*13), one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "pos_grch37": 97981343,
+      "pos_grch38": 97515787,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs55886062",
+      "tier_citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
+    "rs56038477": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "1",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000100100",
+          "provenance": {
+            "accession": "VCV000100100.33",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:51:38Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=100100&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 98039419,
+          "pos_grch38": 97573863,
+          "provenance": {
+            "accession": "rs56038477",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:51:36Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/56038477"
+          }
+        },
+        "gnomad": {
+          "af": 0.018776957017500373,
+          "constraint_provenance": {
+            "accession": "DPYD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0997871251550417,
+          "pli": 5.141188106751485e-35,
+          "provenance": {
+            "accession": "1-97573863-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:52:20Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "colon": "Medium",
+            "kidney": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000370192",
+          "mane_select_refseq": "NM_000110.4",
+          "provenance": {
+            "accession": "rs56038477",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:52:19Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs56038477?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "DPYD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No DPYD c.1236G>A (HapB3 tag) allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 50% followed by titration based on toxicity",
+          "magnitude": 4,
+          "phenotype": "One DPYD c.1236G>A (rs56038477, HapB3 tag) allele detected. This exonic marker tags the HapB3 haplotype containing a deep intronic splice-altering variant, conferring decreased DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends reducing the starting dose by 50% followed by dose titration based on clinical toxicity or therapeutic drug monitoring. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a ≥50% starting dose reduction or alternative therapy",
+          "magnitude": 6.0,
+          "phenotype": "Two DPYD c.1236G>A (rs56038477, HapB3 tag) alleles detected. Homozygosity for HapB3 confers significantly reduced DPD enzyme activity and high risk of severe fluoropyrimidine toxicity; CPIC recommends a ≥50% dose reduction or alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only DPYD c.1236G>A (HapB3 tag), one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "pos_grch37": 98039419,
+      "pos_grch38": 97573863,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs56038477",
+      "tier_citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
     },
     "rs6025": {
       "allele_codes": null,
@@ -2501,6 +5089,145 @@
       "tier_rationale": "ALDH2*2 (Glu504Lys) is the established cause of the alcohol flushing response.",
       "tier_source": "curated"
     },
+    "rs67376798": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "1",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000088974",
+          "provenance": {
+            "accession": "VCV000088974.149",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:51:19Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=88974&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "drug response",
+          "stars": 3
+        },
+        "cpic": {
+          "drug": "fluoropyrimidines (5-fluorouracil, capecitabine)",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 97547947,
+          "pos_grch38": 97082391,
+          "provenance": {
+            "accession": "rs67376798",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T04:51:18Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/67376798"
+          }
+        },
+        "gnomad": {
+          "af": 0.00504381344273267,
+          "constraint_provenance": {
+            "accession": "DPYD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.0997871251550417,
+          "pli": 5.141188106751485e-35,
+          "provenance": {
+            "accession": "1-97082391-T-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T04:51:36Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "colon": "Medium",
+            "kidney": "Medium",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.2925,
+          "mane_select_ensembl": "ENST00000370192",
+          "mane_select_refseq": "NM_000110.4",
+          "provenance": {
+            "accession": "rs67376798",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T04:51:35Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs67376798?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "DPYD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No DPYD c.2846A>T allele detected at this position. Other DPYD variants are not tested here, so DPD activity cannot be inferred.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by 50% followed by titration based on toxicity",
+          "magnitude": 4,
+          "phenotype": "One DPYD c.2846A>T (rs67376798) allele detected. This decreased-function variant is associated with reduced DPD activity and increased risk of fluoropyrimidine toxicity; CPIC recommends reducing the starting dose by 50% followed by dose titration based on clinical toxicity or therapeutic drug monitoring. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a ≥50% starting dose reduction or alternative therapy",
+          "magnitude": 6.0,
+          "phenotype": "Two DPYD c.2846A>T (rs67376798) alleles detected. Homozygotes have significantly reduced DPD enzyme activity (activity score 1.0) and high risk of fluoropyrimidine toxicity; CPIC recommends a ≥50% dose reduction or alternative therapy based on clinical judgment. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only DPYD c.2846A>T, one of several CPIC-relevant DPYD variants. Not detecting it does not rule out reduced DPD activity from other variants.",
+      "pos_grch37": 97547947,
+      "pos_grch38": 97082391,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs67376798",
+      "tier_citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update",
+      "tier_rationale": "CPIC lists this gene-drug pair at level A.",
+      "tier_source": "cpic_level"
+    },
     "rs7412": {
       "allele_codes": null,
       "alt": "T",
@@ -2627,6 +5354,146 @@
       "tier_citation": "Farrer et al. 1997, APOE genotype and Alzheimer disease meta-analysis (Effects of age, sex, and ethnicity on the association between apolipoprotein E genotype and Alzheimer disease), JAMA",
       "tier_rationale": "APOE e2 vs e3/e4 effects on Alzheimer risk and type III hyperlipoproteinemia are replicated in large meta-analyses.",
       "tier_source": "curated"
+    },
+    "rs9263726": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV003059106",
+          "provenance": {
+            "accession": "VCV003059106.2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:19Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=3059106&retmode=json"
+          },
+          "review_status": "no assertion criteria provided",
+          "significance": "Benign",
+          "stars": 0
+        },
+        "cpic": {
+          "drug": "allopurinol",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 31106499,
+          "pos_grch38": 31138722,
+          "provenance": {
+            "accession": "rs9263726",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-28T15:41:18Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/9263726"
+          }
+        },
+        "gnomad": {
+          "af": 0.12610426884469603,
+          "constraint_provenance": {
+            "accession": "PSORS1C1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:42:05Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3993626661951688,
+          "pli": 0.00873418090649623,
+          "provenance": {
+            "accession": "6-31138722-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-28T15:41:55Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered in the previous web knowledge base; not verified against HPA)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "esophagus": "Medium",
+            "lymph node": "Low",
+            "skin": "Medium",
+            "spleen": "Low"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000259881",
+          "mane_select_refseq": "NM_014068.3",
+          "provenance": {
+            "accession": "rs9263726",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-28T15:41:54Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs9263726?content-type=application/json&mane=1&canonical=1&hgvs=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "PSORS1C1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HLA-B*58:01 surrogate tag (rs9263726 A) allele detected at this position. Absence of this surrogate marker does not establish drug safety or rule out allopurinol-induced severe cutaneous adverse reactions (SCAR), and does not replace diagnostic HLA-B typing.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Allopurinol: Contraindicated. Consider non-allopurinol urate-lowering alternatives such as febuxostat.",
+          "magnitude": 8.0,
+          "phenotype": "One HLA-B*58:01 tag (rs9263726 A) allele detected. Highly elevated risk (OR ~80–100) for allopurinol-induced severe cutaneous adverse reactions (SCAR), including Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), and DRESS. High mortality rate (up to 25%). CPIC and ACR guidelines recommend allopurinol is contraindicated; consider alternative urate-lowering therapy (e.g., febuxostat).",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Allopurinol: Contraindicated. Avoid allopurinol and select alternative urate-lowering therapy.",
+          "magnitude": 8.0,
+          "phenotype": "Two HLA-B*58:01 tag (rs9263726 A) alleles detected. Severe, critical risk for allopurinol-induced SCAR (SJS/TEN/DRESS). CPIC and ACR guidelines strongly advise avoiding allopurinol; use non-allopurinol urate-lowering alternatives.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant tag test: rs9263726 (c.110G>A, p.Arg37His in PSORS1C1) is an array surrogate in strong linkage disequilibrium with HLA-B*58:01 in Asian and European ancestries. It does not replace direct sequence-based HLA-B typing.",
+      "pos_grch37": 31106499,
+      "pos_grch38": 31138722,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs9263726",
+      "tier_citation": "CPIC guideline for allopurinol and HLA-B, 2015 update (Hershfield et al., Clinical Pharmacology and Therapeutics)",
+      "tier_rationale": "CPIC Guideline for Allopurinol and HLA-B (Level A). High-risk allele for allopurinol-induced severe cutaneous adverse reactions (SCAR).",
+      "tier_source": "cpic_level"
     },
     "rs9923231": {
       "allele_codes": null,
@@ -2769,16 +5636,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 12,
+    "gene_count": 21,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 14,
+    "locus_count": 32,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "ef2fc86aea9a5b6cb40abb8c0b5d4a421263d08b5756691c1f81ed49168a555c"
+    "sha256": "64ab3b3c090040a5f98fd02c94ef5df0acd0cca1b15dacb615177c69587f03b2"
   },
   "schema_version": 2
 }
