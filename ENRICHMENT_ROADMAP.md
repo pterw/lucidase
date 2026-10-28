@@ -2,7 +2,7 @@
 
 > **Status:** Active Reference & Execution Plan  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 29 curated loci across 18 genes.
+> **Current KB State:** 32 curated loci across 21 genes.
 
 ---
 
@@ -34,6 +34,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 - [x] **Tier 2A: Cardiovascular & Statin Transporters**: `CYP4F2*3` (rs2108622, completing warfarin triad), `ABCG2 Q141K` (rs2231142, rosuvastatin transport).
 - [x] **Tier 4: One-Carbon Folate & Catecholamine Catabolism**: `MTHFR A1298C` (rs1801131, compound heterozygote pair), `COMT Val158Met` (rs4680, prefrontal dopamine clearance).
 - [x] **Phase 1 (Tier 2B): Thiopurine Toxicity (TPMT & NUDT15)**: `TPMT*2` (rs1800462), `TPMT*3C` (rs1142345), `TPMT*3B` (rs1800460), `NUDT15*3` (rs116855232).
+- [x] **Phase 2 (Tier 3): Severe Adverse Drug Reaction (ADR) HLA Immune Alleles**: `HLA-B*57:01` tag (`rs2395029`), `HLA-A*31:01` tag (`rs1061235`), `HLA-B*58:01` tag (`rs9263726` in `PSORS1C1`). `HLA-B*15:02` tag SNPs excluded per Clinical Honesty guardrails (`AGENTS.md` Rule 4).
 
 ---
 
@@ -52,19 +53,18 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 ---
 
-### Phase 2: Severe Adverse Drug Reaction (ADR) HLA Immune Alleles (Tier 3)
+### Phase 2: Severe Adverse Drug Reaction (ADR) HLA Immune Alleles (Tier 3 — Completed)
 
 * **Clinical Rationale**: Human Leukocyte Antigen (HLA) alleles drive idiosyncratic, hyper-severe T-cell-mediated hypersensitivity reactions with extraordinary odds ratios ($OR > 100$ to $1000$). Exposure in positive carriers triggers Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), or DRESS (Drug Reaction with Eosinophilia and Systemic Symptoms). Array platforms reliably genotype well-characterized tag SNPs in linkage disequilibrium with specific HLA class I alleles.
 * **Clinical Honesty Guardrail**: Must explicitly disclaim that array tag SNPs are surrogates for HLA alleles and do not substitute for definitive sequence-based HLA typing.
 * **Target Loci**:
-  - [ ] **`HLA-B*57:01` Tag (`rs2395029`)**: chr6:31464402 (GRCh38) / chr6:31432128 (GRCh37), Intronic/Intergenic tag in `HCP5`.
+  - [x] **`HLA-B*57:01` Tag (`rs2395029`)**: chr6:31464402 (GRCh38) / chr6:31432128 (GRCh37), Intronic/Intergenic tag in `HCP5`.
     - *Indication*: Abacavir (antiretroviral) hypersensitivity.
     - *Predictive Power*: 100% negative predictive value for patch-test confirmed abacavir hypersensitivity. FDA black-box warning.
-  - [ ] **`HLA-B*15:02` Tag (`rs3909184` or `rs2844682`)**: chr6:31353872 / chr6:31357179 (GRCh38).
-    - *Indication*: Carbamazepine and oxcarbazepine-induced Stevens-Johnson Syndrome (SJS) and Toxic Epidermal Necrolysis (TEN) in East and South Asian ancestries (MAF 10–15%).
-  - [ ] **`HLA-A*31:01` Tag (`rs1061235`)**: chr6:29942767 (GRCh38) / chr6:29910493 (GRCh37).
+  - [x] **`HLA-B*15:02` Tag (`rs3909184` or `rs2844682`)**: Excluded per Clinical Honesty guardrails (`AGENTS.md` Rule 4). Tag SNP surrogacy for HLA-B*15:02 suffers from inadequate sensitivity/specificity across non-Asian sub-populations (high false-negative rate) compared to definitive sequence-based HLA typing; clinical guidelines (CPIC) mandate sequence-based or specific allele-level genotyping before carbamazepine initiation.
+  - [x] **`HLA-A*31:01` Tag (`rs1061235`)**: chr6:29942767 (GRCh38) / chr6:29910493 (GRCh37).
     - *Indication*: Carbamazepine hypersensitivity across pan-ethnic and European populations (DRESS syndrome and maculopapular exanthema).
-  - [ ] **`HLA-B*58:01` Tag (`rs9263726`)**: chr6:31378822 (GRCh38) / chr6:31346548 (GRCh37).
+  - [x] **`HLA-B*58:01` Tag (`rs9263726`)**: chr6:31378822 (GRCh38) / chr6:31346548 (GRCh37).
     - *Indication*: Allopurinol (gout therapy) severe cutaneous adverse reactions (SCAR) and SJS/TEN. Extremely high risk in East Asian, Thai, and African ancestries.
 * **Upstream Sources**: ClinVar, CPIC guidelines (Abacavir, Carbamazepine, Allopurinol), FDA Table of Pharmacogenomic Biomarkers in Drug Labeling.
 

@@ -357,7 +357,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `3635cbc` | Web & E2E | `fix(web): clamp clustered karyogram marks to canvas and harmonize e2e tests` |
 | `fae5c19` | Roadmap | `docs(roadmap): record audit remediations, roadmap, handoff updates, and gitignore` |
 | `a0994cb` | Phase 1 (Tier 2B) | `feat(kb): add TPMT and NUDT15 thiopurine pharmacogenomics (Phase 1 / Tier 2B)` |
-
+| `da59dc9` | Phase 2 (Tier 3) | `feat(kb): add HLA-B*57:01, HLA-A*31:01, and HLA-B*58:01 severe ADR immune tag alleles (Phase 2 / Tier 3)` |
 
 ---
 
