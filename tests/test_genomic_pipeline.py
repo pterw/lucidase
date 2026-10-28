@@ -508,6 +508,25 @@ class TestAnnotation(unittest.TestCase):
         self.assertEqual(cftr.alt_count, 0)
         self.assertEqual(cftr.genotype, "I/I")
 
+    def test_coincident_contradictory_probe_fails_closed_to_unresolvable(self):
+        # rs1800562 is at 6:26093141 (GRCh37). An exact rsID call plus a contradictory
+        # position-matched call must not be silently discarded in conflict detection.
+        from genomic_parser import ParseResult, ParseStats, Call
+        parse = ParseResult(
+            format="23andme",
+            build="GRCh37",
+            assay="array",
+            calls=[
+                Call("rs1800562", "6", 26093141, ["G", "G"]),
+                Call("i12345", "6", 26093141, ["G", "A"]),
+            ],
+            stats=ParseStats(total_lines=2, data_rows=2, called=2),
+        )
+        report = self.annotator.annotate_genome(parse)
+        rec = self.record(report, "rs1800562")
+        self.assertIsNone(rec.alt_count)
+        self.assertEqual(rec.sample_observation, "call_unavailable")
+
 
 
 class TestInheritanceArithmetic(unittest.TestCase):

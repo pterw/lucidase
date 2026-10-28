@@ -161,3 +161,18 @@ test("coincident bystander probe does not conflict with compatible probe at same
   assert.equal(rec.genotype_display, "I/I");
 });
 
+test("an exact-rsID call plus a contradictory position-matched call fails closed to unresolvable", () => {
+  const k = kb();
+  // rs1799945 is at 6:26091179 in the mini test KB. Two coincident calls with different genotypes must not be silently resolved by rsID.
+  const out = classify(
+    parse([
+      call("rs1799945", "6", 26091179, ["C", "C"]),
+      call("i12345", "6", 26091179, ["C", "G"]),
+    ]),
+    k
+  );
+  const rec = out.records.find((r) => r.rsid === "rs1799945");
+  assert.equal(rec.altCount, null);
+  assert.equal(rec.sample_observation, "call_unavailable");
+});
+

@@ -447,10 +447,6 @@ def classify(parse: ParseResult, kb: KnowledgeBase) -> dict:
             if code_calls:
                 candidates = code_calls
 
-        exact = [c for c in candidates if c.rsid == locus["rsid"]]
-        if exact:
-            candidates = exact
-
         call = candidates[0] if candidates else None
         conflicting = call is not None and any(not _same_alleles(c, call) for c in candidates)
 

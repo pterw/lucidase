@@ -52,9 +52,6 @@ export function classify(parseResult, kb) {
       if (codeCalls.length > 0) candidates = codeCalls;
     }
 
-    const exact = candidates.filter((c) => c.rsid === locus.rsid);
-    if (exact.length > 0) candidates = exact;
-
     const call = candidates[0];
     const conflicting = call !== undefined && candidates.some((c) => !sameAlleles(c, call));
 
