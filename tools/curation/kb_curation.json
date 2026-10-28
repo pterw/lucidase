@@ -3595,7 +3595,7 @@
           "significance": "Not detected",
           "magnitude": 0.0,
           "repute": "Neutral",
-          "phenotype": "No SLCO1B1 c.388G (*1b) allele detected at this position (homozygous reference A/A). Baseline OATP1B1 transporter sequence at this locus.",
+          "phenotype": "No SLCO1B1 c.388G (*1b) allele detected at this position (homozygous reference A/A). Baseline OATP1B1 transporter sequence at this locus. Overall SLCO1B1 function also depends on other variants, including c.521T>C (*5).",
           "drug_response": null,
           "caveats": []
         },
@@ -3604,20 +3604,21 @@
           "significance": "Drug Response",
           "magnitude": 1.0,
           "repute": "Neutral",
-          "phenotype": "Heterozygous for SLCO1B1 c.388A>G (*1b, Asn130Asp). Normal to slightly increased hepatic statin uptake transporter function.",
-          "drug_response": "Statins: Normal OATP1B1 transporter function (standard dosing guideline applies in absence of *5)",
+          "phenotype": "One SLCO1B1 c.388A>G (*1b, Asn130Asp) allele detected. This variant is associated with normal to slightly increased hepatic statin uptake at this locus, but overall OATP1B1 transporter function and statin myopathy risk also depend on other variants (including c.521T>C, *5).",
+          "drug_response": "Statins: Standard dosing applies for this variant alone; evaluate in conjunction with SLCO1B1 *5 (rs4149056)",
           "caveats": []
         },
         "2": {
           "category": "Pharmacogenomics",
           "significance": "Drug Response",
           "magnitude": 1.0,
-          "repute": "Good",
-          "phenotype": "Homozygous for SLCO1B1 c.388A>G (*1b/*1b, Asn130Asp). Preserved or slightly increased hepatic uptake of statins (atorvastatin, pravastatin, rosuvastatin, simvastatin).",
-          "drug_response": "Statins: Normal or slightly increased hepatic uptake (standard dosing guideline applies in absence of *5)",
+          "repute": "Neutral",
+          "phenotype": "Two SLCO1B1 c.388A>G (*1b, Asn130Asp) alleles detected. In isolation this variant is associated with preserved or slightly increased hepatic uptake of statins, but overall SLCO1B1 transporter function and myopathy risk also depend on other loci (such as c.521T>C, *5).",
+          "drug_response": "Statins: Standard dosing applies for this variant alone; evaluate in conjunction with SLCO1B1 *5 (rs4149056)",
           "caveats": []
         }
       },
+
       "evidence": {
         "clinvar": {
           "accession": "VCV000259983",
