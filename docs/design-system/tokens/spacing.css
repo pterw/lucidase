@@ -3,7 +3,7 @@
 --space-0:0;--space-px:1px;--space-0-5:2px;--space-1:4px;--space-1-5:6px;--space-2:8px;--space-2-5:10px;--space-3:12px;--space-3-5:14px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;
 
 /* Layout */
---layout-max:1560px;--layout-gutter:24px;--layout-gutter-sm:16px;--layout-gutter-lg:32px;
+--layout-max:1680px;--layout-gutter:20px;--layout-gutter-sm:16px;--layout-gutter-lg:24px;
 --header-pad-y:16px;--header-pad-x:24px;--header-h:64px;
 --inspector-w:440px;--margin-col:200px;--section-gap:64px;--group-gap:24px;--space-14:56px;--space-18:72px;--panel-pad:24px;--panel-pad-sm:16px;
 --control-h-sm:30px;--control-h:36px;--control-h-lg:44px;

@@ -240,7 +240,7 @@ button.lds-step-item { cursor: pointer; }
 .lds-finding-topic { margin: 0; font: 700 16px/1.35 var(--font-sans); color: var(--text-body); }
 .lds-finding-gene { font: 400 13px var(--font-mono); color: var(--text-muted); }
 .lds-finding-statement { margin: 0; font: 400 15px/1.55 var(--font-sans); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
-.lds-finding-limit { display: flex; gap: 8px; margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--notice-ink); max-width: var(--measure-prose); }
+.lds-finding-limit { display: flex; gap: 8px; margin: 4px 0 2px 0; font: 400 14px/1.5 var(--font-sans); color: var(--notice-ink); max-width: var(--measure-prose); }
 .lds-finding-limit > .lds-icon { width: 15px; height: 15px; margin-top: 2px; }
 .lds-finding-tech { font: 400 13px var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
 .lds-finding-open { align-self: start; display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 8px; border: 0; background: transparent;
@@ -367,6 +367,8 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-isec-sub { margin: -4px 0 10px; font: 400 13px/1.45 var(--font-sans); color: var(--text-muted); }
 .lds-isec-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .lds-isec-body { display: flex; flex-direction: column; gap: 10px; font: 400 14px/1.5 var(--font-sans); color: var(--text-body); }
+.lds-inspector .lds-prose,
+.lds-isec-body .lds-prose { font: 400 14px/1.55 var(--font-sans); }
 .lds-inspector-heading { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .lds-inspector-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 2px; }
 
@@ -376,14 +378,59 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    below the list at full width and stops sticking. */
 .lds-results { container: lds-results / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; width: 100%; }
 .lds-results-main { flex: 1 1 560px; min-width: 0; }
-.lds-results-side { flex: 0 0 var(--inspector-w); min-width: 0; align-self: stretch; margin-left: auto; }
+.lds-results-side {
+  flex: 0 0 var(--inspector-w);
+  min-width: 0;
+  align-self: stretch;
+  margin-left: auto;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity var(--dur-slow) var(--ease-standard),
+              transform var(--dur-slow) var(--ease-standard);
+}
+.lds-results-side.is-open {
+  opacity: 1;
+  transform: translateX(0);
+}
 .lds-inspector-docked { position: sticky; top: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 32px);
   border: 1px solid var(--border-default); transition: none; }
 .lds-inspector-docked:focus { outline: none; }
 .lds-inspector-docked .lds-inspector-body { flex: 1; min-height: 0; overflow-y: auto; }
 @container lds-results (max-width: 1031px) {
-  .lds-results-side { flex-basis: 100%; }
+  .lds-results-side { flex-basis: 100%; transform: none; }
   .lds-inspector-docked { position: static; max-height: none; }
+}
+
+/* Collapsible sections in grouped report */
+.lds-section-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+.lds-section-toggle:hover {
+  color: var(--text-body);
+  background: var(--bg-hover);
+}
+.lds-section-toggle .lds-icon {
+  width: 16px;
+  height: 16px;
+  transform: rotate(90deg);
+  transition: transform var(--dur-base) var(--ease-standard);
+}
+.lds-section.is-collapsed .lds-section-toggle .lds-icon {
+  transform: rotate(0deg);
+}
+.lds-section.is-collapsed .lds-section-body {
+  display: none;
 }
 
 /* SegmentedControl */
@@ -445,12 +492,43 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    button: a pointer, the focus ring on its halo (an SVG group draws no outline), and the selected halo larger and
    stronger, as in the design system's Karyogram (8.5 to 11 of its 4.25 core, 0.2 to 0.3 opacity). */
 .lds-summary-prose { margin: 0; font: 400 16px/1.55 var(--font-sans); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
-#summary { flex-direction: column; gap: 20px; }
+#summary {
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  transition: margin var(--dur-slow) var(--ease-standard);
+}
 #summary .lds-section-head { flex: none; width: 100%; max-width: none; }
 #summary .lds-section-body { flex: none; width: 100%; }
 .lds-summary-map { min-width: 0; overflow-x: auto; }
-.lds-summary-map svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; }
-.lds-summary-legend { max-width: 560px; }
+.lds-summary-map svg {
+  display: block;
+  width: 100%;
+  min-width: 672px;
+  max-width: 760px;
+  height: auto;
+  margin: 0 auto;
+  transition: margin var(--dur-slow) var(--ease-standard);
+}
+.lds-summary-legend {
+  max-width: 560px;
+  margin: 0 auto;
+  transition: margin var(--dur-slow) var(--ease-standard);
+}
+.has-drawer-open #summary {
+  margin-left: 0;
+  margin-right: auto;
+}
+.has-drawer-open .lds-summary-map svg {
+  margin-left: 0;
+  margin-right: auto;
+}
+.has-drawer-open .lds-summary-legend {
+  margin-left: 0;
+  margin-right: auto;
+}
 .lds-summary-map .kary-locus { cursor: pointer; outline: none; }
 .lds-summary-map .kary-locus:hover .kary-halo { fill-opacity: 0.28; }
 .lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.35; }

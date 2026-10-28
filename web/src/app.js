@@ -329,8 +329,18 @@ function initEventListeners() {
     });
   }
 
-  // The grouped report: "Details" opens the record in the drawer, the same way a table row does.
+  // The grouped report: toggle collapse on section header, or "Details" opens the record in the drawer.
   document.getElementById("report-groups").addEventListener("click", (e) => {
+    const toggle = e.target.closest("button.lds-section-toggle");
+    if (toggle) {
+      const section = toggle.closest("section.lds-section");
+      if (!section) return;
+      const collapsed = section.classList.toggle("is-collapsed");
+      toggle.setAttribute("aria-expanded", String(!collapsed));
+      const title = section.querySelector(".lds-section-title")?.textContent ?? "section";
+      toggle.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${title}`);
+      return;
+    }
     const button = e.target.closest("button.lds-finding-open");
     if (!button) return;
     const id = button.closest("article.lds-finding").dataset.findingId;
@@ -515,10 +525,15 @@ function renderReportGroups() {
   container.innerHTML = groupedReport(allRows(), state.genes).map((group) => `
     <section id="group-${escapeHtml(group.id)}" class="lds-section" aria-labelledby="group-${escapeHtml(group.id)}-h">
       <div class="lds-section-head">
-        <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+        <div class="flex items-center justify-between gap-3">
+          <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+          <button type="button" class="lds-section-toggle" aria-expanded="true" aria-controls="group-${escapeHtml(group.id)}-body" aria-label="Collapse ${escapeHtml(group.title)}">
+            <span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span>
+          </button>
+        </div>
         <p class="lds-section-aside">${escapeHtml(group.aside)}</p>
       </div>
-      <div class="lds-section-body">
+      <div id="group-${escapeHtml(group.id)}-body" class="lds-section-body">
         ${group.rows.length === 0 ? `<p class="lds-meta">No checks in this group.</p>` : group.rows.map(findingRowHtml).join("")}
       </div>
     </section>
@@ -1216,6 +1231,9 @@ function openDrawer(record, opener = document.activeElement) {
   // while it is docked beside the list leaves focus in the list, where the person is choosing. Under the list (a
   // narrow screen) it is out of sight, so it is brought into view and focused every time.
   side.hidden = false;
+  document.getElementById("results-section")?.classList.add("has-drawer-open");
+  void side.offsetWidth;
+  side.classList.add("is-open");
   markSelectedFinding(record.id);
   const below = side.offsetTop > side.parentElement.firstElementChild.offsetTop;
   if (!wasOpen || below) drawer.focus({ preventScroll: true });
@@ -1506,8 +1524,24 @@ function renderDrawerBiotools(record) {
 function closeDrawer() {
   const drawer = document.getElementById("variant-drawer");
   const side = document.getElementById("inspector-side");
+  const resultsSection = document.getElementById("results-section");
   const focusWasInside = Boolean(drawer && drawer.contains(document.activeElement));
-  if (side) side.hidden = true;
+  if (resultsSection) resultsSection.classList.remove("has-drawer-open");
+  if (side) {
+    side.classList.remove("is-open");
+    const onEnd = () => {
+      if (!side.classList.contains("is-open")) {
+        side.hidden = true;
+      }
+      side.removeEventListener("transitionend", onEnd);
+    };
+    side.addEventListener("transitionend", onEnd, { once: true });
+    setTimeout(() => {
+      if (!side.classList.contains("is-open")) {
+        side.hidden = true;
+      }
+    }, 250);
+  }
   state.selectedVariant = null;
   markSelectedFinding(null);
   // Focus that was in the Inspector goes back to whatever opened it (a table row, or a button), if it is still on
