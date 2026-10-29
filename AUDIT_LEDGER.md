@@ -369,6 +369,14 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `7e20dcb` | P2-024 | `fix(test): eliminate focus race in karyogram keyboard file picker test (P2-024)` |
 | `7f26e73` | P1-095 | `fix(kb): scope SLCO1B1 rs2306283 interpretations to single variant (P1-095)` |
 
+### 2026-10-29
+
+| Commit | Scope | Description |
+|---|---|---|
+| `7601557` | Karyogram | `feat(karyogram): enhance chromosome map layout with sidebar guide and contrast bins` |
+| `d6522ed` | Web UX | `feat(web): restore landing hero, add dynamic 1080p scaling, and polish results layout` |
+| `de6e844` | Karyogram UX | `feat(karyogram): refine hero layout with inline wordmark and track alignment` |
+
 ---
 
 *Ledger maintained in ISO YYYY-MM-DD order. All P0, P1 and P2 issues are remediated.*
