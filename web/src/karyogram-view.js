@@ -13,7 +13,7 @@ const TOP_PAD = 24;
 const LABEL_GAP = 14;
 const BOTTOM_PAD = 10;
 const CEN_TICK = 6;
-const R_MIN = 0.9;
+const R_MIN = 1.3;
 const R_MARKED_MIN = 1.6; // a bin with even one marker must read as larger than an empty bin
 const R_MARKED_SPAN = 1.6; // R_MARKED_MIN + R_MARKED_SPAN = 3.2, the busiest bin
 
@@ -55,7 +55,7 @@ const esc = escapeHtml;
 export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
   const { geometry, reference, sample } = layout;
   const labelOf = (state) => stateLabels[state] ?? state;
-  const binSize = sample ? sample.binSize : DEFAULT_BIN_SIZE;
+  const binSize = layout.binSize ?? (sample ? sample.binSize : DEFAULT_BIN_SIZE);
   const drawDensity = Boolean(sample && sample.density === "available" && sample.bins);
 
   const cols = geometry.chromosomes.map((c, i) => ({

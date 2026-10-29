@@ -46,24 +46,32 @@
   <!-- states: reference-only, loading, result, error (density unavailable is a notice inside result) -->
   <main id="karyogram-main" data-karyogram-state="reference-only" class="lds-wrap flex-1 flex flex-col gap-12 pt-10 pb-16" tabindex="-1">
 
-    <section class="flex flex-col gap-5" style="max-width: 720px">
-      <h1 class="lds-display">Chromosome map</h1>
-      <p class="lds-lede">
-        Each dot stands for a stretch of chromosome about 4 million DNA letters long. The more markers from your file
-        fall in that stretch, the bigger the dot. Coloured rings mark the genes this report checks, with your result
-        for each. Your file is read in this browser and never leaves it.
-      </p>
-      <div class="flex flex-wrap items-center gap-3">
-        <input type="file" id="karyogram-file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
-        <button type="button" id="btn-karyogram-browse" class="lds-btn lds-btn-primary">
-          <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
-        </button>
-        <span id="karyogram-sample-group" class="inline-flex items-center gap-3">
-          <span class="lds-meta">or</span>
-          <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
-        </span>
-        <!-- Shown instead of the two above while a file is on the map -->
-        <button type="button" id="btn-karyogram-clear" class="lds-btn lds-btn-ghost hidden">Clear the file</button>
+    <section class="flex flex-wrap items-start justify-between gap-8">
+      <div class="flex flex-col gap-5" style="max-width: 680px">
+        <h1 class="lds-display">Chromosome map</h1>
+        <p class="lds-lede">
+          Each dot stands for a stretch of chromosome about 4 million DNA letters long. The more markers from your file
+          fall in that stretch, the bigger the dot. Coloured rings mark the genes this report checks, with your result
+          for each. Your file is read in this browser and never leaves it.
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <input type="file" id="karyogram-file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
+          <button type="button" id="btn-karyogram-browse" class="lds-btn lds-btn-primary">
+            <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
+          </button>
+          <span id="karyogram-sample-group" class="inline-flex items-center gap-3">
+            <span class="lds-meta">or</span>
+            <button type="button" id="btn-load-karyogram-sample" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
+          </span>
+          <!-- Shown instead of the two above while a file is on the map -->
+          <button type="button" id="btn-karyogram-clear" class="lds-btn lds-btn-secondary hidden">
+            <span class="lds-icon lds-i-x" aria-hidden="true"></span>Clear the file
+          </button>
+        </div>
+      </div>
+      <div class="hidden lg:block self-center" style="max-width: 360px; width: 100%;">
+        <img class="lds-wm-light" src="src/brand/lucidase-wordmark-light.svg" alt="Lucidase" width="360" height="100" style="display: block; width: 100%; height: auto;">
+        <img class="lds-wm-dark" src="src/brand/lucidase-wordmark-dark.svg" alt="Lucidase" width="360" height="100" style="display: block; width: 100%; height: auto;">
       </div>
     </section>
 
@@ -92,10 +100,24 @@
 
     <!-- The figure: the dot field belongs here, inside the figure, never as page texture -->
     <section class="border-t border-line pt-7">
-      <figure class="flex flex-col gap-3">
-        <div id="karyogram-figure" role="region" aria-label="Chromosome map" tabindex="0"></div>
-        <figcaption id="karyogram-caption" class="lds-meta"></figcaption>
-      </figure>
+      <div class="flex flex-col xl:flex-row items-start gap-8 xl:gap-12 w-full max-w-full min-w-0">
+        <aside class="kary-guide hidden xl:flex flex-col gap-3.5 text-14 text-ink-muted shrink-0 w-[280px]">
+          <h2 class="lds-h3 text-ink">How to read this map</h2>
+          <p class="leading-relaxed">
+            Each column represents human chromosomes <strong class="text-ink font-semibold">1 to 22, X, and Y</strong>.
+          </p>
+          <p class="leading-relaxed">
+            Dots represent <strong class="text-ink font-semibold">4 Mb regions</strong>. Larger dots indicate more markers from your file fall within that stretch.
+          </p>
+          <p class="leading-relaxed">
+            <strong class="text-ink font-semibold">Coloured rings</strong> mark the specific genes checked in this report, coloured by your result.
+          </p>
+        </aside>
+        <figure class="flex-1 w-full max-w-full min-w-0 flex flex-col gap-3">
+          <div id="karyogram-figure" role="region" aria-label="Chromosome map" tabindex="0"></div>
+          <figcaption id="karyogram-caption" class="lds-meta"></figcaption>
+        </figure>
+      </div>
     </section>
 
     <section class="lds-section" aria-labelledby="key-h">

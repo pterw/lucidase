@@ -27,13 +27,13 @@ test("24 columns and 34 reference loci with no sample", () => {
   assert.doesNotMatch(svg, /fill=/);
 });
 
-test("the busiest bin has r=3.2 and empty bins r=0.9", () => {
+test("the busiest bin has r=3.2 and empty bins r=1.3", () => {
   // chr2, well away from the centromere: 4 calls in one bin, 1 in another.
   const calls = [call("2", 5_000_001), call("2", 5_000_002), call("2", 5_000_003), call("2", 5_000_004), call("2", 9_000_001)];
   const svg = renderKaryogramSvg(sampleLayout(calls));
   assert.equal(count(svg, /class="kary-bin" [^>]*r="3\.2"/g), 1);
   assert.equal(count(svg, /class="kary-bin" /g), 2);
-  assert.ok(count(svg, /kary-bin-empty" [^>]*r="0\.9"/g) > 100);
+  assert.ok(count(svg, /kary-bin-empty" [^>]*r="1\.3"/g) > 100);
   assert.match(svg, /class="kary-bin" [^>]*r="2\.4"/); // 1.6 + 1.6 * sqrt(1/4) = 2.4
 });
 

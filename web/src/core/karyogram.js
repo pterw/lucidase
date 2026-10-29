@@ -78,7 +78,7 @@ export function layoutKaryogram({ kb, sample = null, binSize = DEFAULT_BIN_SIZE 
   };
 
   if (!sample) {
-    return { geometry: { build: geometryBuild, chromosomes }, reference, sample: null };
+    return { geometry: { build: geometryBuild, chromosomes }, reference, sample: null, binSize };
   }
 
   const lengthOf = Object.fromEntries(chromosomes.map((c) => [c.name, c.length]));

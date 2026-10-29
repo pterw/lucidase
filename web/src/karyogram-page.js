@@ -17,6 +17,7 @@ import { initPagesMenu } from "./pages-menu.js";
 const SAMPLE_URL = "./demo-data/sample-karyogram-23andme.txt";
 const SAMPLE_NAME = "sample-karyogram-23andme.txt";
 const WORKER_TIMEOUT_MS = 30000;
+const KARYOGRAM_BIN_SIZE = 4_000_000;
 const LEGEND_ORDER = [
   "reference",
   "supported_and_observed",
@@ -206,7 +207,7 @@ function showError(message) {
   setViewState("error");
   if (view.kb) {
     try {
-      render(layoutKaryogram({ kb: view.kb }));
+      render(layoutKaryogram({ kb: view.kb, binSize: KARYOGRAM_BIN_SIZE }));
     } catch (err) {
       $("karyogram-error-detail").textContent += ` (and the reference view failed: ${(err && err.message) || err})`;
     }
@@ -342,7 +343,7 @@ function clearFile() {
   stopWorker();
   view.source = null;
   view.pending = null;
-  render(layoutKaryogram({ kb: view.kb }));
+  render(layoutKaryogram({ kb: view.kb, binSize: KARYOGRAM_BIN_SIZE }));
   setViewState("reference-only");
   setInputsDisabled(false);
   $("btn-karyogram-browse").focus();
@@ -372,7 +373,7 @@ async function initPage() {
   });
   try {
     view.kb = await loadKnowledgeBase();
-    render(layoutKaryogram({ kb: view.kb }));
+    render(layoutKaryogram({ kb: view.kb, binSize: KARYOGRAM_BIN_SIZE }));
     setViewState("reference-only");
   } catch (err) {
     showError((err && err.message) || err);
