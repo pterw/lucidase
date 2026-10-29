@@ -693,8 +693,12 @@ function renderQC() {
   if (!qc) return;
 
   document.getElementById("file-line").textContent = fileLine(state.fileName, qc, state.isExample);
-  document.getElementById("qc-filename").textContent = state.fileName;
-  document.getElementById("qc-format").textContent = `${qc.format_name.toUpperCase()} (${qc.build})`;
+  const buildHint = qc.build === "GRCh37"
+    ? `<abbr class="lds-hint" title="Genome Reference Consortium Human Build 37 (hg19), a widely used reference map of human DNA">GRCh37</abbr>`
+    : qc.build === "GRCh38"
+      ? `<abbr class="lds-hint" title="Genome Reference Consortium Human Build 38 (hg38), the current primary reference map of human DNA">GRCh38</abbr>`
+      : escapeHtml(qc.build);
+  document.getElementById("qc-format").innerHTML = `${escapeHtml(qc.format_name.toUpperCase())} (${buildHint})`;
   document.getElementById("qc-total-snps").textContent = qc.total_snps.toLocaleString();
   // A null rate (variants-only VCF) is shown as "Not available", with the QC note as a tooltip.
   setValue(document.getElementById("qc-call-rate"), qc.call_rate === null ? null : formatRate(qc.call_rate));
@@ -1540,7 +1544,7 @@ function closeDrawer() {
       if (!side.classList.contains("is-open")) {
         side.hidden = true;
       }
-    }, 250);
+    }, 260);
   }
   state.selectedVariant = null;
   markSelectedFinding(null);

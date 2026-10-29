@@ -16,6 +16,8 @@
 /* 1. daisyUI 4 theme bridge. Values are the design system's tailwind/lucidase.daisyui.js, as oklch triples. */
 :root,
 [data-theme="light"] {
+  --inspector-w: 520px;
+  --layout-max: 1600px;
   --p: 60.864% 0.1044 210.90; --pc: 100% 0 0; --s: 21.171% 0.0263 244.63; --sc: 98.503% 0.0041 91.45;
   --a: 60.864% 0.1044 210.90; --ac: 100% 0 0; --n: 21.171% 0.0263 244.63; --nc: 98.503% 0.0041 91.45;
   --b1: 100% 0 0; --b2: 98.503% 0.0041 91.45; --b3: 95.853% 0.0098 87.47; --bc: 21.171% 0.0263 244.63;
@@ -129,7 +131,7 @@ button.lds-step-item { cursor: pointer; }
 
 /* Masthead: the lockup, once, on the start page at >= 560px; the wordmark alone below that. */
 .lds-masthead { display: flex; flex-direction: column; gap: 28px; padding: 8px 0 4px; }
-.lds-masthead-art { width: 100%; max-width: 640px; }
+.lds-masthead-art { width: 100%; max-width: clamp(360px, 92%, 532px); line-height: 0; margin-top: 20px; }
 .lds-masthead-art img { display: block; width: 100%; height: auto; }
 .lds-masthead-wordmark { display: none; padding: 12px 0; }
 .lds-masthead-wordmark img { display: block; height: 56px; width: auto; }
@@ -137,6 +139,155 @@ button.lds-step-item { cursor: pointer; }
 .lds-display { margin: 0; font: 400 40px/1.1 var(--font-serif); letter-spacing: -0.02em; max-width: 620px; text-wrap: balance; color: var(--text-body); }
 .lds-lede { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
 .lds-list { margin: 0; padding-left: 18px; list-style: disc; font: 400 15px/1.7 var(--font-sans); }
+
+.lds-hero-aside {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 12px;
+}
+.lds-hero-aside-section + .lds-hero-aside-section {
+  padding-top: 20px;
+  border-top: 1px solid var(--border-default);
+}
+
+.lds-overdrive-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  width: 100%;
+  padding-top: 29px;
+  border-top: 1px solid var(--border-default);
+}
+.card-glass,
+.lds-overdrive-cards .card-glass {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  padding: 24px 28px;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.2);
+}
+.card-accent,
+.lds-overdrive-cards .card-accent {
+  border-top: 3px solid var(--accent);
+}
+.card-muted,
+.lds-overdrive-cards .card-muted {
+  border-top: 3px solid var(--border-strong);
+}
+.lds-overdrive-cards .card-glass ul {
+  margin: 12px 0 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+/* Compatibility Matrix: commercial microarrays and VCF callsets supported offline */
+.lds-formats-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+  padding: 29px 34px;
+  margin-top: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+}
+.lds-formats-matrix .formats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.lds-formats-matrix .format-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--bg-sunk);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.lds-formats-matrix .format-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.lds-formats-matrix .format-name {
+  font: 700 14px var(--font-sans);
+  color: var(--text-body);
+}
+.lds-formats-matrix .format-ver {
+  font: 600 11px var(--font-mono);
+  color: var(--accent);
+}
+.lds-formats-matrix .format-desc {
+  margin: 0;
+  font: 400 12px/1.4 var(--font-sans);
+  color: var(--text-muted);
+}
+
+/* Dynamic scaling for 1080p and compact desktop viewports so landing proportions match 1440p */
+@media (min-width: 1024px) and (max-height: 1150px) {
+  #main-content-flow:has(#section-hero:not(.hidden)) {
+    padding-top: clamp(0.75rem, 1.6vh, 1.5rem);
+    padding-bottom: clamp(1rem, 2vh, 2rem);
+    gap: clamp(1.25rem, 2.2vh, 2rem);
+  }
+  #section-hero {
+    gap: clamp(1rem, 1.8vh, 1.75rem);
+  }
+  #section-hero > div:first-child {
+    gap: clamp(0.75rem, 1.5vh, 1.25rem);
+  }
+  #section-hero .lds-display {
+    font-size: clamp(1.85rem, 3.2vh, 2.5rem);
+    line-height: 1.15;
+  }
+  #section-hero .lds-lede {
+    font-size: clamp(14px, 1.8vh, 17px);
+    line-height: 1.35;
+  }
+  #section-hero .lds-masthead-art img {
+    width: clamp(240px, 20vw, 320px);
+    height: auto;
+  }
+  #section-hero #dropzone {
+    padding: clamp(0.85rem, 1.5vh, 1.35rem) clamp(1rem, 1.5vw, 1.75rem);
+  }
+  #section-hero .lds-dropzone-desc {
+    font-size: clamp(12px, 1.4vh, 14px);
+  }
+  .lds-overdrive-cards {
+    gap: clamp(10px, 1.4vh, 18px);
+    padding-top: clamp(8px, 1.2vh, 14px);
+  }
+  .lds-overdrive-cards .card-glass {
+    padding: clamp(12px, 1.6vh, 18px) clamp(16px, 1.6vw, 22px);
+  }
+  .lds-overdrive-cards .card-glass ul {
+    margin-top: clamp(6px, 0.8vh, 10px);
+    gap: clamp(4px, 0.6vh, 8px);
+    font-size: clamp(12.5px, 1.4vh, 14px);
+  }
+  .lds-formats-matrix {
+    gap: clamp(8px, 1.2vh, 14px);
+    padding: clamp(12px, 1.5vh, 18px) clamp(16px, 1.6vw, 24px);
+    margin-top: 0;
+  }
+  .lds-formats-matrix .format-card {
+    padding: clamp(6px, 1vh, 10px) clamp(10px, 1vw, 14px);
+  }
+  .lds-formats-matrix .format-desc {
+    font-size: clamp(10.5px, 1.2vh, 12px);
+  }
+}
 
 /* Icon: a vendored Lucide SVG (src/icons/) as a currentColor mask, so it follows theme and tone. */
 .lds-icon { display: inline-block; flex: none; width: 16px; height: 16px; background-color: currentColor;
@@ -183,14 +334,18 @@ button.lds-step-item { cursor: pointer; }
 .lds-iconbtn:hover { background: var(--bg-hover); color: var(--text-body); }
 
 /* Dropzone: the one bordered field on the start page. */
-.lds-dropzone { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 28px 28px 24px;
+.lds-dropzone { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 31px 36px; max-width: 540px; width: 100%; margin: 0 auto;
   background: var(--bg-panel); border: 1.5px dashed var(--border-control); border-radius: var(--radius-panel); cursor: pointer;
-  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) ease; }
+@media (min-width: 860px) {
+  .lds-dropzone { transform: translateX(-120px); }
+}
 .lds-dropzone:hover, .lds-dropzone:focus-within, .lds-dropzone.is-over { border-color: var(--accent); }
 .lds-dropzone.is-over { background: var(--accent-wash); }
 .lds-dropzone-title { display: flex; align-items: center; gap: 12px; margin: 0; font: 700 17px var(--font-sans); color: var(--text-body); }
 .lds-dropzone-desc { margin: 0; font: 400 15px/1.55 var(--font-sans); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
-.lds-dropzone-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.lds-dropzone-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; width: 100%; gap: 12px; }
+@media (min-width: 520px) { .lds-dropzone-actions { flex-wrap: nowrap; } }
 
 /* Progress: a 3px ink bar that grows by transform only. */
 .lds-progress { display: flex; flex-direction: column; gap: 8px; }
@@ -204,7 +359,7 @@ button.lds-step-item { cursor: pointer; }
 .lds-alert > .lds-icon { margin-top: 1px; }
 .lds-alert-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .lds-alert-title { margin: 0; font: 700 14px/1.4 var(--font-sans); }
-.lds-alert-text { margin: 0; font: 400 15px/1.55 var(--font-serif); color: var(--text-body); text-wrap: pretty; }
+.lds-alert-text { margin: 0; font: 400 14px/1.55 var(--font-sans); color: var(--text-body); text-wrap: pretty; }
 .lds-alert-detail { margin: 0; font: 400 12px/1.5 var(--font-mono); }
 .lds-alert-notice { background: var(--notice-wash); border-color: var(--notice-line); }
 .lds-alert-notice .lds-alert-title, .lds-alert-notice .lds-alert-detail, .lds-alert-notice > .lds-icon { color: var(--notice-ink); }
@@ -263,6 +418,7 @@ button.lds-step-item { cursor: pointer; }
 .lds-datalist dd { margin: 0; font: 700 14px/1.45 var(--font-mono); color: var(--text-body); overflow-wrap: anywhere; }
 /* A prose value (the design system DataList's mono: false) is in the sans font; rsIDs, genotypes and numbers stay mono. */
 .lds-datalist dd.lds-dd-prose { font-family: var(--font-sans); }
+.lds-datalist dd > .lds-tag { margin-top: 5px; }
 
 /* Tag (badge): 2px corners, one tone triple each. Colour is never the only signal; the text always says it. */
 .lds-tag { display: inline-flex; align-items: center; gap: 6px; min-height: 22px; padding: 0 7px; border: 1px solid; border-radius: var(--radius-badge);
@@ -314,6 +470,18 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-term[aria-expanded="true"] + .lds-term-pop { display: block; }
 @media (max-width: 559px) {
   .lds-term-pop { position: fixed; top: auto; left: var(--layout-gutter-sm); right: var(--layout-gutter-sm); bottom: var(--layout-gutter-sm); width: auto; }
+}
+
+/* Inline hover hint for terms and definitions */
+.lds-hint {
+  text-decoration: underline dotted var(--border-control);
+  text-underline-offset: 3px;
+  cursor: help;
+  transition: text-decoration-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.lds-hint:hover, .lds-hint:focus-visible {
+  text-decoration-color: var(--accent);
+  color: var(--text-body);
 }
 
 /* SearchInput */
@@ -376,27 +544,71 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    .lds-results holds the list and the column. The list keeps at least 560px and the column is var(--inspector-w);
    when both no longer fit beside each other (560 + 32 gap + 440 = 1032px of container width) the Inspector moves
    below the list at full width and stops sticking. */
-.lds-results { container: lds-results / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; width: 100%; }
-.lds-results-main { flex: 1 1 560px; min-width: 0; }
+.lds-results { container: lds-results / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; gap: 36px; width: 100%; }
+.lds-results-main {
+  flex: 1 1 640px;
+  max-width: 1260px;
+  width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  transition: max-width 360ms ease;
+}
+.lds-results.has-drawer-open .lds-results-main {
+  max-width: 1024px;
+  margin-inline: 0;
+}
+#coverage-guardrail-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 24px 32px;
+  width: 100%;
+  background: var(--paper-sunk);
+  border: 1px solid var(--border-default);
+  border-top: 3px solid var(--accent);
+}
+#coverage-guardrail-banner .lds-icon {
+  margin-bottom: 8px;
+}
+#coverage-guardrail-banner .lds-alert-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+#coverage-guardrail-banner .lds-alert-title {
+  font-size: 17px;
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+#coverage-guardrail-banner .lds-alert-text {
+  text-align: center;
+  max-width: 760px;
+  margin-inline: auto;
+  line-height: 1.6;
+}
 .lds-results-side {
   flex: 0 0 var(--inspector-w);
   min-width: 0;
   align-self: stretch;
-  margin-left: auto;
   opacity: 0;
-  transform: translateX(20px);
-  transition: opacity var(--dur-slow) var(--ease-standard),
-              transform var(--dur-slow) var(--ease-standard);
+  transform: translateX(48px) scale(0.98);
+  transition: opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .lds-results-side.is-open {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
 }
 .lds-inspector-docked { position: sticky; top: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 32px);
-  border: 1px solid var(--border-default); transition: none; }
+  border: 1px solid var(--border-default); box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.28); transition: none; }
 .lds-inspector-docked:focus { outline: none; }
 .lds-inspector-docked .lds-inspector-body { flex: 1; min-height: 0; overflow-y: auto; }
-@container lds-results (max-width: 1031px) {
+@container lds-results (max-width: 1119px) {
   .lds-results-side { flex-basis: 100%; transform: none; }
   .lds-inspector-docked { position: static; max-height: none; }
 }
@@ -463,10 +675,10 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .kary-state-insufficient_evidence { --kary-fill: var(--state-insufficient); }
 .kary-state-reference { --kary-fill: var(--ink-subtle); }
 
-.kary-bin { fill: var(--ink-subtle); fill-opacity: 0.7; }
-.kary-bin-empty { fill: var(--border-strong); fill-opacity: 0.45; }
-.kary-cen { stroke: var(--ink-subtle); stroke-width: 1.5; }
-.kary-label { fill: var(--ink-muted); font-family: var(--font-mono); }
+.kary-bin { fill: var(--ink); fill-opacity: 0.8; }
+.kary-bin-empty { fill: var(--ink-subtle); fill-opacity: 0.7; }
+.kary-cen { stroke: var(--ink-subtle); stroke-width: 1.75; }
+.kary-label { fill: var(--ink-muted); font-family: var(--font-mono); font-weight: 600; }
 .kary-halo { fill: var(--kary-fill); fill-opacity: 0.1; transition: fill-opacity var(--dur-fast) ease; }
 .kary-core { fill: var(--kary-fill); stroke: var(--kary-fill); stroke-width: 1; }
 .kary-state-supported_not_observed .kary-core,
@@ -483,6 +695,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    stay 11px and each mark's halo 20px across. The ID selector outranks .lds-summary-map, so the minimum is set here. */
 #karyogram-figure { min-width: 0; overflow-x: auto; }
 #karyogram-figure svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; margin: 0 auto; }
+.kary-guide { background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: var(--radius-panel); padding: 22px 24px; }
 /* The genes table's four columns (Topic, Gene, Chromosome, Your result) fit a 390px phone: under 560px its cells
    have 4px side padding instead of 8px. */
 @media (max-width: 559px) { .lds-table-tight th, .lds-table-tight td { padding-left: var(--space-1); padding-right: var(--space-1); } }
@@ -496,9 +709,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
-  transition: margin var(--dur-slow) var(--ease-standard);
+  margin: 0;
 }
 #summary .lds-section-head { flex: none; width: 100%; max-width: none; }
 #summary .lds-section-body { flex: none; width: 100%; }
@@ -510,24 +721,10 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   max-width: 760px;
   height: auto;
   margin: 0 auto;
-  transition: margin var(--dur-slow) var(--ease-standard);
 }
 .lds-summary-legend {
   max-width: 560px;
-  margin: 0 auto;
-  transition: margin var(--dur-slow) var(--ease-standard);
-}
-.has-drawer-open #summary {
-  margin-left: 0;
-  margin-right: auto;
-}
-.has-drawer-open .lds-summary-map svg {
-  margin-left: 0;
-  margin-right: auto;
-}
-.has-drawer-open .lds-summary-legend {
-  margin-left: 0;
-  margin-right: auto;
+  margin: 0;
 }
 .lds-summary-map .kary-locus { cursor: pointer; outline: none; }
 .lds-summary-map .kary-locus:hover .kary-halo { fill-opacity: 0.28; }

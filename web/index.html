@@ -75,50 +75,84 @@
   <main id="main-content-flow" class="lds-wrap flex-1 flex flex-col gap-16 pt-10 pb-16" tabindex="-1">
 
     <!-- Start: the lockup, what Lucidase does and does not do, and the drop field (hidden while results are shown) -->
-    <section id="section-hero" class="flex flex-wrap items-start gap-12">
-      <div class="flex flex-col gap-5 min-w-0" style="flex: 1 1 420px; max-width: 560px">
-        <div class="lds-masthead">
-          <div class="lds-masthead-art">
-            <img class="lds-wm-light" src="src/brand/lucidase-lockup-light.svg" alt="Lucidase" width="640" height="200">
-            <img class="lds-wm-dark" src="src/brand/lucidase-lockup-dark.svg" alt="Lucidase" width="640" height="200">
-          </div>
-          <div class="lds-masthead-wordmark">
-            <img class="lds-wm-light" src="src/brand/lucidase-wordmark-light.svg" alt="Lucidase" width="603" height="167">
-            <img class="lds-wm-dark" src="src/brand/lucidase-wordmark-dark.svg" alt="Lucidase" width="603" height="167">
-          </div>
-          <h1 class="lds-display">Read your raw DNA file, on your own device</h1>
-        </div>
-        <p id="intro-scope" class="lds-lede">Lucidase explains each result in plain words, including what it could not test. Its tested scope is Not available.</p>
+    <section id="section-hero" class="flex flex-col gap-10">
+      <div class="flex flex-col gap-8">
+        <h1 class="lds-display">Read your raw DNA file, on your own device</h1>
 
-        <div id="dropzone" class="lds-dropzone">
-          <input type="file" id="file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
-          <p class="lds-dropzone-title"><span class="lds-icon lds-icon-22 lds-i-file-up" aria-hidden="true"></span>Drop your raw DNA file here</p>
-          <p class="lds-dropzone-desc">Works with files from 23andMe, AncestryDNA and MyHeritage, and VCF files. Your file is read on this device and never uploaded.</p>
-          <div class="lds-dropzone-actions">
-            <button type="button" id="btn-browse-files" class="lds-btn lds-btn-primary">
-              <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
-            </button>
-            <button type="button" id="btn-load-demo" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
+        <div class="flex flex-wrap items-center justify-between gap-8 lg:gap-12">
+          <div class="flex flex-col min-w-0" style="flex: 1 1 420px; max-width: 540px; gap: 14px">
+            <p id="intro-scope" class="lds-lede">Lucidase explains each result in plain words, including what it could not test. Its tested scope is Not available.</p>
+            <div class="lds-masthead-art">
+              <img class="lds-wm-light" src="src/brand/lucidase-wordmark-light.svg" alt="Lucidase" width="380" height="105">
+              <img class="lds-wm-dark" src="src/brand/lucidase-wordmark-dark.svg" alt="Lucidase" width="380" height="105">
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center justify-center min-w-0" style="flex: 1 1 440px; max-width: 540px">
+            <div id="dropzone" class="lds-dropzone w-full">
+              <input type="file" id="file-input" class="hidden" accept=".txt,.csv,.vcf,.tsv,.gz">
+              <p class="lds-dropzone-title"><span class="lds-icon lds-icon-22 lds-i-file-up" aria-hidden="true"></span>Drop your raw DNA file here</p>
+              <p class="lds-dropzone-desc">Works with files from 23andMe, AncestryDNA and MyHeritage, and VCF files. Your file is read on this device and never uploaded.</p>
+              <div class="lds-dropzone-actions justify-center w-full">
+                <button type="button" id="btn-browse-files" class="lds-btn lds-btn-primary">
+                  <span class="lds-icon lds-i-folder-open" aria-hidden="true"></span>Choose your DNA file
+                </button>
+                <button type="button" id="btn-load-demo" class="lds-btn lds-btn-secondary">Try a made-up example file</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-col gap-7 pt-2 min-w-0" style="flex: 1 1 320px">
-        <div>
-          <h2 class="lds-h3 mb-2.5">What you get</h2>
+      <div class="lds-overdrive-cards">
+        <div class="card-glass card-accent">
+          <h3 class="lds-h3">What you get</h3>
           <ul class="lds-list">
             <li>A result for each place Lucidase checks, with what that result can't tell you</li>
             <li>A map of where those genes sit on your chromosomes</li>
             <li>A copy you can save as a report (.md) or a table (.csv)</li>
           </ul>
         </div>
-        <div>
-          <h2 class="lds-h3 mb-2.5">What it can't do</h2>
-          <ul class="lds-list text-ink-muted">
+        <div class="card-glass card-muted">
+          <h3 class="lds-h3">What it can't do</h3>
+          <ul class="lds-list">
             <li>It is not a medical test or medical advice</li>
             <li>It does not read whole genes, so a missing <button type="button" class="lds-term" data-term="variant">variant</button> does not rule out risk</li>
             <li><button type="button" class="lds-term" data-term="marker">Markers</button> outside its checks are counted, not explained</li>
           </ul>
+        </div>
+      </div>
+
+      <!-- Overdrive Variant 3: Microarray & VCF Compatibility Matrix -->
+      <div class="card-glass lds-formats-matrix">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line">
+          <div>
+            <h4 class="font-sans font-bold text-15 text-ink m-0">Commercial Chip & VCF Compatibility</h4>
+            <p class="lds-meta m-0">Drop your raw zip, tgz, csv, or vcf directly without conversion or pre-formatting</p>
+          </div>
+          <span class="lds-tag lds-tag-neutral lds-data text-11">Offline Parser</span>
+        </div>
+        <div class="formats-grid">
+          <div class="format-card">
+            <div class="format-head"><span class="format-name">23andMe</span><span class="format-ver">v3, v4, v5</span></div>
+            <p class="format-desc">Illumina OmniExpress / Global Screening Array (GRCh37)</p>
+          </div>
+          <div class="format-card">
+            <div class="format-head"><span class="format-name">AncestryDNA</span><span class="format-ver">v1, v2</span></div>
+            <p class="format-desc">Illumina OmniExpress Plus customized array (GRCh37)</p>
+          </div>
+          <div class="format-card">
+            <div class="format-head"><span class="format-name">MyHeritage</span><span class="format-ver">Standard</span></div>
+            <p class="format-desc">Illumina Global Screening Array (GSA, GRCh37)</p>
+          </div>
+          <div class="format-card">
+            <div class="format-head"><span class="format-name">VCF 4.1 - 4.3</span><span class="format-ver">GRCh37 / 38</span></div>
+            <p class="format-desc">Whole exome or genome callsets (GRCh37, GRCh38, hs37d5, GATK)</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 text-12 text-ink-muted">
+          <span>Strips hostile payloads · Fail-closed on ambiguous palindromic A/T and C/G sites</span>
+          <span class="font-mono text-11">Zero dependencies</span>
         </div>
       </div>
     </section>
