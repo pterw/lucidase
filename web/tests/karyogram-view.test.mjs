@@ -17,23 +17,23 @@ test("the same layout renders the same string", () => {
   assert.equal(renderKaryogramSvg(layout), renderKaryogramSvg(layout));
 });
 
-test("24 columns and 32 reference loci with no sample", () => {
+test("24 columns and 34 reference loci with no sample", () => {
   const svg = renderKaryogramSvg(layoutKaryogram({ kb }));
   assert.equal(count(svg, /data-chrom="/g), 24);
-  assert.equal(count(svg, /class="kary-locus /g), 32);
-  assert.equal(count(svg, /data-state="reference"/g), 32);
+  assert.equal(count(svg, /class="kary-locus /g), 34);
+  assert.equal(count(svg, /data-state="reference"/g), 34);
   assert.match(svg, /role="img"/);
   assert.match(svg, /<title id="kary-title">Karyogram \(GRCh38\)<\/title>/);
   assert.doesNotMatch(svg, /fill=/);
 });
 
-test("the busiest bin has r=3.2 and empty bins r=0.9", () => {
+test("the busiest bin has r=3.2 and empty bins r=1.3", () => {
   // chr2, well away from the centromere: 4 calls in one bin, 1 in another.
   const calls = [call("2", 5_000_001), call("2", 5_000_002), call("2", 5_000_003), call("2", 5_000_004), call("2", 9_000_001)];
   const svg = renderKaryogramSvg(sampleLayout(calls));
   assert.equal(count(svg, /class="kary-bin" [^>]*r="3\.2"/g), 1);
   assert.equal(count(svg, /class="kary-bin" /g), 2);
-  assert.ok(count(svg, /kary-bin-empty" [^>]*r="0\.9"/g) > 100);
+  assert.ok(count(svg, /kary-bin-empty" [^>]*r="1\.3"/g) > 100);
   assert.match(svg, /class="kary-bin" [^>]*r="2\.4"/); // 1.6 + 1.6 * sqrt(1/4) = 2.4
 });
 
@@ -63,7 +63,7 @@ test("a hostile gene name is escaped in the title and the desc", () => {
   // desc carries state labels; a hostile state label must be escaped there too.
   const svg2 = renderKaryogramSvg(layoutKaryogram({ kb }), { stateLabels: { reference: `<b>&"'` } });
   assert.doesNotMatch(svg2, /<b>/);
-  assert.match(svg2, /<desc id="kary-desc">[^<]*&lt;b&gt;&amp;&quot;&#39;: 32/);
+  assert.match(svg2, /<desc id="kary-desc">[^<]*&lt;b&gt;&amp;&quot;&#39;: 34/);
 });
 
 test("co-located loci get distinct x positions", () => {
@@ -84,7 +84,7 @@ const mixedLayout = (calls = []) =>
 
 test("with a sample, each locus group carries its observed state as data-state and class", () => {
   const svg = renderKaryogramSvg(mixedLayout());
-  assert.equal(count(svg, /class="kary-locus /g), 32);
+  assert.equal(count(svg, /class="kary-locus /g), 34);
   assert.equal(count(svg, /data-state="reference"/g), 0);
   for (const [rsid, state] of Object.entries(mixedObservations)) {
     assert.match(
@@ -104,7 +104,7 @@ test("the desc counts loci per state from the sample", () => {
   };
   const svg = renderKaryogramSvg(mixedLayout(), { stateLabels: labels });
   const per = Object.fromEntries(STATES.map((s) => [s, Object.values(mixedObservations).filter((o) => o === s).length]));
-  assert.equal(Object.values(per).reduce((a, b) => a + b, 0), 32);
+  assert.equal(Object.values(per).reduce((a, b) => a + b, 0), 34);
   for (const s of STATES) assert.ok(svg.includes(`${labels[s]}: ${per[s]}`), `${s}: ${per[s]}`);
 });
 

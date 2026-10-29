@@ -134,7 +134,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-092 | `web/src/core/classify.js`, `variant_annotator.py`, `web/tests/classify.test.mjs`, `tests/test_genomic_pipeline.py` | Coincident probes at the same genomic coordinates (e.g. 23andMe v5 indel probe `i4000292` and bystander SNV probe `rs1801178` at `chr7:117199644` in CFTR) both matched by position, generating conflicting alleles (`AA` vs `II`) and causing the classifier to fail closed to `unresolvable` / `call_unavailable`. | REMEDIATED (prefer exact rsID matches, and prefer calls using declared `allele_codes` (D/I) for array indel loci over coincident SNV bystander calls; verified with Python and Node regression tests) |
 | P1-093 | `web/src/core/classify.js`, `variant_annotator.py`, `web/tests/classify.test.mjs`, `tests/test_genomic_pipeline.py` | Exact-rsID candidate filter silently discarded contradictory position-matched calls prior to conflict detection (e.g. `rs1800562 G/G` vs `i12345 G/A`), causing conflicting calls to be classified as non-variant wild-type instead of failing closed to unresolvable. | REMEDIATED (removed exact-rsID discard filter so contradictory position-matched calls preserve conflict detection and fail closed to unresolvable; verified with Node and Python regression tests) |
 | P1-094 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | Single-variant CYP2C19 (*3, *17), TPMT, and NUDT15 interpretations asserted unphased diplotypes/metabolizer status or unphased dosing recommendations; DPYD starting dose reduction cited superseded 25-50% range; negative HLA tag interpretations asserted patient-level risk reductions. | REMEDIATED (aligned single-variant interpretations with clinical guidelines, withheld unphased diplotypes, updated DPYD to 50% dose reduction with titration, scoped negative HLA tag results to tested marker) |
-
+| P1-095 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json` | Single-variant `SLCO1B1` `rs2306283` (`*1b`) interpretations asserted unphased `*1b/*1b` diplotype and unconditional normal/increased function, conflicting when co-inherited with `*5` (`rs4149056`). | REMEDIATED (scoped interpretations to single-variant effect, removed diplotype assertions, updated count 2 repute to Neutral, and noted multi-variant dependence) |
 
 ---
 
@@ -363,7 +363,21 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `fae5c19` | Roadmap | `docs(roadmap): record audit remediations, roadmap, handoff updates, and gitignore` |
 | `a0994cb` | Phase 1 (Tier 2B) | `feat(kb): add TPMT and NUDT15 thiopurine pharmacogenomics (Phase 1 / Tier 2B)` |
 | `da59dc9` | Phase 2 (Tier 3) | `feat(kb): add HLA-B*57:01, HLA-A*31:01, and HLA-B*58:01 severe ADR immune tag alleles (Phase 2 / Tier 3)` |
+| `e284cd4` | P2-022 | `fix(debruijn): use approved design token for branch node styling (P2-022)` |
+| `494c717` | P1-094, P2-023 | `fix(kb): align CYP2C19, TPMT, DPYD, ABCG2, and HLA interpretations with guidelines (P1-094, P2-023)` |
+| `0b2808f` | Docs | `docs(audit): record audit ledger entries for P1-093, P1-094, P2-022, and P2-023` |
+| `7e20dcb` | P2-024 | `fix(test): eliminate focus race in karyogram keyboard file picker test (P2-024)` |
+| `7f26e73` | P1-095 | `fix(kb): scope SLCO1B1 rs2306283 interpretations to single variant (P1-095)` |
+
+### 2026-10-29
+
+| Commit | Scope | Description |
+|---|---|---|
+| `7601557` | Karyogram | `feat(karyogram): enhance chromosome map layout with sidebar guide and contrast bins` |
+| `d6522ed` | Web UX | `feat(web): restore landing hero, add dynamic 1080p scaling, and polish results layout` |
+| `de6e844` | Karyogram UX | `feat(karyogram): refine hero layout with inline wordmark and track alignment` |
 
 ---
 
 *Ledger maintained in ISO YYYY-MM-DD order. All P0, P1 and P2 issues are remediated.*
+

@@ -405,8 +405,8 @@ test("the intro sentence states the manifest's places and genes in plain words, 
 
 test("the start screen's intro sentence holds no digits in its source, so its numbers can only come from the manifest", () => {
   const html = readText("../index.html");
-  const match = html.match(/<p id="intro-scope"[^>]*>([^<]*)<\/p>/);
-  assert.ok(match, "no #intro-scope paragraph");
+  const match = html.match(/<(?:p|h2) id="intro-scope"[^>]*>([^<]*)<\/(?:p|h2)>/);
+  assert.ok(match, "no #intro-scope element");
   assert.doesNotMatch(match[1], /\d/);
 });
 

@@ -845,6 +845,42 @@
       "insights_provenance": {
         "source": "Hand-entered gene insights (UniProt, AlphaFold, Ensembl, ENCODE values); not verified against upstream"
       }
+    },
+    "BCHE": {
+      "topic": "Pseudocholinesterase deficiency (anesthesia apnea)",
+      "inheritance": {
+        "model": "pharmacogenomic",
+        "mendelian_disease": false,
+        "disease": "Butyrylcholinesterase / Pseudocholinesterase Deficiency",
+        "omim": "177400",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P06276",
+        "alphafold": {
+          "global_plddt": 93.4,
+          "folding_status": "Confidently Folded Alpha/Beta Hydrolase Core",
+          "domains": [
+            "Catalytic \u03b1/\u03b2 hydrolase fold: residues 29\u2013532 (catalytic triad Ser226, Glu353, His466)",
+            "Tetramerization C-terminal domain: residues 533\u2013602"
+          ],
+          "flexible_joints": "N-terminal signal peptide (residues 1\u201328) cleaved in mature enzyme"
+        },
+        "ensembl": {
+          "ensg": "ENSG00000114200",
+          "sift_prediction": "tolerated (0.24)"
+        },
+        "encode": {
+          "top_tissues": {
+            "liver": 5120.5,
+            "blood": 840.2
+          }
+        }
+      },
+      "insights_provenance": {
+        "source": "UniProt P06276, AlphaFold AF-P06276-F1, Ensembl ENSG00000114200"
+      }
     }
   },
   "loci": {
@@ -3452,6 +3488,172 @@
           "drug": "allopurinol",
           "provenance": {
             "source": "CPIC gene-drug pair level A (curator's recollection of the CPIC gene-drug table; not retrieved from CPIC in this build)"
+          }
+        }
+      }
+    },
+    "rs1799807": {
+      "gene": "BCHE",
+      "chrom": "3",
+      "pos_grch37": 165548529,
+      "pos_grch38": 165830741,
+      "ref": "T",
+      "alt": "C",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: BCHE c.293A>G (Atypical / p.Asp98Gly) is the most common cause of prolonged succinylcholine apnea, but silent (activity-deficient) alleles and other BCHE variants are not tested by this single variant.",
+      "tier": {
+        "rationale": "CPIC lists BCHE and succinylcholine/mivacurium at level B; ClinVar classifies c.293A>G with 2-star multiple-submitter review.",
+        "citation": "CPIC clinical guideline and FDA drug label annotations for succinylcholine and BCHE"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No BCHE c.293A>G (Atypical / Asp98Gly) allele detected at this position. Other BCHE deficiency variants (e.g., silent or fluoride-resistant alleles) are not evaluated by this test.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 2.5,
+          "repute": "Bad",
+          "phenotype": "Heterozygous for the atypical BCHE allele (c.293A>G / p.Asp98Gly). Intermediate plasma cholinesterase activity; usually mild prolongation of neuromuscular blockade with succinylcholine or mivacurium.",
+          "drug_response": "Succinylcholine / Mivacurium: Moderate sensitivity (mildly prolonged paralysis possible)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response (Critical)",
+          "magnitude": 5.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for the atypical BCHE allele (c.293A>G / p.Asp98Gly). Markedly reduced plasma cholinesterase activity; high risk of prolonged post-anesthetic apnea (paralysis lasting 1 to 4 hours) following standard succinylcholine or mivacurium administration.",
+          "drug_response": "Succinylcholine / Mivacurium: Severe sensitivity (prolonged apnea / post-anesthetic paralysis; ventilatory support required)",
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000013215",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Pathogenic/Likely pathogenic",
+          "provenance": {
+            "source": "ClinVar VCV000013215 (hand-transcribed from pinned capture clinvar/rs1799807.json)",
+            "accession": "VCV000013215",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/13215/"
+          }
+        },
+        "gnomad": {
+          "af": 0.016023,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs1799807.json)",
+            "accession": "3-165830741-T-C"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "blood": "High"
+          },
+          "subcellular": [
+            "Secreted"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for BCHE; liver expression and plasma secretion)"
+          }
+        },
+        "cpic": {
+          "level": "B",
+          "drug": "succinylcholine, mivacurium",
+          "provenance": {
+            "source": "CPIC gene-drug pair level B (CPIC guideline / gene-drug table for BCHE and succinylcholine/mivacurium)"
+          }
+        }
+      }
+    },
+    "rs2306283": {
+      "gene": "SLCO1B1",
+      "chrom": "12",
+      "pos_grch37": 21329738,
+      "pos_grch38": 21176804,
+      "ref": "A",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test: SLCO1B1 c.388A>G (*1b) is a common variant with normal or slightly enhanced hepatic statin uptake. It is frequently co-inherited with c.521T>C (*5) defining the *15 haplotype.",
+      "tier": {
+        "rationale": "CPIC lists SLCO1B1 and statins at level A; rs2306283 defines the *1b allele.",
+        "citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No SLCO1B1 c.388G (*1b) allele detected at this position (homozygous reference A/A). Baseline OATP1B1 transporter sequence at this locus. Overall SLCO1B1 function also depends on other variants, including c.521T>C (*5).",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "One SLCO1B1 c.388A>G (*1b, Asn130Asp) allele detected. This variant is associated with normal to slightly increased hepatic statin uptake at this locus, but overall OATP1B1 transporter function and statin myopathy risk also depend on other variants (including c.521T>C, *5).",
+          "drug_response": "Statins: Standard dosing applies for this variant alone; evaluate in conjunction with SLCO1B1 *5 (rs4149056)",
+          "caveats": []
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "significance": "Drug Response",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Two SLCO1B1 c.388A>G (*1b, Asn130Asp) alleles detected. In isolation this variant is associated with preserved or slightly increased hepatic uptake of statins, but overall SLCO1B1 transporter function and myopathy risk also depend on other loci (such as c.521T>C, *5).",
+          "drug_response": "Statins: Standard dosing applies for this variant alone; evaluate in conjunction with SLCO1B1 *5 (rs4149056)",
+          "caveats": []
+        }
+      },
+
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000259983",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign",
+          "provenance": {
+            "source": "ClinVar VCV000259983 (hand-transcribed from pinned capture clinvar/rs2306283.json)",
+            "accession": "VCV000259983",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/259983/"
+          }
+        },
+        "gnomad": {
+          "af": 0.41846,
+          "provenance": {
+            "source": "gnomAD (hand-computed (exome+genome) ac/an from pinned capture gnomad/rs2306283.12-21176804-A-G.json)",
+            "accession": "12-21176804-A-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High"
+          },
+          "subcellular": [
+            "Plasma membrane"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (same gene as rs4149056; hepatocyte basolateral membrane expression)"
+          }
+        },
+        "cpic": {
+          "level": "A",
+          "drug": "simvastatin, atorvastatin, pravastatin, rosuvastatin",
+          "provenance": {
+            "source": "CPIC gene-drug pair level A (CPIC guideline for SLCO1B1 and statins)"
           }
         }
       }

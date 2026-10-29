@@ -31,12 +31,12 @@ module.exports = {
         ok: v("ok"),
       },
       fontFamily: {
-        serif: ["orpheuspro", "Georgia", "serif"],
+        serif: ["mencken-std", "Georgia", "serif"],
         sans: ["akzidenz-grotesk-next-pro", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         condensed: ["akzidenz-grotesk-next-conden", "swiss-721-bt-condensed", "Arial Narrow", "sans-serif"],
         mono: ["input-mono", "ui-monospace", "monospace"],
         "mono-narrow": ["input-mono-narrow", "input-mono", "ui-monospace", "monospace"],
-        display: ["orpheuspro", "Georgia", "serif"],
+        display: ["mencken-std", "Georgia", "serif"],
       },
       fontSize: {
         "11": ["11px", "1.45"], "12": ["12px", "1.45"], "13": ["13px", "1.45"], "14": ["14px", "1.45"], "15": ["15px", "1.55"],
