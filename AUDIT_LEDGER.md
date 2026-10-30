@@ -171,6 +171,8 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-022 | `graph_core.py`, `tests/test_debruijn.py` | Hardcoded color `#E11D48` used for dense graph branch nodes and legend was outside vendored design system. | REMEDIATED (used approved design-system token `BRANCH = "#B53A55"` matching `--state-insufficient` ruby token from `web/src/ds/colors.css`) |
 | P2-023 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | ABCG2 Q141K interpretations attributed SLCO1B1-combined rosuvastatin dosing (<=10mg) to single-gene ABCG2 poor function and added unneeded restriction on intermediate function. | REMEDIATED (aligned with CPIC Table 3 single-gene recommendations: <=20mg daily for poor function, desired starting dose for intermediate function) |
 | P2-024 | `tests/e2e/test_karyogram.py` | `test_file_button_opens_the_picker_from_the_keyboard` intermittently timed out waiting for `filechooser` in CI under load when `page.keyboard.press` fired before `#btn-karyogram-browse` focus settled. | REMEDIATED (explicitly await `expect(button).to_be_focused()` and use `button.press(key)` to target keypress directly) |
+| P2-025 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | FUT2 `rs601338` non-secretor interpretation incorrectly reported lower serum vitamin B12; non-secretors have higher total circulating B12 (holo-haptocorrin, without altering bioavailable transcobalamin-bound B12). | REMEDIATED (corrected phenotype direction to higher total circulating B12 via holo-haptocorrin while noting unaltered bioavailable B12, verified by test_kb_build) |
+| P2-026 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | VDR FokI `rs2228570` allele labels were inverted against functional literature: longer 427-AA isoform was labelled F allele and shorter 424-AA isoform labelled f allele. | REMEDIATED (aligned with conventional nomenclature: longer 427-AA isoform is f allele [genotype ff] and shorter 424-AA isoform is F allele [genotype FF], verified by test_kb_build) |
 
 ---
 
@@ -387,18 +389,13 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | Commit | Scope | Description |
 |---|---|---|
 | `ee6f68c` | Phase 3 (PGx) | `feat(kb): add G6PD enzymopathy and CYP2D6 core star alleles (Phase 3 completion)` |
-| `4ef768c` | P1-096 | `fix(karyogram): deduplicate genes in the chromosome map genes table (P1-096)` |
+| `6a3a10f` | P1-096 | `fix(karyogram): deduplicate genes in the chromosome map genes table (P1-096)` |
 | `ef18d69` | Karyogram export | `feat(karyogram): add high-resolution JPEG export on current theme background` |
 | `91f8226` | P1-097 | `fix(karyogram): preserve partial coverage in gene-level results and enforce core boundary (P1-097)` |
-| b1c098 | P1-098, P1-099, P1-100 | ix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100) |
-| 8bdbc67 | Phase 4 (Metabolic) | eat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR) |
-| b1c098 | P1-098, P1-099, P1-100 | ix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100) |
-| 8bdbc67 | Phase 4 (Metabolic) | eat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR) |
-=======
-| `b918b1d` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
->>>>>>> 65d7c01 (docs(audit): update audit ledger with Phase 4 commit b85d3ae)
+| `ab1c098` | P1-098, P1-099, P1-100 | `fix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100)` |
+| `8bdbc67` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
+| `9d77b30` | P2-025, P2-026 | `fix(kb): correct FUT2 B12 association direction and VDR FokI allele naming (P2-025, P2-026)` |
 
 ---
 
 *Ledger maintained in ISO YYYY-MM-DD order. All P0, P1 and P2 issues are remediated.*
-
