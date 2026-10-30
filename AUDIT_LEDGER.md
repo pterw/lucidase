@@ -399,7 +399,8 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `8bdbc67` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
 | `9d77b30` | P2-025, P2-026 | `fix(kb): correct FUT2 B12 association direction and VDR FokI allele naming (P2-025, P2-026)` |
 | `ee746ec` | P2-027, P2-028 | `fix(kb): correct BCO1 conversion attribution and qualify FMO3 haplotype claims (P2-027, P2-028)` |
-| `16764ff` | P2-029 | `fix(kb): qualify CBS homocystinuria phenotypes by rescuing cis 844ins68 insertion (P2-029)` |
+| `568bc56` | P2-029 | `fix(kb): qualify CBS homocystinuria phenotypes by rescuing cis 844ins68 insertion (P2-029)` |
+| `c857aba` | Phase 5 (Hereditary) | `feat(kb): add Phase 5 hereditary disease and secondary findings expansions (HFE S65C, F13A1, BRCA1, BRCA2, SERPINA1)` |
 
 ---
 
