@@ -615,11 +615,20 @@ function setViewMode(mode) {
 
 function renderReportGroups() {
   const container = document.getElementById("report-groups");
-  container.innerHTML = groupedReport(allRows(), state.genes).map((group) => `
+  container.innerHTML = groupedReport(allRows(), state.genes).map((group) => {
+    const totalChecks = group.rows.length;
+    const foundChecks = group.rows.filter(r => r.state === "supported_and_observed").length;
+    const summaryPill = totalChecks > 0
+      ? `<span class="lds-section-summary">${totalChecks} ${totalChecks === 1 ? "check" : "checks"} · ${foundChecks} found</span>`
+      : "";
+    return `
     <section id="group-${escapeHtml(group.id)}" class="lds-section" aria-labelledby="group-${escapeHtml(group.id)}-h">
       <div class="lds-section-head">
         <div class="flex items-center justify-between gap-3">
-          <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+            ${summaryPill}
+          </div>
           <button type="button" class="lds-section-toggle" aria-expanded="true" aria-controls="group-${escapeHtml(group.id)}-body" aria-label="Collapse ${escapeHtml(group.title)}">
             <span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span>
           </button>
@@ -630,7 +639,8 @@ function renderReportGroups() {
         ${group.rows.length === 0 ? `<p class="lds-meta">No checks in this group.</p>` : group.rows.map(findingRowHtml).join("")}
       </div>
     </section>
-  `).join("");
+  `;
+  }).join("");
   // Glossary words in the groups' asides: the design system's own copy (REPORT_GROUPS), never knowledge-base text.
   for (const group of REPORT_GROUPS) {
     const terms = GROUP_ASIDE_TERMS[group.id];
@@ -652,7 +662,7 @@ function findingRowHtml(row) {
       <div class="lds-finding-main">
         <div class="lds-finding-head">
           <h3 id="${headingId}" class="lds-finding-topic">${escapeHtml(row.topic)}</h3>
-          <span class="lds-finding-gene">${escapeHtml(row.gene)}</span>
+          <span class="lds-finding-gene">${escapeHtml(row.gene)} <span class="lds-finding-marker font-mono text-12 font-normal text-ink-muted">· ${escapeHtml(row.markers)}</span></span>
         </div>
         <p class="lds-finding-statement">${escapeHtml(row.statement)}</p>
         ${limitation}

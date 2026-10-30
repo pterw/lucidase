@@ -870,3 +870,20 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+/* Section summary pills and finding locus disambiguation */
+.lds-section-summary {
+  font: 500 12px var(--font-sans);
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.lds-finding-marker {
+  display: inline-block;
+  margin-left: 2px;
+  font: 400 12px var(--font-mono);
+  color: var(--text-muted);
+}
