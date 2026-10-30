@@ -693,7 +693,12 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 /* On a narrow screen the figure keeps its drawn size and scrolls sideways inside its own box (a named, focusable
    region in karyogram.html), never the page: 672px is the SVG's own width, one unit per pixel, so chromosome labels
    stay 11px and each mark's halo 20px across. The ID selector outranks .lds-summary-map, so the minimum is set here. */
-#karyogram-figure { min-width: 0; overflow-x: auto; }
+#karyogram-figure {
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
 #karyogram-figure svg { display: block; width: 100%; min-width: 672px; max-width: 760px; height: auto; margin: 0 auto; }
 .kary-guide { background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: var(--radius-panel); padding: 22px 24px; }
 /* The genes table's four columns (Topic, Gene, Chromosome, Your result) fit a 390px phone: under 560px its cells
@@ -713,7 +718,12 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 }
 #summary .lds-section-head { flex: none; width: 100%; max-width: none; }
 #summary .lds-section-body { flex: none; width: 100%; }
-.lds-summary-map { min-width: 0; overflow-x: auto; }
+.lds-summary-map {
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
 .lds-summary-map svg {
   display: block;
   width: 100%;
@@ -886,4 +896,19 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   margin-left: 2px;
   font: 400 12px var(--font-mono);
   color: var(--text-muted);
+}
+
+/* Multi-locus assortment finding rows */
+.lds-assortment-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-default);
+}
+.lds-assortment-row:first-child {
+  padding-top: 0;
+}
+.lds-assortment-row:last-child {
+  border-bottom: none;
 }

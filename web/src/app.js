@@ -391,9 +391,9 @@ function initEventListeners() {
   });
 
   // Filter tabs and toolbar filter pills
-  document.querySelectorAll("[data-filter]").forEach(btn => {
+  document.querySelectorAll("[data-filter], [data-status-filter]").forEach(btn => {
     btn.addEventListener("click", () => {
-      applyFilter(btn.getAttribute("data-filter"));
+      applyFilter(btn.getAttribute("data-filter") || btn.getAttribute("data-status-filter"));
     });
   });
 
@@ -548,8 +548,9 @@ function setTableOpen(open) {
 /** Applies the active result-word filter across both the cards view and technical table. */
 function applyFilter(filterVal) {
   state.filterCategory = filterVal;
-  document.querySelectorAll("[data-filter]").forEach((b) => {
-    const active = b.getAttribute("data-filter") === filterVal;
+  document.querySelectorAll("[data-filter], [data-status-filter]").forEach((b) => {
+    const val = b.getAttribute("data-filter") || b.getAttribute("data-status-filter");
+    const active = val === filterVal;
     b.classList.toggle("tab-active", active);
     b.classList.toggle("is-active", active);
     b.setAttribute("aria-pressed", String(active));
@@ -954,7 +955,7 @@ function renderAssortmentSection() {
   container.innerHTML = "";
 
   // One row per finding, hairlines between (no nested cards). Every interpolated value is escaped.
-  const ROW = "flex flex-col gap-3 py-5 border-b border-line first:pt-0";
+  const ROW = "lds-assortment-row";
 
   // Possible compound heterozygotes (e.g. HFE C282Y / H63D).
   compounds.forEach(ch => {
@@ -986,26 +987,31 @@ function renderAssortmentSection() {
     const row = document.createElement("div");
     row.className = ROW;
     row.innerHTML = `
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="lds-h3">Co-occurring variant alleles</span>
-        <span class="lds-tag ${NEUTRAL_TAG}">Multi-locus</span>
-        <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="lds-h3">Co-occurring variant alleles</span>
+          <span class="lds-tag ${NEUTRAL_TAG}">Multi-locus</span>
+          <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
+        </div>
+        <span class="lds-meta font-mono font-medium">${Math.round(ia.joint_transmission_prob * 100)}% joint inheritance</span>
       </div>
       <div class="flex flex-col gap-1">
-        <p class="lds-h3">${escapeHtml(ia.type)}</p>
+        <p class="sr-only">${escapeHtml(ia.type)}</p>
         <p class="lds-prose">${escapeHtml(ia.description)}</p>
       </div>
       ${multiLocusComponentsHtml(ia)}
-      <dl class="lds-datalist">
-        <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
-        <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>
-      </dl>
-      <div class="flex flex-wrap gap-2">
-        ${ia.genes.map(g => `
-          <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(g)}">
-            See the ${escapeHtml(g)} details
-          </button>
-        `).join("")}
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <dl class="lds-datalist">
+          <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
+          <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>
+        </dl>
+        <div class="flex flex-wrap gap-2">
+          ${ia.genes.map(g => `
+            <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(g)}">
+              See the ${escapeHtml(g)} details
+            </button>
+          `).join("")}
+        </div>
       </div>
     `;
     container.appendChild(row);

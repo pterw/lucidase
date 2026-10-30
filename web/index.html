@@ -258,10 +258,10 @@
           </div>
           <div class="lds-toolbar-filters" role="group" aria-label="Filter results by status">
             <span class="lds-toolbar-label">Status:</span>
-            <button type="button" data-filter="every" class="lds-filter-pill is-active" aria-pressed="true">All<span class="lds-tab-count" data-tab-count="every"></span></button>
-            <button type="button" data-filter="observed" class="lds-filter-pill" aria-pressed="false">Found<span class="lds-tab-count" data-tab-count="observed"></span></button>
-            <button type="button" data-filter="negative" class="lds-filter-pill" aria-pressed="false">Not found<span class="lds-tab-count" data-tab-count="negative"></span></button>
-            <button type="button" data-filter="insufficient" class="lds-filter-pill" aria-pressed="false">Unclear<span class="lds-tab-count" data-tab-count="insufficient"></span></button>
+            <button type="button" data-status-filter="every" class="lds-filter-pill is-active" aria-pressed="true">All<span class="lds-tab-count" data-tab-count="every"></span></button>
+            <button type="button" data-status-filter="observed" class="lds-filter-pill" aria-pressed="false">Found<span class="lds-tab-count" data-tab-count="observed"></span></button>
+            <button type="button" data-status-filter="negative" class="lds-filter-pill" aria-pressed="false">Not found<span class="lds-tab-count" data-tab-count="negative"></span></button>
+            <button type="button" data-status-filter="insufficient" class="lds-filter-pill" aria-pressed="false">Unclear<span class="lds-tab-count" data-tab-count="insufficient"></span></button>
           </div>
         </div>
         <div class="lds-toolbar-right">
@@ -327,7 +327,7 @@
                     <th scope="col">Result</th>
                     <th scope="col">Topic</th>
                     <th scope="col">Evidence and category</th>
-                    <th scope="col">ClinVar review</th>
+                    <th scope="col" class="whitespace-nowrap">ClinVar review</th>
                     <th scope="col">Magnitude</th>
                     <th scope="col">What it means</th>
                   </tr>
