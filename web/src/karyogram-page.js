@@ -44,6 +44,8 @@ function setInputsDisabled(disabled) {
   $("karyogram-file-input").disabled = disabled;
   $("btn-karyogram-browse").disabled = disabled;
   $("btn-load-karyogram-sample").disabled = disabled;
+  const btnExport = $("btn-karyogram-export");
+  if (btnExport) btnExport.disabled = disabled;
 }
 
 function updateProgress(percent, message) {
@@ -373,6 +375,111 @@ function clearFile() {
   $("btn-karyogram-browse").focus();
 }
 
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export async function exportKaryogramJpeg() {
+  const figureSvg = document.querySelector("#karyogram-figure svg");
+  if (!figureSvg) return null;
+
+  const computed = getComputedStyle(document.documentElement);
+  const bodyComputed = getComputedStyle(document.body);
+  const bgCanvas = bodyComputed.backgroundColor || computed.getPropertyValue("--bg-canvas").trim() || "#0B1117";
+  const ink = computed.getPropertyValue("--ink").trim() || "#EDF2F5";
+  const inkMuted = computed.getPropertyValue("--ink-muted").trim() || "#97A6B2";
+  const inkSubtle = computed.getPropertyValue("--ink-subtle").trim() || "#7F8D99";
+  const stateObserved = computed.getPropertyValue("--state-observed").trim() || "#62E4F1";
+  const stateNotObserved = computed.getPropertyValue("--state-not-observed").trim() || "#5FCB92";
+  const stateArrayGap = computed.getPropertyValue("--state-array-gap").trim() || "#E9B65A";
+  const stateOutside = computed.getPropertyValue("--state-outside").trim() || "#6E7D89";
+  const stateInsufficient = computed.getPropertyValue("--state-insufficient").trim() || "#F2798F";
+
+  const svgClone = figureSvg.cloneNode(true);
+  const styleEl = document.createElementNS("http://www.w3.org/2000/svg", "style");
+  styleEl.textContent = `
+    .kary-bin { fill: ${ink}; fill-opacity: 0.8; }
+    .kary-bin-empty { fill: ${inkSubtle}; fill-opacity: 0.7; }
+    .kary-cen { stroke: ${inkSubtle}; stroke-width: 1.75; }
+    .kary-label { fill: ${inkMuted}; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; font-size: 11px; text-anchor: middle; }
+
+    .kary-state-supported_and_observed .kary-halo { fill: ${stateObserved}; fill-opacity: 0.15; }
+    .kary-state-supported_and_observed .kary-core { fill: ${stateObserved}; stroke: ${stateObserved}; stroke-width: 1; }
+
+    .kary-state-supported_not_observed .kary-halo { fill: ${stateNotObserved}; fill-opacity: 0.15; }
+    .kary-state-supported_not_observed .kary-core { fill: ${bgCanvas}; stroke: ${stateNotObserved}; stroke-width: 1.75; }
+
+    .kary-state-not_tested_by_array .kary-halo { fill: ${stateArrayGap}; fill-opacity: 0.15; }
+    .kary-state-not_tested_by_array .kary-core { fill: ${bgCanvas}; stroke: ${stateArrayGap}; stroke-width: 1.75; stroke-dasharray: 2 1.6; }
+
+    .kary-state-outside_coverage .kary-halo { fill: ${stateOutside}; fill-opacity: 0.15; }
+    .kary-state-outside_coverage .kary-core { fill: ${stateOutside}; stroke: ${stateOutside}; stroke-width: 1; }
+
+    .kary-state-insufficient_evidence .kary-halo { fill: ${stateInsufficient}; fill-opacity: 0.15; }
+    .kary-state-insufficient_evidence .kary-core { fill: ${stateInsufficient}; stroke: ${stateInsufficient}; stroke-width: 1; clip-path: inset(0 50% 0 0); }
+
+    .kary-state-reference .kary-halo { fill: ${inkSubtle}; fill-opacity: 0.15; }
+    .kary-state-reference .kary-core { fill: ${inkSubtle}; stroke: ${inkSubtle}; stroke-width: 1; }
+  `;
+  svgClone.insertBefore(styleEl, svgClone.firstChild);
+
+  const svgWidth = parseFloat(svgClone.getAttribute("width")) || 672;
+  const svgHeight = parseFloat(svgClone.getAttribute("height")) || 532;
+  const padX = 48;
+  const padY = 40;
+  const scale = 2;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round((svgWidth + padX * 2) * scale);
+  canvas.height = Math.round((svgHeight + padY * 2) * scale);
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.fillStyle = bgCanvas;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const blobUrl = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  await new Promise((resolve, reject) => {
+    img.onload = () => {
+      ctx.drawImage(img, padX * scale, padY * scale, svgWidth * scale, svgHeight * scale);
+      URL.revokeObjectURL(blobUrl);
+      resolve();
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(blobUrl);
+      reject(err);
+    };
+    img.src = blobUrl;
+  });
+
+  const base = view.source
+    ? `Lucidase_Chromosome_Map_${view.source.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_")}`
+    : "Lucidase_Chromosome_Map";
+  const filename = `${base}.jpg`;
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        downloadBlob(blob, filename);
+        resolve({ filename, size: blob.size });
+      } else {
+        resolve(null);
+      }
+    }, "image/jpeg", 0.95);
+  });
+}
+
 async function initPage() {
   initTheme();
   initPagesMenu();
@@ -380,6 +487,7 @@ async function initPage() {
     get layout() {
       return view.layout;
     },
+    exportJpeg: exportKaryogramJpeg,
   };
   const fileInput = $("karyogram-file-input");
   fileInput.addEventListener("change", (e) => {
@@ -395,6 +503,12 @@ async function initPage() {
       showError((err && err.message) || err);
     }
   });
+  const btnExport = $("btn-karyogram-export");
+  if (btnExport) {
+    btnExport.addEventListener("click", () => {
+      exportKaryogramJpeg().catch((err) => showError((err && err.message) || err));
+    });
+  }
   try {
     view.kb = await loadKnowledgeBase();
     render(layoutKaryogram({ kb: view.kb, binSize: KARYOGRAM_BIN_SIZE }));

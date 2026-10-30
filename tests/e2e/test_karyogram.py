@@ -912,3 +912,44 @@ def test_on_a_phone_the_genes_table_never_clips_the_result_word(page, loaded):
         page.locator("#btn-load-karyogram-sample").click()
         _wait_result(page)
     _assert_genes_table_never_clips(page)
+
+
+def test_karyogram_jpeg_export_downloads_high_res_jpeg_on_theme_background(page, tmp_path):
+    _open(page)
+    btn_export = page.locator("#btn-karyogram-export")
+    expect(btn_export).to_be_visible()
+    expect(btn_export).to_be_enabled()
+
+    # 1. Export reference karyogram
+    with page.expect_download() as download_info:
+        btn_export.click()
+    download = download_info.value
+    assert download.suggested_filename == "Lucidase_Chromosome_Map.jpg"
+    ref_path = tmp_path / "ref_map.jpg"
+    download.save_as(ref_path)
+    assert ref_path.stat().st_size > 20000
+
+    # 2. Toggle to dark theme, load sample, and export
+    page.locator("#btn-theme-toggle").click()
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+
+    with page.expect_download() as download_info:
+        btn_export.click()
+    download_sample = download_info.value
+    assert "Lucidase_Chromosome_Map" in download_sample.suggested_filename
+    assert download_sample.suggested_filename.endswith(".jpg")
+    sample_path = tmp_path / "sample_map.jpg"
+    download_sample.save_as(sample_path)
+    assert sample_path.stat().st_size > 50000
+
+    # Verify resolution and JPEG validity with PIL
+    from PIL import Image
+    with Image.open(sample_path) as img:
+        assert img.format == "JPEG"
+        assert img.width >= 1400
+        assert img.height >= 1000
+        # Dark theme background corner check
+        corner = img.getpixel((5, 5))
+        assert corner[0] < 30 and corner[1] < 30 and corner[2] < 35
+
