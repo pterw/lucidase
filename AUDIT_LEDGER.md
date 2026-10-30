@@ -137,6 +137,9 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-095 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json` | Single-variant `SLCO1B1` `rs2306283` (`*1b`) interpretations asserted unphased `*1b/*1b` diplotype and unconditional normal/increased function, conflicting when co-inherited with `*5` (`rs4149056`). | REMEDIATED (scoped interpretations to single-variant effect, removed diplotype assertions, updated count 2 repute to Neutral, and noted multi-variant dependence) |
 | P1-096 | `web/src/karyogram-page.js`, `tests/e2e/test_karyogram.py` | `renderLoci` iterated over loci rather than unique genes, producing duplicate identical rows for multi-locus genes (e.g. 4 DPYD, 3 G6PD, 3 TPMT, 3 CYP2D6 rows) in the "Genes this report checks" table. | REMEDIATED (deduplicated by gene in chromosome coordinate order, rolled up locus observations to clinical gene state, updated e2e assertions) |
 | P1-097 | `web/src/core/karyogram.js`, `web/src/karyogram-page.js`, `web/tests/karyogram.test.mjs`, `tests/e2e/test_karyogram.py` | Clinical domain aggregation in DOM renderer (`aggregateState`) masked unassayed loci in multi-locus genes, reporting "Not found" when only 1 locus was checked. | REMEDIATED (moved roll-up to core domain `rollUpGeneResult`, preserving partial coverage with "Not found (N of M tested)" and fail-fast validation) |
+| P1-098 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | Single-variant CYP2D6 interpretations (`rs28371725`, `rs1065852`) affirmatively assigned patient-level metabolizer phenotype ("Intermediate metabolizer phenotype") without diplotyping and CNV detection. | REMEDIATED (withheld affirmative metabolizer phenotypes, made drug responses allele-specific and conditional on diplotyping/CNV, verified by test_kb_build) |
+| P1-099 | `web/src/karyogram-page.js` | `exportKaryogramJpeg` substituted an independent `<style>` definition altering typography (generic monospace vs `input-mono`) and halo opacity (0.15 vs 0.1) instead of capturing live resolved styles. | REMEDIATED (captured resolved styles across SVG elements directly from live DOM, preserving design-system tokens and theme colors) |
+| P1-100 | `web/src/core/karyogram.js`, `web/src/view-model.js`, `web/src/karyogram-page.js`, `web/tests/karyogram.test.mjs`, `web/tests/view-model.test.mjs` | Domain function `rollUpGeneResult` hardcoded English display labels ("Found", "Unclear", etc.), creating a second source of truth outside `RESULT_WORDS`. | REMEDIATED (extracted label formatting to display-model `geneResultLabel` in `view-model.js` backed by `RESULT_WORDS`, keeping domain roll-up purely structural) |
 
 ---
 
@@ -387,6 +390,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `4ef768c` | P1-096 | `fix(karyogram): deduplicate genes in the chromosome map genes table (P1-096)` |
 | `ef18d69` | Karyogram export | `feat(karyogram): add high-resolution JPEG export on current theme background` |
 | `91f8226` | P1-097 | `fix(karyogram): preserve partial coverage in gene-level results and enforce core boundary (P1-097)` |
+| `ab1c098` | P1-098, P1-099, P1-100 | `fix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100)` |
 
 ---
 

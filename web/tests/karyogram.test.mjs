@@ -164,7 +164,6 @@ test("rollUpGeneResult returns reference state and 'No file yet' when no sample 
   const res = rollUpGeneResult(["rs1050828", "rs1050829", "rs5030868"], null);
   assert.deepEqual(res, {
     state: "reference",
-    label: "No file yet",
     tested: 0,
     total: 3,
     isPartial: false,
@@ -191,7 +190,6 @@ test("rollUpGeneResult preserves partial coverage in negative multi-locus gene r
   });
   assert.deepEqual(partial1, {
     state: "supported_not_observed",
-    label: "Not found (1 of 3 tested)",
     tested: 1,
     total: 3,
     isPartial: true,
@@ -205,7 +203,6 @@ test("rollUpGeneResult preserves partial coverage in negative multi-locus gene r
   });
   assert.deepEqual(partial2, {
     state: "supported_not_observed",
-    label: "Not found (2 of 3 tested)",
     tested: 2,
     total: 3,
     isPartial: true,
@@ -219,7 +216,6 @@ test("rollUpGeneResult preserves partial coverage in negative multi-locus gene r
   });
   assert.deepEqual(full, {
     state: "supported_not_observed",
-    label: "Not found",
     tested: 3,
     total: 3,
     isPartial: false,
@@ -233,7 +229,6 @@ test("rollUpGeneResult preserves partial coverage in negative multi-locus gene r
   });
   assert.deepEqual(gaps, {
     state: "not_tested_by_array",
-    label: "Not on your chip",
     tested: 0,
     total: 3,
     isPartial: false,
@@ -247,7 +242,6 @@ test("rollUpGeneResult preserves partial coverage in negative multi-locus gene r
   });
   assert.deepEqual(observed, {
     state: "supported_and_observed",
-    label: "Found",
     tested: 2,
     total: 3,
     isPartial: false,
@@ -261,7 +255,6 @@ test("rollUpGeneResult preserves partial coverage in negative multi-locus gene r
   });
   assert.deepEqual(unclear, {
     state: "insufficient_evidence",
-    label: "Unclear",
     tested: 2,
     total: 3,
     isPartial: false,

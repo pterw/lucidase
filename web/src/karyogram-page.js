@@ -10,7 +10,7 @@
 import { loadKnowledgeBase } from "./kb-loader.js";
 import { layoutKaryogram, rollUpGeneResult } from "./core/karyogram.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
-import { RESULT_WORDS, escapeHtml, karyogramStateLabels } from "./view-model.js";
+import { RESULT_WORDS, escapeHtml, geneResultLabel, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
 import { initPagesMenu } from "./pages-menu.js";
 
@@ -127,9 +127,10 @@ function topicOf(gene) {
 /** The result cell: the swatch and the plain word with a file; the muted "No file yet" while there is no result. */
 function resultCell(layout, result) {
   if (!layout.sample || result.state === "reference") return `<span class="lds-na-text">No file yet</span>`;
+  const label = geneResultLabel(result);
   return (
     `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(result.state)}" aria-hidden="true"></span>` +
-    `${escapeHtml(result.label)}</span>`
+    `${escapeHtml(label)}</span>`
   );
 }
 
@@ -385,42 +386,38 @@ export async function exportKaryogramJpeg() {
   const computed = getComputedStyle(document.documentElement);
   const bodyComputed = getComputedStyle(document.body);
   const bgCanvas = bodyComputed.backgroundColor || computed.getPropertyValue("--bg-canvas").trim() || "#0B1117";
-  const ink = computed.getPropertyValue("--ink").trim() || "#EDF2F5";
-  const inkMuted = computed.getPropertyValue("--ink-muted").trim() || "#97A6B2";
-  const inkSubtle = computed.getPropertyValue("--ink-subtle").trim() || "#7F8D99";
-  const stateObserved = computed.getPropertyValue("--state-observed").trim() || "#62E4F1";
-  const stateNotObserved = computed.getPropertyValue("--state-not-observed").trim() || "#5FCB92";
-  const stateArrayGap = computed.getPropertyValue("--state-array-gap").trim() || "#E9B65A";
-  const stateOutside = computed.getPropertyValue("--state-outside").trim() || "#6E7D89";
-  const stateInsufficient = computed.getPropertyValue("--state-insufficient").trim() || "#F2798F";
 
   const svgClone = figureSvg.cloneNode(true);
-  const styleEl = document.createElementNS("http://www.w3.org/2000/svg", "style");
-  styleEl.textContent = `
-    .kary-bin { fill: ${ink}; fill-opacity: 0.8; }
-    .kary-bin-empty { fill: ${inkSubtle}; fill-opacity: 0.7; }
-    .kary-cen { stroke: ${inkSubtle}; stroke-width: 1.75; }
-    .kary-label { fill: ${inkMuted}; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; font-size: 11px; text-anchor: middle; }
 
-    .kary-state-supported_and_observed .kary-halo { fill: ${stateObserved}; fill-opacity: 0.15; }
-    .kary-state-supported_and_observed .kary-core { fill: ${stateObserved}; stroke: ${stateObserved}; stroke-width: 1; }
+  // Capture resolved computed styles from live SVG elements to respect the design system tokens
+  const SVG_STYLE_PROPS = [
+    "fill",
+    "fill-opacity",
+    "stroke",
+    "stroke-width",
+    "stroke-dasharray",
+    "font-family",
+    "font-size",
+    "font-weight",
+    "text-anchor",
+    "clip-path",
+  ];
 
-    .kary-state-supported_not_observed .kary-halo { fill: ${stateNotObserved}; fill-opacity: 0.15; }
-    .kary-state-supported_not_observed .kary-core { fill: ${bgCanvas}; stroke: ${stateNotObserved}; stroke-width: 1.75; }
+  const sourceElements = [figureSvg, ...figureSvg.querySelectorAll("*")];
+  const cloneElements = [svgClone, ...svgClone.querySelectorAll("*")];
 
-    .kary-state-not_tested_by_array .kary-halo { fill: ${stateArrayGap}; fill-opacity: 0.15; }
-    .kary-state-not_tested_by_array .kary-core { fill: ${bgCanvas}; stroke: ${stateArrayGap}; stroke-width: 1.75; stroke-dasharray: 2 1.6; }
-
-    .kary-state-outside_coverage .kary-halo { fill: ${stateOutside}; fill-opacity: 0.15; }
-    .kary-state-outside_coverage .kary-core { fill: ${stateOutside}; stroke: ${stateOutside}; stroke-width: 1; }
-
-    .kary-state-insufficient_evidence .kary-halo { fill: ${stateInsufficient}; fill-opacity: 0.15; }
-    .kary-state-insufficient_evidence .kary-core { fill: ${stateInsufficient}; stroke: ${stateInsufficient}; stroke-width: 1; clip-path: inset(0 50% 0 0); }
-
-    .kary-state-reference .kary-halo { fill: ${inkSubtle}; fill-opacity: 0.15; }
-    .kary-state-reference .kary-core { fill: ${inkSubtle}; stroke: ${inkSubtle}; stroke-width: 1; }
-  `;
-  svgClone.insertBefore(styleEl, svgClone.firstChild);
+  for (let i = 0; i < sourceElements.length; i++) {
+    const src = sourceElements[i];
+    const dest = cloneElements[i];
+    if (!src || !dest) continue;
+    const srcComputed = getComputedStyle(src);
+    for (const prop of SVG_STYLE_PROPS) {
+      const val = srcComputed.getPropertyValue(prop);
+      if (val) {
+        dest.style.setProperty(prop, val);
+      }
+    }
+  }
 
   const svgWidth = parseFloat(svgClone.getAttribute("width")) || 672;
   const svgHeight = parseFloat(svgClone.getAttribute("height")) || 532;

@@ -1232,3 +1232,13 @@ def test_overlay_runs_the_range_check_on_the_finished_evidence(monkeypatch, cura
     assert kb is None
     assert "rs6025" in seen
     assert any("sentinel range error" in e for e in errors), errors
+
+
+def test_cyp2d6_drug_responses_withhold_affirmative_metabolizer_phenotype(built):
+    """P1-098: CYP2D6 drug responses withhold unphased patient-level metabolizer phenotypes."""
+    for rsid in ("rs3892097", "rs1065852", "rs28371725"):
+        interps = built["loci"][rsid]["interpretations"]
+        for count in ("1", "2"):
+            resp = interps[count]["drug_response"] or ""
+            assert "metabolizer phenotype" not in resp.lower()
+            assert "diplotyping" in resp

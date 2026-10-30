@@ -59,7 +59,6 @@ export function rollUpGeneResult(loci, observations) {
   if (!observations) {
     return {
       state: "reference",
-      label: "No file yet",
       tested: 0,
       total,
       isPartial: false,
@@ -85,7 +84,6 @@ export function rollUpGeneResult(loci, observations) {
   if (observed > 0) {
     return {
       state: COVERAGE_STATES.SUPPORTED_AND_OBSERVED,
-      label: "Found",
       tested,
       total,
       isPartial: false,
@@ -94,7 +92,6 @@ export function rollUpGeneResult(loci, observations) {
   if (unclear > 0) {
     return {
       state: COVERAGE_STATES.INSUFFICIENT_EVIDENCE,
-      label: "Unclear",
       tested,
       total,
       isPartial: false,
@@ -103,27 +100,16 @@ export function rollUpGeneResult(loci, observations) {
   if (tested === 0) {
     return {
       state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
-      label: "Not on your chip",
       tested: 0,
       total,
       isPartial: false,
     };
   }
-  if (tested < total) {
-    return {
-      state: COVERAGE_STATES.SUPPORTED_NOT_OBSERVED,
-      label: `Not found (${tested} of ${total} tested)`,
-      tested,
-      total,
-      isPartial: true,
-    };
-  }
   return {
     state: COVERAGE_STATES.SUPPORTED_NOT_OBSERVED,
-    label: "Not found",
     tested,
     total,
-    isPartial: false,
+    isPartial: tested < total,
   };
 }
 

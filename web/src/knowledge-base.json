@@ -2111,7 +2111,7 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Mildly decreased CYP2D6 substrate metabolism; adjust dosing according to full clinical context.",
+          "drug_response": "Mildly decreased CYP2D6 substrate metabolism (one *10 allele); complete diplotyping and CNV detection required for metabolizer status.",
           "magnitude": 1.5,
           "phenotype": "One CYP2D6*10 (rs1065852) allele detected. Common decreased-function variant (p.Pro34Ser) prevalent in East Asian populations. Full metabolizer status requires star-allele diplotyping across all loci.",
           "repute": "Bad",
@@ -2120,7 +2120,7 @@
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Intermediate metabolism of codeine, tramadol, tamoxifen, and tricyclic antidepressants. Titration or alternative dosing may be warranted.",
+          "drug_response": "Decreased metabolism of codeine, tramadol, tamoxifen, and tricyclic antidepressants (two *10 alleles); complete diplotyping and CNV detection required for definitive metabolizer status.",
           "magnitude": 3.0,
           "phenotype": "Two CYP2D6*10 (rs1065852) alleles detected. Homozygous decreased-function allele. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
           "repute": "Bad",
@@ -4544,7 +4544,7 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Moderately decreased rate of CYP2D6 drug clearance or prodrug bioactivation.",
+          "drug_response": "Reduced rate of CYP2D6 substrate clearance or prodrug bioactivation (one *41 allele); complete diplotyping and CNV detection required for metabolizer status.",
           "magnitude": 1.5,
           "phenotype": "One CYP2D6*41 (rs28371725) allele detected. Splicing defect causing reduced enzyme expression. Full metabolizer assignment requires complete star-allele diplotyping.",
           "repute": "Bad",
@@ -4553,7 +4553,7 @@
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Intermediate metabolizer phenotype: reduced conversion of codeine/tramadol to active analgesics; impaired clearance of secondary amine TCAs.",
+          "drug_response": "Decreased metabolism of codeine/tramadol and secondary amine TCAs (two *41 alleles); complete diplotyping and CNV detection required for definitive metabolizer status.",
           "magnitude": 3.0,
           "phenotype": "Two CYP2D6*41 (rs28371725) alleles detected. Homozygous hypomorphic splicing variant. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
           "repute": "Bad",
@@ -4681,7 +4681,7 @@
         "1": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Opioids (codeine, tramadol) / Tamoxifen / SSRIs: Reduced bioactivation or clearance may occur if paired with another non-functional allele.",
+          "drug_response": "Opioids / Tamoxifen / SSRIs: Reduced bioactivation or clearance may occur if paired with another non-functional allele (one *4 allele); complete diplotyping and CNV detection required for metabolizer status.",
           "magnitude": 2.5,
           "phenotype": "One CYP2D6*4 (rs3892097) allele detected. This splice defect inactivates the allele. Full metabolizer status cannot be assigned without complete star-allele diplotyping and CNV detection.",
           "repute": "Bad",
@@ -4690,7 +4690,7 @@
         "2": {
           "category": "Pharmacogenomics",
           "caveats": [],
-          "drug_response": "Codeine / Tramadol: Ineffective analgesia due to lack of conversion to morphine/O-desmethyltramadol. Tamoxifen: Decreased endoxifen formation. TCAs / SSRIs: Markedly reduced clearance; toxicity risk.",
+          "drug_response": "Codeine / Tramadol: Ineffective analgesia due to lack of conversion to active metabolites; Tamoxifen / TCAs: Impaired activation or clearance (two *4 alleles); complete diplotyping and CNV detection required for definitive metabolizer status.",
           "magnitude": 4.0,
           "phenotype": "Two CYP2D6*4 (rs3892097) alleles detected. Homozygous non-functional splice mutation. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
           "repute": "Bad",
@@ -6869,7 +6869,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "abcc1ec87f0167a387090dc698817bfae0f923e432a7d6a2df4819255a1ea28d"
+    "sha256": "4ae24b618679bdd9f4cb679bf735e890a45a60b559800a593519ca6e41a200bc"
   },
   "schema_version": 2
 }

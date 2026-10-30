@@ -22,6 +22,7 @@ import {
   fileLine,
   fmtPct,
   groupIdForModel,
+  geneResultLabel,
   groupedReport,
   karyogramStateLabels,
   introScopeText,
@@ -620,6 +621,24 @@ test("each coverage state reads as the design system's plain word with its one-l
   for (const state of ["supported_and_observed", "supported_not_observed", "not_tested_by_array", "insufficient_evidence"]) {
     assert.equal(labels[state], DS_RESULT_WORDS[state][0], state);
   }
+});
+
+test("geneResultLabel derives gene table result labels from RESULT_WORDS and formats partial coverage (P1-100)", () => {
+  assert.equal(geneResultLabel({ state: "reference" }), "No file yet");
+  assert.equal(geneResultLabel({ state: "supported_and_observed" }), "Found");
+  assert.equal(geneResultLabel({ state: "insufficient_evidence" }), "Unclear");
+  assert.equal(geneResultLabel({ state: "not_tested_by_array" }), "Not on your chip");
+  assert.equal(geneResultLabel({ state: "supported_not_observed", isPartial: false }), "Not found");
+  assert.equal(
+    geneResultLabel({ state: "supported_not_observed", isPartial: true, tested: 1, total: 3 }),
+    "Not found (1 of 3 tested)"
+  );
+
+  const custom = { supported_not_observed: "Negative" };
+  assert.equal(
+    geneResultLabel({ state: "supported_not_observed", isPartial: true, tested: 2, total: 4 }, custom),
+    "Negative (2 of 4 tested)"
+  );
 });
 
 test("the APOE card states its result in the same plain words", () => {
