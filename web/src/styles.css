@@ -18,6 +18,7 @@
 [data-theme="light"] {
   --inspector-w: 520px;
   --layout-max: 1600px;
+  --bg-header: #F4F1EA;
   --p: 60.864% 0.1044 210.90; --pc: 100% 0 0; --s: 21.171% 0.0263 244.63; --sc: 98.503% 0.0041 91.45;
   --a: 60.864% 0.1044 210.90; --ac: 100% 0 0; --n: 21.171% 0.0263 244.63; --nc: 98.503% 0.0041 91.45;
   --b1: 100% 0 0; --b2: 98.503% 0.0041 91.45; --b3: 95.853% 0.0098 87.47; --bc: 21.171% 0.0263 244.63;
@@ -25,6 +26,7 @@
   --wa: 60.767% 0.1243 71.52; --wac: 100% 0 0; --er: 53.328% 0.1588 11.33; --erc: 100% 0 0;
 }
 [data-theme="dark"] {
+  --bg-header: #141E28;
   --p: 85.149% 0.1148 204.32; --pc: 17.44% 0.0157 248.74; --s: 95.822% 0.0067 233.64; --sc: 17.44% 0.0157 248.74;
   --a: 85.149% 0.1148 204.32; --ac: 17.44% 0.0157 248.74; --n: 95.822% 0.0067 233.64; --nc: 17.44% 0.0157 248.74;
   --b1: 20.008% 0.0185 245.32; --b2: 17.44% 0.0157 248.74; --b3: 15.612% 0.0135 248.04; --bc: 95.822% 0.0067 233.64;
@@ -34,6 +36,7 @@
 /* No JS / first paint: follow the device unless a theme is set. Mirrors [data-theme="dark"] above; keep in sync. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    --bg-header: #141E28;
     --p: 85.149% 0.1148 204.32; --pc: 17.44% 0.0157 248.74; --s: 95.822% 0.0067 233.64; --sc: 17.44% 0.0157 248.74;
     --a: 85.149% 0.1148 204.32; --ac: 17.44% 0.0157 248.74; --n: 95.822% 0.0067 233.64; --nc: 17.44% 0.0157 248.74;
     --b1: 20.008% 0.0185 245.32; --b2: 17.44% 0.0157 248.74; --b3: 15.612% 0.0135 248.04; --bc: 95.822% 0.0067 233.64;
@@ -88,6 +91,7 @@
 
 /* StepNav: Choose your file, Read your results, Save a copy. Below 560px of its own width it becomes the current step,
    "Step 2 of 3", a bar and a back link; both forms are in the markup and a container query shows one. */
+.lds-stepnav-bar { padding-top: 0.15rem; padding-bottom: 0.3rem; }
 .lds-stepnav { container-type: inline-size; }
 .lds-stepnav-list { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; }
 .lds-step { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
@@ -137,6 +141,31 @@ button.lds-step-item { cursor: pointer; }
 .lds-masthead-wordmark img { display: block; height: 56px; width: auto; }
 @media (max-width: 559px) { .lds-masthead-art { display: none; } .lds-masthead-wordmark { display: block; } }
 .lds-display { margin: 0; font: 400 40px/1.1 var(--font-serif); letter-spacing: -0.02em; max-width: 620px; text-wrap: balance; color: var(--text-body); }
+#section-hero > div:first-child { container-type: inline-size; }
+#section-hero .lds-display {
+  white-space: nowrap;
+  text-wrap: nowrap;
+  max-width: none;
+  display: inline-block;
+  font-size: clamp(1rem, calc(2.75rem * tan(atan2(100cqi, 960px))), 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-top: -1.875rem;
+  margin-bottom: 0.09rem;
+}
+#section-hero #intro-scope {
+  white-space: nowrap;
+  text-wrap: nowrap;
+  width: max-content;
+  max-width: none;
+  margin-top: -2.1rem;
+  margin-bottom: 0.35rem;
+  font-size: clamp(0.88rem, calc(1.21rem * tan(atan2(100cqi, 560px))), 1.21rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-muted);
+}
 .lds-lede { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
 .lds-list { margin: 0; padding-left: 18px; list-style: disc; font: 400 15px/1.7 var(--font-sans); }
 
@@ -164,18 +193,18 @@ button.lds-step-item { cursor: pointer; }
 .card-glass,
 .lds-overdrive-cards .card-glass {
   background: var(--bg-panel);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-panel);
   padding: 24px 28px;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
 }
 .card-accent,
 .lds-overdrive-cards .card-accent {
-  border-top: 3px solid var(--accent);
+  border-top: 1px solid var(--accent);
 }
 .card-muted,
 .lds-overdrive-cards .card-muted {
-  border-top: 3px solid var(--border-strong);
+  border-top: 1px solid var(--border-strong);
 }
 .lds-overdrive-cards .card-glass ul {
   margin: 12px 0 0 0;
@@ -195,9 +224,9 @@ button.lds-step-item { cursor: pointer; }
   padding: 29px 34px;
   margin-top: 8px;
   background: var(--bg-panel);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-panel);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+  box-shadow: none;
 }
 .lds-formats-matrix .formats-grid {
   display: grid;
@@ -210,9 +239,9 @@ button.lds-step-item { cursor: pointer; }
   gap: 6px;
   padding: 14px 16px;
   background: var(--bg-sunk);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-control);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 .lds-formats-matrix .format-head {
   display: flex;
@@ -231,6 +260,8 @@ button.lds-step-item { cursor: pointer; }
   margin: 0;
   font: 400 12px/1.4 var(--font-sans);
   color: var(--text-muted);
+  white-space: nowrap;
+  text-wrap: nowrap;
 }
 
 /* Dynamic scaling for 1080p and compact desktop viewports so landing proportions match 1440p */
@@ -333,18 +364,67 @@ button.lds-step-item { cursor: pointer; }
   background: transparent; color: var(--text-muted); border-radius: var(--radius-control); cursor: pointer; }
 .lds-iconbtn:hover { background: var(--bg-hover); color: var(--text-body); }
 
-/* Dropzone: the one bordered field on the start page. */
-.lds-dropzone { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 31px 36px; max-width: 540px; width: 100%; margin: 0 auto;
-  background: var(--bg-panel); border: 1.5px dashed var(--border-control); border-radius: var(--radius-panel); cursor: pointer;
-  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) ease; }
-@media (min-width: 860px) {
-  .lds-dropzone { transform: translateX(-120px); }
+/* Hero section: fluid two-column layout */
+.lds-hero-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 3vw, 3rem);
+}
+.lds-hero-column {
+  flex: 1 1 clamp(320px, 36vw, 540px);
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.4vw, 16px);
+}
+.lds-hero-drop-col {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dropzone: fluid responsive bordered field on the start page */
+.lds-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(10px, 1.3vw, 15px);
+  padding: clamp(1.25rem, 2.2vw, 2.1rem) clamp(1.25rem, 2.5vw, 2.25rem);
+  max-width: 540px;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--bg-panel);
+  border: 1.5px dashed var(--border-control);
+  border-radius: var(--radius-panel);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease;
 }
 .lds-dropzone:hover, .lds-dropzone:focus-within, .lds-dropzone.is-over { border-color: var(--accent); }
 .lds-dropzone.is-over { background: var(--accent-wash); }
-.lds-dropzone-title { display: flex; align-items: center; gap: 12px; margin: 0; font: 700 17px var(--font-sans); color: var(--text-body); }
-.lds-dropzone-desc { margin: 0; font: 400 15px/1.55 var(--font-sans); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
-.lds-dropzone-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; width: 100%; gap: 12px; }
+.lds-dropzone-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font: 700 clamp(15px, 1.25vw, 17px) var(--font-sans);
+  color: var(--text-body);
+}
+.lds-dropzone-desc {
+  margin: 0;
+  font: 400 clamp(13px, 1.1vw, 15px)/1.55 var(--font-sans);
+  color: var(--text-muted);
+  max-width: var(--measure-prose);
+  text-wrap: pretty;
+}
+.lds-dropzone-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: clamp(8px, 1vw, 12px);
+}
 @media (min-width: 520px) { .lds-dropzone-actions { flex-wrap: nowrap; } }
 
 /* Progress: a 3px ink bar that grows by transform only. */
@@ -554,8 +634,13 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   transition: max-width 360ms ease;
 }
 .lds-results.has-drawer-open .lds-results-main {
-  max-width: 1024px;
+  flex: 1 1 640px;
+  max-width: 100%;
   margin-inline: 0;
+}
+.lds-results.is-table-view .lds-results-main,
+.lds-results:has(#table-panel:not(.hidden)) .lds-results-main {
+  max-width: 100%;
 }
 #coverage-guardrail-banner {
   display: flex;
@@ -709,7 +794,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
    (as the design system's Karyogram: full width, height auto), and the legend at its 560px measure. Each mark is a
    button: a pointer, the focus ring on its halo (an SVG group draws no outline), and the selected halo larger and
    stronger, as in the design system's Karyogram (8.5 to 11 of its 4.25 core, 0.2 to 0.3 opacity). */
-.lds-summary-prose { margin: 0; font: 400 16px/1.55 var(--font-sans); color: var(--text-body); max-width: var(--measure-prose); text-wrap: pretty; }
+.lds-summary-prose { margin: 0; font: 400 16px/1.55 var(--font-sans); color: var(--text-body); max-width: 100%; text-wrap: pretty; }
 #summary {
   flex-direction: column;
   gap: 20px;
@@ -718,6 +803,18 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 }
 #summary .lds-section-head { flex: none; width: 100%; max-width: none; }
 #summary .lds-section-body { flex: none; width: 100%; }
+
+/* Table view: full width, heading on one line without breaks, extending across left column */
+#results-table {
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+#results-table .lds-section-head { flex: none; width: 100%; max-width: none; }
+#results-table .lds-section-title { white-space: nowrap; }
+#results-table .lds-section-body { flex: none; width: 100%; }
+#results-table .lds-table th,
+#results-table .lds-table td { padding: 8px 8px; }
 .lds-summary-map {
   min-width: 0;
   overflow-x: auto;
@@ -738,7 +835,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 }
 .lds-summary-map .kary-locus { cursor: pointer; outline: none; }
 .lds-summary-map .kary-locus:hover .kary-halo { fill-opacity: 0.28; }
-.lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.35; }
+.lds-summary-map .kary-locus.is-selected .kary-halo { r: 10px; fill-opacity: 0.35; }
 .lds-summary-map .kary-locus:focus-visible .kary-halo { stroke: var(--accent); stroke-width: 2; fill-opacity: 0.35; }
 
 /* Results toolbar: docked / sticky controls for views and filters */
@@ -746,9 +843,9 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   position: sticky;
   top: 0;
   z-index: 15;
-  background: var(--bg-canvas);
-  border-top: 1px solid var(--border-default);
-  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-header);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
   padding: 10px 0;
   margin-bottom: 24px;
   display: flex;
@@ -919,4 +1016,67 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 }
 .lds-assortment-row:last-child {
   border-bottom: none;
+}
+
+/* Finding limitation disclosure: compact trigger that expands on click */
+.lds-finding-limit {
+  margin: 6px 0 0 0;
+  border-radius: var(--radius-control);
+}
+.lds-finding-limit-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font: 600 13px var(--font-sans);
+  color: var(--text-muted);
+  user-select: none;
+  list-style: none;
+}
+.lds-finding-limit-toggle::-webkit-details-marker {
+  display: none;
+}
+.lds-finding-limit-toggle:hover {
+  color: var(--text-body);
+}
+.lds-finding-limit-chevron {
+  width: 12px;
+  height: 12px;
+  transition: transform var(--dur-fast) ease;
+}
+.lds-finding-limit[open] .lds-finding-limit-chevron {
+  transform: rotate(90deg);
+}
+.lds-finding-limit-body {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-control);
+  font: 400 13px/1.55 var(--font-sans);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+
+/* QC sex-chromosome check tag: comfortable breathing room */
+#qc-inferred-sex {
+  min-height: 32px;
+  padding: 6px 12px;
+  line-height: 1.45;
+  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Wide display fluid scaling for 1440p and 4K displays */
+@media (min-width: 1920px) {
+  :root {
+    --layout-max: 1800px;
+    --inspector-w: 560px;
+  }
+}
+@media (min-width: 2560px) {
+  :root {
+    --layout-max: 2100px;
+    --inspector-w: 600px;
+  }
 }

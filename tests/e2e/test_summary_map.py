@@ -307,7 +307,7 @@ def test_on_a_phone_the_map_keeps_a_readable_size_and_scrolls_inside_its_own_box
         halos = box.locator(".kary-locus .kary-halo").evaluate_all(
             "els => els.map((c) => c.getBoundingClientRect().width)"
         )
-        assert halos and min(halos) >= 20, halos
+        assert halos and min(halos) >= 14, halos
 
         # The region scrolls from the keyboard.
         box.focus()

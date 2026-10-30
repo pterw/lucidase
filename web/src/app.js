@@ -582,6 +582,10 @@ function filterFindingCards() {
 function setViewMode(mode) {
   state.viewMode = mode;
   const isCards = mode === "cards";
+  const resultsSection = document.getElementById("results-section");
+  if (resultsSection) {
+    resultsSection.classList.toggle("is-table-view", !isCards);
+  }
   const btnCards = document.getElementById("btn-view-cards");
   const btnTable = document.getElementById("btn-view-table");
   if (btnCards) {
@@ -656,14 +660,22 @@ function findingRowHtml(row) {
   const headingId = `f-${escapeHtml(row.key)}-h`;
   const limitation = row.limitation === null
     ? ""
-    : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span><b>What this can’t tell you:</b> ${escapeHtml(row.limitation)}</span></p>`;
+    : `<details class="lds-finding-limit">
+        <summary class="lds-finding-limit-toggle">
+          <span class="lds-icon lds-i-info" aria-hidden="true"></span>
+          <span class="lds-finding-limit-title">What this can’t tell you:</span>
+          <span class="lds-icon lds-i-chevron-right lds-finding-limit-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="lds-finding-limit-body">${escapeHtml(row.limitation)}</div>
+      </details>`;
   return `
     <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}" data-finding-state="${escapeHtml(row.state)}">
       <span class="lds-mark lds-mark-16 lds-mark-${escapeHtml(row.state)}" role="img" aria-label="${escapeHtml(row.stateLabel)}"></span>
       <div class="lds-finding-main">
         <div class="lds-finding-head">
           <h3 id="${headingId}" class="lds-finding-topic">${escapeHtml(row.topic)}</h3>
-          <span class="lds-finding-gene">${escapeHtml(row.gene)} <span class="lds-finding-marker font-mono text-12 font-normal text-ink-muted">· ${escapeHtml(row.markers)}</span></span>
+          <span class="lds-finding-gene">${escapeHtml(row.gene)}</span>
+          <span class="lds-finding-marker font-mono text-12 font-normal text-ink-muted">· ${escapeHtml(row.markers)}</span>
         </div>
         <p class="lds-finding-statement">${escapeHtml(row.statement)}</p>
         ${limitation}
@@ -1179,7 +1191,7 @@ function renderVariantsTable() {
         ${valueHtml(r.magnitudeShort)} <span class="lds-meta">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
       </td>
       <td class="text-ink-muted">
-        <div class="min-w-64 max-w-md line-clamp-2" title="${escapeHtml(guidanceTitle)}">${escapeHtml(guidance)}</div>
+        <div class="min-w-48 max-w-md line-clamp-2" title="${escapeHtml(guidanceTitle)}">${escapeHtml(guidance)}</div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1259,7 +1271,35 @@ function openDrawer(record, opener = document.activeElement) {
   setValue(document.getElementById("drawer-genotype"), record.genotype);
   setValue(document.getElementById("drawer-chrom"), chromosomeWords(record.chromosomes));
   setValue(document.getElementById("drawer-coord"), record.positionText);
-  document.getElementById("drawer-significance").textContent = record.significance;
+  const isecFoundTitle = document.getElementById("isec-found");
+
+  const drawerSigEl = document.getElementById("drawer-significance");
+
+  if (record.significance === "Not detected" || record.coverage_state === "supported_not_observed") {
+
+    if (isecFoundTitle) isecFoundTitle.textContent = "Not detected";
+
+    if (drawerSigEl) {
+
+      drawerSigEl.textContent = "";
+
+      drawerSigEl.classList.add("hidden");
+
+    }
+
+  } else {
+
+    if (isecFoundTitle) isecFoundTitle.textContent = "What was found";
+
+    if (drawerSigEl) {
+
+      drawerSigEl.textContent = record.significance;
+
+      drawerSigEl.classList.remove("hidden");
+
+    }
+
+  }
   setValue(
     document.getElementById("drawer-phenotype"),
     [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null

@@ -573,7 +573,7 @@ const ACMG_VERSION_FALLBACK = "ACMG SF";
 export function introScopeText(manifest) {
   const loci = numberOrNull(manifest && manifest.locus_count);
   const genes = numberOrNull(manifest && manifest.gene_count);
-  const explains = "explains each result in plain words, including what it could not test.";
+  const explains = "explains each result in plain words.";
   if (loci === null || genes === null) return `Lucidase ${explains} Its tested scope is ${NOT_AVAILABLE}.`;
   return `Lucidase checks ${loci} places in ${genes} genes and ${explains}`;
 }

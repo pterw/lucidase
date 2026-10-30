@@ -332,7 +332,7 @@ def test_static_claims_come_from_the_kb_manifest(loaded_page):
     intro = page.locator("#intro-scope").inner_text()
     assert intro == (
         f"Lucidase checks {MANIFEST['locus_count']} places in {MANIFEST['gene_count']} genes and explains each "
-        "result in plain words, including what it could not test."
+        "result in plain words."
     )
     assert page.locator("#redis-status-indicator").count() == 0
 

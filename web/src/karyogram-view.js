@@ -129,8 +129,8 @@ export function renderKaryogramSvg(layout, { stateLabels = {} } = {}) {
     parts.push(
       `<g class="kary-locus kary-state-${esc(state)}" data-rsid="${esc(l.rsid)}" data-state="${esc(state)}">` +
         `<title>${esc(l.gene)} ${esc(l.rsid)}: ${esc(labelOf(state))}</title>` +
-        `<circle class="kary-halo" cx="${f(x)}" cy="${f(y)}" r="10"/>` +
-        `<circle class="kary-core" cx="${f(x)}" cy="${f(y)}" r="5"/></g>`,
+        `<circle class="kary-halo" cx="${f(x)}" cy="${f(y)}" r="7"/>` +
+        `<circle class="kary-core" cx="${f(x)}" cy="${f(y)}" r="3.5"/></g>`,
     );
   }
 

@@ -393,11 +393,11 @@ test("the KB badge text and title come from the manifest, with no source version
 test("the intro sentence states the manifest's places and genes in plain words, and no scope without them", () => {
   // Counts that differ from the live KB, so a literal in the function cannot pass.
   const text = introScopeText({ locus_count: 7, gene_count: 3, acmg_sf_version: "ACMG SF v3.2" });
-  assert.equal(text, "Lucidase checks 7 places in 3 genes and explains each result in plain words, including what it could not test.");
+  assert.equal(text, "Lucidase checks 7 places in 3 genes and explains each result in plain words.");
   assert.doesNotMatch(text, /ACMG/);
   assert.equal(
     introScopeText({ locus_count: 140, gene_count: 99 }),
-    "Lucidase checks 140 places in 99 genes and explains each result in plain words, including what it could not test."
+    "Lucidase checks 140 places in 99 genes and explains each result in plain words."
   );
   for (const bad of [null, {}, { locus_count: 14 }, { gene_count: 12 }, { locus_count: "14", gene_count: 12 }]) {
     const unavailable = introScopeText(bad);

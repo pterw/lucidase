@@ -180,6 +180,11 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-029 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | CBS `rs5742905` (c.833T>C / p.Ile278Thr) asserted homocystinuria disease and carrier phenotypes without qualifying for the common benign cis `844ins68` rescuing insertion. | REMEDIATED (qualified limitation, carrier, and homozygous phenotypes to require excluding the rescuing 844ins68 insertion before concluding CBS deficiency, verified by test_kb_build) |
 | P2-030 | `web/src/app.js`, `web/src/styles.css` | Multi-locus genes with multiple checks (e.g. 4 DPYD or 3 G6PD checks) shared identical gene card titles, making findings ambiguous; section headers lacked check and found count summaries. | REMEDIATED (disambiguated finding card headers with locus markers, added section summary pills displaying check count and found count) |
 | P2-031 | `web/index.html`, `web/src/app.js`, `web/src/styles.css` | Pairwise co-occurring allele cards across unlinked loci repeated 6 large sprawling cards in multi-locus section; karyogram SVG lacked smooth mobile horizontal touch panning; table ClinVar review column wrapped awkwardly. | REMEDIATED (condensed multi-locus co-occurrence cards into compact structured rows, added webkit and touch-action pan-x scrolling to karyogram figures, and enforced whitespace-nowrap on table ClinVar review) |
+| P1-103 | `web/src/styles.css`, `web/src/app.js` | Technical results table squeezed into narrow right margin column next to 200px header, wrapping title across two lines, creating bottom-left dead space, and forcing horizontal scrolling. | REMEDIATED (converted results-table to full-width stacked layout, one-line title without breaks, and expanded table body 100% to left margin with zero horizontal scroll) |
+| P2-032 | `web/src/styles.css` | Header and docked results toolbar blended into page canvas in light and dark modes. | REMEDIATED (themed `--bg-header` to bone/cream `#F4F1EA` in lightmode and elevated slate `#141E28` in darkmode, providing distinct contrast and docking hierarchy) |
+| P2-033 | `web/src/app.js`, `web/src/styles.css` | Verbose inline finding limitation disclosures occupied excessive vertical space and bloated cards view. | REMEDIATED (converted limitation text to interactive compact disclosure with chevron toggle and styled expandable drawer panel) |
+| P2-034 | `web/src/karyogram-view.js`, `web/karyogram.html`, `web/src/karyogram-page.js` | Karyogram locus marks cluttered dense chromosomes (Chr 1, 6, 19) with overlapping blobs; guide card lacked term definitions and karyogram explanation. | REMEDIATED (scaled marks from r=10/5 to r=7/3.5, expanded guide card with genome structure explanation and interactive glossary terms) |
+| P2-035 | `web/src/app.js` | Record Inspector stacked redundant headings `"What was found"` over `"Not detected"` when variant was absent. | REMEDIATED (section title displays `"Not detected"` directly and hides redundant subheadings when variant is absent) |
 
 ---
 
@@ -409,6 +414,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `fc1d25e` | P1-102 | `feat(web): add sequential navigation and counter to inspector drawer (P1-102)` |
 | `eea5192` | P2-030 | `feat(web): disambiguate multi-locus gene card headers and add category summary pills (P2-030)` |
 | `73861b0` | P2-031 | `feat(web): compact multi-locus co-occurrence cards and ensure mobile karyogram scroll (P2-031)` |
+| `017e534` | P1-103, P2-032..P2-035 | `fix(web): full-width table view, cream header theming, limitation disclosures, and karyogram decluttering (P1-103, P2-032..P2-035)` |
 
 ---
 

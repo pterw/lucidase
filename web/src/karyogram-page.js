@@ -13,6 +13,7 @@ import { renderKaryogramSvg } from "./karyogram-view.js";
 import { RESULT_WORDS, escapeHtml, geneResultLabel, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
 import { initPagesMenu } from "./pages-menu.js";
+import { upgradeTerms } from "./term.js";
 
 const SAMPLE_URL = "./demo-data/sample-karyogram-23andme.txt";
 const SAMPLE_NAME = "sample-karyogram-23andme.txt";
@@ -472,6 +473,7 @@ export async function exportKaryogramJpeg() {
 async function initPage() {
   initTheme();
   initPagesMenu();
+  upgradeTerms(document.body);
   window.__lucidaseKaryogram = {
     get layout() {
       return view.layout;
