@@ -839,3 +839,34 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-section.is-filtered-out {
   display: none !important;
 }
+
+/* Inspector navigation */
+.lds-inspector-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lds-inspector-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  padding: 2px 4px;
+}
+.lds-drawer-counter {
+  font: 600 11px var(--font-mono);
+  color: var(--text-muted);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.lds-inspector-nav .lds-iconbtn {
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+}
+.lds-inspector-nav .lds-iconbtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

@@ -417,12 +417,26 @@ function initEventListeners() {
   document.getElementById("btn-use-another-file").addEventListener("click", () => goToStep(0));
 
 
-  // Inspector close: its close button, or Escape anywhere on the page while it is open (design system Inspector)
+  // Inspector close and sequential traversal
   if (btnCloseDrawer) {
     btnCloseDrawer.addEventListener("click", closeDrawer);
   }
+  const btnDrawerPrev = document.getElementById("btn-drawer-prev");
+  const btnDrawerNext = document.getElementById("btn-drawer-next");
+  if (btnDrawerPrev) btnDrawerPrev.addEventListener("click", () => navigateDrawer(-1));
+  if (btnDrawerNext) btnDrawerNext.addEventListener("click", () => navigateDrawer(1));
+
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && state.selectedVariant !== null) closeDrawer();
+    if (state.selectedVariant === null) return;
+    if (e.key === "Escape") {
+      closeDrawer();
+    } else if (e.key === "ArrowLeft" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      navigateDrawer(-1);
+    } else if (e.key === "ArrowRight" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      navigateDrawer(1);
+    }
   });
 }
 
@@ -1164,6 +1178,36 @@ let drawerOpener = null;
  * results, or under them on a narrow screen. It is non-modal: the list stays usable, and opening another record
  * swaps the content. The element ids are the drawer's (#variant-drawer, drawer-*), which the tests read.
  */
+
+/** The ordered list of records currently navigable in the inspector drawer. */
+function getNavigableRecords() {
+  const rows = allRows();
+  if (!state.filterCategory || state.filterCategory === "every") {
+    return rows;
+  }
+  const targetState = STATE_TABS[state.filterCategory];
+  return rows.filter((r) => !targetState || r.coverage_state === targetState);
+}
+
+/** Navigates to the adjacent record (-1 for previous, +1 for next) in the inspector drawer. */
+function navigateDrawer(delta) {
+  if (!state.selectedVariant) return;
+  const navigable = getNavigableRecords();
+  const currentIndex = navigable.findIndex((r) => r.id === state.selectedVariant.id);
+  if (currentIndex < 0) return;
+  const nextIndex = currentIndex + delta;
+  if (nextIndex >= 0 && nextIndex < navigable.length) {
+    const nextRecord = navigable[nextIndex];
+    const nextOpener = document.querySelector(`article.lds-finding[data-finding-id="${CSS.escape(nextRecord.id)}"] button.lds-finding-open`) ||
+      document.querySelector(`tr[data-record-id="${CSS.escape(nextRecord.id)}"]`);
+    openDrawer(nextRecord, nextOpener);
+    const card = document.querySelector(`article.lds-finding[data-finding-id="${CSS.escape(nextRecord.id)}"]`);
+    if (card && state.viewMode === "cards") {
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+}
+
 function openDrawer(record, opener = document.activeElement) {
   const drawer = document.getElementById("variant-drawer");
   const side = document.getElementById("inspector-side");
@@ -1174,6 +1218,22 @@ function openDrawer(record, opener = document.activeElement) {
   drawerOpener = (opener instanceof HTMLElement || opener instanceof SVGElement) && opener !== document.body ? opener : null;
 
   // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
+  // Traversal navigation state
+  const navigable = getNavigableRecords();
+  const currentIndex = navigable.findIndex((r) => r.id === record.id);
+  const counterEl = document.getElementById("drawer-counter");
+  const btnPrev = document.getElementById("btn-drawer-prev");
+  const btnNext = document.getElementById("btn-drawer-next");
+  if (counterEl) {
+    if (currentIndex >= 0) {
+      counterEl.textContent = `${currentIndex + 1} of ${navigable.length}`;
+    } else {
+      counterEl.textContent = `1 of ${navigable.length}`;
+    }
+  }
+  if (btnPrev) btnPrev.disabled = currentIndex <= 0;
+  if (btnNext) btnNext.disabled = currentIndex < 0 || currentIndex >= navigable.length - 1;
+
   document.getElementById("drawer-title").textContent = topicOf(record);
   // The subtitle names the gene once, then the markers ("rs429358 + rs7412" for APOE); the record id stays readable.
   const markerEl = document.getElementById("drawer-rsid");
