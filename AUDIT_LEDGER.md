@@ -175,6 +175,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-026 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | VDR FokI `rs2228570` allele labels were inverted against functional literature: longer 427-AA isoform was labelled F allele and shorter 424-AA isoform labelled f allele. | REMEDIATED (aligned with conventional nomenclature: longer 427-AA isoform is f allele [genotype ff] and shorter 424-AA isoform is F allele [genotype FF], verified by test_kb_build) |
 | P2-027 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | BCO1 `rs12934922` (p.Arg267Ser) interpretation misattributed a 32% reduced carotenoid conversion ratio from `rs7501331` (p.Ala379Val) reported in Leung et al. 2009. | REMEDIATED (removed misattributed 32% figure, accurately qualified single-variant and co-inherited effects with p.Ala379Val, verified by test_kb_build) |
 | P2-028 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | FMO3 `rs2266780` (p.Glu308Gly) and `rs2266782` (p.Glu158Lys) asserted clinically evident mild trimethylaminuria without qualifying by combined cis haplotype and dietary load. | REMEDIATED (qualified metabolic efficiency by combined haplotype context and dietary precursor load, avoiding unsupported single-variant TMAU claims, verified by test_kb_build) |
+| P2-029 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | CBS `rs5742905` (c.833T>C / p.Ile278Thr) asserted homocystinuria disease and carrier phenotypes without qualifying for the common benign cis `844ins68` rescuing insertion. | REMEDIATED (qualified limitation, carrier, and homozygous phenotypes to require excluding the rescuing 844ins68 insertion before concluding CBS deficiency, verified by test_kb_build) |
 
 ---
 
@@ -398,6 +399,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `8bdbc67` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
 | `9d77b30` | P2-025, P2-026 | `fix(kb): correct FUT2 B12 association direction and VDR FokI allele naming (P2-025, P2-026)` |
 | `ee746ec` | P2-027, P2-028 | `fix(kb): correct BCO1 conversion attribution and qualify FMO3 haplotype claims (P2-027, P2-028)` |
+| `16764ff` | P2-029 | `fix(kb): qualify CBS homocystinuria phenotypes by rescuing cis 844ins68 insertion (P2-029)` |
 
 ---
 

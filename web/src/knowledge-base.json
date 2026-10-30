@@ -6738,27 +6738,29 @@
         "1": {
           "category": "Carrier",
           "caveats": [
+            "Frequently occurs in cis with 844ins68 which rescues enzyme activity; carrier status should not be assumed without 844ins68 testing.",
             "Clinical homocystinuria requires biallelic mutations; carriers have normal fasting homocysteine under typical diets."
           ],
           "drug_response": null,
           "magnitude": 1.5,
-          "phenotype": "Carrier for pyridoxine-responsive homocystinuria (CBS p.Ile278Thr, c.833T>C). Unaffected carrier; transmits to 50% of offspring.",
+          "phenotype": "Heterozygous for CBS c.833T>C (p.Ile278Thr). Frequently co-inherited in cis with the rescuing 844ins68 insertion (a benign haplotype producing normal enzyme activity). Definitive carrier assessment requires excluding 844ins68; asymptomatic under typical diets.",
           "repute": "Neutral",
           "significance": "Carrier"
         },
         "2": {
           "category": "Pathogenic",
           "caveats": [
-            "Responsive to pharmacological vitamin B6 (pyridoxine); clinical surveillance by a metabolic geneticist is recommended."
+            "Definitive diagnosis requires ruling out the common cis 844ins68 rescuing insertion and confirming elevated plasma total homocysteine.",
+            "When pathogenic, typically responsive to pharmacological vitamin B6 (pyridoxine); clinical surveillance by a metabolic geneticist is recommended."
           ],
           "drug_response": null,
           "magnitude": 4.0,
-          "phenotype": "Homozygous for CBS p.Ile278Thr: Pyridoxine (vitamin B6)-responsive cystathionine beta-synthase deficiency. Associated with elevated plasma total homocysteine and thromboembolic risk, typically ameliorated by therapeutic vitamin B6 supplementation.",
+          "phenotype": "Homozygous for CBS c.833T>C (p.Ile278Thr). If unlinked to the rescuing 844ins68 insertion, associated with pyridoxine (vitamin B6)-responsive cystathionine beta-synthase deficiency. However, because c.833T>C frequently occurs on the benign [833C; 844ins68] haplotype (which rescues splicing and enzyme activity), definitive diagnosis of CBS deficiency requires excluding the 844ins68 insertion.",
           "repute": "Bad",
           "significance": "Pathogenic"
         }
       },
-      "limitation": "Single-variant test of CBS (c.833T>C, p.Ile278Thr); classic homocystinuria is clinically heterogeneous with over 150 known CBS mutations.",
+      "limitation": "Single-variant test of CBS (c.833T>C, p.Ile278Thr): c.833T>C frequently co-occurs in cis with a benign 68-bp duplication (844ins68) that rescues CBS splicing and enzyme function. Definitive clinical assessment requires excluding the 844ins68 insertion. Classic homocystinuria is also clinically heterogeneous with over 150 known CBS mutations not tested here.",
       "pos_grch37": 44483184,
       "pos_grch38": 43063074,
       "ref": "A",
@@ -7956,7 +7958,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "5a85eceb7c000949ad43cf8d04db1cbd637ac664464e2901cf88755b7c4828fc"
+    "sha256": "be8844f89f3f045f32390ea5dd90bc9e89fcf33772190e2d0429b4de527d2efa"
   },
   "schema_version": 2
 }

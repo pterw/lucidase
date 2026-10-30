@@ -16,12 +16,12 @@
         "uniprot_id": "P55899",
         "alphafold": {
           "global_plddt": 86.4,
-          "folding_status": "Confidently Folded MHC-like α1/α2/α3 Domains",
+          "folding_status": "Confidently Folded MHC-like \u03b11/\u03b12/\u03b13 Domains",
           "domains": [
-            "Domain 1 (α1/α2 domains): residues 23–204 (Length: 182 AAs)",
-            "Domain 2 (α3 domain): residues 205–297 (Length: 93 AAs)"
+            "Domain 1 (\u03b11/\u03b12 domains): residues 23\u2013204 (Length: 182 AAs)",
+            "Domain 2 (\u03b13 domain): residues 205\u2013297 (Length: 93 AAs)"
           ],
-          "flexible_joints": "Transmembrane anchor (residues 307–337)"
+          "flexible_joints": "Transmembrane anchor (residues 307\u2013337)"
         },
         "ensembl": {
           "ensg": "ENSG00000010704",
@@ -56,9 +56,9 @@
           "global_plddt": 84.8,
           "folding_status": "12-Transmembrane ABC Transporter",
           "domains": [
-            "TMD1 & NBD1: residues 1–650 (NBD1 contains deltaF508 at position 508)",
-            "Regulatory (R) Domain: residues 651–843 (intrinsically disordered)",
-            "TMD2 & NBD2: residues 844–1480"
+            "TMD1 & NBD1: residues 1\u2013650 (NBD1 contains deltaF508 at position 508)",
+            "Regulatory (R) Domain: residues 651\u2013843 (intrinsically disordered)",
+            "TMD2 & NBD2: residues 844\u20131480"
           ],
           "flexible_joints": "R domain acts as dynamic phosphorylation-regulated switch"
         },
@@ -79,7 +79,7 @@
       }
     },
     "APOE": {
-      "topic": "Alzheimer’s disease risk",
+      "topic": "Alzheimer\u2019s disease risk",
       "inheritance": {
         "model": "risk_factor",
         "mendelian_disease": false,
@@ -94,10 +94,10 @@
           "global_plddt": 75.5,
           "folding_status": "Structured Core with Flexible Termini",
           "domains": [
-            "Domain 1 (Receptor-binding): residues 40–187 (Length: 148 AAs)",
-            "Domain 2 (Lipid-binding): residues 219–305 (Length: 87 AAs)"
+            "Domain 1 (Receptor-binding): residues 40\u2013187 (Length: 148 AAs)",
+            "Domain 2 (Lipid-binding): residues 219\u2013305 (Length: 87 AAs)"
           ],
-          "flexible_joints": "Residues 188–218 form a hinge region mediating lipid vesicle interaction"
+          "flexible_joints": "Residues 188\u2013218 form a hinge region mediating lipid vesicle interaction"
         },
         "ensembl": {
           "ensg": "ENSG00000130203",
@@ -119,14 +119,14 @@
       "diplotypes": {
         "e3/e3": {
           "category": "Not detected",
-          "significance": "No ε2 or ε4 allele detected",
+          "significance": "No \u03b52 or \u03b54 allele detected",
           "magnitude": 0.0,
           "repute": "Neutral",
-          "phenotype": "APOE ε3/ε3 pattern: no ε2 or ε4 allele detected at rs429358 or rs7412 (the 2 APOE variants tested). This is the most common APOE genotype (~60–65% population frequency) and corresponds to the population-baseline lifetime risk for late-onset Alzheimer's disease, which is not an absence of risk.",
+          "phenotype": "APOE \u03b53/\u03b53 pattern: no \u03b52 or \u03b54 allele detected at rs429358 or rs7412 (the 2 APOE variants tested). This is the most common APOE genotype (~60\u201365% population frequency) and corresponds to the population-baseline lifetime risk for late-onset Alzheimer's disease, which is not an absence of risk.",
           "drug_response": null,
           "caveats": [
-            "Relative risk: 1.0× (Average Population Baseline)",
-            "Lifetime risk: 10–15% lifetime Alzheimer's risk",
+            "Relative risk: 1.0\u00d7 (Average Population Baseline)",
+            "Lifetime risk: 10\u201315% lifetime Alzheimer's risk",
             "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
           ]
         },
@@ -135,11 +135,11 @@
           "significance": "Risk Factor / Carrier",
           "magnitude": 4.2,
           "repute": "Bad",
-          "phenotype": "APOE ε3/ε4 Heterozygous Carrier: One ε4 copy conferring a ~3–4× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease (~20–25% population prevalence); the absolute lifetime risk ~25–35% is a separate figure. Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
+          "phenotype": "APOE \u03b53/\u03b54 Heterozygous Carrier: One \u03b54 copy conferring a ~3\u20134\u00d7 relative risk (versus \u03b53/\u03b53) of late-onset Alzheimer's disease (~20\u201325% population prevalence); the absolute lifetime risk ~25\u201335% is a separate figure. Cardiovascular health, regular aerobic exercise, ApoB management, and quality sleep are effective protective lifestyle modulators.",
           "drug_response": null,
           "caveats": [
-            "Relative risk: 3–4× Increased Risk",
-            "Lifetime risk: 25–35% lifetime Alzheimer's risk",
+            "Relative risk: 3\u20134\u00d7 Increased Risk",
+            "Lifetime risk: 25\u201335% lifetime Alzheimer's risk",
             "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
           ]
         },
@@ -148,11 +148,11 @@
           "significance": "High Risk Factor",
           "magnitude": 6.0,
           "repute": "Bad",
-          "phenotype": "APOE ε4/ε4 Homozygote: Two copies of the ε4 allele (~2% population prevalence). Confers a ~12–15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease, and increased LDL/atherosclerosis susceptibility.",
+          "phenotype": "APOE \u03b54/\u03b54 Homozygote: Two copies of the \u03b54 allele (~2% population prevalence). Confers a ~12\u201315\u00d7 relative risk (versus \u03b53/\u03b53) of late-onset Alzheimer's disease, and increased LDL/atherosclerosis susceptibility.",
           "drug_response": null,
           "caveats": [
-            "Relative risk: 12–15× Markedly Elevated Risk",
-            "Lifetime risk: 50–65% lifetime Alzheimer's risk",
+            "Relative risk: 12\u201315\u00d7 Markedly Elevated Risk",
+            "Lifetime risk: 50\u201365% lifetime Alzheimer's risk",
             "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
           ]
         },
@@ -161,11 +161,11 @@
           "significance": "Protective / Carrier",
           "magnitude": 2.2,
           "repute": "Good",
-          "phenotype": "APOE ε2/ε3 Heterozygous Carrier: One protective ε2 allele and one neutral ε3 allele (~10–15% population prevalence). Associated with ~40–50% lower relative risk (versus ε3/ε3) of Alzheimer's disease (absolute lifetime risk ~5–8% is a separate figure) and lower circulating LDL-cholesterol.",
+          "phenotype": "APOE \u03b52/\u03b53 Heterozygous Carrier: One protective \u03b52 allele and one neutral \u03b53 allele (~10\u201315% population prevalence). Associated with ~40\u201350% lower relative risk (versus \u03b53/\u03b53) of Alzheimer's disease (absolute lifetime risk ~5\u20138% is a separate figure) and lower circulating LDL-cholesterol.",
           "drug_response": null,
           "caveats": [
-            "Relative risk: 0.6× (Protective Effect)",
-            "Lifetime risk: 5–8% lifetime Alzheimer's risk",
+            "Relative risk: 0.6\u00d7 (Protective Effect)",
+            "Lifetime risk: 5\u20138% lifetime Alzheimer's risk",
             "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
           ]
         },
@@ -174,7 +174,7 @@
           "significance": "Protective AD / Lipid Risk",
           "magnitude": 3.5,
           "repute": "Bad",
-          "phenotype": "APOE ε2/ε2 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic susceptibility to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
+          "phenotype": "APOE \u03b52/\u03b52 Homozygote: Protective against Alzheimer's disease, but strongly associated with genetic susceptibility to Type III Hyperlipoproteinemia (familial dysbetalipoproteinemia; requires secondary metabolic triggers).",
           "drug_response": null,
           "caveats": [
             "Relative risk: Protective AD / Type III HLP Risk",
@@ -187,11 +187,11 @@
           "significance": "Risk Factor / Carrier",
           "magnitude": 3.2,
           "repute": "Bad",
-          "phenotype": "APOE ε2/ε4 Double Heterozygote: Carries one protective ε2 allele and one risk-elevating ε4 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between ε3/ε3 and ε3/ε4 (relative risk ~1.5–2× versus ε3/ε3; absolute lifetime risk ~15–20% is a separate figure).",
+          "phenotype": "APOE \u03b52/\u03b54 Double Heterozygote: Carries one protective \u03b52 allele and one risk-elevating \u03b54 allele (~2% population prevalence). Overall Alzheimer's risk is intermediate between \u03b53/\u03b53 and \u03b53/\u03b54 (relative risk ~1.5\u20132\u00d7 versus \u03b53/\u03b53; absolute lifetime risk ~15\u201320% is a separate figure).",
           "drug_response": null,
           "caveats": [
-            "Relative risk: 1.5–2× Intermediate Risk",
-            "Lifetime risk: 15–20% lifetime Alzheimer's risk",
+            "Relative risk: 1.5\u20132\u00d7 Intermediate Risk",
+            "Lifetime risk: 15\u201320% lifetime Alzheimer's risk",
             "Risk estimates are from predominantly European-ancestry cohorts and may not apply equally to other ancestries."
           ]
         }
@@ -213,11 +213,11 @@
           "global_plddt": 82.1,
           "folding_status": "Multi-domain Coagulation Factor",
           "domains": [
-            "A1 Domain: residues 29–335",
-            "A2 Domain: residues 336–684",
-            "A3-C1-C2 Domains: residues 1546–2224"
+            "A1 Domain: residues 29\u2013335",
+            "A2 Domain: residues 336\u2013684",
+            "A3-C1-C2 Domains: residues 1546\u20132224"
           ],
-          "flexible_joints": "B-domain (residues 685–1545) is heavily intrinsically disordered"
+          "flexible_joints": "B-domain (residues 685\u20131545) is heavily intrinsically disordered"
         },
         "ensembl": {
           "ensg": "ENSG00000198734",
@@ -250,9 +250,9 @@
           "global_plddt": 89.2,
           "folding_status": "Serine Protease Proenzyme",
           "domains": [
-            "Gla Domain: residues 44–89",
-            "Kringle Domains: residues 109–284",
-            "Peptidase S1: residues 328–622"
+            "Gla Domain: residues 44\u201389",
+            "Kringle Domains: residues 109\u2013284",
+            "Peptidase S1: residues 328\u2013622"
           ],
           "flexible_joints": "Inter-kringle linker segments"
         },
@@ -286,8 +286,8 @@
           "global_plddt": 91.8,
           "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
           "domains": [
-            "Transmembrane Anchor: residues 1–44",
-            "Catalytic P450 Core: residues 45–490 (Heme-binding Cys435)"
+            "Transmembrane Anchor: residues 1\u201344",
+            "Catalytic P450 Core: residues 45\u2013490 (Heme-binding Cys435)"
           ],
           "flexible_joints": "Substrate recognition loops B-C and F-G"
         },
@@ -322,9 +322,9 @@
           "global_plddt": 88.5,
           "folding_status": "4-Transmembrane Helical Bundle",
           "domains": [
-            "Helices 1–4: residues 10–160 (Active site Cys132-Cys135 redox triad)"
+            "Helices 1\u20134: residues 10\u2013160 (Active site Cys132-Cys135 redox triad)"
           ],
-          "flexible_joints": "ER luminal loop 1 (residues 31–78)"
+          "flexible_joints": "ER luminal loop 1 (residues 31\u201378)"
         },
         "ensembl": {
           "ensg": "ENSG00000167397",
@@ -357,9 +357,9 @@
           "global_plddt": 85.3,
           "folding_status": "12-Transmembrane MFS Superfamily Transporter",
           "domains": [
-            "TMD 1–6 (N-terminal bundle): residues 1–280",
-            "Extracellular Loop 5 (Disulfide stabilized): residues 115–230",
-            "TMD 7–12 (C-terminal bundle): residues 281–691"
+            "TMD 1\u20136 (N-terminal bundle): residues 1\u2013280",
+            "Extracellular Loop 5 (Disulfide stabilized): residues 115\u2013230",
+            "TMD 7\u201312 (C-terminal bundle): residues 281\u2013691"
           ],
           "flexible_joints": "Central rocker-switch substrate translocation cavity"
         },
@@ -394,11 +394,11 @@
           "global_plddt": 88.7,
           "folding_status": "5-Domain Heterotetramer-equivalent Catalytic Dimer",
           "domains": [
-            "Domain I (4Fe-4S Cluster): residues 1–172",
-            "Domain II (FAD-binding): residues 173–286",
-            "Domain III (NADPH-binding): residues 287–524",
-            "Domain IV (Pyrimidine-binding core): residues 525–847",
-            "Domain V (Second 4Fe-4S Cluster): residues 848–1025"
+            "Domain I (4Fe-4S Cluster): residues 1\u2013172",
+            "Domain II (FAD-binding): residues 173\u2013286",
+            "Domain III (NADPH-binding): residues 287\u2013524",
+            "Domain IV (Pyrimidine-binding core): residues 525\u2013847",
+            "Domain V (Second 4Fe-4S Cluster): residues 848\u20131025"
           ],
           "flexible_joints": "Interdomain linkers coordinate electron transfer between flavin centers"
         },
@@ -434,10 +434,10 @@
           "global_plddt": 87.2,
           "folding_status": "Two-Domain Folate-Metabolizing Homodimer",
           "domains": [
-            "N-terminal Catalytic TIM Barrel: residues 1–356",
-            "C-terminal Regulatory SAM-binding Domain: residues 357–656"
+            "N-terminal Catalytic TIM Barrel: residues 1\u2013356",
+            "C-terminal Regulatory SAM-binding Domain: residues 357\u2013656"
           ],
-          "flexible_joints": "Interdomain linker (residues 338–362; Ala222Val alters thermal stability)"
+          "flexible_joints": "Interdomain linker (residues 338\u2013362; Ala222Val alters thermal stability)"
         },
         "ensembl": {
           "ensg": "ENSG00000185010",
@@ -483,9 +483,9 @@
           "global_plddt": 93.4,
           "folding_status": "High-Confidence Homotetrameric Mitochondrial Dehydrogenase",
           "domains": [
-            "NAD-binding Rossmann Fold: residues 1–135",
-            "Catalytic Subunit: residues 136–470",
-            "Oligomerization Interface: residues 471–517 (Glu504Lys disrupts tetramer)"
+            "NAD-binding Rossmann Fold: residues 1\u2013135",
+            "Catalytic Subunit: residues 136\u2013470",
+            "Oligomerization Interface: residues 471\u2013517 (Glu504Lys disrupts tetramer)"
           ],
           "flexible_joints": "Coenzyme-binding entrance loop"
         },
@@ -521,8 +521,8 @@
           "global_plddt": 91.5,
           "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
           "domains": [
-            "Transmembrane Anchor: residues 1–44",
-            "Catalytic P450 Core: residues 45–490 (Heme-binding Cys435)"
+            "Transmembrane Anchor: residues 1\u201344",
+            "Catalytic P450 Core: residues 45\u2013490 (Heme-binding Cys435)"
           ],
           "flexible_joints": "Substrate recognition loops B-C and F-G"
         },
@@ -557,8 +557,8 @@
           "global_plddt": 90.8,
           "folding_status": "High-Confidence Cytochrome P450 Monooxygenase",
           "domains": [
-            "N-terminal Transmembrane Anchor: residues 1–46",
-            "Catalytic P450 Core: residues 47–520 (Heme-binding Cys468; Val433Met in substrate recognition site 6)"
+            "N-terminal Transmembrane Anchor: residues 1\u201346",
+            "Catalytic P450 Core: residues 47\u2013520 (Heme-binding Cys468; Val433Met in substrate recognition site 6)"
           ],
           "flexible_joints": "Membrane-spanning anchor loop and flexible substrate access channel"
         },
@@ -594,10 +594,10 @@
           "global_plddt": 88.4,
           "folding_status": "High-Confidence ABC Half-Transporter Homodimer",
           "domains": [
-            "N-terminal Nucleotide-Binding Domain (NBD): residues 35–300 (Walker A motif at residues 80–88; Gln141Lys is at NBD-TMD interface)",
-            "Transmembrane Domain (TMD): residues 380–655 (6 transmembrane helices forming substrate translocation pore)"
+            "N-terminal Nucleotide-Binding Domain (NBD): residues 35\u2013300 (Walker A motif at residues 80\u201388; Gln141Lys is at NBD-TMD interface)",
+            "Transmembrane Domain (TMD): residues 380\u2013655 (6 transmembrane helices forming substrate translocation pore)"
           ],
-          "flexible_joints": "Intracellular connecting peptide linking NBD and TMD (residues 301–379)"
+          "flexible_joints": "Intracellular connecting peptide linking NBD and TMD (residues 301\u2013379)"
         },
         "ensembl": {
           "ensg": "ENSG00000118777",
@@ -632,10 +632,10 @@
           "global_plddt": 91.5,
           "folding_status": "Alpha/Beta Rossmann Fold Methyltransferase",
           "domains": [
-            "Catalytic core: residues 1–221 (S-COMT) / 51–271 (MB-COMT)",
+            "Catalytic core: residues 1\u2013221 (S-COMT) / 51\u2013271 (MB-COMT)",
             "Active site: SAM-binding pocket and catechol substrate binding site (coordinated with Mg2+)"
           ],
-          "flexible_joints": "N-terminal membrane anchor (residues 1–50 in MB-COMT)"
+          "flexible_joints": "N-terminal membrane anchor (residues 1\u201350 in MB-COMT)"
         },
         "ensembl": {
           "ensg": "ENSG00000093010",
@@ -670,9 +670,9 @@
           "global_plddt": 94.9,
           "folding_status": "Confidently Folded S-Adenosylmethionine-Dependent Methyltransferase",
           "domains": [
-            "Catalytic Methyltransferase Core: residues 15–245 (Length: 231 AAs; binds SAM cofactor and thiopurine substrates; *2 Ala80Pro, *3B Ala154Thr, and *3C Tyr240Cys destabilize tertiary fold)"
+            "Catalytic Methyltransferase Core: residues 15\u2013245 (Length: 231 AAs; binds SAM cofactor and thiopurine substrates; *2 Ala80Pro, *3B Ala154Thr, and *3C Tyr240Cys destabilize tertiary fold)"
           ],
-          "flexible_joints": "Disordered N-terminal extension: residues 1–14"
+          "flexible_joints": "Disordered N-terminal extension: residues 1\u201314"
         },
         "ensembl": {
           "ensg": "ENSG00000137364",
@@ -707,9 +707,9 @@
           "global_plddt": 92.8,
           "folding_status": "High-Confidence Nudix Hydrolase Dimer",
           "domains": [
-            "Nudix Homology Domain: residues 8–150 (Length: 143 AAs; catalytic Nudix box motif at residues 38–59; Arg139Cys disrupts homodimer stability)"
+            "Nudix Homology Domain: residues 8\u2013150 (Length: 143 AAs; catalytic Nudix box motif at residues 38\u201359; Arg139Cys disrupts homodimer stability)"
           ],
-          "flexible_joints": "Flexible C-terminal tail: residues 151–164"
+          "flexible_joints": "Flexible C-terminal tail: residues 151\u2013164"
         },
         "ensembl": {
           "ensg": "ENSG00000136159",
@@ -744,12 +744,12 @@
           "global_plddt": 88.1,
           "folding_status": "Confidently Folded MHC Class I Antigen Recognition Heterodimer",
           "domains": [
-            "Extracellular alpha-1 and alpha-2 Domains: residues 25–205 (forms the antigen recognition cleft where abacavir binds non-covalently in the F-pocket)",
-            "Extracellular alpha-3 Immunoglobulin-like Domain: residues 206–299 (binds beta-2 microglobulin and CD8 co-receptor)",
-            "Transmembrane Region: residues 309–332",
-            "Cytoplasmic Tail: residues 333–362"
+            "Extracellular alpha-1 and alpha-2 Domains: residues 25\u2013205 (forms the antigen recognition cleft where abacavir binds non-covalently in the F-pocket)",
+            "Extracellular alpha-3 Immunoglobulin-like Domain: residues 206\u2013299 (binds beta-2 microglobulin and CD8 co-receptor)",
+            "Transmembrane Region: residues 309\u2013332",
+            "Cytoplasmic Tail: residues 333\u2013362"
           ],
-          "flexible_joints": "Inter-domain linker between alpha-2 and alpha-3 domains (residues 201–205)"
+          "flexible_joints": "Inter-domain linker between alpha-2 and alpha-3 domains (residues 201\u2013205)"
         },
         "ensembl": {
           "ensg": "ENSG00000234745",
@@ -784,12 +784,12 @@
           "global_plddt": 87.1,
           "folding_status": "Confidently Folded MHC Class I Antigen Presenting Core",
           "domains": [
-            "alpha-1 and alpha-2 Antigen Binding Cleft: residues 25–205 (binds antigenic self/foreign peptides and interacts with carbamazepine)",
-            "alpha-3 Domain: residues 206–298 (immunoglobulin-like fold binding beta-2M)",
-            "Transmembrane Domain: residues 309–332",
-            "Cytoplasmic Domain: residues 333–365"
+            "alpha-1 and alpha-2 Antigen Binding Cleft: residues 25\u2013205 (binds antigenic self/foreign peptides and interacts with carbamazepine)",
+            "alpha-3 Domain: residues 206\u2013298 (immunoglobulin-like fold binding beta-2M)",
+            "Transmembrane Domain: residues 309\u2013332",
+            "Cytoplasmic Domain: residues 333\u2013365"
           ],
-          "flexible_joints": "Flexible connecting loop between alpha-2 and alpha-3 (residues 202–206)"
+          "flexible_joints": "Flexible connecting loop between alpha-2 and alpha-3 (residues 202\u2013206)"
         },
         "ensembl": {
           "ensg": "ENSG00000206503",
@@ -824,10 +824,10 @@
           "global_plddt": 59.4,
           "folding_status": "Intrinsically Disordered MHC-Linked Regulatory Protein",
           "domains": [
-            "N-terminal Putative Structured Segment: residues 1–45 (contains p.Arg37His / rs9263726 missense site)",
-            "Disordered C-terminal Region: residues 46–152 (highly flexible non-globular segment)"
+            "N-terminal Putative Structured Segment: residues 1\u201345 (contains p.Arg37His / rs9263726 missense site)",
+            "Disordered C-terminal Region: residues 46\u2013152 (highly flexible non-globular segment)"
           ],
-          "flexible_joints": "Extended flexible region (residues 46–152)"
+          "flexible_joints": "Extended flexible region (residues 46\u2013152)"
         },
         "ensembl": {
           "ensg": "ENSG00000204540",
@@ -862,10 +862,10 @@
           "global_plddt": 93.4,
           "folding_status": "Confidently Folded Alpha/Beta Hydrolase Core",
           "domains": [
-            "Catalytic α/β hydrolase fold: residues 29–532 (catalytic triad Ser226, Glu353, His466)",
-            "Tetramerization C-terminal domain: residues 533–602"
+            "Catalytic \u03b1/\u03b2 hydrolase fold: residues 29\u2013532 (catalytic triad Ser226, Glu353, His466)",
+            "Tetramerization C-terminal domain: residues 533\u2013602"
           ],
-          "flexible_joints": "N-terminal signal peptide (residues 1–28) cleaved in mature enzyme"
+          "flexible_joints": "N-terminal signal peptide (residues 1\u201328) cleaved in mature enzyme"
         },
         "ensembl": {
           "ensg": "ENSG00000114200",
@@ -898,10 +898,10 @@
           "global_plddt": 92.8,
           "folding_status": "Confidently Folded Rossmann Fold and Dimer Interface",
           "domains": [
-            "N-terminal Rossmann-fold NADP+ binding domain: residues 36–200",
-            "C-terminal catalytic and dimer interface domain: residues 201–515"
+            "N-terminal Rossmann-fold NADP+ binding domain: residues 36\u2013200",
+            "C-terminal catalytic and dimer interface domain: residues 201\u2013515"
           ],
-          "flexible_joints": "N-terminal peptide residues 1–35"
+          "flexible_joints": "N-terminal peptide residues 1\u201335"
         },
         "ensembl": {
           "ensg": "ENSG00000160211",
@@ -935,8 +935,8 @@
           "global_plddt": 91.2,
           "folding_status": "High-Confidence Cytochrome P450 Monooxygenase Fold",
           "domains": [
-            "Transmembrane anchor: residues 1–33",
-            "Catalytic P450 monooxygenase core: residues 34–497 (Heme-binding loop with conserved Cys443)"
+            "Transmembrane anchor: residues 1\u201333",
+            "Catalytic P450 monooxygenase core: residues 34\u2013497 (Heme-binding loop with conserved Cys443)"
           ],
           "flexible_joints": "Substrate recognition sites (SRS loops)"
         },
@@ -1045,7 +1045,7 @@
           "significance": "Not detected",
           "magnitude": 0.0,
           "repute": "Neutral",
-          "phenotype": "No APOE ε4-determining (rs429358 C) allele detected at this position. Combine with rs7412 to assign the APOE diplotype.",
+          "phenotype": "No APOE \u03b54-determining (rs429358 C) allele detected at this position. Combine with rs7412 to assign the APOE diplotype.",
           "drug_response": null,
           "caveats": []
         },
@@ -1054,7 +1054,7 @@
           "significance": "Carrier / Risk Factor",
           "magnitude": 3.8,
           "repute": "Bad",
-          "phenotype": "APOE ε4 carrier (heterozygote ε3/ε4 or ε2/ε4): ~3-4× elevated risk of late-onset Alzheimer's disease.",
+          "phenotype": "APOE \u03b54 carrier (heterozygote \u03b53/\u03b54 or \u03b52/\u03b54): ~3-4\u00d7 elevated risk of late-onset Alzheimer's disease.",
           "drug_response": null,
           "caveats": []
         },
@@ -1063,7 +1063,7 @@
           "significance": "High Risk Factor",
           "magnitude": 5,
           "repute": "Bad",
-          "phenotype": "APOE ε4/ε4 homozygote: ~12-15× relative risk (versus ε3/ε3) of late-onset Alzheimer's disease.",
+          "phenotype": "APOE \u03b54/\u03b54 homozygote: ~12-15\u00d7 relative risk (versus \u03b53/\u03b53) of late-onset Alzheimer's disease.",
           "drug_response": null,
           "caveats": []
         }
@@ -1125,7 +1125,7 @@
           "significance": "Not detected",
           "magnitude": 0.0,
           "repute": "Neutral",
-          "phenotype": "No APOE ε2-determining (rs7412 T) allele detected at this position. Combine with rs429358 to assign the APOE diplotype.",
+          "phenotype": "No APOE \u03b52-determining (rs7412 T) allele detected at this position. Combine with rs429358 to assign the APOE diplotype.",
           "drug_response": null,
           "caveats": []
         },
@@ -1134,7 +1134,7 @@
           "significance": "Protective / Carrier",
           "magnitude": 2,
           "repute": "Good",
-          "phenotype": "APOE ε2 carrier: modestly lower LDL cholesterol and slightly reduced Alzheimer's risk.",
+          "phenotype": "APOE \u03b52 carrier: modestly lower LDL cholesterol and slightly reduced Alzheimer's risk.",
           "drug_response": null,
           "caveats": []
         },
@@ -1143,7 +1143,7 @@
           "significance": "Protective AD / Lipid Risk",
           "magnitude": 3.5,
           "repute": "Bad",
-          "phenotype": "APOE ε2/ε2: Associated with Type III Hyperlipoproteinemia (dysbetalipoproteinemia), but protective against Alzheimer's.",
+          "phenotype": "APOE \u03b52/\u03b52: Associated with Type III Hyperlipoproteinemia (dysbetalipoproteinemia), but protective against Alzheimer's.",
           "drug_response": null,
           "caveats": []
         }
@@ -1359,7 +1359,7 @@
           "significance": "Pathogenic",
           "magnitude": 4,
           "repute": "Bad",
-          "phenotype": "Factor V Leiden heterozygote: 4-8× increased risk of venous thromboembolism. Caution with oral contraceptives or prolonged immobility.",
+          "phenotype": "Factor V Leiden heterozygote: 4-8\u00d7 increased risk of venous thromboembolism. Caution with oral contraceptives or prolonged immobility.",
           "drug_response": null,
           "caveats": []
         },
@@ -1368,7 +1368,7 @@
           "significance": "Pathogenic",
           "magnitude": 6,
           "repute": "Bad",
-          "phenotype": "Factor V Leiden homozygote: 50-80× markedly increased risk of venous thromboembolism (VTE/DVT/PE).",
+          "phenotype": "Factor V Leiden homozygote: 50-80\u00d7 markedly increased risk of venous thromboembolism (VTE/DVT/PE).",
           "drug_response": null,
           "caveats": []
         }
@@ -1436,7 +1436,7 @@
           "significance": "Pathogenic",
           "magnitude": 3.5,
           "repute": "Bad",
-          "phenotype": "Prothrombin G20210A heterozygote: 2-3× increased risk of venous blood clots.",
+          "phenotype": "Prothrombin G20210A heterozygote: 2-3\u00d7 increased risk of venous blood clots.",
           "drug_response": null,
           "caveats": []
         },
@@ -1445,7 +1445,7 @@
           "significance": "Pathogenic",
           "magnitude": 5.5,
           "repute": "Bad",
-          "phenotype": "Prothrombin G20210A homozygote: ~10× increased risk of thrombosis.",
+          "phenotype": "Prothrombin G20210A homozygote: ~10\u00d7 increased risk of thrombosis.",
           "drug_response": null,
           "caveats": []
         }
@@ -1516,7 +1516,7 @@
           "significance": "Pathogenic (Carrier)",
           "magnitude": 2.5,
           "repute": "Good",
-          "phenotype": "Cystic Fibrosis Carrier (ΔF508 heterozygote). Asymptomatic carrier; 1 in 4 risk with carrier partner.",
+          "phenotype": "Cystic Fibrosis Carrier (\u0394F508 heterozygote). Asymptomatic carrier; 1 in 4 risk with carrier partner.",
           "drug_response": null,
           "caveats": []
         },
@@ -1525,7 +1525,7 @@
           "significance": "Pathogenic",
           "magnitude": 7,
           "repute": "Bad",
-          "phenotype": "Cystic Fibrosis (ΔF508 homozygote): Classic severe cystic fibrosis affecting lungs and digestive system.",
+          "phenotype": "Cystic Fibrosis (\u0394F508 homozygote): Classic severe cystic fibrosis affecting lungs and digestive system.",
           "drug_response": null,
           "caveats": []
         }
@@ -1757,8 +1757,8 @@
           "significance": "Drug Response",
           "magnitude": 3,
           "repute": "Bad",
-          "phenotype": "Intermediate SLCO1B1 function: 4.5× elevated risk of simvastatin-induced myopathy.",
-          "drug_response": "Simvastatin: Moderate Myopathy Risk (Limit dose to ≤20mg)",
+          "phenotype": "Intermediate SLCO1B1 function: 4.5\u00d7 elevated risk of simvastatin-induced myopathy.",
+          "drug_response": "Simvastatin: Moderate Myopathy Risk (Limit dose to \u226420mg)",
           "caveats": []
         },
         "2": {
@@ -1766,7 +1766,7 @@
           "significance": "Drug Response",
           "magnitude": 4.5,
           "repute": "Bad",
-          "phenotype": "Poor SLCO1B1 transporter function (521C/C): ~17× higher risk of simvastatin-induced myopathy/rhabdomyolysis.",
+          "phenotype": "Poor SLCO1B1 transporter function (521C/C): ~17\u00d7 higher risk of simvastatin-induced myopathy/rhabdomyolysis.",
           "drug_response": "Simvastatin: High Myopathy Risk (Prescribe rosuvastatin/pravastatin)",
           "caveats": []
         }
@@ -1839,8 +1839,8 @@
           "significance": "Drug Response",
           "magnitude": 5,
           "repute": "Bad",
-          "phenotype": "One DPYD*2A (rs3918290) allele detected. This variant is associated with a high risk of life-threatening neutropenia and mucositis on fluoropyrimidines, and CPIC recommends a ≥50% dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
-          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
+          "phenotype": "One DPYD*2A (rs3918290) allele detected. This variant is associated with a high risk of life-threatening neutropenia and mucositis on fluoropyrimidines, and CPIC recommends a \u226550% dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by \u226550%",
           "caveats": []
         },
         "2": {
@@ -2325,7 +2325,7 @@
           "significance": "Drug Response",
           "magnitude": 3.0,
           "repute": "Bad",
-          "phenotype": "One CYP2C9*2 (rs1799853) allele detected. This missense variant (p.Arg144Cys) is associated with ~30–40% reduced CYP2C9 enzymatic clearance. Warfarin dose requirements are typically lower, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "phenotype": "One CYP2C9*2 (rs1799853) allele detected. This missense variant (p.Arg144Cys) is associated with ~30\u201340% reduced CYP2C9 enzymatic clearance. Warfarin dose requirements are typically lower, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
           "drug_response": "Warfarin: Reduced clearance (one *2 allele; lower initial dose typically indicated)",
           "caveats": []
         },
@@ -2407,7 +2407,7 @@
           "significance": "Drug Response",
           "magnitude": 3.5,
           "repute": "Bad",
-          "phenotype": "One CYP2C9*3 (rs1057910) allele detected. This missense variant (p.Ile359Leu) confers a severe (~80–90%) reduction in substrate clearance. Lower initial warfarin doses and increased monitoring are indicated, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
+          "phenotype": "One CYP2C9*3 (rs1057910) allele detected. This missense variant (p.Ile359Leu) confers a severe (~80\u201390%) reduction in substrate clearance. Lower initial warfarin doses and increased monitoring are indicated, but a metabolizer status needs CYP2C9 star-allele diplotyping, which this single-variant test does not do.",
           "drug_response": "Warfarin: Markedly reduced clearance (one *3 allele; conservative starting dose indicated)",
           "caveats": []
         },
@@ -2489,8 +2489,8 @@
           "significance": "Drug Response",
           "magnitude": 5,
           "repute": "Bad",
-          "phenotype": "One DPYD*13 (rs55886062) allele detected. This complete loss-of-function variant is associated with a high risk of life-threatening toxicity on fluoropyrimidines, and CPIC recommends a ≥50% starting dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
-          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by ≥50%",
+          "phenotype": "One DPYD*13 (rs55886062) allele detected. This complete loss-of-function variant is associated with a high risk of life-threatening toxicity on fluoropyrimidines, and CPIC recommends a \u226550% starting dose reduction for carriers of one non-functional allele. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends reducing the starting dose by \u226550%",
           "caveats": []
         },
         "2": {
@@ -2582,8 +2582,8 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 6.0,
           "repute": "Bad",
-          "phenotype": "Two DPYD c.2846A>T (rs67376798) alleles detected. Homozygotes have significantly reduced DPD enzyme activity (activity score 1.0) and high risk of fluoropyrimidine toxicity; CPIC recommends a ≥50% dose reduction or alternative therapy based on clinical judgment. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
-          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a ≥50% starting dose reduction or alternative therapy",
+          "phenotype": "Two DPYD c.2846A>T (rs67376798) alleles detected. Homozygotes have significantly reduced DPD enzyme activity (activity score 1.0) and high risk of fluoropyrimidine toxicity; CPIC recommends a \u226550% dose reduction or alternative therapy based on clinical judgment. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a \u226550% starting dose reduction or alternative therapy",
           "caveats": []
         }
       },
@@ -2666,8 +2666,8 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 6.0,
           "repute": "Bad",
-          "phenotype": "Two DPYD c.1236G>A (rs56038477, HapB3 tag) alleles detected. Homozygosity for HapB3 confers significantly reduced DPD enzyme activity and high risk of severe fluoropyrimidine toxicity; CPIC recommends a ≥50% dose reduction or alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
-          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a ≥50% starting dose reduction or alternative therapy",
+          "phenotype": "Two DPYD c.1236G>A (rs56038477, HapB3 tag) alleles detected. Homozygosity for HapB3 confers significantly reduced DPD enzyme activity and high risk of severe fluoropyrimidine toxicity; CPIC recommends a \u226550% dose reduction or alternative therapy. DPD activity also depends on other DPYD variants that this array does not test, so a DPD activity status cannot be inferred from this one variant.",
+          "drug_response": "5-Fluorouracil / Capecitabine: CPIC recommends a \u226550% starting dose reduction or alternative therapy",
           "caveats": []
         }
       },
@@ -3389,7 +3389,7 @@
       "alt": "G",
       "allele_codes": null,
       "role": "standard",
-      "limitation": "Single-variant tag test: rs2395029 (c.5534+294T>G in HCP5) is an array surrogate in strong linkage disequilibrium with HLA-B*57:01 (near 100% negative predictive value in European and Hispanic ancestries, ~90–95% in African ancestry). This assay does not substitute for sequence-based HLA typing.",
+      "limitation": "Single-variant tag test: rs2395029 (c.5534+294T>G in HCP5) is an array surrogate in strong linkage disequilibrium with HLA-B*57:01 (near 100% negative predictive value in European and Hispanic ancestries, ~90\u201395% in African ancestry). This assay does not substitute for sequence-based HLA typing.",
       "tier": {
         "rationale": "CPIC Guideline for HLA-B and Abacavir (Level A); FDA boxed warning mandates HLA-B*57:01 screening prior to abacavir initiation.",
         "citation": "CPIC guideline for HLA-B and abacavir, 2014 update (Martin et al., Clinical Pharmacology and Therapeutics)"
@@ -3409,7 +3409,7 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 8.5,
           "repute": "Bad",
-          "phenotype": "One HLA-B*57:01 tag (rs2395029 G) allele detected. Carriage of HLA-B*57:01 is associated with a 45–55% absolute risk of life-threatening abacavir hypersensitivity reaction (fever, severe rash, constitutional symptoms, gastrointestinal and respiratory distress). Rechallenge after reaction can be fatal. CPIC and FDA strongly mandate abacavir contraindication.",
+          "phenotype": "One HLA-B*57:01 tag (rs2395029 G) allele detected. Carriage of HLA-B*57:01 is associated with a 45\u201355% absolute risk of life-threatening abacavir hypersensitivity reaction (fever, severe rash, constitutional symptoms, gastrointestinal and respiratory distress). Rechallenge after reaction can be fatal. CPIC and FDA strongly mandate abacavir contraindication.",
           "drug_response": "Abacavir: Contraindicated. Use an alternative antiretroviral regimen not containing abacavir.",
           "caveats": []
         },
@@ -3581,7 +3581,7 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 8.0,
           "repute": "Bad",
-          "phenotype": "One HLA-B*58:01 tag (rs9263726 A) allele detected. Highly elevated risk (OR ~80–100) for allopurinol-induced severe cutaneous adverse reactions (SCAR), including Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), and DRESS. High mortality rate (up to 25%). CPIC and ACR guidelines recommend allopurinol is contraindicated; consider alternative urate-lowering therapy (e.g., febuxostat).",
+          "phenotype": "One HLA-B*58:01 tag (rs9263726 A) allele detected. Highly elevated risk (OR ~80\u2013100) for allopurinol-induced severe cutaneous adverse reactions (SCAR), including Stevens-Johnson Syndrome (SJS), Toxic Epidermal Necrolysis (TEN), and DRESS. High mortality rate (up to 25%). CPIC and ACR guidelines recommend allopurinol is contraindicated; consider alternative urate-lowering therapy (e.g., febuxostat).",
           "drug_response": "Allopurinol: Contraindicated. Consider non-allopurinol urate-lowering alternatives such as febuxostat.",
           "caveats": []
         },
@@ -3840,7 +3840,7 @@
           "significance": "Drug Response (Critical)",
           "magnitude": 5.0,
           "repute": "Bad",
-          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.202G>A (p.Val68Met, A-). Class III G6PD deficiency (~10–20% residual activity); high risk of acute hemolytic anemia triggered by rasburicase, primaquine, dapsone, or fava beans.",
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.202G>A (p.Val68Met, A-). Class III G6PD deficiency (~10\u201320% residual activity); high risk of acute hemolytic anemia triggered by rasburicase, primaquine, dapsone, or fava beans.",
           "drug_response": "Rasburicase: Contraindicated (severe hemolytic anemia risk). Primaquine/Tafenoquine: Contraindicated or dose-adjusted. Avoid dapsone, nitrofurantoin, sulfamethoxazole.",
           "caveats": []
         }
@@ -4784,7 +4784,7 @@
       "alt": "G",
       "allele_codes": null,
       "role": "standard",
-      "limitation": "Single-variant test of CBS (c.833T>C, p.Ile278Thr); classic homocystinuria is clinically heterogeneous with over 150 known CBS mutations.",
+      "limitation": "Single-variant test of CBS (c.833T>C, p.Ile278Thr): c.833T>C frequently co-occurs in cis with a benign 68-bp duplication (844ins68) that rescues CBS splicing and enzyme function. Definitive clinical assessment requires excluding the 844ins68 insertion. Classic homocystinuria is also clinically heterogeneous with over 150 known CBS mutations not tested here.",
       "interpretations": {
         "0": {
           "category": "Not detected",
@@ -4802,9 +4802,10 @@
           "significance": "Carrier",
           "magnitude": 1.5,
           "repute": "Neutral",
-          "phenotype": "Carrier for pyridoxine-responsive homocystinuria (CBS p.Ile278Thr, c.833T>C). Unaffected carrier; transmits to 50% of offspring.",
+          "phenotype": "Heterozygous for CBS c.833T>C (p.Ile278Thr). Frequently co-inherited in cis with the rescuing 844ins68 insertion (a benign haplotype producing normal enzyme activity). Definitive carrier assessment requires excluding 844ins68; asymptomatic under typical diets.",
           "drug_response": null,
           "caveats": [
+            "Frequently occurs in cis with 844ins68 which rescues enzyme activity; carrier status should not be assumed without 844ins68 testing.",
             "Clinical homocystinuria requires biallelic mutations; carriers have normal fasting homocysteine under typical diets."
           ]
         },
@@ -4813,10 +4814,11 @@
           "significance": "Pathogenic",
           "magnitude": 4.0,
           "repute": "Bad",
-          "phenotype": "Homozygous for CBS p.Ile278Thr: Pyridoxine (vitamin B6)-responsive cystathionine beta-synthase deficiency. Associated with elevated plasma total homocysteine and thromboembolic risk, typically ameliorated by therapeutic vitamin B6 supplementation.",
+          "phenotype": "Homozygous for CBS c.833T>C (p.Ile278Thr). If unlinked to the rescuing 844ins68 insertion, associated with pyridoxine (vitamin B6)-responsive cystathionine beta-synthase deficiency. However, because c.833T>C frequently occurs on the benign [833C; 844ins68] haplotype (which rescues splicing and enzyme activity), definitive diagnosis of CBS deficiency requires excluding the 844ins68 insertion.",
           "drug_response": null,
           "caveats": [
-            "Responsive to pharmacological vitamin B6 (pyridoxine); clinical surveillance by a metabolic geneticist is recommended."
+            "Definitive diagnosis requires ruling out the common cis 844ins68 rescuing insertion and confirming elevated plasma total homocysteine.",
+            "When pathogenic, typically responsive to pharmacological vitamin B6 (pyridoxine); clinical surveillance by a metabolic geneticist is recommended."
           ]
         }
       },

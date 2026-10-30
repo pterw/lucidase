@@ -1323,3 +1323,18 @@ def test_fmo3_phenotypes_qualify_activity_by_haplotype_pairing(built):
 
     p2_158 = built['loci']['rs2266782']['interpretations']['2']['phenotype']
     assert 'p.Glu308Gly' in p2_158
+
+def test_cbs_phenotypes_qualify_844ins68_rescuing_insertion(built):
+    """P2-029: CBS c.833T>C qualifies homocystinuria claims by cis 844ins68 rescuing insertion."""
+    limitation = built["loci"]["rs5742905"]["limitation"]
+    p1 = built["loci"]["rs5742905"]["interpretations"]["1"]["phenotype"]
+    c1 = built["loci"]["rs5742905"]["interpretations"]["1"]["caveats"]
+    p2 = built["loci"]["rs5742905"]["interpretations"]["2"]["phenotype"]
+    c2 = built["loci"]["rs5742905"]["interpretations"]["2"]["caveats"]
+
+    assert "844ins68" in limitation
+    assert "844ins68" in p1
+    assert any("844ins68" in c for c in c1)
+    assert "844ins68" in p2
+    assert any("844ins68" in c for c in c2)
+
