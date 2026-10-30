@@ -1281,3 +1281,21 @@ def test_cyp2d6_drug_responses_withhold_affirmative_metabolizer_phenotype(built)
             resp = interps[count]["drug_response"] or ""
             assert "metabolizer phenotype" not in resp.lower()
             assert "diplotyping" in resp
+
+def test_fut2_phenotype_reports_higher_total_b12_without_asserting_increased_bioavailability(built):
+    """P2-025: FUT2 non-secretor genotype reports higher circulating B12 (haptocorrin)."""
+    p2 = built["loci"]["rs601338"]["interpretations"]["2"]["phenotype"]
+    assert "higher total circulating vitamin B12" in p2
+    assert "lower" not in p2.lower()
+    assert "transcobalamin" in p2
+
+
+def test_vdr_foki_phenotype_labels_match_conventional_f_and_F(built):
+    """P2-026: VDR FokI assigns 'f' to longer 427-AA isoform and 'F' to shorter 424-AA isoform."""
+    p0 = built["loci"]["rs2228570"]["interpretations"]["0"]["phenotype"]
+    p1 = built["loci"]["rs2228570"]["interpretations"]["1"]["phenotype"]
+    p2 = built["loci"]["rs2228570"]["interpretations"]["2"]["phenotype"]
+
+    assert "427-amino-acid" in p0 and "f allele" in p0 and "ff" in p0
+    assert "427-AA (f)" in p1 and "424-AA (F)" in p1 and "Ff" in p1
+    assert "424-amino-acid" in p2 and "F allele" in p2 and "FF" in p2

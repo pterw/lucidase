@@ -4311,7 +4311,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No VDR FokI G allele detected at this position (homozygous A/A). Encodes the longer 427-amino-acid vitamin D receptor isoform (F allele).",
+          "phenotype": "No VDR FokI G allele detected at this position (homozygous A/A). Encodes the longer 427-amino-acid vitamin D receptor isoform (f allele, genotype ff).",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -4320,7 +4320,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 1.0,
-          "phenotype": "Heterozygous for VDR FokI (A/G): Expresses both the 427-AA and shorter 424-AA vitamin D receptor isoforms. Intermediate transactivation activity.",
+          "phenotype": "Heterozygous for VDR FokI (A/G, genotype Ff): Expresses both the longer 427-AA (f) and shorter 424-AA (F) vitamin D receptor isoforms. Intermediate transactivation activity.",
           "repute": "Neutral",
           "significance": "Carrier"
         },
@@ -4329,7 +4329,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 1.0,
-          "phenotype": "Homozygous for VDR FokI (G/G): Encodes the shorter 424-amino-acid vitamin D receptor isoform (f allele) with altered transactivation efficiency.",
+          "phenotype": "Homozygous for VDR FokI (G/G, genotype FF): Encodes the shorter 424-amino-acid vitamin D receptor isoform (F allele) with altered transactivation efficiency.",
           "repute": "Neutral",
           "significance": "Trait"
         }
@@ -6874,7 +6874,7 @@
           "caveats": [],
           "drug_response": null,
           "magnitude": 2.0,
-          "phenotype": "FUT2 non-secretor (se/se): Lacks ABH blood group antigens in mucosal secretions and saliva. Strong resistance to common norovirus strains (GII.4); associated with altered gut microbiome composition and lower median serum vitamin B12 levels.",
+          "phenotype": "FUT2 non-secretor (se/se): Lacks ABH blood group antigens in mucosal secretions and saliva. Strong resistance to common norovirus strains (GII.4); associated with altered gut microbiome composition and higher total circulating vitamin B12 (holo-haptocorrin, without altering bioavailable transcobalamin-bound B12).",
           "repute": "Neutral",
           "significance": "Trait"
         }
@@ -7954,7 +7954,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "216c1ab713c5463851f1c8d7bd7b3463f2cad917b64a959d2b30832a87dbe67f"
+    "sha256": "35f5c9f4bae26a43eb720fa6584b5f5b28902a62c0cf2eb2dfb02956720b7228"
   },
   "schema_version": 2
 }
