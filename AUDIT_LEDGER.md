@@ -140,6 +140,8 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-098 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | Single-variant CYP2D6 interpretations (`rs28371725`, `rs1065852`) affirmatively assigned patient-level metabolizer phenotype ("Intermediate metabolizer phenotype") without diplotyping and CNV detection. | REMEDIATED (withheld affirmative metabolizer phenotypes, made drug responses allele-specific and conditional on diplotyping/CNV, verified by test_kb_build) |
 | P1-099 | `web/src/karyogram-page.js` | `exportKaryogramJpeg` substituted an independent `<style>` definition altering typography (generic monospace vs `input-mono`) and halo opacity (0.15 vs 0.1) instead of capturing live resolved styles. | REMEDIATED (captured resolved styles across SVG elements directly from live DOM, preserving design-system tokens and theme colors) |
 | P1-100 | `web/src/core/karyogram.js`, `web/src/view-model.js`, `web/src/karyogram-page.js`, `web/tests/karyogram.test.mjs`, `web/tests/view-model.test.mjs` | Domain function `rollUpGeneResult` hardcoded English display labels ("Found", "Unclear", etc.), creating a second source of truth outside `RESULT_WORDS`. | REMEDIATED (extracted label formatting to display-model `geneResultLabel` in `view-model.js` backed by `RESULT_WORDS`, keeping domain roll-up purely structural) |
+| P1-101 | `web/index.html`, `web/src/app.js`, `web/src/styles.css` | Scaling from 14 to 55 checks caused severe vertical scroll fatigue; users lacked a sticky toolbar to switch views (Cards / Table), filter findings by status, or quickly jump to report sections. | REMEDIATED (added sticky results toolbar with segmented Cards/Table switcher, status filter pills with live counts, and category jump anchors) |
+| P1-102 | `web/index.html`, `web/src/app.js`, `web/src/styles.css` | Inspecting records across 55 checks in the drawer required repeated closing, manual scrolling, and re-opening; no sequential navigation existed. | REMEDIATED (added sequential Previous/Next drawer navigation controls, active record counter e.g. "2 of 54", keyboard arrow shortcuts, and card auto-scroll into view) |
 
 ---
 
@@ -176,6 +178,8 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-027 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | BCO1 `rs12934922` (p.Arg267Ser) interpretation misattributed a 32% reduced carotenoid conversion ratio from `rs7501331` (p.Ala379Val) reported in Leung et al. 2009. | REMEDIATED (removed misattributed 32% figure, accurately qualified single-variant and co-inherited effects with p.Ala379Val, verified by test_kb_build) |
 | P2-028 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | FMO3 `rs2266780` (p.Glu308Gly) and `rs2266782` (p.Glu158Lys) asserted clinically evident mild trimethylaminuria without qualifying by combined cis haplotype and dietary load. | REMEDIATED (qualified metabolic efficiency by combined haplotype context and dietary precursor load, avoiding unsupported single-variant TMAU claims, verified by test_kb_build) |
 | P2-029 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | CBS `rs5742905` (c.833T>C / p.Ile278Thr) asserted homocystinuria disease and carrier phenotypes without qualifying for the common benign cis `844ins68` rescuing insertion. | REMEDIATED (qualified limitation, carrier, and homozygous phenotypes to require excluding the rescuing 844ins68 insertion before concluding CBS deficiency, verified by test_kb_build) |
+| P2-030 | `web/src/app.js`, `web/src/styles.css` | Multi-locus genes with multiple checks (e.g. 4 DPYD or 3 G6PD checks) shared identical gene card titles, making findings ambiguous; section headers lacked check and found count summaries. | REMEDIATED (disambiguated finding card headers with locus markers, added section summary pills displaying check count and found count) |
+| P2-031 | `web/index.html`, `web/src/app.js`, `web/src/styles.css` | Pairwise co-occurring allele cards across unlinked loci repeated 6 large sprawling cards in multi-locus section; karyogram SVG lacked smooth mobile horizontal touch panning; table ClinVar review column wrapped awkwardly. | REMEDIATED (condensed multi-locus co-occurrence cards into compact structured rows, added webkit and touch-action pan-x scrolling to karyogram figures, and enforced whitespace-nowrap on table ClinVar review) |
 
 ---
 
@@ -401,6 +405,10 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `ee746ec` | P2-027, P2-028 | `fix(kb): correct BCO1 conversion attribution and qualify FMO3 haplotype claims (P2-027, P2-028)` |
 | `568bc56` | P2-029 | `fix(kb): qualify CBS homocystinuria phenotypes by rescuing cis 844ins68 insertion (P2-029)` |
 | `c857aba` | Phase 5 (Hereditary) | `feat(kb): add Phase 5 hereditary disease and secondary findings expansions (HFE S65C, F13A1, BRCA1, BRCA2, SERPINA1)` |
+| `70f775a` | P1-101 | `feat(web): add sticky results toolbar with view switcher and status filters (P1-101)` |
+| `fc1d25e` | P1-102 | `feat(web): add sequential navigation and counter to inspector drawer (P1-102)` |
+| `eea5192` | P2-030 | `feat(web): disambiguate multi-locus gene card headers and add category summary pills (P2-030)` |
+| `73861b0` | P2-031 | `feat(web): compact multi-locus co-occurrence cards and ensure mobile karyogram scroll (P2-031)` |
 
 ---
 
