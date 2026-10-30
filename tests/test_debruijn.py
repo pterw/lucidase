@@ -19,15 +19,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-import graph_core as gc  # noqa: E402
-from assembly import (  # noqa: E402
+import debruijn.graph_core as gc  # noqa: E402
+from debruijn.assembly import (  # noqa: E402
     assembly_metrics,
     build_assembly_graph,
     extract_contigs,
     simplify_graph,
     write_gfa,
 )
-from bio_engine import evaluate_assembly_against_reference, revcomp  # noqa: E402
+from debruijn.bio_engine import evaluate_assembly_against_reference, revcomp  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ def test_trail_cover_self_loop_and_parallel_edges():
 # G-F1: the dead --selftest flag is gone
 # ---------------------------------------------------------------------------
 def test_cli_help_does_not_list_selftest_and_module_imports(capsys):
-    import debruijn_explorer as d  # imports cleanly
+    import debruijn.debruijn_explorer as d  # imports cleanly
 
     with pytest.raises(SystemExit) as exc:
         d.parse_args(["--help"])
@@ -123,7 +123,7 @@ def test_cli_help_does_not_list_selftest_and_module_imports(capsys):
 
 
 def test_explorer_has_no_selftest_entry_point():
-    import debruijn_explorer as d
+    import debruijn.debruijn_explorer as d
 
     assert not hasattr(d, "selftest")
     with pytest.raises(SystemExit):
@@ -272,7 +272,7 @@ def test_assembly_graph_coverage_is_per_distinct_kmer():
 # G-F7: one default k
 # ---------------------------------------------------------------------------
 def test_default_k_is_shared_by_assemble_and_cli():
-    import debruijn_explorer as d
+    import debruijn.debruijn_explorer as d
 
     assert isinstance(d.DEFAULT_K, int)
     assert inspect.signature(d.assemble).parameters["k"].default == d.DEFAULT_K
@@ -383,9 +383,9 @@ def test_gfa_forward_only_input_keeps_plus_links(tmp_path):
 # S4-F3 follow-up: the CLI prints the GUI's labels, rules and thresholds
 # ---------------------------------------------------------------------------
 def test_cli_prints_the_same_binning_and_identity_labels_as_the_gui(capsys):
-    import debruijn_explorer as d
-    from bio_engine import alignment_basis_text
-    from ml_engine import binning_caveat_lines
+    import debruijn.debruijn_explorer as d
+    from debruijn.bio_engine import alignment_basis_text
+    from debruijn.ml_engine import binning_caveat_lines
 
     genome = _random_genome(300, 4)
     args = d.parse_args(
@@ -403,7 +403,7 @@ def test_cli_prints_the_same_binning_and_identity_labels_as_the_gui(capsys):
 
 
 def test_gui_and_cli_share_one_default_k():
-    import debruijn_explorer as d
+    import debruijn.debruijn_explorer as d
 
     assert d.DEFAULT_K == gc.DEFAULT_K == 3
     assert "IntVar(value=DEFAULT_K)" in open(os.path.join(ROOT, "gui.py"), encoding="utf-8").read()
@@ -468,7 +468,7 @@ def test_collect_kmers_k_less_than_two_fails_fast():
 
 def test_load_sequences_as_fasta_supports_gzip(tmp_path):
     import gzip
-    from bio_engine import load_sequences_as_fasta
+    from debruijn.bio_engine import load_sequences_as_fasta
 
     fa_gz = tmp_path / "reads.fasta.gz"
     with gzip.open(fa_gz, "wt", encoding="utf-8") as f:
@@ -488,7 +488,7 @@ def test_load_sequences_as_fasta_supports_gzip(tmp_path):
 
 
 def test_extract_kmer_features_arbitrary_k():
-    from ml_engine import extract_kmer_features
+    from debruijn.ml_engine import extract_kmer_features
 
     vec2 = extract_kmer_features("ACGTACGT", k=2)
     assert len(vec2) == 16

@@ -74,73 +74,138 @@ _check_dependencies()
 # ---------------------------------------------------------------------------
 # Re-exports from Modular Engines
 # ---------------------------------------------------------------------------
-from assembly import (  # noqa: E402
-    assembly_metrics,
-    build_assembly_graph,
-    extract_contigs,
-    simplify_graph,
-    write_gfa,
-)
-from bio_engine import (  # noqa: E402
-    _gc_content,
-    alignment_basis_text,
-    contigs_to_seqrecords,
-    evaluate_assembly_against_reference,
-    find_orfs,
-    load_sequences_as_fasta,
-    parse_records,
-    revcomp,
-    safe_mw,
-    write_contigs_fasta,
-    write_contigs_genbank,
-)
-from graph_core import (  # noqa: E402
-    EDGE,
-    FUTURE,
-    FUTURE_TXT,
-    DEFAULT_K,
-    INK,
-    LEMON,
-    LIME,
-    MAX_DRAW_NODES,
-    MAX_KMERS,
-    MAX_TABLE_ROWS,
-    ORANGE,
-    PANEL,
-    PITH,
-    RIND,
-    TRAIL_COLORS,
-    Model,
-    analyze,
-    build_graph,
-    collect_kmers,
-    layout,
-    render,
-    trail_cover,
-)
-from gui import (  # noqa: E402
-    EXAMPLES,
-    ExplorerApp,
-    coverage_count_lines,
-    stars_text,
-    run_gui,
-    write_clinical_csv,
-    write_clinical_markdown,
-)
+try:
+    from .assembly import (  # noqa: E402
+        assembly_metrics,
+        build_assembly_graph,
+        extract_contigs,
+        simplify_graph,
+        write_gfa,
+    )
+    from .bio_engine import (  # noqa: E402
+        _gc_content,
+        alignment_basis_text,
+        contigs_to_seqrecords,
+        evaluate_assembly_against_reference,
+        find_orfs,
+        load_sequences_as_fasta,
+        parse_records,
+        revcomp,
+        safe_mw,
+        write_contigs_fasta,
+        write_contigs_genbank,
+    )
+    from .graph_core import (  # noqa: E402
+        EDGE,
+        FUTURE,
+        FUTURE_TXT,
+        DEFAULT_K,
+        INK,
+        LEMON,
+        LIME,
+        MAX_DRAW_NODES,
+        MAX_KMERS,
+        MAX_TABLE_ROWS,
+        ORANGE,
+        PANEL,
+        PITH,
+        RIND,
+        TRAIL_COLORS,
+        Model,
+        analyze,
+        build_graph,
+        collect_kmers,
+        layout,
+        render,
+        trail_cover,
+    )
+    from .ml_engine import (  # noqa: E402
+        OUTLIER_FRACTION,
+        bin_contigs,
+        binning_caveat_lines,
+        coverage_summary,
+        estimate_error_threshold,
+        extract_kmer_features,
+        fit_kmer_error_model,
+        kmer_spectrum,
+    )
+except ImportError:
+    from assembly import (  # noqa: E402
+        assembly_metrics,
+        build_assembly_graph,
+        extract_contigs,
+        simplify_graph,
+        write_gfa,
+    )
+    from bio_engine import (  # noqa: E402
+        _gc_content,
+        alignment_basis_text,
+        contigs_to_seqrecords,
+        evaluate_assembly_against_reference,
+        find_orfs,
+        load_sequences_as_fasta,
+        parse_records,
+        revcomp,
+        safe_mw,
+        write_contigs_fasta,
+        write_contigs_genbank,
+    )
+    from graph_core import (  # noqa: E402
+        EDGE,
+        FUTURE,
+        FUTURE_TXT,
+        DEFAULT_K,
+        INK,
+        LEMON,
+        LIME,
+        MAX_DRAW_NODES,
+        MAX_KMERS,
+        MAX_TABLE_ROWS,
+        ORANGE,
+        PANEL,
+        PITH,
+        RIND,
+        TRAIL_COLORS,
+        Model,
+        analyze,
+        build_graph,
+        collect_kmers,
+        layout,
+        render,
+        trail_cover,
+    )
+    from ml_engine import (  # noqa: E402
+        OUTLIER_FRACTION,
+        bin_contigs,
+        binning_caveat_lines,
+        coverage_summary,
+        estimate_error_threshold,
+        extract_kmer_features,
+        fit_kmer_error_model,
+        kmer_spectrum,
+    )
+
+_PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _PARENT_DIR not in sys.path:
+    sys.path.insert(0, _PARENT_DIR)
+
+def __getattr__(name: str):
+    if name in {
+        "EXAMPLES",
+        "ExplorerApp",
+        "coverage_count_lines",
+        "stars_text",
+        "run_gui",
+        "write_clinical_csv",
+        "write_clinical_markdown",
+    }:
+        import gui
+        return getattr(gui, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 from genomic_parser import (  # noqa: E402
     compute_qc,
     parse_genotype_file,
     read_genotype_text,
-)
-from ml_engine import (  # noqa: E402
-    OUTLIER_FRACTION,
-    bin_contigs,
-    binning_caveat_lines,
-    coverage_summary,
-    estimate_error_threshold,
-    extract_kmer_features,
-    fit_kmer_error_model,
-    kmer_spectrum,
 )
 from variant_annotator import (  # noqa: E402
     APOE_ROW_ID,
@@ -231,6 +296,7 @@ def run_headless(args) -> int:
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 
+    from gui import coverage_count_lines, stars_text, write_clinical_csv, write_clinical_markdown
     if getattr(args, "genome", None):
         try:
             result = parse_genotype_file(read_genotype_text(args.genome), os.path.basename(args.genome))
@@ -510,6 +576,7 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     if args.headless:
         return run_headless(args)
+    from gui import run_gui
     return run_gui()
 
 

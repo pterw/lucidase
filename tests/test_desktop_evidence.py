@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-import debruijn_explorer  # noqa: E402
+import debruijn.debruijn_explorer as debruijn_explorer  # noqa: E402
 import gui  # noqa: E402
 from genomic_parser import parse_genotype_file  # noqa: E402
 from test_gui_genome import analyse, make_app  # noqa: E402

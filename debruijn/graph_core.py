@@ -28,24 +28,44 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, FancyArrowPatch
 from matplotlib.path import Path
 
-from assembly import (
-    assembly_metrics,
-    build_assembly_graph,
-    extract_contigs,
-    simplify_graph,
-)
-from bio_engine import (
-    contigs_to_seqrecords,
-    evaluate_assembly_against_reference,
-    parse_records,
-    revcomp,
-)
-from ml_engine import (
-    bin_contigs,
-    coverage_summary,
-    fit_kmer_error_model,
-    kmer_spectrum,
-)
+try:
+    from .assembly import (
+        assembly_metrics,
+        build_assembly_graph,
+        extract_contigs,
+        simplify_graph,
+    )
+    from .bio_engine import (
+        contigs_to_seqrecords,
+        evaluate_assembly_against_reference,
+        parse_records,
+        revcomp,
+    )
+    from .ml_engine import (
+        bin_contigs,
+        coverage_summary,
+        fit_kmer_error_model,
+        kmer_spectrum,
+    )
+except ImportError:
+    from assembly import (
+        assembly_metrics,
+        build_assembly_graph,
+        extract_contigs,
+        simplify_graph,
+    )
+    from bio_engine import (
+        contigs_to_seqrecords,
+        evaluate_assembly_against_reference,
+        parse_records,
+        revcomp,
+    )
+    from ml_engine import (
+        bin_contigs,
+        coverage_summary,
+        fit_kmer_error_model,
+        kmer_spectrum,
+    )
 
 # ---------------------------------------------------------------------------
 # Palette (citrus) and limits

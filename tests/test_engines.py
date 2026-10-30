@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import bio_engine  # noqa: E402
-import ml_engine  # noqa: E402
+import debruijn.bio_engine as bio_engine  # noqa: E402
+import debruijn.ml_engine as ml_engine  # noqa: E402
 
 
 def _dna(n: int, seed: int) -> str:

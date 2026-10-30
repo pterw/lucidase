@@ -55,7 +55,7 @@ See [Deployment Options](web/README.md#deployment-options) and its Local Develop
 | Web app | `web/` | Parses and classifies raw DNA files in the browser. |
 | Knowledge-base build | `tools/` | Builds the one curated knowledge base, `web/src/knowledge-base.json`. |
 | Desktop genomics | `genomic_parser.py`, `variant_annotator.py`, `segregation_engine.py`, `biotools_orchestrator.py`, `gui.py` | Local reference implementation of the same rules. |
-| de Bruijn explorer | `graph_core.py`, `assembly.py`, `bio_engine.py`, `ml_engine.py`, `debruijn_explorer.py` | Standalone assembly and graph teaching tool. |
+| de Bruijn explorer | `debruijn/` (`graph_core.py`, `assembly.py`, `bio_engine.py`, `ml_engine.py`, `debruijn_explorer.py`) | Standalone assembly and graph teaching tool. |
 
 ## Development
 

@@ -13,7 +13,10 @@ from collections import Counter
 
 import networkx as nx
 
-from bio_engine import _gc_content, find_orfs, revcomp, safe_mw
+try:
+    from .bio_engine import _gc_content, find_orfs, revcomp, safe_mw
+except ImportError:
+    from bio_engine import _gc_content, find_orfs, revcomp, safe_mw
 
 
 def build_assembly_graph(kmers: list[str]) -> nx.DiGraph:
