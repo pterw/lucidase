@@ -86,6 +86,12 @@ EXPECTED = {
     "rs9263726": (31106498, {"G", "A", "C"}, 31138721, {"G", "A", "C"}, "G", "A"),
     "rs1799807": (165548528, {"T", "A", "C"}, 165830740, {"T", "A", "C"}, "T", "C"),
     "rs2306283": (21329737, {"A", "C", "G", "T"}, 21176803, {"A", "C", "G", "T"}, "A", "G"),
+    "rs1050828": (153764216, {"T", "C"}, 154536001, {"T", "C"}, "C", "T"),
+    "rs1050829": (153763491, {"C", "A", "T"}, 154535276, {"C", "A", "T"}, "T", "C"),
+    "rs5030868": (153762633, {"G", "A"}, 154534418, {"G", "A"}, "G", "A"),
+    "rs3892097": (42524946, {"T", "G", "A", "C"}, 42128944, {"T", "G", "A", "C"}, "C", "T"),
+    "rs1065852": (42526693, {"G", "A", "C"}, 42130691, {"G", "A", "C"}, "G", "A"),
+    "rs28371725": (42523804, {"T", "G", "A", "C"}, 42127802, {"T", "G", "A", "C"}, "C", "T"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -125,6 +131,12 @@ EXPECTED_CLINVAR = {
     "rs9263726": "VCV003059106",
     "rs1799807": "VCV000013215",
     "rs2306283": "VCV000259983",
+    "rs1050828": "VCV000037123",
+    "rs1050829": "VCV000100055",
+    "rs5030868": "VCV000100057",
+    "rs3892097": "VCV000016889",
+    "rs1065852": "VCV000016893",
+    "rs28371725": "VCV000039381",
 }
 
 
@@ -449,6 +461,8 @@ EXPECTED_MODELS = {
     "HLA-A": ("pharmacogenomic", False),
     "PSORS1C1": ("pharmacogenomic", False),
     "BCHE": ("pharmacogenomic", False),
+    "G6PD": ("pharmacogenomic", False),
+    "CYP2D6": ("pharmacogenomic", False),
 }
 
 
@@ -501,6 +515,8 @@ EXPECTED_TOPICS = {
     "HLA-A": "Carbamazepine hypersensitivity (HLA-A*31:01)",
     "PSORS1C1": "Allopurinol hypersensitivity (HLA-B*58:01)",
     "BCHE": "Pseudocholinesterase deficiency (anesthesia apnea)",
+    "G6PD": "Glucose-6-phosphate dehydrogenase deficiency (acute hemolytic anemia)",
+    "CYP2D6": "CYP2D6 drug metabolism (opioids, antidepressants, tamoxifen)",
 }
 
 
@@ -606,6 +622,8 @@ EXPECTED_TIERS = {
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
     "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
     "rs1799807": "Tier B", "rs2306283": "Tier A",
+    "rs1050828": "Tier A", "rs1050829": "Tier A", "rs5030868": "Tier A",
+    "rs3892097": "Tier A", "rs1065852": "Tier A", "rs28371725": "Tier A",
 }
 
 
@@ -673,6 +691,8 @@ def test_tier_source_values_per_locus(built):
         "rs1800462", "rs1142345", "rs1800460", "rs116855232",
         "rs2395029", "rs1061235", "rs9263726",
         "rs1799807", "rs2306283",
+        "rs1050828", "rs1050829", "rs5030868",
+        "rs3892097", "rs1065852", "rs28371725",
     }
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
@@ -912,6 +932,8 @@ TIERS_BEFORE_OVERLAY = {
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
     "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
     "rs1799807": "Tier B", "rs2306283": "Tier A",
+    "rs1050828": "Tier A", "rs1050829": "Tier A", "rs5030868": "Tier A",
+    "rs3892097": "Tier A", "rs1065852": "Tier A", "rs28371725": "Tier A",
 }
 
 

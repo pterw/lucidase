@@ -1,0 +1,9 @@
+{
+  "bytes": 145,
+  "http_status": 200,
+  "method": "POST",
+  "request_body": "{\"query\":\"query($symbol: String!) { gene(gene_symbol: $symbol, reference_genome: GRCh38) { symbol gnomad_constraint { pli oe_lof oe_lof_upper } } }\",\"variables\":{\"symbol\":\"G6PD\"}}",
+  "retrieved_at": "2026-10-30T03:54:23Z",
+  "sha256_of_body": "23267d2341258d4538d2f3d5a9b7b7b12c3729e73b9337262bbc857889a0bd71",
+  "url": "https://gnomad.broadinstitute.org/api"
+}

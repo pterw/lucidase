@@ -377,6 +377,12 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `d6522ed` | Web UX | `feat(web): restore landing hero, add dynamic 1080p scaling, and polish results layout` |
 | `de6e844` | Karyogram UX | `feat(karyogram): refine hero layout with inline wordmark and track alignment` |
 
+### 2026-10-30
+
+| Commit | Scope | Description |
+|---|---|---|
+| `pending` | Phase 3 (PGx) | `feat(kb): add G6PD enzymopathy and CYP2D6 core star alleles (Phase 3 completion)` |
+
 ---
 
 *Ledger maintained in ISO YYYY-MM-DD order. All P0, P1 and P2 issues are remediated.*

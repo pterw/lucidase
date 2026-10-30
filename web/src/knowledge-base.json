@@ -795,6 +795,47 @@
       },
       "topic": "Warfarin and phenytoin metabolism"
     },
+    "CYP2D6": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Cytochrome P450 2D6 Drug Metabolism",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "608902",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Transmembrane anchor: residues 1–33",
+            "Catalytic P450 monooxygenase core: residues 34–497 (Heme-binding loop with conserved Cys443)"
+          ],
+          "flexible_joints": "Substrate recognition sites (SRS loops)",
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase Fold",
+          "global_plddt": 91.2
+        },
+        "encode": {
+          "top_tissues": {
+            "brain": 410.0,
+            "liver": 3890.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000100197",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "UniProt P10635, AlphaFold AF-P10635-F1, Ensembl ENSG00000100197",
+          "url": null
+        },
+        "uniprot_id": "P10635"
+      },
+      "topic": "CYP2D6 drug metabolism (opioids, antidepressants, tamoxifen)"
+    },
     "CYP4F2": {
       "acmg_sf": false,
       "inheritance": {
@@ -964,6 +1005,48 @@
         "uniprot_id": "P12259"
       },
       "topic": "Blood clots (factor V Leiden)"
+    },
+    "G6PD": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Glucose-6-Phosphate Dehydrogenase Deficiency",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "305900",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "N-terminal Rossmann-fold NADP+ binding domain: residues 36–200",
+            "C-terminal catalytic and dimer interface domain: residues 201–515"
+          ],
+          "flexible_joints": "N-terminal peptide residues 1–35",
+          "folding_status": "Confidently Folded Rossmann Fold and Dimer Interface",
+          "global_plddt": 92.8
+        },
+        "encode": {
+          "top_tissues": {
+            "blood": 4820.0,
+            "liver": 1650.0,
+            "lymph node": 940.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000160211",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "UniProt P11413, AlphaFold AF-P11413-F1, Ensembl ENSG00000160211",
+          "url": null
+        },
+        "uniprot_id": "P11413"
+      },
+      "topic": "Glucose-6-phosphate dehydrogenase deficiency (acute hemolytic anemia)"
     },
     "HFE": {
       "acmg_sf": true,
@@ -1363,6 +1446,282 @@
     }
   },
   "loci": {
+    "rs1050828": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "X",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000037123",
+          "provenance": {
+            "accession": "VCV000037123.109",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:36Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722711%2C1722697%2C1722696%2C1722622%2C1722596%2C37123%2C10361&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Likely pathogenic",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "rasburicase, primaquine, tafenoquine, dapsone",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for G6PD and rasburicase/primaquine/dapsone)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 153764217,
+          "pos_grch38": 154536002,
+          "provenance": {
+            "accession": "rs1050828",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:54:35Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1050828"
+          }
+        },
+        "gnomad": {
+          "af": 0.006443034878493799,
+          "constraint_provenance": {
+            "accession": "G6PD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.1648943119065558,
+          "pli": 0.9999998810417456,
+          "provenance": {
+            "accession": "X-154536002-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:54:44Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for G6PD; erythrocyte and cytosolic expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4927,
+          "mane_select_ensembl": "ENST00000393562",
+          "mane_select_refseq": "NM_001360016.2",
+          "provenance": {
+            "accession": "rs1050828",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1050828?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "G6PD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No G6PD c.202G>A (A-) allele detected at this position. Other G6PD deficiency variants (e.g. Mediterranean, Canton, Chatham) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated or high caution. Primaquine/Dapsone: Dose reduction or alternative agent recommended.",
+          "magnitude": 2.5,
+          "phenotype": "Heterozygous for G6PD c.202G>A (p.Val68Met). In females, mosaic red-cell enzyme activity due to random X-chromosome inactivation; intermediate risk of acute hemolytic anemia upon oxidative drug exposure.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated (severe hemolytic anemia risk). Primaquine/Tafenoquine: Contraindicated or dose-adjusted. Avoid dapsone, nitrofurantoin, sulfamethoxazole.",
+          "magnitude": 5.0,
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.202G>A (p.Val68Met, A-). Class III G6PD deficiency (~10–20% residual activity); high risk of acute hemolytic anemia triggered by rasburicase, primaquine, dapsone, or fava beans.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only G6PD c.202G>A (A-). Normal enzyme activity and hemolysis risk also depend on other deficiency alleles (such as G6PD Mediterranean c.563C>T, Canton, Chatham) and co-inherited modifier variants that this locus alone does not determine. In females, random X-inactivation leads to mosaic enzyme levels.",
+      "pos_grch37": 153764217,
+      "pos_grch38": 154536002,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1050828",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for rasburicase and G6PD",
+      "tier_rationale": "CPIC Level A guideline and FDA boxed warning mandate pre-treatment testing before rasburicase; ClinVar classifies c.202G>A with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
+    "rs1050829": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "X",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000100055",
+          "provenance": {
+            "accession": "VCV000100055.84",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:47Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722747%2C1722726%2C1722698%2C1722697%2C1722693%2C1722622%2C1722617%2C1722597%2C1546331%2C1065168%2C100055%2C37123%2C10388%2C10382%2C10361&retmode=json"
+          },
+          "review_status": "criteria provided, conflicting classifications",
+          "significance": "Conflicting classifications of pathogenicity",
+          "stars": 1
+        },
+        "cpic": {
+          "drug": "rasburicase, primaquine, tafenoquine, dapsone",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for G6PD and rasburicase/primaquine/dapsone)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 153763492,
+          "pos_grch38": 154535277,
+          "provenance": {
+            "accession": "rs1050829",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:54:45Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1050829"
+          }
+        },
+        "gnomad": {
+          "af": 0.017080243592636025,
+          "constraint_provenance": {
+            "accession": "G6PD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.1648943119065558,
+          "pli": 0.9999998810417456,
+          "provenance": {
+            "accession": "X-154535277-T-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:54:58Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for G6PD; erythrocyte and cytosolic expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0954,
+          "mane_select_ensembl": "ENST00000393562",
+          "mane_select_refseq": "NM_001360016.2",
+          "provenance": {
+            "accession": "rs1050829",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:51Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1050829?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "G6PD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No G6PD c.376A>G (A+) allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Normal to mildly reduced enzyme activity; standard oxidative drug dosing generally tolerated unless paired with c.202G>A.",
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for G6PD c.376A>G (p.Asn126Asp, A+). Retains ~85% of normal enzyme activity when alone; confers hemolytic risk primarily when co-inherited in cis with c.202G>A.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Near-normal enzyme activity alone; verify whether c.202G>A is present on the same haplotype.",
+          "magnitude": 2.0,
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.376A>G (p.Asn126Asp, A+). Class IV mild variant (~85% activity); asymptomatic under most conditions unless combined with c.202G>A.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only G6PD c.376A>G (A+). Alone, c.376A>G produces near-normal enzyme activity (~85%), but when co-inherited on the same chromosome (in cis) with c.202G>A, it forms the composite deficient G6PD A- haplotype.",
+      "pos_grch37": 153763492,
+      "pos_grch38": 154535277,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs1050829",
+      "tier_citation": "CPIC clinical guideline for G6PD and rasburicase/primaquine",
+      "tier_rationale": "CPIC Level A guideline for G6PD; ClinVar classifies c.376A>G with 1-star review.",
+      "tier_source": "cpic_level"
+    },
     "rs1057910": {
       "allele_codes": null,
       "alt": "C",
@@ -1639,6 +1998,143 @@
       "rsid": "rs1061235",
       "tier_citation": "CPIC guideline for carbamazepine and HLA-A and HLA-B, 2014 update (Leckband et al., Clinical Pharmacology and Therapeutics)",
       "tier_rationale": "CPIC Guideline for Carbamazepine and Oxcarbazepine with HLA-A and HLA-B (Level A).",
+      "tier_source": "cpic_level"
+    },
+    "rs1065852": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016893",
+          "provenance": {
+            "accession": "VCV000016893.11",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:13Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=16893&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 42526694,
+          "pos_grch38": 42130692,
+          "provenance": {
+            "accession": "rs1065852",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:55:12Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1065852"
+          }
+        },
+        "gnomad": {
+          "af": 0.21215728486515645,
+          "constraint_provenance": {
+            "accession": "CYP2D6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.4809840538374945,
+          "pli": 2.316033019048199e-20,
+          "provenance": {
+            "accession": "22-42130692-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:55:19Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CYP2D6; liver microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.7572,
+          "mane_select_ensembl": "ENST00000645361",
+          "mane_select_refseq": "NM_000106.6",
+          "provenance": {
+            "accession": "rs1065852",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:18Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1065852?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2D6",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2D6*10 (rs1065852) allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Mildly decreased CYP2D6 substrate metabolism; adjust dosing according to full clinical context.",
+          "magnitude": 1.5,
+          "phenotype": "One CYP2D6*10 (rs1065852) allele detected. Common decreased-function variant (p.Pro34Ser) prevalent in East Asian populations. Full metabolizer status requires star-allele diplotyping across all loci.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Intermediate metabolism of codeine, tramadol, tamoxifen, and tricyclic antidepressants. Titration or alternative dosing may be warranted.",
+          "magnitude": 3.0,
+          "phenotype": "Two CYP2D6*10 (rs1065852) alleles detected. Homozygous decreased-function allele. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 42526694,
+      "pos_grch38": 42130692,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs1065852",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for CYP2D6",
+      "tier_rationale": "CPIC Level A clinical guideline for CYP2D6; ClinVar classifies *10 (p.Pro34Ser) with 2-star multiple-submitter review.",
       "tier_source": "cpic_level"
     },
     "rs113993960": {
@@ -3937,6 +4433,280 @@
       "tier_rationale": "CPIC Guideline for HLA-B and Abacavir (Level A); FDA boxed warning mandates HLA-B*57:01 screening prior to abacavir initiation.",
       "tier_source": "cpic_level"
     },
+    "rs28371725": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000039381",
+          "provenance": {
+            "accession": "VCV000039381.12",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:20Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=39381&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 42523805,
+          "pos_grch38": 42127803,
+          "provenance": {
+            "accession": "rs28371725",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:55:19Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/28371725"
+          }
+        },
+        "gnomad": {
+          "af": 0.0916536156502643,
+          "constraint_provenance": {
+            "accession": "CYP2D6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.4809840538374945,
+          "pli": 2.316033019048199e-20,
+          "provenance": {
+            "accession": "22-42127803-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:55:28Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CYP2D6; liver microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000645361",
+          "mane_select_refseq": "NM_000106.6",
+          "provenance": {
+            "accession": "rs28371725",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:26Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs28371725?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2D6",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2D6*41 (rs28371725) allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Moderately decreased rate of CYP2D6 drug clearance or prodrug bioactivation.",
+          "magnitude": 1.5,
+          "phenotype": "One CYP2D6*41 (rs28371725) allele detected. Splicing defect causing reduced enzyme expression. Full metabolizer assignment requires complete star-allele diplotyping.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Intermediate metabolizer phenotype: reduced conversion of codeine/tramadol to active analgesics; impaired clearance of secondary amine TCAs.",
+          "magnitude": 3.0,
+          "phenotype": "Two CYP2D6*41 (rs28371725) alleles detected. Homozygous hypomorphic splicing variant. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 42523805,
+      "pos_grch38": 42127803,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs28371725",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for CYP2D6",
+      "tier_rationale": "CPIC Level A clinical guideline for CYP2D6; ClinVar classifies *41 (c.2988G>A) with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
+    "rs3892097": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016889",
+          "provenance": {
+            "accession": "VCV000016889.12",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:08Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=16889&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 42524947,
+          "pos_grch38": 42128945,
+          "provenance": {
+            "accession": "rs3892097",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:55:07Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/3892097"
+          }
+        },
+        "gnomad": {
+          "af": 0.16296244197496132,
+          "constraint_provenance": {
+            "accession": "CYP2D6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.4809840538374945,
+          "pli": 2.316033019048199e-20,
+          "provenance": {
+            "accession": "22-42128945-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:55:33Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CYP2D6; liver microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000645361",
+          "mane_select_refseq": "NM_000106.6",
+          "provenance": {
+            "accession": "rs3892097",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:11Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs3892097?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2D6",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2D6*4 (rs3892097) allele detected at this position. Other CYP2D6 alleles (*10, *41, *5 gene deletion, *1xN duplications) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Opioids (codeine, tramadol) / Tamoxifen / SSRIs: Reduced bioactivation or clearance may occur if paired with another non-functional allele.",
+          "magnitude": 2.5,
+          "phenotype": "One CYP2D6*4 (rs3892097) allele detected. This splice defect inactivates the allele. Full metabolizer status cannot be assigned without complete star-allele diplotyping and CNV detection.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Codeine / Tramadol: Ineffective analgesia due to lack of conversion to morphine/O-desmethyltramadol. Tamoxifen: Decreased endoxifen formation. TCAs / SSRIs: Markedly reduced clearance; toxicity risk.",
+          "magnitude": 4.0,
+          "phenotype": "Two CYP2D6*4 (rs3892097) alleles detected. Homozygous non-functional splice mutation. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 42524947,
+      "pos_grch38": 42128945,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs3892097",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for CYP2D6",
+      "tier_rationale": "CPIC Level A clinical guideline for CYP2D6; ClinVar classifies *4 (c.506-1G>A) with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
     "rs3918290": {
       "allele_codes": null,
       "alt": "T",
@@ -4873,6 +5643,144 @@
       "tier_citation": "Enattah et al. 2002, Identification of a variant associated with adult-type hypolactasia, Nature Genetics",
       "tier_rationale": "The -13910 variant is the established cause of lactase persistence in European-ancestry populations.",
       "tier_source": "curated"
+    },
+    "rs5030868": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "X",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000100057",
+          "provenance": {
+            "accession": "VCV000100057.136",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:53Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722739%2C1722698%2C1722697%2C1722696%2C100057&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Likely pathogenic",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "rasburicase, primaquine, tafenoquine, dapsone",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for G6PD and rasburicase/primaquine/dapsone)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 153762634,
+          "pos_grch38": 154534419,
+          "provenance": {
+            "accession": "rs5030868",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:54:52Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/5030868"
+          }
+        },
+        "gnomad": {
+          "af": 0.0014093797737056851,
+          "constraint_provenance": {
+            "accession": "G6PD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.1648943119065558,
+          "pli": 0.9999998810417456,
+          "provenance": {
+            "accession": "X-154534419-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:54:56Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for G6PD; erythrocyte and cytosolic expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.3196,
+          "mane_select_ensembl": "ENST00000393562",
+          "mane_select_refseq": "NM_001360016.2",
+          "provenance": {
+            "accession": "rs5030868",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:56Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs5030868?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "G6PD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No G6PD c.563C>T (Mediterranean) allele detected at this position. Other G6PD deficiency variants (e.g. A-, Canton, Chatham) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated or high caution. Primaquine/Dapsone: Alternative agent or dose reduction required.",
+          "magnitude": 3.0,
+          "phenotype": "Heterozygous for G6PD c.563C>T (p.Ser188Phe, Mediterranean). In females, mosaic red-cell enzyme activity due to random X-chromosome inactivation; intermediate to high risk of acute hemolytic anemia upon oxidative drug exposure.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated (severe hemolytic crisis risk). Primaquine/Tafenoquine: Contraindicated. Avoid dapsone, sulfamethoxazole, nitrofurantoin, and fava beans.",
+          "magnitude": 5.0,
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.563C>T (p.Ser188Phe, Mediterranean). Severe Class II G6PD deficiency (<10% residual activity); high risk of acute, severe hemolytic anemia and favism triggered by rasburicase, primaquine, dapsone, or fava beans.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only G6PD c.563C>T (Mediterranean). G6PD activity also depends on other deficiency variants (such as A-, Canton, Chatham) not tested by this single variant.",
+      "pos_grch37": 153762634,
+      "pos_grch38": 154534419,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs5030868",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for rasburicase and G6PD",
+      "tier_rationale": "CPIC Level A guideline and FDA boxed warning mandate pre-treatment testing before rasburicase; ClinVar classifies c.563C>T with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
     },
     "rs55886062": {
       "allele_codes": null,
@@ -5952,16 +6860,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 22,
+    "gene_count": 24,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 34,
+    "locus_count": 40,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "d11ac7d3540fb988fa5d04e35b28266bface31cc86cb99a8c6567457de5c7964"
+    "sha256": "abcc1ec87f0167a387090dc698817bfae0f923e432a7d6a2df4819255a1ea28d"
   },
   "schema_version": 2
 }

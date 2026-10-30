@@ -2,7 +2,7 @@
 
 > **Status:** Active Reference & Execution Plan  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 32 curated loci across 21 genes.
+> **Current KB State:** 40 curated loci across 24 genes.
 
 ---
 
@@ -35,6 +35,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 - [x] **Tier 4: One-Carbon Folate & Catecholamine Catabolism**: `MTHFR A1298C` (rs1801131, compound heterozygote pair), `COMT Val158Met` (rs4680, prefrontal dopamine clearance).
 - [x] **Phase 1 (Tier 2B): Thiopurine Toxicity (TPMT & NUDT15)**: `TPMT*2` (rs1800462), `TPMT*3C` (rs1142345), `TPMT*3B` (rs1800460), `NUDT15*3` (rs116855232).
 - [x] **Phase 2 (Tier 3): Severe Adverse Drug Reaction (ADR) HLA Immune Alleles**: `HLA-B*57:01` tag (`rs2395029`), `HLA-A*31:01` tag (`rs1061235`), `HLA-B*58:01` tag (`rs9263726` in `PSORS1C1`). `HLA-B*15:02` tag SNPs excluded per Clinical Honesty guardrails (`AGENTS.md` Rule 4).
+- [x] **Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies**: `CYP2D6` core star alleles (`rs3892097` *4, `rs1065852` *10, `rs28371725` *41), `G6PD` deficiency (`rs1050828` A-, `rs1050829` A+, `rs5030868` Med), `BChE` pseudocholinesterase deficiency (`rs1799807`), `SLCO1B1` statin uptake expansion (`rs2306283` *1b).
 
 ---
 
@@ -70,20 +71,20 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 ---
 
-### Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies
+### Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies (Completed)
 
 * **Target Loci**:
-  - [ ] **`CYP2D6` Core Array Star Alleles**:
+  - [x] **`CYP2D6` Core Array Star Alleles**:
     - *Loci*: `*4` (`rs3892097`, c.506-1G>A splice defect, ~70% of poor metabolizers in Europeans); `*10` (`rs1065852`, p.Pro34Ser, East Asian intermediate metabolizer); `*41` (`rs28371725`, c.2988G>A decreased function).
     - *Why*: Metabolizes ~25% of all clinical drugs (codeine, tramadol, tamoxifen, SSRIs, beta-blockers).
     - *Limitation*: Must strictly refuse full diplotype/metabolizer prediction due to undetectable copy number variations (CNV duplications `*1xN` and full deletions `*5`) on standard genotyping arrays.
-  - [ ] **`BChE` Butyrylcholinesterase / Pseudocholinesterase Deficiency (`rs1799807`)**:
+  - [x] **`BChE` Butyrylcholinesterase / Pseudocholinesterase Deficiency (`rs1799807`)**:
     - *Locus*: chr3:165768994 (GRCh38) / chr3:165488439 (GRCh37), c.293A>G (p.Asp70Gly, Kalow/Atypical variant).
     - *Why*: Patients receiving depolarizing neuromuscular blockers (succinylcholine) or mivacurium during anesthesia develop prolonged neuromuscular blockade and prolonged apnea requiring mechanical ventilation.
-  - [ ] **`G6PD` Glucose-6-Phosphate Dehydrogenase Deficiency**:
+  - [x] **`G6PD` Glucose-6-Phosphate Dehydrogenase Deficiency**:
     - *Loci*: G6PD A- (`rs1050828` c.202G>A + `rs1050829` c.376A>G), G6PD Mediterranean (`rs5030868` c.563C>T).
     - *Why*: X-linked enzymopathy affecting >400 million people. Acute hemolytic anemia triggered by rasburicase, primaquine, dapsone, sulfamethoxazole, nitrofurantoin, and fava beans. CPIC Level A.
-  - [ ] **`SLCO1B1` Expansion (`rs2306283`)**:
+  - [x] **`SLCO1B1` Expansion (`rs2306283`)**:
     - *Locus*: c.388A>G (p.Asn130Asp, `*1b`).
     - *Why*: In combination with existing `rs4149056` (`*5`), enables full differentiation of `*1a` (normal), `*1b` (enhanced), `*5` (poor), and `*15` (poor) statin uptake haplotypes.
 
