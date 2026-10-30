@@ -954,6 +954,78 @@
       "insights_provenance": {
         "source": "UniProt P10635, AlphaFold AF-P10635-F1, Ensembl ENSG00000100197"
       }
+    },
+    "FUT2": {
+      "topic": "Secretor status (FUT2)",
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": null,
+        "omim": "182100",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": null
+    },
+    "BCO1": {
+      "topic": "Beta-carotene to vitamin A conversion (BCO1)",
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": null,
+        "omim": "605748",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": null
+    },
+    "PNPLA3": {
+      "topic": "Liver fat accumulation & NAFLD risk (PNPLA3)",
+      "inheritance": {
+        "model": "risk_factor",
+        "mendelian_disease": false,
+        "disease": null,
+        "omim": "609567",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": null
+    },
+    "FMO3": {
+      "topic": "Choline & trimethylamine metabolism (FMO3)",
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": null,
+        "omim": "136132",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": null
+    },
+    "CBS": {
+      "topic": "Homocysteine transsulfuration & B6 response (CBS)",
+      "inheritance": {
+        "model": "autosomal_recessive",
+        "mendelian_disease": true,
+        "disease": "Homocystinuria, Pyridoxine-Responsive",
+        "omim": "236200",
+        "penetrance": 0.5
+      },
+      "acmg_sf": false,
+      "insights": null
+    },
+    "VDR": {
+      "topic": "Vitamin D receptor function (VDR FokI)",
+      "inheritance": {
+        "model": "trait",
+        "mendelian_disease": false,
+        "disease": null,
+        "omim": "601769",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": null
     }
   },
   "loci": {
@@ -4221,6 +4293,643 @@
           "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
           "provenance": {
             "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)"
+          }
+        }
+      }
+    },
+    "rs601338": {
+      "gene": "FUT2",
+      "chrom": "19",
+      "pos_grch37": 49206674,
+      "pos_grch38": 48703417,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of FUT2 (c.428G>A, p.Trp143Ter); other population-specific non-secretor alleles (such as Asian se385 A>T) are not tested.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Well-replicated determinant of mucosal ABH antigen secretion, norovirus resistance, and plasma vitamin B12 levels.",
+        "citation": "Kelly et al. 1995, Sequence analysis of FUT2; Lindesmith et al. 2003, Human susceptibility to norovirus, Nature Medicine"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No FUT2 non-secretor allele detected at this position. Expected secretor phenotype (ABH blood group antigens expressed on mucosal surfaces and in saliva).",
+          "drug_response": null,
+          "caveats": [
+            "Based on a single European-predominant non-secretor variant (p.Trp143Ter); other non-secretor alleles are not tested."
+          ]
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Carrier",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "FUT2 secretor carrier (Se/se): One copy of the common non-secretor allele (c.428G>A, p.Trp143Ter). Typically maintains mucosal secretor status due to dominant expression of the functional allele.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 2.0,
+          "repute": "Neutral",
+          "phenotype": "FUT2 non-secretor (se/se): Lacks ABH blood group antigens in mucosal secretions and saliva. Strong resistance to common norovirus strains (GII.4); associated with altered gut microbiome composition and lower median serum vitamin B12 levels.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012945",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign",
+          "provenance": {
+            "source": "ClinVar VCV000012945 (machine-imported)",
+            "accession": "VCV000012945",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/12945/"
+          }
+        },
+        "gnomad": {
+          "af": 0.458221,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "19-48703417-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "small_intestine": "High",
+            "colon": "High",
+            "stomach": "High",
+            "salivary_gland": "High"
+          },
+          "subcellular": [
+            "Golgi apparatus"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for FUT2; mucosal secretory epithelium and Golgi apparatus)"
+          }
+        }
+      }
+    },
+    "rs12934922": {
+      "gene": "BCO1",
+      "chrom": "16",
+      "pos_grch37": 81301694,
+      "pos_grch38": 81268089,
+      "ref": "A",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of BCO1 (c.801A>T, p.Arg267Ser); total carotenoid cleavage depends on co-inherited BCO1 variants and dietary fat intake.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Established functional missense variant reducing catalytic cleavage of dietary provitamin A beta-carotene into active retinal.",
+        "citation": "Leung et al. 2009, Two common single nucleotide polymorphisms in the BCMO1 gene, Journal of Nutrition"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No BCO1 p.Arg267Ser reduced-conversion allele detected at this position.",
+          "drug_response": null,
+          "caveats": [
+            "Other BCO1 variants such as p.Ala379Val may also modulate carotenoid conversion."
+          ]
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Carrier",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous for BCO1 p.Arg267Ser: Approximately 32% reduced enzyme activity converting dietary beta-carotene into active vitamin A (retinol).",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Homozygous for BCO1 p.Arg267Ser: Significantly reduced enzymatic conversion of beta-carotene to retinol; may benefit from direct dietary sources of preformed vitamin A.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV001293223",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign",
+          "provenance": {
+            "source": "ClinVar VCV001293223 (machine-imported)",
+            "accession": "VCV001293223",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1293223/"
+          }
+        },
+        "gnomad": {
+          "af": 0.404575,
+          "loeuf": 1.203615,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "16-81268089-A-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "small_intestine": "High",
+            "liver": "Medium",
+            "kidney": "Medium"
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for BCO1; intestinal enterocytes and hepatic carotenoid monooxygenase)"
+          }
+        }
+      }
+    },
+    "rs7501331": {
+      "gene": "BCO1",
+      "chrom": "16",
+      "pos_grch37": 81314496,
+      "pos_grch38": 81280891,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of BCO1 (c.1136C>T, p.Ala379Val); double mutants with p.Arg267Ser exhibit additive enzyme impairment.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Functional missense variant with additive effect on reduced beta-carotene conversion.",
+        "citation": "Leung et al. 2009, Two common single nucleotide polymorphisms in the BCMO1 gene, Journal of Nutrition"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No BCO1 p.Ala379Val reduced-conversion allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Carrier",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous for BCO1 p.Ala379Val: Moderately decreased enzymatic conversion of beta-carotene into active vitamin A (retinol).",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Homozygous for BCO1 p.Ala379Val: Reduced conversion efficiency of beta-carotene to retinol, especially if co-inherited with p.Arg267Ser.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV001253021",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign",
+          "provenance": {
+            "source": "ClinVar VCV001253021 (machine-imported)",
+            "accession": "VCV001253021",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1253021/"
+          }
+        },
+        "gnomad": {
+          "af": 0.221276,
+          "loeuf": 1.203615,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "16-81280891-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "small_intestine": "High",
+            "liver": "Medium",
+            "kidney": "Medium"
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for BCO1; intestinal enterocytes and hepatic carotenoid monooxygenase)"
+          }
+        }
+      }
+    },
+    "rs738409": {
+      "gene": "PNPLA3",
+      "chrom": "22",
+      "pos_grch37": 44324727,
+      "pos_grch38": 43928847,
+      "ref": "C",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of PNPLA3 (c.444C>G, p.Ile148Met); overall liver fat is also modulated by dietary sugars, adiposity, TM6SF2, and HSD17B13.",
+      "tier": {
+        "curated_tier": "Tier A",
+        "rationale": "Major established genetic determinant of hepatic triglyceride accumulation, non-alcoholic fatty liver disease (NAFLD), and progression to steatohepatitis.",
+        "citation": "Romeo et al. 2008, Genetic variation in PNPLA3 confers susceptibility to nonalcoholic fatty liver disease, Nature Genetics"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No PNPLA3 p.Ile148Met risk allele detected at this position. Baseline population genetic risk for hepatic steatosis.",
+          "drug_response": null,
+          "caveats": [
+            "Absence of this allele does not exclude liver steatosis secondary to metabolic syndrome or high alcohol intake."
+          ]
+        },
+        "1": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 2.0,
+          "repute": "Bad",
+          "phenotype": "Heterozygous for PNPLA3 p.Ile148Met (C/G): Approximately 2-fold increased risk of hepatic steatosis (fatty liver); increased liver fat accumulation upon high dietary sucrose or alcohol consumption.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Risk Factor",
+          "significance": "Risk Factor",
+          "magnitude": 3.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for PNPLA3 p.Ile148Met (G/G): Up to 3- to 5-fold increased susceptibility to hepatic steatosis, elevated liver enzymes (ALT/AST), and heightened sensitivity to dietary carbohydrate- and alcohol-induced liver fat accumulation.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000341932",
+          "review_status": "criteria provided, conflicting classifications",
+          "stars": 1,
+          "significance": "Conflicting classifications of pathogenicity; risk factor",
+          "provenance": {
+            "source": "ClinVar VCV000341932 (machine-imported)",
+            "accession": "VCV000341932",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/341932/"
+          }
+        },
+        "gnomad": {
+          "af": 0.232098,
+          "loeuf": 1.260781,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "22-43928847-C-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "adipose": "High"
+          },
+          "subcellular": [
+            "Lipid droplet",
+            "Endoplasmic reticulum"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for PNPLA3; hepatic lipid droplet surface and adipocytes)"
+          }
+        }
+      }
+    },
+    "rs2266782": {
+      "gene": "FMO3",
+      "chrom": "1",
+      "pos_grch37": 171076966,
+      "pos_grch38": 171107825,
+      "ref": "G",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of FMO3 (c.472G>A, p.Glu158Lys); trimethylamine metabolism depends on haplotype pairing with p.Glu308Gly and dietary choline load.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Common functional polymorphism causing moderate reduction in flavin-containing monooxygenase 3 catalytic efficiency.",
+        "citation": "Zschocke et al. 1999, Polymorphisms of the FMO3 gene in trimethylaminuria, Pharmacogenetics"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No FMO3 p.Glu158Lys reduced-activity allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Carrier",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous carrier of FMO3 p.Glu158Lys: Mildly reduced trimethylamine N-oxygenation capacity; generally asymptomatic on typical diets.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Homozygous for FMO3 p.Glu158Lys: Decreased enzyme activity converting odorous trimethylamine to odorless TMAO; higher susceptibility to mild transient fish odor following high-choline meals.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000038394",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign/Likely benign",
+          "provenance": {
+            "source": "ClinVar VCV000038394 (machine-imported)",
+            "accession": "VCV000038394",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/38394/"
+          }
+        },
+        "gnomad": {
+          "af": 0.401804,
+          "loeuf": 1.321702,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "1-171107825-G-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for FMO3; hepatic microsomal monooxygenase)"
+          }
+        }
+      }
+    },
+    "rs2266780": {
+      "gene": "FMO3",
+      "chrom": "1",
+      "pos_grch37": 171083242,
+      "pos_grch38": 171114102,
+      "ref": "A",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of FMO3 (c.923A>G, p.Glu308Gly); co-inheritance with p.Glu158Lys produces compound reduction in TMA oxidation.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Functional coding polymorphism in FMO3 resulting in decreased N-oxygenation capacity.",
+        "citation": "Zschocke et al. 1999, Polymorphisms of the FMO3 gene in trimethylaminuria, Pharmacogenetics"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No FMO3 p.Glu308Gly reduced-activity allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Carrier",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous carrier of FMO3 p.Glu308Gly: Moderately reduced enzymatic oxidation of trimethylamine.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Homozygous for FMO3 p.Glu308Gly: Substantially decreased FMO3 capacity; compound inheritance with p.Glu158Lys produces clinically evident mild trimethylaminuria.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000038395",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign/Likely benign",
+          "provenance": {
+            "source": "ClinVar VCV000038395 (machine-imported)",
+            "accession": "VCV000038395",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/38395/"
+          }
+        },
+        "gnomad": {
+          "af": 0.175726,
+          "loeuf": 1.321702,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "1-171114102-A-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High"
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for FMO3; hepatic microsomal monooxygenase)"
+          }
+        }
+      }
+    },
+    "rs5742905": {
+      "gene": "CBS",
+      "chrom": "21",
+      "pos_grch37": 44483184,
+      "pos_grch38": 43063074,
+      "ref": "A",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of CBS (c.833T>C, p.Ile278Thr); classic homocystinuria is clinically heterogeneous with over 150 known CBS mutations.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No CBS p.Ile278Thr allele detected at this position. Other homocystinuria variants in CBS are not excluded.",
+          "drug_response": null,
+          "caveats": [
+            "Absence of this variant does not rule out other pathogenic CBS mutations."
+          ]
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Carrier",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Carrier for pyridoxine-responsive homocystinuria (CBS p.Ile278Thr, c.833T>C). Unaffected carrier; transmits to 50% of offspring.",
+          "drug_response": null,
+          "caveats": [
+            "Clinical homocystinuria requires biallelic mutations; carriers have normal fasting homocysteine under typical diets."
+          ]
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 4.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for CBS p.Ile278Thr: Pyridoxine (vitamin B6)-responsive cystathionine beta-synthase deficiency. Associated with elevated plasma total homocysteine and thromboembolic risk, typically ameliorated by therapeutic vitamin B6 supplementation.",
+          "drug_response": null,
+          "caveats": [
+            "Responsive to pharmacological vitamin B6 (pyridoxine); clinical surveillance by a metabolic geneticist is recommended."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000120",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Pathogenic",
+          "provenance": {
+            "source": "ClinVar VCV000000120 (machine-imported)",
+            "accession": "VCV000000120",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/120/"
+          }
+        },
+        "gnomad": {
+          "af": 0.0,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "21-43063074-A-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "kidney": "High",
+            "brain": "Medium"
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleus"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for CBS; hepatic and renal cystathionine beta-synthase)"
+          }
+        }
+      }
+    },
+    "rs2228570": {
+      "gene": "VDR",
+      "chrom": "12",
+      "pos_grch37": 48272895,
+      "pos_grch38": 47879112,
+      "ref": "A",
+      "alt": "G",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of VDR FokI (start codon polymorphism); bone density and calcium absorption are also influenced by vitamin D levels and BsmI/TaqI haplotypes.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Common start-codon variant altering VDR protein length by 3 amino acids, modulating transactivation capacity and bone mineral density.",
+        "citation": "Arai et al. 1997, A vitamin D receptor gene polymorphism in the translation initiation codon, Journal of Bone and Mineral Research"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No VDR FokI G allele detected at this position (homozygous A/A). Encodes the longer 427-amino-acid vitamin D receptor isoform (F allele).",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Trait",
+          "significance": "Carrier",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous for VDR FokI (A/G): Expresses both the 427-AA and shorter 424-AA vitamin D receptor isoforms. Intermediate transactivation activity.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "2": {
+          "category": "Trait",
+          "significance": "Trait",
+          "magnitude": 1.0,
+          "repute": "Neutral",
+          "phenotype": "Homozygous for VDR FokI (G/G): Encodes the shorter 424-amino-acid vitamin D receptor isoform (f allele) with altered transactivation efficiency.",
+          "drug_response": null,
+          "caveats": []
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000308887",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Benign",
+          "provenance": {
+            "source": "ClinVar VCV000308887 (machine-imported)",
+            "accession": "VCV000308887",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/308887/"
+          }
+        },
+        "gnomad": {
+          "af": 0.628776,
+          "loeuf": 0.70171,
+          "pli": 0.015655,
+          "provenance": {
+            "source": "gnomAD r4 (machine-imported)",
+            "accession": "12-47879112-A-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "small_intestine": "High",
+            "kidney": "High",
+            "colon": "High",
+            "bone": "Medium"
+          },
+          "subcellular": [
+            "Nucleus"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (hand-entered for VDR; nuclear receptor expression in intestinal enterocytes and renal tubules)"
           }
         }
       }

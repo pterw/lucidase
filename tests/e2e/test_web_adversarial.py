@@ -108,6 +108,12 @@ DEMO_FOUND_CATEGORIES = {
     "rs2306283": "Pharmacogenomics",
     "rs1050829": "Pharmacogenomics",
     "rs3892097": "Pharmacogenomics",
+    "rs601338": "Trait",
+    "rs12934922": "Trait",
+    "rs738409": "Risk Factor",
+    "rs2266782": "Trait",
+    "rs2266780": "Trait",
+    "rs5742905": "Carrier",
 }
 DEMO_FILTER_ROWS = {"observed": set(DEMO_FOUND_CATEGORIES)}
 
@@ -178,8 +184,8 @@ def _count(page, element_id):
 # them with the variant-present findings). Wild type: 9 Not found, 2 Not on your chip, 2 Unclear (H63D and MTHFR
 # wild type; the worker also lists them with the wild-type checks). Between them every state tab is non-empty once.
 STATE_TAB_COUNTS = {
-    "demo": {"observed": 20, "negative": 15, "gaps": 0, "insufficient": 4},
-    "wildtype": {"observed": 0, "negative": 33, "gaps": 2, "insufficient": 4},
+    "demo": {"observed": 26, "negative": 17, "gaps": 0, "insufficient": 4},
+    "wildtype": {"observed": 0, "negative": 41, "gaps": 2, "insufficient": 4},
 }
 
 
@@ -211,7 +217,7 @@ def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_p
     page.locator("[data-filter='observed']").click()
     rows = _shown_rows(page)
     found = {row[0] for row in rows}
-    assert len(found) == len(rows) == _count(page, "count-state-observed") == 20
+    assert len(found) == len(rows) == _count(page, "count-state-observed") == 26
     # The category is read off each row's own tag, not from a tab.
     categories = page.evaluate(
         "() => Object.fromEntries([...document.querySelectorAll('#variants-tbody tr')]"
@@ -220,12 +226,12 @@ def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_p
     )
     assert categories == DEMO_FOUND_CATEGORIES
     # The report groups hold the same Found checks, one row each, each as a Found row.
-    assert page.locator("#report-groups article.lds-finding:has(> span.lds-mark-supported_and_observed)").count() == 20
+    assert page.locator("#report-groups article.lds-finding:has(> span.lds-mark-supported_and_observed)").count() == 26
     for rsid in found:
         report_row = page.locator(f'#report-groups article.lds-finding[data-finding-id="{rsid}"]')
         expect(report_row.locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
     assert {row[1] for row in rows} == {"Found"}
-    assert page.locator("#showing-count").text_content() == "Showing 20 of 20 findings"
+    assert page.locator("#showing-count").text_content() == "Showing 26 of 26 findings"
 
 
 
@@ -344,7 +350,7 @@ def test_the_tab_keys_are_new_and_the_old_all_key_is_gone(loaded_page):
     # The Found tab is its own key and lists only Found checks.
     page.locator("[data-filter='observed']").click()
     rows = _shown_rows(page)
-    assert len(rows) == 20 and {row[1] for row in rows} == {"Found"}, rows
+    assert len(rows) == 26 and {row[1] for row in rows} == {"Found"}, rows
     assert page.evaluate("() => window.__lucidase.state.filterCategory") == "observed"
 
 

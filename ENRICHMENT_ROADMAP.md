@@ -2,7 +2,7 @@
 
 > **Status:** Active Reference & Execution Plan  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 40 curated loci across 24 genes.
+> **Current KB State:** 48 curated loci across 30 genes.
 
 ---
 
@@ -94,18 +94,24 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 * **Rationale**: Directly relevant to consumer DNA users exploring diet, B-vitamin supplementation, and metabolic efficiency.
 * **Target Loci**:
-  - [ ] **`FUT2` Secretor Status (`rs601338`)**:
+  - [x] **`FUT2` Secretor Status (`rs601338`)**:
     - *Locus*: chr19:48703417 (GRCh38) / chr19:49206674 (GRCh37), c.428G>A (p.Trp143Ter nonsense variant).
-    - *Why*: Non-secretors (homozygous AA / null, ~20% of Europeans) lack ABO blood group antigens on mucosal surfaces. Associated with altered gut microbiome diversity, lower serum Vitamin B12 levels, and resistance to norovirus infection.
-  - [ ] **`VDR` Vitamin D Receptor (FokI `rs2228570`)**:
-    - *Locus*: chr12:47844671 (GRCh38) / chr12:48239328 (GRCh37), c.2T>C (start codon polymorphism).
+    - *Why*: Non-secretors (homozygous AA / non-secretor, ~20% of Europeans) lack ABO blood group antigens on mucosal surfaces. Associated with altered gut microbiome diversity, lower serum Vitamin B12 levels, and resistance to norovirus infection.
+  - [x] **`VDR` Vitamin D Receptor (FokI `rs2228570`)**:
+    - *Locus*: chr12:47879112 (GRCh38) / chr12:48272895 (GRCh37), c.2T>C (start codon polymorphism).
     - *Why*: Alters translation initiation site resulting in a protein 3 amino acids shorter with altered transactivation capacity and bone mineral density modulation.
-  - [ ] **`BCMO1` Beta-Carotene Monooxygenase (`rs7501331` & `rs12934922`)**:
+  - [x] **`BCO1` Beta-Carotene Monooxygenase (`rs7501331` & `rs12934922`)**:
     - *Why*: Regulates intestinal conversion of dietary beta-carotene into active retinol (Vitamin A). Variant carriers exhibit up to 50–70% reduced catalytic activity, requiring direct preformed retinol intake.
-  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191` & `rs10455872`)**:
-    - *Why*: Encodes primary extracellular enzyme for degrading ingested histamine; reduced activity correlates with food histamine intolerance.
-  - [ ] **`FMO3` Trimethylaminuria / Choline Metabolism (`rs2266782` & `rs2266780`)**:
+  - [x] **`PNPLA3` Hepatic Fat / NAFLD Susceptibility (`rs738409`)**:
+    - *Locus*: chr22:43928847 (GRCh38) / chr22:44324727 (GRCh37), c.444C>G (p.Ile148Met).
+    - *Why*: Major genetic modifier of hepatic triglyceride accumulation and non-alcoholic fatty liver disease (NAFLD) susceptibility.
+  - [x] **`FMO3` Trimethylaminuria / Choline Metabolism (`rs2266782` & `rs2266780`)**:
     - *Why*: Modulates conversion of dietary choline-derived trimethylamine (fish odor) to odorless trimethylamine N-oxide (TMAO).
+  - [x] **`CBS` Homocystinuria & Pyridoxine Response (`rs5742905`)**:
+    - *Locus*: chr21:43063074 (GRCh38) / chr21:44483184 (GRCh37), c.833T>C (p.Ile278Thr).
+    - *Why*: Most common pathogenic CBS mutation causing pyridoxine (B6)-responsive homocystinuria; carrier status transmits to 50% of offspring.
+  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191` & `rs10455872`)**:
+    - *Why*: Encodes primary extracellular enzyme for degrading ingested histamine; reduced activity correlates with food histamine intolerance (parked for Phase 6).
 
 ---
 

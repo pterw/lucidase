@@ -92,6 +92,14 @@ EXPECTED = {
     "rs3892097": (42524946, {"T", "G", "A", "C"}, 42128944, {"T", "G", "A", "C"}, "C", "T"),
     "rs1065852": (42526693, {"G", "A", "C"}, 42130691, {"G", "A", "C"}, "G", "A"),
     "rs28371725": (42523804, {"T", "G", "A", "C"}, 42127802, {"T", "G", "A", "C"}, "C", "T"),
+    "rs601338": (49206673, {"G", "A"}, 48703416, {"G", "A"}, "G", "A"),
+    "rs7501331": (81314495, {"T", "C"}, 81280890, {"T", "C"}, "C", "T"),
+    "rs12934922": (81301693, {"G", "A", "T"}, 81268088, {"G", "A", "T"}, "A", "T"),
+    "rs738409": (44324726, {"G", "A", "T", "C"}, 43928846, {"G", "A", "T", "C"}, "C", "G"),
+    "rs2266782": (171076965, {"G", "A"}, 171107824, {"G", "A"}, "G", "A"),
+    "rs2266780": (171083241, {"G", "A"}, 171114101, {"G", "A"}, "A", "G"),
+    "rs5742905": (44483183, {"G", "A", "C"}, 43063073, {"G", "A", "C"}, "A", "G"),
+    "rs2228570": (48272894, {"G", "A", "T", "C"}, 47879111, {"G", "A", "T", "C"}, "A", "G"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -137,6 +145,14 @@ EXPECTED_CLINVAR = {
     "rs3892097": "VCV000016889",
     "rs1065852": "VCV000016893",
     "rs28371725": "VCV000039381",
+    "rs601338": "VCV000012945",
+    "rs7501331": "VCV001253021",
+    "rs12934922": "VCV001293223",
+    "rs738409": "VCV000341932",
+    "rs2266782": "VCV000038394",
+    "rs2266780": "VCV000038395",
+    "rs5742905": "VCV000000120",
+    "rs2228570": "VCV000308887",
 }
 
 
@@ -463,6 +479,12 @@ EXPECTED_MODELS = {
     "BCHE": ("pharmacogenomic", False),
     "G6PD": ("pharmacogenomic", False),
     "CYP2D6": ("pharmacogenomic", False),
+    "FUT2": ("trait", False),
+    "BCO1": ("trait", False),
+    "PNPLA3": ("risk_factor", False),
+    "FMO3": ("trait", False),
+    "CBS": ("autosomal_recessive", True),
+    "VDR": ("trait", False),
 }
 
 
@@ -517,6 +539,12 @@ EXPECTED_TOPICS = {
     "BCHE": "Pseudocholinesterase deficiency (anesthesia apnea)",
     "G6PD": "Glucose-6-phosphate dehydrogenase deficiency (acute hemolytic anemia)",
     "CYP2D6": "CYP2D6 drug metabolism (opioids, antidepressants, tamoxifen)",
+    "FUT2": "Secretor status (FUT2)",
+    "BCO1": "Beta-carotene to vitamin A conversion (BCO1)",
+    "PNPLA3": "Liver fat accumulation & NAFLD risk (PNPLA3)",
+    "FMO3": "Choline & trimethylamine metabolism (FMO3)",
+    "CBS": "Homocysteine transsulfuration & B6 response (CBS)",
+    "VDR": "Vitamin D receptor function (VDR FokI)",
 }
 
 
@@ -624,6 +652,9 @@ EXPECTED_TIERS = {
     "rs1799807": "Tier B", "rs2306283": "Tier A",
     "rs1050828": "Tier A", "rs1050829": "Tier A", "rs5030868": "Tier A",
     "rs3892097": "Tier A", "rs1065852": "Tier A", "rs28371725": "Tier A",
+    "rs601338": "Tier B", "rs7501331": "Tier B", "rs12934922": "Tier B",
+    "rs738409": "Tier A", "rs2266782": "Tier B", "rs2266780": "Tier B",
+    "rs5742905": "Tier B", "rs2228570": "Tier B",
 }
 
 
@@ -683,7 +714,7 @@ def test_qc_rejects_a_citation_that_looks_like_a_pmid(curation):
 
 def test_tier_source_values_per_locus(built):
     sources = {r: l["tier_source"] for r, l in built["loci"].items()}
-    assert {r for r, v in sources.items() if v == "clinvar_review"} == {"rs113993960", "rs1800562", "rs1799945"}
+    assert {r for r, v in sources.items() if v == "clinvar_review"} == {"rs113993960", "rs1800562", "rs1799945", "rs5742905"}
     assert {r for r, v in sources.items() if v == "cpic_level"} == {
         "rs4244285", "rs9923231", "rs4149056", "rs3918290", "rs4986893", "rs12248560",
         "rs1799853", "rs1057910", "rs55886062", "rs67376798", "rs56038477",
@@ -696,7 +727,8 @@ def test_tier_source_values_per_locus(built):
     }
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
-        "rs1801131", "rs4680"
+        "rs1801131", "rs4680",
+        "rs601338", "rs7501331", "rs12934922", "rs738409", "rs2266782", "rs2266780", "rs2228570",
     }
 
 
@@ -934,6 +966,9 @@ TIERS_BEFORE_OVERLAY = {
     "rs1799807": "Tier B", "rs2306283": "Tier A",
     "rs1050828": "Tier A", "rs1050829": "Tier A", "rs5030868": "Tier A",
     "rs3892097": "Tier A", "rs1065852": "Tier A", "rs28371725": "Tier A",
+    "rs601338": "Tier B", "rs7501331": "Tier B", "rs12934922": "Tier B",
+    "rs738409": "Tier A", "rs2266782": "Tier B", "rs2266780": "Tier B",
+    "rs5742905": "Tier B", "rs2228570": "Tier B",
 }
 
 
@@ -959,8 +994,12 @@ def test_imported_evidence_is_machine_imported_with_the_captures_retrieval_time(
         assert prov["accession"].startswith(clinvar["accession"] + "."), rsid
         gnomad = locus["evidence"]["gnomad"]
         assert gnomad["provenance"]["curation_mode"] == "machine_imported", rsid
-        assert gnomad["constraint_provenance"]["curation_mode"] == "machine_imported", rsid
-        assert gnomad["pli"] is not None and gnomad["loeuf"] is not None, rsid
+        if locus["gene"] in ("FUT2", "CBS"):
+            assert gnomad["constraint_provenance"] is None, rsid
+            assert gnomad["pli"] is None and gnomad["loeuf"] is None, rsid
+        else:
+            assert gnomad["constraint_provenance"]["curation_mode"] == "machine_imported", rsid
+            assert gnomad["pli"] is not None and gnomad["loeuf"] is not None, rsid
 
 
 def test_values_without_an_adapter_stay_manually_curated(built, curation):
@@ -992,7 +1031,7 @@ def test_importing_evidence_changes_no_evidence_tier(built):
 
 
 def test_mendelian_tier_follows_the_imported_stars(built):
-    for rsid in ("rs113993960", "rs1799945", "rs1800562"):
+    for rsid in ("rs113993960", "rs1799945", "rs1800562", "rs5742905"):
         clinvar = built["loci"][rsid]["evidence"]["clinvar"]
         assert clinvar["provenance"]["curation_mode"] == "machine_imported"
         conflicting = "conflicting" in clinvar["review_status"]

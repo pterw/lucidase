@@ -1050,7 +1050,7 @@ test("a multi-locus finding whose components are all Found shows the words and n
   // Positive control for the same string: the same pairing with F2 read as Unclear carries the caution.
   const unclear = demoMultiLocusData((records) =>
     records.map((r) => (r.rsid === "rs1799963" ? { ...r, coverage_state: "insufficient_evidence" } : r)));
-  assert.equal(unclear.independentAssortment.length, 1);
+  assert.equal(unclear.independentAssortment.length, 3);
   const flagged = mdSection(markdownReport(unclear), "Co-occurring variant alleles on unlinked loci");
   assert.match(flagged, /rs1799963: Unclear/);
   assert.ok(flagged.includes(MULTI_LOCUS_CAUTION), flagged);
