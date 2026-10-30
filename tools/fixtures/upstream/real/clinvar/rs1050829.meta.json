@@ -1,0 +1,9 @@
+{
+  "bytes": 78864,
+  "http_status": 200,
+  "method": "GET",
+  "request_body": null,
+  "retrieved_at": "2026-10-30T03:54:47Z",
+  "sha256_of_body": "3568c79f4799206277720f9c6aa7ab3837fb624a1dc8ca987273ccc9e3e68517",
+  "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722747%2C1722726%2C1722698%2C1722697%2C1722693%2C1722622%2C1722617%2C1722597%2C1546331%2C1065168%2C100055%2C37123%2C10388%2C10382%2C10361&retmode=json"
+}

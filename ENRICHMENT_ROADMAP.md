@@ -2,7 +2,7 @@
 
 > **Status:** Active Reference & Execution Plan  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 32 curated loci across 21 genes.
+> **Current KB State:** 48 curated loci across 30 genes.
 
 ---
 
@@ -35,6 +35,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 - [x] **Tier 4: One-Carbon Folate & Catecholamine Catabolism**: `MTHFR A1298C` (rs1801131, compound heterozygote pair), `COMT Val158Met` (rs4680, prefrontal dopamine clearance).
 - [x] **Phase 1 (Tier 2B): Thiopurine Toxicity (TPMT & NUDT15)**: `TPMT*2` (rs1800462), `TPMT*3C` (rs1142345), `TPMT*3B` (rs1800460), `NUDT15*3` (rs116855232).
 - [x] **Phase 2 (Tier 3): Severe Adverse Drug Reaction (ADR) HLA Immune Alleles**: `HLA-B*57:01` tag (`rs2395029`), `HLA-A*31:01` tag (`rs1061235`), `HLA-B*58:01` tag (`rs9263726` in `PSORS1C1`). `HLA-B*15:02` tag SNPs excluded per Clinical Honesty guardrails (`AGENTS.md` Rule 4).
+- [x] **Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies**: `CYP2D6` core star alleles (`rs3892097` *4, `rs1065852` *10, `rs28371725` *41), `G6PD` deficiency (`rs1050828` A-, `rs1050829` A+, `rs5030868` Med), `BChE` pseudocholinesterase deficiency (`rs1799807`), `SLCO1B1` statin uptake expansion (`rs2306283` *1b).
 
 ---
 
@@ -70,20 +71,20 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 ---
 
-### Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies
+### Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies (Completed)
 
 * **Target Loci**:
-  - [ ] **`CYP2D6` Core Array Star Alleles**:
+  - [x] **`CYP2D6` Core Array Star Alleles**:
     - *Loci*: `*4` (`rs3892097`, c.506-1G>A splice defect, ~70% of poor metabolizers in Europeans); `*10` (`rs1065852`, p.Pro34Ser, East Asian intermediate metabolizer); `*41` (`rs28371725`, c.2988G>A decreased function).
     - *Why*: Metabolizes ~25% of all clinical drugs (codeine, tramadol, tamoxifen, SSRIs, beta-blockers).
     - *Limitation*: Must strictly refuse full diplotype/metabolizer prediction due to undetectable copy number variations (CNV duplications `*1xN` and full deletions `*5`) on standard genotyping arrays.
-  - [ ] **`BChE` Butyrylcholinesterase / Pseudocholinesterase Deficiency (`rs1799807`)**:
+  - [x] **`BChE` Butyrylcholinesterase / Pseudocholinesterase Deficiency (`rs1799807`)**:
     - *Locus*: chr3:165768994 (GRCh38) / chr3:165488439 (GRCh37), c.293A>G (p.Asp70Gly, Kalow/Atypical variant).
     - *Why*: Patients receiving depolarizing neuromuscular blockers (succinylcholine) or mivacurium during anesthesia develop prolonged neuromuscular blockade and prolonged apnea requiring mechanical ventilation.
-  - [ ] **`G6PD` Glucose-6-Phosphate Dehydrogenase Deficiency**:
+  - [x] **`G6PD` Glucose-6-Phosphate Dehydrogenase Deficiency**:
     - *Loci*: G6PD A- (`rs1050828` c.202G>A + `rs1050829` c.376A>G), G6PD Mediterranean (`rs5030868` c.563C>T).
     - *Why*: X-linked enzymopathy affecting >400 million people. Acute hemolytic anemia triggered by rasburicase, primaquine, dapsone, sulfamethoxazole, nitrofurantoin, and fava beans. CPIC Level A.
-  - [ ] **`SLCO1B1` Expansion (`rs2306283`)**:
+  - [x] **`SLCO1B1` Expansion (`rs2306283`)**:
     - *Locus*: c.388A>G (p.Asn130Asp, `*1b`).
     - *Why*: In combination with existing `rs4149056` (`*5`), enables full differentiation of `*1a` (normal), `*1b` (enhanced), `*5` (poor), and `*15` (poor) statin uptake haplotypes.
 
@@ -93,32 +94,43 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 * **Rationale**: Directly relevant to consumer DNA users exploring diet, B-vitamin supplementation, and metabolic efficiency.
 * **Target Loci**:
-  - [ ] **`FUT2` Secretor Status (`rs601338`)**:
+  - [x] **`FUT2` Secretor Status (`rs601338`)**:
     - *Locus*: chr19:48703417 (GRCh38) / chr19:49206674 (GRCh37), c.428G>A (p.Trp143Ter nonsense variant).
-    - *Why*: Non-secretors (homozygous AA / null, ~20% of Europeans) lack ABO blood group antigens on mucosal surfaces. Associated with altered gut microbiome diversity, lower serum Vitamin B12 levels, and resistance to norovirus infection.
-  - [ ] **`VDR` Vitamin D Receptor (FokI `rs2228570`)**:
-    - *Locus*: chr12:47844671 (GRCh38) / chr12:48239328 (GRCh37), c.2T>C (start codon polymorphism).
+    - *Why*: Non-secretors (homozygous AA / non-secretor, ~20% of Europeans) lack ABO blood group antigens on mucosal surfaces. Associated with altered gut microbiome diversity, lower serum Vitamin B12 levels, and resistance to norovirus infection.
+  - [x] **`VDR` Vitamin D Receptor (FokI `rs2228570`)**:
+    - *Locus*: chr12:47879112 (GRCh38) / chr12:48272895 (GRCh37), c.2T>C (start codon polymorphism).
     - *Why*: Alters translation initiation site resulting in a protein 3 amino acids shorter with altered transactivation capacity and bone mineral density modulation.
-  - [ ] **`BCMO1` Beta-Carotene Monooxygenase (`rs7501331` & `rs12934922`)**:
+  - [x] **`BCO1` Beta-Carotene Monooxygenase (`rs7501331` & `rs12934922`)**:
     - *Why*: Regulates intestinal conversion of dietary beta-carotene into active retinol (Vitamin A). Variant carriers exhibit up to 50–70% reduced catalytic activity, requiring direct preformed retinol intake.
-  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191` & `rs10455872`)**:
-    - *Why*: Encodes primary extracellular enzyme for degrading ingested histamine; reduced activity correlates with food histamine intolerance.
-  - [ ] **`FMO3` Trimethylaminuria / Choline Metabolism (`rs2266782` & `rs2266780`)**:
+  - [x] **`PNPLA3` Hepatic Fat / NAFLD Susceptibility (`rs738409`)**:
+    - *Locus*: chr22:43928847 (GRCh38) / chr22:44324727 (GRCh37), c.444C>G (p.Ile148Met).
+    - *Why*: Major genetic modifier of hepatic triglyceride accumulation and non-alcoholic fatty liver disease (NAFLD) susceptibility.
+  - [x] **`FMO3` Trimethylaminuria / Choline Metabolism (`rs2266782` & `rs2266780`)**:
     - *Why*: Modulates conversion of dietary choline-derived trimethylamine (fish odor) to odorless trimethylamine N-oxide (TMAO).
+  - [x] **`CBS` Homocystinuria & Pyridoxine Response (`rs5742905`)**:
+    - *Locus*: chr21:43063074 (GRCh38) / chr21:44483184 (GRCh37), c.833T>C (p.Ile278Thr).
+    - *Why*: Most common pathogenic CBS mutation causing pyridoxine (B6)-responsive homocystinuria; carrier status transmits to 50% of offspring.
+  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191`, `rs1049742`, `rs1049793`, `rs2052129`)**:
+    - *Why*: Encodes primary extracellular enzyme for degrading ingested histamine; reduced activity correlates with food histamine intolerance (parked for Phase 6).
+    - *Curation note*: Per 2024 Nutrients benchmark (PMCID: PMC11054051), the canonical functional panel comprises `rs10156191` (p.Thr16Met), `rs1049742` (p.Ser332Phe), `rs1049793` (p.His664Asp), and promoter `rs2052129` (correcting earlier drafts referencing ABCB1 `rs1045642` or ERCC5 `rs1047768`).
 
 ---
 
 ### Phase 5: Hereditary Disease & Secondary Findings Expansions
 
 * **Target Loci**:
-  - [ ] **`HFE` S65C (`rs41512945`)**:
-    - *Locus*: chr6:26090954 (GRCh38) / chr6:26092523 (GRCh37), c.193A>T (p.Ser65Cys).
+  - [x] **`HFE` S65C (`rs1800730`)**:
+    - *Locus*: chr6:26090957 (GRCh38) / chr6:26091185 (GRCh37), c.193A>T (p.Ser65Cys).
     - *Why*: Completes the HFE hemochromatosis panel alongside existing C282Y (`rs1800562`) and H63D (`rs1799945`). Compound heterozygosity (C282Y / S65C) confers mild iron overload risk.
-  - [ ] **`F13A1` Factor XIII Val34Leu (`rs5985`)**:
-    - *Locus*: chr6:6144368 (GRCh38) / chr6:6144888 (GRCh37), c.100G>T (p.Val34Leu).
+  - [x] **`F13A1` Factor XIII Val34Leu (`rs5985`)**:
+    - *Locus*: chr6:6318562 (GRCh38) / chr6:6318795 (GRCh37), c.100G>T (p.Val34Leu, plus-strand C>A).
     - *Why*: Synergizes with existing thrombophilia markers (`F5` Leiden, `F2` Prothrombin). The 34Leu allele accelerates fibrin cross-linking, providing protective effect against venous thromboembolism.
-  - [ ] **Common Founder Variants in ACMG SF Genes (e.g. `BRCA1` 185delAG, `BRCA2` 6174delT)**:
-    - *Condition*: Only if verified to be reliably called on consumer microarrays (23andMe / Ancestry).
+  - [x] **Common Founder Variants in ACMG SF Genes (`BRCA1` & `BRCA2`)**:
+    - *Loci*: `BRCA1` 185delAG (`rs80357914` / `i4000377`, c.68_69delAG), `BRCA1` 5382insC (`rs80357906` / `i4000378`, c.5266dupC), `BRCA2` 6174delT (`rs80359550` / `i4000379`, c.5946delT).
+    - *Why*: Canonical 3-variant founder mutation panel for hereditary breast and ovarian cancer (HBOC); FDA-authorized direct-to-consumer carrier screening.
+  - [x] **`SERPINA1` Alpha-1 Antitrypsin Deficiency (Pi\*Z & Pi\*S)**:
+    - *Loci*: Pi\*Z (`rs28929474`, chr14:94378610 GRCh38 / 94844947 GRCh37, c.1096G>A, p.Glu366Lys) and Pi\*S (`rs17580`, chr14:94380925 GRCh38 / 94847262 GRCh37, c.863A>T, p.Glu288Val).
+    - *Why*: Autosomal recessive / co-dominant risk for early-onset pulmonary emphysema and liver cirrhosis. Completes high-frequency European carrier testing.
 
 ---
 

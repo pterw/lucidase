@@ -135,7 +135,7 @@ class TestGuardrailsAndKbRules(unittest.TestCase):
 
     def test_acmg_loci_carry_the_single_locus_caveat(self):
         acmg = [r for r, l in self.kb["loci"].items() if self.kb["genes"][l["gene"]]["acmg_sf"]]
-        self.assertEqual(sorted(acmg), ["rs1799945", "rs1800562"])
+        self.assertEqual(sorted(acmg), ["rs1799945", "rs1800562", "rs1800730", "rs80357906", "rs80357914", "rs80359550"])
         for rsid in acmg:
             self.assertEqual(self.kb["loci"][rsid]["limitation"], ACMG_SINGLE_LOCUS_CAVEAT)
 

@@ -1,0 +1,9 @@
+{
+  "bytes": 42061,
+  "http_status": 200,
+  "method": "GET",
+  "request_body": null,
+  "retrieved_at": "2026-10-30T05:27:43Z",
+  "sha256_of_body": "956e43998b897f76e01e88d0d6f81acc1e6edccff013adc6b9dfce93b0e87e53",
+  "url": "https://rest.ensembl.org/vep/human/id/rs738409?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+}

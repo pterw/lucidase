@@ -63,6 +63,17 @@ export function karyogramStateLabels() {
   return labels;
 }
 
+/** Formats the display label for a gene-level karyogram result using the shared RESULT_WORDS vocabulary. */
+export function geneResultLabel(result, labels = karyogramStateLabels()) {
+  if (!result || typeof result !== "object") return "Not available";
+  if (result.state === "reference") return "No file yet";
+  const base = labels[result.state] || result.state;
+  if (result.isPartial && result.state === "supported_not_observed") {
+    return `${base} (${result.tested} of ${result.total} tested)`;
+  }
+  return base;
+}
+
 export const MODEL_LABELS = {
   autosomal_recessive: "Autosomal recessive",
   autosomal_dominant: "Autosomal dominant",
@@ -97,6 +108,7 @@ export const REPORT_GROUPS = deepFreeze([
 const GROUP_BY_MODEL = {
   pharmacogenomic: "medicines",
   risk_factor: "risk",
+  autosomal_dominant: "risk",
   autosomal_recessive: "carrier",
   trait: "traits",
 };

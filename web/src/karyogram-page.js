@@ -8,9 +8,9 @@
  */
 
 import { loadKnowledgeBase } from "./kb-loader.js";
-import { layoutKaryogram } from "./core/karyogram.js";
+import { layoutKaryogram, rollUpGeneResult } from "./core/karyogram.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
-import { RESULT_WORDS, escapeHtml, karyogramStateLabels } from "./view-model.js";
+import { RESULT_WORDS, escapeHtml, geneResultLabel, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
 import { initPagesMenu } from "./pages-menu.js";
 
@@ -44,6 +44,8 @@ function setInputsDisabled(disabled) {
   $("karyogram-file-input").disabled = disabled;
   $("btn-karyogram-browse").disabled = disabled;
   $("btn-load-karyogram-sample").disabled = disabled;
+  const btnExport = $("btn-karyogram-export");
+  if (btnExport) btnExport.disabled = disabled;
 }
 
 function updateProgress(percent, message) {
@@ -123,23 +125,40 @@ function topicOf(gene) {
 }
 
 /** The result cell: the swatch and the plain word with a file; the muted "No file yet" while there is no result. */
-function resultCell(layout, state) {
-  if (!layout.sample) return `<span class="lds-na-text">No file yet</span>`;
+function resultCell(layout, result) {
+  if (!layout.sample || result.state === "reference") return `<span class="lds-na-text">No file yet</span>`;
+  const label = geneResultLabel(result);
   return (
-    `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
-    `${escapeHtml(labels[state])}</span>`
+    `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(result.state)}" aria-hidden="true"></span>` +
+    `${escapeHtml(label)}</span>`
   );
 }
 
 function renderLoci(layout) {
-  $("karyogram-loci-body").innerHTML = layout.reference.loci
-    .map((l) => {
-      const state = stateOf(layout, l.rsid);
+  const genes = [];
+  const seen = new Set();
+  for (const l of layout.reference.loci) {
+    if (!seen.has(l.gene)) {
+      seen.add(l.gene);
+      genes.push({
+        gene: l.gene,
+        chrom: l.chrom,
+        loci: layout.reference.loci.filter((x) => x.gene === l.gene),
+      });
+    }
+  }
+
+  $("karyogram-loci-body").innerHTML = genes
+    .map((g) => {
+      const result = rollUpGeneResult(
+        g.loci,
+        layout.sample ? layout.sample.observations : null,
+      );
       return (
-        `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
-        `<td class="font-bold">${escapeHtml(topicOf(l.gene))}</td><td class="lds-data">${escapeHtml(l.gene)}</td>` +
-        `<td class="lds-data">${escapeHtml(l.chrom)}</td>` +
-        `<td>${resultCell(layout, state)}</td></tr>`
+        `<tr data-gene="${escapeHtml(g.gene)}" data-rsid="${escapeHtml(g.loci[0].rsid)}" data-state="${escapeHtml(result.state)}"${result.isPartial ? ` data-partial="true"` : ""}>` +
+        `<td class="font-bold">${escapeHtml(topicOf(g.gene))}</td><td class="lds-data">${escapeHtml(g.gene)}</td>` +
+        `<td class="lds-data">${escapeHtml(g.chrom)}</td>` +
+        `<td>${resultCell(layout, result)}</td></tr>`
       );
     })
     .join("");
@@ -349,6 +368,107 @@ function clearFile() {
   $("btn-karyogram-browse").focus();
 }
 
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export async function exportKaryogramJpeg() {
+  const figureSvg = document.querySelector("#karyogram-figure svg");
+  if (!figureSvg) return null;
+
+  const computed = getComputedStyle(document.documentElement);
+  const bodyComputed = getComputedStyle(document.body);
+  const bgCanvas = bodyComputed.backgroundColor || computed.getPropertyValue("--bg-canvas").trim() || "#0B1117";
+
+  const svgClone = figureSvg.cloneNode(true);
+
+  // Capture resolved computed styles from live SVG elements to respect the design system tokens
+  const SVG_STYLE_PROPS = [
+    "fill",
+    "fill-opacity",
+    "stroke",
+    "stroke-width",
+    "stroke-dasharray",
+    "font-family",
+    "font-size",
+    "font-weight",
+    "text-anchor",
+    "clip-path",
+  ];
+
+  const sourceElements = [figureSvg, ...figureSvg.querySelectorAll("*")];
+  const cloneElements = [svgClone, ...svgClone.querySelectorAll("*")];
+
+  for (let i = 0; i < sourceElements.length; i++) {
+    const src = sourceElements[i];
+    const dest = cloneElements[i];
+    if (!src || !dest) continue;
+    const srcComputed = getComputedStyle(src);
+    for (const prop of SVG_STYLE_PROPS) {
+      const val = srcComputed.getPropertyValue(prop);
+      if (val) {
+        dest.style.setProperty(prop, val);
+      }
+    }
+  }
+
+  const svgWidth = parseFloat(svgClone.getAttribute("width")) || 672;
+  const svgHeight = parseFloat(svgClone.getAttribute("height")) || 532;
+  const padX = 48;
+  const padY = 40;
+  const scale = 2;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round((svgWidth + padX * 2) * scale);
+  canvas.height = Math.round((svgHeight + padY * 2) * scale);
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.fillStyle = bgCanvas;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const blobUrl = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  await new Promise((resolve, reject) => {
+    img.onload = () => {
+      ctx.drawImage(img, padX * scale, padY * scale, svgWidth * scale, svgHeight * scale);
+      URL.revokeObjectURL(blobUrl);
+      resolve();
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(blobUrl);
+      reject(err);
+    };
+    img.src = blobUrl;
+  });
+
+  const base = view.source
+    ? `Lucidase_Chromosome_Map_${view.source.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_")}`
+    : "Lucidase_Chromosome_Map";
+  const filename = `${base}.jpg`;
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        downloadBlob(blob, filename);
+        resolve({ filename, size: blob.size });
+      } else {
+        resolve(null);
+      }
+    }, "image/jpeg", 0.95);
+  });
+}
+
 async function initPage() {
   initTheme();
   initPagesMenu();
@@ -356,6 +476,7 @@ async function initPage() {
     get layout() {
       return view.layout;
     },
+    exportJpeg: exportKaryogramJpeg,
   };
   const fileInput = $("karyogram-file-input");
   fileInput.addEventListener("change", (e) => {
@@ -371,6 +492,12 @@ async function initPage() {
       showError((err && err.message) || err);
     }
   });
+  const btnExport = $("btn-karyogram-export");
+  if (btnExport) {
+    btnExport.addEventListener("click", () => {
+      exportKaryogramJpeg().catch((err) => showError((err && err.message) || err));
+    });
+  }
   try {
     view.kb = await loadKnowledgeBase();
     render(layoutKaryogram({ kb: view.kb, binSize: KARYOGRAM_BIN_SIZE }));

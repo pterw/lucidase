@@ -86,6 +86,27 @@ EXPECTED = {
     "rs9263726": (31106498, {"G", "A", "C"}, 31138721, {"G", "A", "C"}, "G", "A"),
     "rs1799807": (165548528, {"T", "A", "C"}, 165830740, {"T", "A", "C"}, "T", "C"),
     "rs2306283": (21329737, {"A", "C", "G", "T"}, 21176803, {"A", "C", "G", "T"}, "A", "G"),
+    "rs1050828": (153764216, {"T", "C"}, 154536001, {"T", "C"}, "C", "T"),
+    "rs1050829": (153763491, {"C", "A", "T"}, 154535276, {"C", "A", "T"}, "T", "C"),
+    "rs5030868": (153762633, {"G", "A"}, 154534418, {"G", "A"}, "G", "A"),
+    "rs3892097": (42524946, {"T", "G", "A", "C"}, 42128944, {"T", "G", "A", "C"}, "C", "T"),
+    "rs1065852": (42526693, {"G", "A", "C"}, 42130691, {"G", "A", "C"}, "G", "A"),
+    "rs28371725": (42523804, {"T", "G", "A", "C"}, 42127802, {"T", "G", "A", "C"}, "C", "T"),
+    "rs601338": (49206673, {"G", "A"}, 48703416, {"G", "A"}, "G", "A"),
+    "rs7501331": (81314495, {"T", "C"}, 81280890, {"T", "C"}, "C", "T"),
+    "rs12934922": (81301693, {"G", "A", "T"}, 81268088, {"G", "A", "T"}, "A", "T"),
+    "rs738409": (44324726, {"G", "A", "T", "C"}, 43928846, {"G", "A", "T", "C"}, "C", "G"),
+    "rs2266782": (171076965, {"G", "A"}, 171107824, {"G", "A"}, "G", "A"),
+    "rs2266780": (171083241, {"G", "A"}, 171114101, {"G", "A"}, "A", "G"),
+    "rs5742905": (44483183, {"G", "A", "C"}, 43063073, {"G", "A", "C"}, "A", "G"),
+    "rs2228570": (48272894, {"G", "A", "T", "C"}, 47879111, {"G", "A", "T", "C"}, "A", "G"),
+    "rs1800730": (26091184, {"A", "T"}, 26090956, {"A", "T"}, "A", "T"),
+    "rs5985": (6318794, {"C", "A", "G", "T"}, 6318561, {"C", "A", "G", "T"}, "C", "A"),
+    "rs80357914": (41276043, {"ACT", "A"}, 43124026, {"ACT", "A"}, "ACT", "A"),
+    "rs80357906": (41209078, {"T", "TG"}, 43057061, {"T", "TG"}, "T", "TG"),
+    "rs80359550": (32914436, {"GT", "G"}, 32340299, {"GT", "G"}, "GT", "G"),
+    "rs28929474": (94844946, {"C", "A", "G", "T"}, 94378609, {"C", "A", "G", "T"}, "C", "T"),
+    "rs17580": (94847261, {"A", "T"}, 94380924, {"A", "T"}, "T", "A"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -125,6 +146,27 @@ EXPECTED_CLINVAR = {
     "rs9263726": "VCV003059106",
     "rs1799807": "VCV000013215",
     "rs2306283": "VCV000259983",
+    "rs1050828": "VCV000037123",
+    "rs1050829": "VCV000100055",
+    "rs5030868": "VCV000100057",
+    "rs3892097": "VCV000016889",
+    "rs1065852": "VCV000016893",
+    "rs28371725": "VCV000039381",
+    "rs601338": "VCV000012945",
+    "rs7501331": "VCV001253021",
+    "rs12934922": "VCV001293223",
+    "rs738409": "VCV000341932",
+    "rs2266782": "VCV000038394",
+    "rs2266780": "VCV000038395",
+    "rs5742905": "VCV000000120",
+    "rs2228570": "VCV000308887",
+    "rs1800730": "VCV000000011",
+    "rs5985": "VCV000016532",
+    "rs80357914": "VCV000017662",
+    "rs80357906": "VCV000017677",
+    "rs80359550": "VCV000009325",
+    "rs28929474": "VCV000017967",
+    "rs17580": "VCV000017969",
 }
 
 
@@ -235,8 +277,12 @@ def test_rs6025_ref_alt_is_build_independent(built):
 
 def test_indel_locus_declares_array_allele_codes(built):
     assert built["loci"]["rs113993960"]["allele_codes"] == {"D": "alt", "I": "ref"}
+    assert built["loci"]["rs80357914"]["allele_codes"] == {"I": "ref", "D": "alt"}
+    assert built["loci"]["rs80357906"]["allele_codes"] == {"D": "ref", "I": "alt"}
+    assert built["loci"]["rs80359550"]["allele_codes"] == {"I": "ref", "D": "alt"}
+    indels = {"rs113993960", "rs80357914", "rs80357906", "rs80359550"}
     assert all(
-        built["loci"][r]["allele_codes"] is None for r in built["loci"] if r != "rs113993960"
+        built["loci"][r]["allele_codes"] is None for r in built["loci"] if r not in indels
     )
 
 
@@ -449,6 +495,18 @@ EXPECTED_MODELS = {
     "HLA-A": ("pharmacogenomic", False),
     "PSORS1C1": ("pharmacogenomic", False),
     "BCHE": ("pharmacogenomic", False),
+    "G6PD": ("pharmacogenomic", False),
+    "CYP2D6": ("pharmacogenomic", False),
+    "FUT2": ("trait", False),
+    "BCO1": ("trait", False),
+    "PNPLA3": ("risk_factor", False),
+    "FMO3": ("trait", False),
+    "CBS": ("autosomal_recessive", True),
+    "VDR": ("trait", False),
+    "F13A1": ("risk_factor", False),
+    "BRCA1": ("autosomal_dominant", True),
+    "BRCA2": ("autosomal_dominant", True),
+    "SERPINA1": ("autosomal_recessive", True),
 }
 
 
@@ -467,7 +525,7 @@ def test_gene_inheritance_follows_the_owner_safe_classification(built):
 def test_every_locus_gene_exists_and_acmg_flag_is_hfe_only(built):
     for rsid, locus in built["loci"].items():
         assert locus["gene"] in built["genes"], rsid
-    assert {g for g, v in built["genes"].items() if v["acmg_sf"]} == {"HFE"}
+    assert {g for g, v in built["genes"].items() if v["acmg_sf"]} == {"HFE", "BRCA1", "BRCA2"}
 
 
 def test_gene_insights_are_curated_and_null_when_absent(built):
@@ -501,6 +559,18 @@ EXPECTED_TOPICS = {
     "HLA-A": "Carbamazepine hypersensitivity (HLA-A*31:01)",
     "PSORS1C1": "Allopurinol hypersensitivity (HLA-B*58:01)",
     "BCHE": "Pseudocholinesterase deficiency (anesthesia apnea)",
+    "G6PD": "Glucose-6-phosphate dehydrogenase deficiency (acute hemolytic anemia)",
+    "CYP2D6": "CYP2D6 drug metabolism (opioids, antidepressants, tamoxifen)",
+    "FUT2": "Secretor status (FUT2)",
+    "BCO1": "Beta-carotene to vitamin A conversion (BCO1)",
+    "PNPLA3": "Liver fat accumulation & NAFLD risk (PNPLA3)",
+    "FMO3": "Choline & trimethylamine metabolism (FMO3)",
+    "CBS": "Homocysteine transsulfuration & B6 response (CBS)",
+    "VDR": "Vitamin D receptor function (VDR FokI)",
+    "F13A1": "Blood clots and fibrin stability (Factor XIII Val34Leu)",
+    "BRCA1": "Hereditary breast and ovarian cancer (BRCA1)",
+    "BRCA2": "Hereditary breast and ovarian cancer (BRCA2)",
+    "SERPINA1": "Alpha-1 antitrypsin deficiency (SERPINA1 Pi*Z and Pi*S)",
 }
 
 
@@ -606,6 +676,14 @@ EXPECTED_TIERS = {
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
     "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
     "rs1799807": "Tier B", "rs2306283": "Tier A",
+    "rs1050828": "Tier A", "rs1050829": "Tier A", "rs5030868": "Tier A",
+    "rs3892097": "Tier A", "rs1065852": "Tier A", "rs28371725": "Tier A",
+    "rs601338": "Tier B", "rs7501331": "Tier B", "rs12934922": "Tier B",
+    "rs738409": "Tier A", "rs2266782": "Tier B", "rs2266780": "Tier B",
+    "rs5742905": "Tier B", "rs2228570": "Tier B",
+    "rs1800730": "Tier D", "rs5985": "Tier B",
+    "rs80357914": "Tier A", "rs80357906": "Tier A", "rs80359550": "Tier A",
+    "rs28929474": "Tier B", "rs17580": "Tier B",
 }
 
 
@@ -665,7 +743,10 @@ def test_qc_rejects_a_citation_that_looks_like_a_pmid(curation):
 
 def test_tier_source_values_per_locus(built):
     sources = {r: l["tier_source"] for r, l in built["loci"].items()}
-    assert {r for r, v in sources.items() if v == "clinvar_review"} == {"rs113993960", "rs1800562", "rs1799945"}
+    assert {r for r, v in sources.items() if v == "clinvar_review"} == {
+        "rs113993960", "rs1800562", "rs1799945", "rs5742905",
+        "rs1800730", "rs80357914", "rs80357906", "rs80359550", "rs28929474", "rs17580",
+    }
     assert {r for r, v in sources.items() if v == "cpic_level"} == {
         "rs4244285", "rs9923231", "rs4149056", "rs3918290", "rs4986893", "rs12248560",
         "rs1799853", "rs1057910", "rs55886062", "rs67376798", "rs56038477",
@@ -673,10 +754,13 @@ def test_tier_source_values_per_locus(built):
         "rs1800462", "rs1142345", "rs1800460", "rs116855232",
         "rs2395029", "rs1061235", "rs9263726",
         "rs1799807", "rs2306283",
+        "rs1050828", "rs1050829", "rs5030868",
+        "rs3892097", "rs1065852", "rs28371725",
     }
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
-        "rs1801131", "rs4680"
+        "rs1801131", "rs4680",
+        "rs601338", "rs7501331", "rs12934922", "rs738409", "rs2266782", "rs2266780", "rs2228570", "rs5985",
     }
 
 
@@ -912,6 +996,14 @@ TIERS_BEFORE_OVERLAY = {
     "rs1800462": "Tier A", "rs1142345": "Tier A", "rs1800460": "Tier A", "rs116855232": "Tier A",
     "rs2395029": "Tier A", "rs1061235": "Tier A", "rs9263726": "Tier A",
     "rs1799807": "Tier B", "rs2306283": "Tier A",
+    "rs1050828": "Tier A", "rs1050829": "Tier A", "rs5030868": "Tier A",
+    "rs3892097": "Tier A", "rs1065852": "Tier A", "rs28371725": "Tier A",
+    "rs601338": "Tier B", "rs7501331": "Tier B", "rs12934922": "Tier B",
+    "rs738409": "Tier A", "rs2266782": "Tier B", "rs2266780": "Tier B",
+    "rs5742905": "Tier B", "rs2228570": "Tier B",
+    "rs1800730": "Tier D", "rs5985": "Tier B",
+    "rs80357914": "Tier A", "rs80357906": "Tier A", "rs80359550": "Tier A",
+    "rs28929474": "Tier B", "rs17580": "Tier B",
 }
 
 
@@ -937,8 +1029,12 @@ def test_imported_evidence_is_machine_imported_with_the_captures_retrieval_time(
         assert prov["accession"].startswith(clinvar["accession"] + "."), rsid
         gnomad = locus["evidence"]["gnomad"]
         assert gnomad["provenance"]["curation_mode"] == "machine_imported", rsid
-        assert gnomad["constraint_provenance"]["curation_mode"] == "machine_imported", rsid
-        assert gnomad["pli"] is not None and gnomad["loeuf"] is not None, rsid
+        if locus["gene"] in ("FUT2", "CBS"):
+            assert gnomad["constraint_provenance"] is None, rsid
+            assert gnomad["pli"] is None and gnomad["loeuf"] is None, rsid
+        else:
+            assert gnomad["constraint_provenance"]["curation_mode"] == "machine_imported", rsid
+            assert gnomad["pli"] is not None and gnomad["loeuf"] is not None, rsid
 
 
 def test_values_without_an_adapter_stay_manually_curated(built, curation):
@@ -970,7 +1066,7 @@ def test_importing_evidence_changes_no_evidence_tier(built):
 
 
 def test_mendelian_tier_follows_the_imported_stars(built):
-    for rsid in ("rs113993960", "rs1799945", "rs1800562"):
+    for rsid in ("rs113993960", "rs1799945", "rs1800562", "rs5742905", "rs1800730", "rs80357914", "rs80357906", "rs80359550", "rs28929474", "rs17580"):
         clinvar = built["loci"][rsid]["evidence"]["clinvar"]
         assert clinvar["provenance"]["curation_mode"] == "machine_imported"
         conflicting = "conflicting" in clinvar["review_status"]
@@ -1210,3 +1306,70 @@ def test_overlay_runs_the_range_check_on_the_finished_evidence(monkeypatch, cura
     assert kb is None
     assert "rs6025" in seen
     assert any("sentinel range error" in e for e in errors), errors
+
+
+def test_cyp2d6_drug_responses_withhold_affirmative_metabolizer_phenotype(built):
+    """P1-098: CYP2D6 drug responses withhold unphased patient-level metabolizer phenotypes."""
+    for rsid in ("rs3892097", "rs1065852", "rs28371725"):
+        interps = built["loci"][rsid]["interpretations"]
+        for count in ("1", "2"):
+            resp = interps[count]["drug_response"] or ""
+            assert "metabolizer phenotype" not in resp.lower()
+            assert "diplotyping" in resp
+
+def test_fut2_phenotype_reports_higher_total_b12_without_asserting_increased_bioavailability(built):
+    """P2-025: FUT2 non-secretor genotype reports higher circulating B12 (haptocorrin)."""
+    p2 = built["loci"]["rs601338"]["interpretations"]["2"]["phenotype"]
+    assert "higher total circulating vitamin B12" in p2
+    assert "lower" not in p2.lower()
+    assert "transcobalamin" in p2
+
+
+def test_vdr_foki_phenotype_labels_match_conventional_f_and_F(built):
+    """P2-026: VDR FokI assigns 'f' to longer 427-AA isoform and 'F' to shorter 424-AA isoform."""
+    p0 = built["loci"]["rs2228570"]["interpretations"]["0"]["phenotype"]
+    p1 = built["loci"]["rs2228570"]["interpretations"]["1"]["phenotype"]
+    p2 = built["loci"]["rs2228570"]["interpretations"]["2"]["phenotype"]
+
+    assert "427-amino-acid" in p0 and "f allele" in p0 and "ff" in p0
+    assert "427-AA (f)" in p1 and "424-AA (F)" in p1 and "Ff" in p1
+    assert "424-amino-acid" in p2 and "F allele" in p2 and "FF" in p2
+
+
+def test_bco1_phenotype_distinguishes_r267s_and_a379v(built):
+    p1 = built['loci']['rs12934922']['interpretations']['1']['phenotype']
+    p2 = built['loci']['rs12934922']['interpretations']['2']['phenotype']
+
+    assert '32%' not in p1
+    assert '32%' not in p2
+    assert 'Ala379Val' in p1 and 'rs7501331' in p1
+    assert 'Ala379Val' in p2
+
+
+def test_fmo3_phenotypes_qualify_activity_by_haplotype_pairing(built):
+    p1_308 = built['loci']['rs2266780']['interpretations']['1']['phenotype']
+    p2_308 = built['loci']['rs2266780']['interpretations']['2']['phenotype']
+    caveats_308 = built['loci']['rs2266780']['interpretations']['2']['caveats']
+
+    assert 'Mild reduction in FMO3 catalytic efficiency' in p1_308
+    assert 'p.Glu158Lys' in p2_308
+    assert 'clinically evident' not in p2_308.lower()
+    assert any('does not cause severe trimethylaminuria in isolation' in c for c in caveats_308)
+
+    p2_158 = built['loci']['rs2266782']['interpretations']['2']['phenotype']
+    assert 'p.Glu308Gly' in p2_158
+
+def test_cbs_phenotypes_qualify_844ins68_rescuing_insertion(built):
+    """P2-029: CBS c.833T>C qualifies homocystinuria claims by cis 844ins68 rescuing insertion."""
+    limitation = built["loci"]["rs5742905"]["limitation"]
+    p1 = built["loci"]["rs5742905"]["interpretations"]["1"]["phenotype"]
+    c1 = built["loci"]["rs5742905"]["interpretations"]["1"]["caveats"]
+    p2 = built["loci"]["rs5742905"]["interpretations"]["2"]["phenotype"]
+    c2 = built["loci"]["rs5742905"]["interpretations"]["2"]["caveats"]
+
+    assert "844ins68" in limitation
+    assert "844ins68" in p1
+    assert any("844ins68" in c for c in c1)
+    assert "844ins68" in p2
+    assert any("844ins68" in c for c in c2)
+

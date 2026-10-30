@@ -419,8 +419,12 @@ def test_synthetic_gnomad_zero_an_is_none_not_a_division():
 def test_gnomad_constraint_for_every_gene(snapshot, gene):
     constraint = snapshot.constraint(gene)
     assert constraint.symbol == gene
-    assert constraint.pli is not None and 0 < constraint.pli <= 1
-    assert constraint.loeuf is not None and constraint.loeuf > 0
+    if gene in {"CBS", "FUT2"}:
+        assert constraint.pli is None and "pli" in constraint.reasons
+        assert constraint.loeuf is None and "loeuf" in constraint.reasons
+    else:
+        assert constraint.pli is not None and 0 < constraint.pli <= 1
+        assert constraint.loeuf is not None and constraint.loeuf > 0
 
 
 def test_gnomad_constraint_loeuf_is_oe_lof_upper(snapshot):

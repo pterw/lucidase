@@ -129,7 +129,7 @@ def test_demo_multi_locus_cards_show_each_component_word_and_caution_on_unclear(
     compound = rows.filter(has_text="Possible compound heterozygote")
     pairing = rows.filter(has_text="Co-occurring variant alleles")
     expect(compound).to_have_count(1)
-    expect(pairing).to_have_count(1)
+    expect(pairing).to_have_count(6)
 
     # HFE: C282Y is Found, H63D's own word is Unclear, so the card carries the caution line.
     _assert_component(compound, "rs1800562", "Found", "supported_and_observed")
@@ -138,14 +138,16 @@ def test_demo_multi_locus_cards_show_each_component_word_and_caution_on_unclear(
     expect(compound.get_by_text(MULTI_LOCUS_CAUTION, exact=True)).to_have_count(1)  # positive control
 
     # F5 + F2: both Found, no caution line (same locator as the positive control above).
-    _assert_component(pairing, "rs6025", "Found", "supported_and_observed")
-    _assert_component(pairing, "rs1799963", "Found", "supported_and_observed")
-    expect(pairing.get_by_text(MULTI_LOCUS_CAUTION, exact=True)).to_have_count(0)
+    f5_f2 = pairing.filter(has_text="F5").filter(has_text="F2")
+    expect(f5_f2).to_have_count(1)
+    _assert_component(f5_f2, "rs6025", "Found", "supported_and_observed")
+    _assert_component(f5_f2, "rs1799963", "Found", "supported_and_observed")
+    expect(f5_f2.get_by_text(MULTI_LOCUS_CAUTION, exact=True)).to_have_count(0)
     expect(caution).to_have_count(1)
 
     # The existing inspect buttons are kept.
     expect(compound.locator("button.btn-inspect-gene[data-gene='HFE']")).to_have_count(1)
-    expect(pairing.locator("button.btn-inspect-gene")).to_have_count(2)
+    expect(f5_f2.locator("button.btn-inspect-gene")).to_have_count(2)
 
 
 # --- The simulator's words (design RecordInspector): rows, notes and the "How this is worked out" sentence.
@@ -318,5 +320,5 @@ def test_multi_locus_card_chips_are_neutral_not_category_tones(loaded_page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     cards = page.locator("#assortment-cards-container")
-    expect(cards.locator(".lds-tag-neutral")).to_have_count(4)  # positive control: two neutral chips on each card
+    expect(cards.locator(".lds-tag-neutral")).to_have_count(14)  # positive control: two neutral chips on each card
     expect(cards.locator(".lds-tag[class*='lds-tag-cat-']")).to_have_count(0)

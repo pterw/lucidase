@@ -679,7 +679,7 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .kary-bin-empty { fill: var(--ink-subtle); fill-opacity: 0.7; }
 .kary-cen { stroke: var(--ink-subtle); stroke-width: 1.75; }
 .kary-label { fill: var(--ink-muted); font-family: var(--font-mono); font-weight: 600; }
-.kary-halo { fill: var(--kary-fill); fill-opacity: 0.1; transition: fill-opacity var(--dur-fast) ease; }
+.kary-halo { fill: var(--kary-fill); fill-opacity: 0.1; transition: fill-opacity var(--dur-fast) ease; pointer-events: none; }
 .kary-core { fill: var(--kary-fill); stroke: var(--kary-fill); stroke-width: 1; }
 .kary-state-supported_not_observed .kary-core,
 .kary-state-not_tested_by_array .kary-core { fill: var(--bg-canvas); stroke-width: 1.75; }

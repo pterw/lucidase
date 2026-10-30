@@ -145,7 +145,7 @@ class NotDetectedStatement(Fixture):
         one = next(r for r in self.report(self.wild_type("rs1800562")).records if r.rsid == "rs1800562")
         self.assertIn("(1 variant tested in HFE)", one.not_detected_statement)
         both = self.report(self.wild_type("rs1800562"), self.wild_type("rs1799945"))
-        statements = [r.not_detected_statement for r in both.records if r.gene == "HFE"]
+        statements = [r.not_detected_statement for r in both.records if r.gene == "HFE" and r.not_detected_statement]
         self.assertEqual(len(statements), 2)
         for s in statements:
             self.assertIn("(2 variants tested in HFE)", s)

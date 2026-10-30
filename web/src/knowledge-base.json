@@ -627,6 +627,82 @@
       },
       "topic": "Pseudocholinesterase deficiency (anesthesia apnea)"
     },
+    "BCO1": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "trait",
+        "omim": "605748",
+        "penetrance": null
+      },
+      "insights": null,
+      "topic": "Beta-carotene to vitamin A conversion (BCO1)"
+    },
+    "BRCA1": {
+      "acmg_sf": true,
+      "inheritance": {
+        "disease": "Hereditary breast and ovarian cancer syndrome",
+        "mendelian_disease": true,
+        "model": "autosomal_dominant",
+        "omim": "113705",
+        "penetrance": 0.72
+      },
+      "insights": {
+        "clinical_relevance": "Heterozygous pathogenic variant carriers have up to a ~72% cumulative lifetime risk of breast cancer and ~44% risk of ovarian cancer, requiring enhanced surveillance and consideration of risk-reducing interventions per NCCN guidelines.",
+        "ensembl_gene_id": "ENSG00000012048",
+        "mechanism": "Truncating frameshift and nonsense mutations eliminate critical functional domains, abolishing error-free DNA repair and predisposing epithelial tissues to genomic instability.",
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "manually_curated from UniProt P38398, Ensembl ENSG00000012048, and NCCN Genetic/Familial High-Risk Assessment Guidelines",
+          "url": null
+        },
+        "summary": "BRCA1 encodes an essential tumor suppressor that maintains genomic integrity through homologous recombination repair of DNA double-strand breaks and cell cycle checkpoint control.",
+        "uniprot_id": "P38398"
+      },
+      "topic": "Hereditary breast and ovarian cancer (BRCA1)"
+    },
+    "BRCA2": {
+      "acmg_sf": true,
+      "inheritance": {
+        "disease": "Hereditary breast and ovarian cancer syndrome",
+        "mendelian_disease": true,
+        "model": "autosomal_dominant",
+        "omim": "600185",
+        "penetrance": 0.69
+      },
+      "insights": {
+        "clinical_relevance": "Carriers face an estimated 45-69% lifetime risk of female breast cancer, 11-17% ovarian cancer risk, and increased risks for male breast, prostate, and pancreatic cancers.",
+        "ensembl_gene_id": "ENSG00000139618",
+        "mechanism": "Loss-of-function frameshift variants impede RAD51 nucleofilament formation, leaving double-strand breaks to be repaired by error-prone non-homologous end joining.",
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "manually_curated from UniProt P51587, Ensembl ENSG00000139618, and NCCN Guidelines",
+          "url": null
+        },
+        "summary": "BRCA2 encodes a key mediator of homologous recombination DNA repair that loads RAD51 recombinase onto single-stranded DNA overhangs at double-strand breaks.",
+        "uniprot_id": "P51587"
+      },
+      "topic": "Hereditary breast and ovarian cancer (BRCA2)"
+    },
+    "CBS": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Homocystinuria, Pyridoxine-Responsive",
+        "mendelian_disease": true,
+        "model": "autosomal_recessive",
+        "omim": "236200",
+        "penetrance": 0.5
+      },
+      "insights": null,
+      "topic": "Homocysteine transsulfuration & B6 response (CBS)"
+    },
     "CFTR": {
       "acmg_sf": false,
       "inheritance": {
@@ -795,6 +871,47 @@
       },
       "topic": "Warfarin and phenytoin metabolism"
     },
+    "CYP2D6": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Cytochrome P450 2D6 Drug Metabolism",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "608902",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "Transmembrane anchor: residues 1–33",
+            "Catalytic P450 monooxygenase core: residues 34–497 (Heme-binding loop with conserved Cys443)"
+          ],
+          "flexible_joints": "Substrate recognition sites (SRS loops)",
+          "folding_status": "High-Confidence Cytochrome P450 Monooxygenase Fold",
+          "global_plddt": 91.2
+        },
+        "encode": {
+          "top_tissues": {
+            "brain": 410.0,
+            "liver": 3890.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000100197",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "UniProt P10635, AlphaFold AF-P10635-F1, Ensembl ENSG00000100197",
+          "url": null
+        },
+        "uniprot_id": "P10635"
+      },
+      "topic": "CYP2D6 drug metabolism (opioids, antidepressants, tamoxifen)"
+    },
     "CYP4F2": {
       "acmg_sf": false,
       "inheritance": {
@@ -882,6 +999,32 @@
       },
       "topic": "Fluorouracil (5-FU) side effects"
     },
+    "F13A1": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "risk_factor",
+        "omim": "134570",
+        "penetrance": null
+      },
+      "insights": {
+        "clinical_relevance": "Carriers of the 34Leu allele exhibit a protective ~15-25% lower risk of deep vein thrombosis and pulmonary embolism, interacting with prothrombotic mutations in F5 and F2.",
+        "ensembl_gene_id": "ENSG00000124491",
+        "mechanism": "The Val34Leu polymorphism accelerates thrombin cleavage and activation of FXIII, generating a finer, more rigid fibrin mesh with altered clot permeability, conferring protective effects against venous thrombosis.",
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "manually_curated from UniProt P00488, Ensembl ENSG00000124491, and Kohler et al. Blood 1998",
+          "url": null
+        },
+        "summary": "F13A1 encodes the catalytic A subunit of coagulation Factor XIII, a transglutaminase that cross-links fibrin chains to stabilize clots against mechanical shear and fibrinolysis.",
+        "uniprot_id": "P00488"
+      },
+      "topic": "Blood clots and fibrin stability (Factor XIII Val34Leu)"
+    },
     "F2": {
       "acmg_sf": false,
       "inheritance": {
@@ -964,6 +1107,72 @@
         "uniprot_id": "P12259"
       },
       "topic": "Blood clots (factor V Leiden)"
+    },
+    "FMO3": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "trait",
+        "omim": "136132",
+        "penetrance": null
+      },
+      "insights": null,
+      "topic": "Choline & trimethylamine metabolism (FMO3)"
+    },
+    "FUT2": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "trait",
+        "omim": "182100",
+        "penetrance": null
+      },
+      "insights": null,
+      "topic": "Secretor status (FUT2)"
+    },
+    "G6PD": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Glucose-6-Phosphate Dehydrogenase Deficiency",
+        "mendelian_disease": false,
+        "model": "pharmacogenomic",
+        "omim": "305900",
+        "penetrance": null
+      },
+      "insights": {
+        "alphafold": {
+          "domains": [
+            "N-terminal Rossmann-fold NADP+ binding domain: residues 36–200",
+            "C-terminal catalytic and dimer interface domain: residues 201–515"
+          ],
+          "flexible_joints": "N-terminal peptide residues 1–35",
+          "folding_status": "Confidently Folded Rossmann Fold and Dimer Interface",
+          "global_plddt": 92.8
+        },
+        "encode": {
+          "top_tissues": {
+            "blood": 4820.0,
+            "liver": 1650.0,
+            "lymph node": 940.0
+          }
+        },
+        "ensembl": {
+          "ensg": "ENSG00000160211",
+          "sift_prediction": "deleterious (0.00)"
+        },
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "UniProt P11413, AlphaFold AF-P11413-F1, Ensembl ENSG00000160211",
+          "url": null
+        },
+        "uniprot_id": "P11413"
+      },
+      "topic": "Glucose-6-phosphate dehydrogenase deficiency (acute hemolytic anemia)"
     },
     "HFE": {
       "acmg_sf": true,
@@ -1194,6 +1403,18 @@
       },
       "topic": "Thiopurine drug toxicity (NUDT15)"
     },
+    "PNPLA3": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "risk_factor",
+        "omim": "609567",
+        "penetrance": null
+      },
+      "insights": null,
+      "topic": "Liver fat accumulation & NAFLD risk (PNPLA3)"
+    },
     "PSORS1C1": {
       "acmg_sf": false,
       "inheritance": {
@@ -1236,6 +1457,32 @@
         "uniprot_id": "Q9UBC0"
       },
       "topic": "Allopurinol hypersensitivity (HLA-B*58:01)"
+    },
+    "SERPINA1": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": "Alpha-1 antitrypsin deficiency",
+        "mendelian_disease": true,
+        "model": "autosomal_recessive",
+        "omim": "107400",
+        "penetrance": 0.8
+      },
+      "insights": {
+        "clinical_relevance": "Pi*ZZ homozygotes have markedly decreased circulating AAT levels (<15% of normal) and high susceptibility to early-onset panacinar emphysema and hepatic cirrhosis; Pi*SZ and Pi*MZ genotypes have milder risk profiles.",
+        "ensembl_gene_id": "ENSG00000197249",
+        "mechanism": "The Pi*Z mutation alters protein folding, leading to intracellular polymerization and accumulation in hepatocytes (toxic liver gain-of-function) and severe plasma deficiency (loss of elastase inhibition in lung).",
+        "provenance": {
+          "accession": null,
+          "curation_mode": "manually_curated",
+          "release": null,
+          "retrieved_at": null,
+          "source": "manually_curated from UniProt P01009, Ensembl ENSG00000197249, and American Thoracic Society/ERS Guidelines",
+          "url": null
+        },
+        "summary": "SERPINA1 encodes alpha-1 antitrypsin, a circulating serine protease inhibitor synthesized by hepatocytes that protects lower respiratory tract alveoli from neutrophil elastase destruction.",
+        "uniprot_id": "P01009"
+      },
+      "topic": "Alpha-1 antitrypsin deficiency (SERPINA1 Pi*Z and Pi*S)"
     },
     "SLCO1B1": {
       "acmg_sf": false,
@@ -1321,6 +1568,18 @@
       },
       "topic": "Thiopurine drug toxicity (TPMT)"
     },
+    "VDR": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "trait",
+        "omim": "601769",
+        "penetrance": null
+      },
+      "insights": null,
+      "topic": "Vitamin D receptor function (VDR FokI)"
+    },
     "VKORC1": {
       "acmg_sf": false,
       "inheritance": {
@@ -1363,6 +1622,282 @@
     }
   },
   "loci": {
+    "rs1050828": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "X",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000037123",
+          "provenance": {
+            "accession": "VCV000037123.109",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:36Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722711%2C1722697%2C1722696%2C1722622%2C1722596%2C37123%2C10361&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Likely pathogenic",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "rasburicase, primaquine, tafenoquine, dapsone",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for G6PD and rasburicase/primaquine/dapsone)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 153764217,
+          "pos_grch38": 154536002,
+          "provenance": {
+            "accession": "rs1050828",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:54:35Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1050828"
+          }
+        },
+        "gnomad": {
+          "af": 0.006443034878493799,
+          "constraint_provenance": {
+            "accession": "G6PD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.1648943119065558,
+          "pli": 0.9999998810417456,
+          "provenance": {
+            "accession": "X-154536002-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:54:44Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for G6PD; erythrocyte and cytosolic expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4927,
+          "mane_select_ensembl": "ENST00000393562",
+          "mane_select_refseq": "NM_001360016.2",
+          "provenance": {
+            "accession": "rs1050828",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1050828?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "G6PD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No G6PD c.202G>A (A-) allele detected at this position. Other G6PD deficiency variants (e.g. Mediterranean, Canton, Chatham) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated or high caution. Primaquine/Dapsone: Dose reduction or alternative agent recommended.",
+          "magnitude": 2.5,
+          "phenotype": "Heterozygous for G6PD c.202G>A (p.Val68Met). In females, mosaic red-cell enzyme activity due to random X-chromosome inactivation; intermediate risk of acute hemolytic anemia upon oxidative drug exposure.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated (severe hemolytic anemia risk). Primaquine/Tafenoquine: Contraindicated or dose-adjusted. Avoid dapsone, nitrofurantoin, sulfamethoxazole.",
+          "magnitude": 5.0,
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.202G>A (p.Val68Met, A-). Class III G6PD deficiency (~10–20% residual activity); high risk of acute hemolytic anemia triggered by rasburicase, primaquine, dapsone, or fava beans.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only G6PD c.202G>A (A-). Normal enzyme activity and hemolysis risk also depend on other deficiency alleles (such as G6PD Mediterranean c.563C>T, Canton, Chatham) and co-inherited modifier variants that this locus alone does not determine. In females, random X-inactivation leads to mosaic enzyme levels.",
+      "pos_grch37": 153764217,
+      "pos_grch38": 154536002,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1050828",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for rasburicase and G6PD",
+      "tier_rationale": "CPIC Level A guideline and FDA boxed warning mandate pre-treatment testing before rasburicase; ClinVar classifies c.202G>A with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
+    "rs1050829": {
+      "allele_codes": null,
+      "alt": "C",
+      "chrom": "X",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000100055",
+          "provenance": {
+            "accession": "VCV000100055.84",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:47Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722747%2C1722726%2C1722698%2C1722697%2C1722693%2C1722622%2C1722617%2C1722597%2C1546331%2C1065168%2C100055%2C37123%2C10388%2C10382%2C10361&retmode=json"
+          },
+          "review_status": "criteria provided, conflicting classifications",
+          "significance": "Conflicting classifications of pathogenicity",
+          "stars": 1
+        },
+        "cpic": {
+          "drug": "rasburicase, primaquine, tafenoquine, dapsone",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for G6PD and rasburicase/primaquine/dapsone)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 153763492,
+          "pos_grch38": 154535277,
+          "provenance": {
+            "accession": "rs1050829",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:54:45Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1050829"
+          }
+        },
+        "gnomad": {
+          "af": 0.017080243592636025,
+          "constraint_provenance": {
+            "accession": "G6PD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.1648943119065558,
+          "pli": 0.9999998810417456,
+          "provenance": {
+            "accession": "X-154535277-T-C",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:54:58Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for G6PD; erythrocyte and cytosolic expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0954,
+          "mane_select_ensembl": "ENST00000393562",
+          "mane_select_refseq": "NM_001360016.2",
+          "provenance": {
+            "accession": "rs1050829",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:51Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1050829?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "G6PD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No G6PD c.376A>G (A+) allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Normal to mildly reduced enzyme activity; standard oxidative drug dosing generally tolerated unless paired with c.202G>A.",
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for G6PD c.376A>G (p.Asn126Asp, A+). Retains ~85% of normal enzyme activity when alone; confers hemolytic risk primarily when co-inherited in cis with c.202G>A.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Near-normal enzyme activity alone; verify whether c.202G>A is present on the same haplotype.",
+          "magnitude": 2.0,
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.376A>G (p.Asn126Asp, A+). Class IV mild variant (~85% activity); asymptomatic under most conditions unless combined with c.202G>A.",
+          "repute": "Neutral",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only G6PD c.376A>G (A+). Alone, c.376A>G produces near-normal enzyme activity (~85%), but when co-inherited on the same chromosome (in cis) with c.202G>A, it forms the composite deficient G6PD A- haplotype.",
+      "pos_grch37": 153763492,
+      "pos_grch38": 154535277,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs1050829",
+      "tier_citation": "CPIC clinical guideline for G6PD and rasburicase/primaquine",
+      "tier_rationale": "CPIC Level A guideline for G6PD; ClinVar classifies c.376A>G with 1-star review.",
+      "tier_source": "cpic_level"
+    },
     "rs1057910": {
       "allele_codes": null,
       "alt": "C",
@@ -1639,6 +2174,143 @@
       "rsid": "rs1061235",
       "tier_citation": "CPIC guideline for carbamazepine and HLA-A and HLA-B, 2014 update (Leckband et al., Clinical Pharmacology and Therapeutics)",
       "tier_rationale": "CPIC Guideline for Carbamazepine and Oxcarbazepine with HLA-A and HLA-B (Level A).",
+      "tier_source": "cpic_level"
+    },
+    "rs1065852": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016893",
+          "provenance": {
+            "accession": "VCV000016893.11",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:13Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=16893&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 42526694,
+          "pos_grch38": 42130692,
+          "provenance": {
+            "accession": "rs1065852",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:55:12Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1065852"
+          }
+        },
+        "gnomad": {
+          "af": 0.21215728486515645,
+          "constraint_provenance": {
+            "accession": "CYP2D6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.4809840538374945,
+          "pli": 2.316033019048199e-20,
+          "provenance": {
+            "accession": "22-42130692-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:55:19Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CYP2D6; liver microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.7572,
+          "mane_select_ensembl": "ENST00000645361",
+          "mane_select_refseq": "NM_000106.6",
+          "provenance": {
+            "accession": "rs1065852",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:18Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1065852?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2D6",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2D6*10 (rs1065852) allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Mildly decreased CYP2D6 substrate metabolism (one *10 allele); complete diplotyping and CNV detection required for metabolizer status.",
+          "magnitude": 1.5,
+          "phenotype": "One CYP2D6*10 (rs1065852) allele detected. Common decreased-function variant (p.Pro34Ser) prevalent in East Asian populations. Full metabolizer status requires star-allele diplotyping across all loci.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Decreased metabolism of codeine, tramadol, tamoxifen, and tricyclic antidepressants (two *10 alleles); complete diplotyping and CNV detection required for definitive metabolizer status.",
+          "magnitude": 3.0,
+          "phenotype": "Two CYP2D6*10 (rs1065852) alleles detected. Homozygous decreased-function allele. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 42526694,
+      "pos_grch38": 42130692,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs1065852",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for CYP2D6",
+      "tier_rationale": "CPIC Level A clinical guideline for CYP2D6; ClinVar classifies *10 (p.Pro34Ser) with 2-star multiple-submitter review.",
       "tier_source": "cpic_level"
     },
     "rs113993960": {
@@ -2190,6 +2862,270 @@
       "tier_citation": "CPIC guideline for CYP2C19 and clopidogrel, 2022 update",
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
+    },
+    "rs12934922": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "16",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV001293223",
+          "provenance": {
+            "accession": "VCV001293223.3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:54Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1293223&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 81301694,
+          "pos_grch38": 81268089,
+          "provenance": {
+            "accession": "rs12934922",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:26:53Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/12934922"
+          }
+        },
+        "gnomad": {
+          "af": 0.40457468068468155,
+          "constraint_provenance": {
+            "accession": "BCO1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2036147935950074,
+          "pli": 3.865997107239834e-18,
+          "provenance": {
+            "accession": "16-81268089-A-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:26:57Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for BCO1; intestinal enterocytes and hepatic carotenoid monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "Medium",
+            "small_intestine": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.188,
+          "mane_select_ensembl": "ENST00000258168",
+          "mane_select_refseq": "NM_017429.3",
+          "provenance": {
+            "accession": "rs12934922",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:57Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs12934922?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "BCO1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Other BCO1 variants such as p.Ala379Val may also modulate carotenoid conversion."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No BCO1 p.Arg267Ser reduced-conversion allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "Carrier of BCO1 p.Arg267Ser: Reduced conversion of dietary beta-carotene to vitamin A (retinol), especially when co-inherited with p.Ala379Val (rs7501331).",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Homozygous for BCO1 p.Arg267Ser: Moderately reduced enzymatic conversion of beta-carotene to retinol; impaired conversion is most pronounced in the presence of co-inherited p.Ala379Val.",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": "Single-variant test of BCO1 (c.801A>T, p.Arg267Ser); total carotenoid cleavage depends on co-inherited BCO1 variants and dietary fat intake.",
+      "pos_grch37": 81301694,
+      "pos_grch38": 81268089,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs12934922",
+      "tier_citation": "Leung et al. 2009, Two common single nucleotide polymorphisms in the BCMO1 gene, Journal of Nutrition",
+      "tier_rationale": "Established functional missense variant reducing catalytic cleavage of dietary provitamin A beta-carotene into active retinal.",
+      "tier_source": "curated"
+    },
+    "rs17580": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "14",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017969",
+          "provenance": {
+            "accession": "VCV000017969.106",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:01:32Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=626305%2C440501%2C440500%2C17969&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Pathogenic, low penetrance; other",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 94847262,
+          "pos_grch38": 94380925,
+          "provenance": {
+            "accession": "rs17580",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T07:01:31Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/17580"
+          }
+        },
+        "gnomad": {
+          "af": 0.036359592660555,
+          "constraint_provenance": {
+            "accession": "SERPINA1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:44Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.1901133649798687,
+          "pli": 8.773683322435002e-07,
+          "provenance": {
+            "accession": "14-94380925-T-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:02:07Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000197249",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000197249",
+            "url": "https://www.proteinatlas.org/ENSG00000197249-SERPINA1"
+          },
+          "subcellular": [
+            "Extracellular region",
+            "Secreted",
+            "Endoplasmic reticulum",
+            "Vesicles"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "lung": "Medium",
+            "small intestine": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_pathogenic",
+          "alphamissense_score": 0.6396,
+          "mane_select_ensembl": "ENST00000393087",
+          "mane_select_refseq": "NM_000295.5",
+          "provenance": {
+            "accession": "rs17580",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:02:02Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs17580?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "SERPINA1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No SERPINA1 Pi*S allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Carrier",
+          "caveats": [
+            "Generally benign in isolation; compound heterozygosity with Pi*Z (Pi*SZ) causes clinically significant deficiency."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous carrier of SERPINA1 Pi*S allele (Pi*MS genotype, plus-strand T/A). Circulating AAT levels are approximately 80% of normal, usually sufficient to protect lung tissue unless severe smoking or environmental exposure is present.",
+          "repute": "Neutral",
+          "significance": "Carrier / Mild Modifier"
+        },
+        "2": {
+          "category": "Variant present",
+          "caveats": [
+            "Milder risk than Pi*ZZ; smoking abstinence prevents accelerated lung function decline."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Homozygous for SERPINA1 Pi*S allele (Pi*SS genotype, plus-strand A/A). Produces mild-to-moderate reduction in plasma AAT (~50-60% of normal), with low risk of clinical lung disease in non-smokers.",
+          "repute": "Neutral",
+          "significance": "Moderate Deficiency"
+        }
+      },
+      "limitation": "Single-variant test of SERPINA1 Pi*S (c.863A>T, p.Glu288Val, plus-strand T>A); does not assess Pi*Z or rare deficient/non-functional alleles.",
+      "pos_grch37": 94847262,
+      "pos_grch38": 94380925,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs17580",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
     },
     "rs1799807": {
       "allele_codes": null,
@@ -3125,6 +4061,140 @@
       "tier_rationale": null,
       "tier_source": "clinvar_review"
     },
+    "rs1800730": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000011",
+          "provenance": {
+            "accession": "VCV000000011.97",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:59Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=11&retmode=json"
+          },
+          "review_status": "criteria provided, conflicting classifications",
+          "significance": "Conflicting classifications of pathogenicity",
+          "stars": 1
+        },
+        "dbsnp": {
+          "pos_grch37": 26091185,
+          "pos_grch38": 26090957,
+          "provenance": {
+            "accession": "rs1800730",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T06:59:58Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1800730"
+          }
+        },
+        "gnomad": {
+          "af": 0.013639900674560494,
+          "constraint_provenance": {
+            "accession": "HFE",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-03T00:22:03Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.161310736713692,
+          "pli": 1.7623125883910847e-11,
+          "provenance": {
+            "accession": "6-26090957-A-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:00:08Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000010704",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000010704",
+            "url": "https://www.proteinatlas.org/ENSG00000010704-HFE"
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "duodenum": "High",
+            "liver": "High",
+            "placenta": "Medium",
+            "small intestine": "High",
+            "spleen": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.2754,
+          "mane_select_ensembl": "ENST00000357618",
+          "mane_select_refseq": "NM_000410.4",
+          "provenance": {
+            "accession": "rs1800730",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:00:06Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1800730?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "insufficient",
+      "evidence_tier": "Tier D",
+      "gene": "HFE",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No HFE S65C allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Carrier",
+          "caveats": [
+            "Compound heterozygosity with C282Y (rs1800562) can produce mild or late-onset iron overload."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous carrier of HFE S65C (c.193A>T, p.Ser65Cys). Carries 1 copy of the mild modifier allele; by itself confers minimal iron risk unless paired with C282Y.",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Variant present",
+          "caveats": [
+            "Periodic serum ferritin and transferrin saturation monitoring can assess actual clinical iron stores."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Homozygous for HFE S65C (c.193A>T, p.Ser65Cys). Associated with mild elevations in transferrin saturation and serum ferritin, with substantially lower clinical penetrance than C282Y homozygosity.",
+          "repute": "Bad",
+          "significance": "Variant present"
+        }
+      },
+      "limitation": "ACMG Secondary Findings locus caveat: This finding represents interrogation of a single specific nucleotide locus only. It does NOT represent comprehensive clinical sequencing of the gene. A negative result at this single position does not rule out other pathogenic variants across the remainder of the gene.",
+      "pos_grch37": 26091185,
+      "pos_grch38": 26090957,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs1800730",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
+    },
     "rs1801131": {
       "allele_codes": null,
       "alt": "G",
@@ -3519,6 +4589,134 @@
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
     },
+    "rs2228570": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "12",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000308887",
+          "provenance": {
+            "accession": "VCV000308887.37",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:53Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=3235711%2C308887&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 48272895,
+          "pos_grch38": 47879112,
+          "provenance": {
+            "accession": "rs2228570",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:28:52Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2228570"
+          }
+        },
+        "gnomad": {
+          "af": 0.6287760277861104,
+          "constraint_provenance": {
+            "accession": "VDR",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:26Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7017101914299548,
+          "pli": 0.015655241000310363,
+          "provenance": {
+            "accession": "12-47879112-A-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:29:08Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for VDR; nuclear receptor expression in intestinal enterocytes and renal tubules)",
+            "url": null
+          },
+          "subcellular": [
+            "Nucleus"
+          ],
+          "tissues": {
+            "bone": "Medium",
+            "colon": "High",
+            "kidney": "High",
+            "small_intestine": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000549336",
+          "mane_select_refseq": "NM_000376.3",
+          "provenance": {
+            "accession": "rs2228570",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:29:03Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2228570?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "VDR",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No VDR FokI G allele detected at this position (homozygous A/A). Encodes the longer 427-amino-acid vitamin D receptor isoform (f allele, genotype ff).",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "Heterozygous for VDR FokI (A/G, genotype Ff): Expresses both the longer 427-AA (f) and shorter 424-AA (F) vitamin D receptor isoforms. Intermediate transactivation activity.",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "Homozygous for VDR FokI (G/G, genotype FF): Encodes the shorter 424-amino-acid vitamin D receptor isoform (F allele) with altered transactivation efficiency.",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": "Single-variant test of VDR FokI (start codon polymorphism); bone density and calcium absorption are also influenced by vitamin D levels and BsmI/TaqI haplotypes.",
+      "pos_grch37": 48272895,
+      "pos_grch38": 47879112,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs2228570",
+      "tier_citation": "Arai et al. 1997, A vitamin D receptor gene polymorphism in the translation initiation codon, Journal of Bone and Mineral Research",
+      "tier_rationale": "Common start-codon variant altering VDR protein length by 3 amino acids, modulating transactivation capacity and bone mineral density.",
+      "tier_source": "curated"
+    },
     "rs2231142": {
       "allele_codes": null,
       "alt": "T",
@@ -3658,6 +4856,258 @@
       "tier_citation": "CPIC guideline for SLCO1B1, ABCG2 and CYP2C9 and statin-associated musculoskeletal symptoms, 2022 update",
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
+    },
+    "rs2266780": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "1",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000038395",
+          "provenance": {
+            "accession": "VCV000038395.16",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:16Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=38395%2C16318&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign/Likely benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 171083242,
+          "pos_grch38": 171114102,
+          "provenance": {
+            "accession": "rs2266780",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:28:15Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2266780"
+          }
+        },
+        "gnomad": {
+          "af": 0.17572617168757973,
+          "constraint_provenance": {
+            "accession": "FMO3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:25Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3217018584775138,
+          "pli": 2.2868587858368506e-14,
+          "provenance": {
+            "accession": "1-171114102-A-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:28:31Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for FMO3; hepatic microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0982,
+          "mane_select_ensembl": "ENST00000367755",
+          "mane_select_refseq": "NM_001002294.3",
+          "provenance": {
+            "accession": "rs2266780",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:31Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2266780?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "FMO3",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No FMO3 p.Glu308Gly reduced-activity allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "Heterozygous carrier of FMO3 p.Glu308Gly: Mild reduction in FMO3 catalytic efficiency; typically asymptomatic in the absence of co-inherited FMO3 variants.",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [
+            "Transient mild trimethylamine accumulation may occur under high dietary choline or carnitine load; does not cause severe trimethylaminuria in isolation."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Homozygous for FMO3 p.Glu308Gly: Moderately decreased FMO3 capacity; noticeable reduction in trimethylamine oxidation occurs primarily when co-inherited on haplotypes carrying p.Glu158Lys.",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": "Single-variant test of FMO3 (c.923A>G, p.Glu308Gly); co-inheritance with p.Glu158Lys produces compound reduction in TMA oxidation.",
+      "pos_grch37": 171083242,
+      "pos_grch38": 171114102,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs2266780",
+      "tier_citation": "Zschocke et al. 1999, Polymorphisms of the FMO3 gene in trimethylaminuria, Pharmacogenetics",
+      "tier_rationale": "Functional coding polymorphism in FMO3 resulting in decreased N-oxygenation capacity.",
+      "tier_source": "curated"
+    },
+    "rs2266782": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "1",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000038394",
+          "provenance": {
+            "accession": "VCV000038394.23",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:02Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=217371%2C38394%2C16318&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign/Likely benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 171076966,
+          "pos_grch38": 171107825,
+          "provenance": {
+            "accession": "rs2266782",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:28:01Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2266782"
+          }
+        },
+        "gnomad": {
+          "af": 0.40180419975750603,
+          "constraint_provenance": {
+            "accession": "FMO3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:25Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.3217018584775138,
+          "pli": 2.2868587858368506e-14,
+          "provenance": {
+            "accession": "1-171107825-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:28:14Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for FMO3; hepatic microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0917,
+          "mane_select_ensembl": "ENST00000367755",
+          "mane_select_refseq": "NM_001002294.3",
+          "provenance": {
+            "accession": "rs2266782",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:14Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2266782?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "FMO3",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No FMO3 p.Glu158Lys reduced-activity allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "Heterozygous carrier of FMO3 p.Glu158Lys: Minor reduction in FMO3 catalytic activity; typically asymptomatic in isolation.",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Homozygous for FMO3 p.Glu158Lys: Decreased FMO3 capacity, especially when co-inherited in cis with p.Glu308Gly; may have mild susceptibility to transient odor under high dietary choline intake.",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": "Single-variant test of FMO3 (c.472G>A, p.Glu158Lys); trimethylamine metabolism depends on haplotype pairing with p.Glu308Gly and dietary choline load.",
+      "pos_grch37": 171076966,
+      "pos_grch38": 171107825,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs2266782",
+      "tier_citation": "Zschocke et al. 1999, Polymorphisms of the FMO3 gene in trimethylaminuria, Pharmacogenetics",
+      "tier_rationale": "Common functional polymorphism causing moderate reduction in flavin-containing monooxygenase 3 catalytic efficiency.",
+      "tier_source": "curated"
     },
     "rs2306283": {
       "allele_codes": null,
@@ -3935,6 +5385,417 @@
       "rsid": "rs2395029",
       "tier_citation": "CPIC guideline for HLA-B and abacavir, 2014 update (Martin et al., Clinical Pharmacology and Therapeutics)",
       "tier_rationale": "CPIC Guideline for HLA-B and Abacavir (Level A); FDA boxed warning mandates HLA-B*57:01 screening prior to abacavir initiation.",
+      "tier_source": "cpic_level"
+    },
+    "rs28371725": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000039381",
+          "provenance": {
+            "accession": "VCV000039381.12",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:20Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=39381&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 42523805,
+          "pos_grch38": 42127803,
+          "provenance": {
+            "accession": "rs28371725",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:55:19Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/28371725"
+          }
+        },
+        "gnomad": {
+          "af": 0.0916536156502643,
+          "constraint_provenance": {
+            "accession": "CYP2D6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.4809840538374945,
+          "pli": 2.316033019048199e-20,
+          "provenance": {
+            "accession": "22-42127803-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:55:28Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CYP2D6; liver microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000645361",
+          "mane_select_refseq": "NM_000106.6",
+          "provenance": {
+            "accession": "rs28371725",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:26Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs28371725?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2D6",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2D6*41 (rs28371725) allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Reduced rate of CYP2D6 substrate clearance or prodrug bioactivation (one *41 allele); complete diplotyping and CNV detection required for metabolizer status.",
+          "magnitude": 1.5,
+          "phenotype": "One CYP2D6*41 (rs28371725) allele detected. Splicing defect causing reduced enzyme expression. Full metabolizer assignment requires complete star-allele diplotyping.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Decreased metabolism of codeine/tramadol and secondary amine TCAs (two *41 alleles); complete diplotyping and CNV detection required for definitive metabolizer status.",
+          "magnitude": 3.0,
+          "phenotype": "Two CYP2D6*41 (rs28371725) alleles detected. Homozygous hypomorphic splicing variant. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 42523805,
+      "pos_grch38": 42127803,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs28371725",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for CYP2D6",
+      "tier_rationale": "CPIC Level A clinical guideline for CYP2D6; ClinVar classifies *41 (c.2988G>A) with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
+    "rs28929474": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "14",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017967",
+          "provenance": {
+            "accession": "VCV000017967.118",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:01:18Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1492979%2C626304%2C219359%2C17967&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Likely pathogenic; risk factor",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 94844947,
+          "pos_grch38": 94378610,
+          "provenance": {
+            "accession": "rs28929474",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T07:01:17Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/28929474"
+          }
+        },
+        "gnomad": {
+          "af": 0.01586291664549959,
+          "constraint_provenance": {
+            "accession": "SERPINA1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:44Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.1901133649798687,
+          "pli": 8.773683322435002e-07,
+          "provenance": {
+            "accession": "14-94378610-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:02:16Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000197249",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000197249",
+            "url": "https://www.proteinatlas.org/ENSG00000197249-SERPINA1"
+          },
+          "subcellular": [
+            "Extracellular region",
+            "Secreted",
+            "Endoplasmic reticulum",
+            "Vesicles"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "High",
+            "lung": "Medium",
+            "small intestine": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "ambiguous",
+          "alphamissense_score": 0.4658,
+          "mane_select_ensembl": "ENST00000393087",
+          "mane_select_refseq": "NM_000295.5",
+          "provenance": {
+            "accession": "rs28929474",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:01:29Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs28929474?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "SERPINA1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No SERPINA1 Pi*Z allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Carrier",
+          "caveats": [
+            "Avoiding active or passive tobacco smoke exposure is the most critical preventative action to preserve lung function.",
+            "Compound heterozygosity with Pi*S (Pi*SZ) produces significantly lower AAT levels and higher pulmonary disease risk."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Heterozygous carrier of SERPINA1 Pi*Z allele (Pi*MZ genotype, plus-strand C/T). Circulating AAT levels are approximately 50-60% of normal. Moderate increased risk for chronic obstructive pulmonary disease (especially in smokers) and cirrhosis.",
+          "repute": "Neutral",
+          "significance": "Carrier / Risk Factor"
+        },
+        "2": {
+          "category": "Pathogenic",
+          "caveats": [
+            "High risk of severe pulmonary emphysema and liver fibrosis/cirrhosis; pulmonary function testing, liver enzymes, and specialist referral are indicated.",
+            "Strict avoidance of all smoking and occupational lung irritants is essential."
+          ],
+          "drug_response": null,
+          "magnitude": 5.0,
+          "phenotype": "Homozygous for SERPINA1 Pi*Z allele (Pi*ZZ genotype, plus-strand T/T). Causes severe alpha-1 antitrypsin deficiency with plasma AAT levels typically 10-15% of normal. High lifetime risk of early-onset panacinar emphysema and chronic liver disease.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        }
+      },
+      "limitation": "Single-variant test of SERPINA1 Pi*Z (c.1096G>A, p.Glu366Lys); does not assess Pi*S or rare deficient/non-functional alleles (e.g. Mmalton, Siiyama, Q0).",
+      "pos_grch37": 94844947,
+      "pos_grch38": 94378610,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs28929474",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
+    },
+    "rs3892097": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016889",
+          "provenance": {
+            "accession": "VCV000016889.12",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:08Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=16889&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Likely benign; drug response; other",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "codeine, tramadol, tamoxifen, nortriptyline, ondansetron",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for CYP2D6 and codeine/tamoxifen/antidepressants)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 42524947,
+          "pos_grch38": 42128945,
+          "provenance": {
+            "accession": "rs3892097",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:55:07Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/3892097"
+          }
+        },
+        "gnomad": {
+          "af": 0.16296244197496132,
+          "constraint_provenance": {
+            "accession": "CYP2D6",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.4809840538374945,
+          "pli": 2.316033019048199e-20,
+          "provenance": {
+            "accession": "22-42128945-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:55:33Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CYP2D6; liver microsomal monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000645361",
+          "mane_select_refseq": "NM_000106.6",
+          "provenance": {
+            "accession": "rs3892097",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:55:11Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs3892097?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "CYP2D6",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CYP2D6*4 (rs3892097) allele detected at this position. Other CYP2D6 alleles (*10, *41, *5 gene deletion, *1xN duplications) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Opioids / Tamoxifen / SSRIs: Reduced bioactivation or clearance may occur if paired with another non-functional allele (one *4 allele); complete diplotyping and CNV detection required for metabolizer status.",
+          "magnitude": 2.5,
+          "phenotype": "One CYP2D6*4 (rs3892097) allele detected. This splice defect inactivates the allele. Full metabolizer status cannot be assigned without complete star-allele diplotyping and CNV detection.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Codeine / Tramadol: Ineffective analgesia due to lack of conversion to active metabolites; Tamoxifen / TCAs: Impaired activation or clearance (two *4 alleles); complete diplotyping and CNV detection required for definitive metabolizer status.",
+          "magnitude": 4.0,
+          "phenotype": "Two CYP2D6*4 (rs3892097) alleles detected. Homozygous non-functional splice mutation. Complete star-allele diplotyping and CNV testing required for final clinical assignment.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Incomplete star-allele coverage refusal: Interrogating an isolated SNP (e.g. *2) cannot rule out other active, decreased, or gain-of-function alleles (e.g. *3, *4, *17) not present on this array. A full metabolizer phenotype cannot and will not be inferred without complete haplotype sequencing.",
+      "pos_grch37": 42524947,
+      "pos_grch38": 42128945,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs3892097",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for CYP2D6",
+      "tier_rationale": "CPIC Level A clinical guideline for CYP2D6; ClinVar classifies *4 (c.506-1G>A) with 2-star multiple-submitter review.",
       "tier_source": "cpic_level"
     },
     "rs3918290": {
@@ -4874,6 +6735,144 @@
       "tier_rationale": "The -13910 variant is the established cause of lactase persistence in European-ancestry populations.",
       "tier_source": "curated"
     },
+    "rs5030868": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "X",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000100057",
+          "provenance": {
+            "accession": "VCV000100057.136",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:53Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1722739%2C1722698%2C1722697%2C1722696%2C100057&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic/Likely pathogenic",
+          "stars": 2
+        },
+        "cpic": {
+          "drug": "rasburicase, primaquine, tafenoquine, dapsone",
+          "level": "A",
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "CPIC gene-drug pair level A (CPIC guideline / gene-drug table for G6PD and rasburicase/primaquine/dapsone)",
+            "url": null
+          }
+        },
+        "dbsnp": {
+          "pos_grch37": 153762634,
+          "pos_grch38": 154534419,
+          "provenance": {
+            "accession": "rs5030868",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T03:54:52Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/5030868"
+          }
+        },
+        "gnomad": {
+          "af": 0.0014093797737056851,
+          "constraint_provenance": {
+            "accession": "G6PD",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.1648943119065558,
+          "pli": 0.9999998810417456,
+          "provenance": {
+            "accession": "X-154534419-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T03:54:56Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for G6PD; erythrocyte and cytosolic expression)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "blood": "High",
+            "liver": "Medium"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.3196,
+          "mane_select_ensembl": "ENST00000393562",
+          "mane_select_refseq": "NM_001360016.2",
+          "provenance": {
+            "accession": "rs5030868",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T03:54:56Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs5030868?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "G6PD",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No G6PD c.563C>T (Mediterranean) allele detected at this position. Other G6PD deficiency variants (e.g. A-, Canton, Chatham) are not evaluated by this test.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated or high caution. Primaquine/Dapsone: Alternative agent or dose reduction required.",
+          "magnitude": 3.0,
+          "phenotype": "Heterozygous for G6PD c.563C>T (p.Ser188Phe, Mediterranean). In females, mosaic red-cell enzyme activity due to random X-chromosome inactivation; intermediate to high risk of acute hemolytic anemia upon oxidative drug exposure.",
+          "repute": "Bad",
+          "significance": "Drug Response"
+        },
+        "2": {
+          "category": "Pharmacogenomics",
+          "caveats": [],
+          "drug_response": "Rasburicase: Contraindicated (severe hemolytic crisis risk). Primaquine/Tafenoquine: Contraindicated. Avoid dapsone, sulfamethoxazole, nitrofurantoin, and fava beans.",
+          "magnitude": 5.0,
+          "phenotype": "Hemizygous (male) or homozygous (female) for G6PD c.563C>T (p.Ser188Phe, Mediterranean). Severe Class II G6PD deficiency (<10% residual activity); high risk of acute, severe hemolytic anemia and favism triggered by rasburicase, primaquine, dapsone, or fava beans.",
+          "repute": "Bad",
+          "significance": "Drug Response (Critical)"
+        }
+      },
+      "limitation": "Single-variant test: this assay covers only G6PD c.563C>T (Mediterranean). G6PD activity also depends on other deficiency variants (such as A-, Canton, Chatham) not tested by this single variant.",
+      "pos_grch37": 153762634,
+      "pos_grch38": 154534419,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs5030868",
+      "tier_citation": "CPIC clinical guideline and FDA drug label annotations for rasburicase and G6PD",
+      "tier_rationale": "CPIC Level A guideline and FDA boxed warning mandate pre-treatment testing before rasburicase; ClinVar classifies c.563C>T with 2-star multiple-submitter review.",
+      "tier_source": "cpic_level"
+    },
     "rs55886062": {
       "allele_codes": null,
       "alt": "C",
@@ -5151,6 +7150,391 @@
       "tier_citation": "CPIC guideline for DPYD and fluoropyrimidines, 2017 update",
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
+    },
+    "rs5742905": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "21",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000120",
+          "provenance": {
+            "accession": "VCV000000120.110",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:43Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=3075863%2C120&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Pathogenic",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 44483184,
+          "pos_grch38": 43063074,
+          "provenance": {
+            "accession": "rs5742905",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:28:42Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/5742905"
+          }
+        },
+        "gnomad": {
+          "af": 0.0,
+          "constraint_provenance": null,
+          "loeuf": null,
+          "pli": null,
+          "provenance": {
+            "accession": "21-43063074-A-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:28:51Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for CBS; hepatic and renal cystathionine beta-synthase)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol",
+            "Nucleus"
+          ],
+          "tissues": {
+            "brain": "Medium",
+            "kidney": "High",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1585,
+          "mane_select_ensembl": "ENST00000398165",
+          "mane_select_refseq": "NM_000071.3",
+          "provenance": {
+            "accession": "rs5742905",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:28:49Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs5742905?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "CBS",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Absence of this variant does not rule out other pathogenic CBS mutations."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No CBS p.Ile278Thr allele detected at this position. Other homocystinuria variants in CBS are not excluded.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Carrier",
+          "caveats": [
+            "Frequently occurs in cis with 844ins68 which rescues enzyme activity; carrier status should not be assumed without 844ins68 testing.",
+            "Clinical homocystinuria requires biallelic mutations; carriers have normal fasting homocysteine under typical diets."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for CBS c.833T>C (p.Ile278Thr). Frequently co-inherited in cis with the rescuing 844ins68 insertion (a benign haplotype producing normal enzyme activity). Definitive carrier assessment requires excluding 844ins68; asymptomatic under typical diets.",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Definitive diagnosis requires ruling out the common cis 844ins68 rescuing insertion and confirming elevated plasma total homocysteine.",
+            "When pathogenic, typically responsive to pharmacological vitamin B6 (pyridoxine); clinical surveillance by a metabolic geneticist is recommended."
+          ],
+          "drug_response": null,
+          "magnitude": 4.0,
+          "phenotype": "Homozygous for CBS c.833T>C (p.Ile278Thr). If unlinked to the rescuing 844ins68 insertion, associated with pyridoxine (vitamin B6)-responsive cystathionine beta-synthase deficiency. However, because c.833T>C frequently occurs on the benign [833C; 844ins68] haplotype (which rescues splicing and enzyme activity), definitive diagnosis of CBS deficiency requires excluding the 844ins68 insertion.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        }
+      },
+      "limitation": "Single-variant test of CBS (c.833T>C, p.Ile278Thr): c.833T>C frequently co-occurs in cis with a benign 68-bp duplication (844ins68) that rescues CBS splicing and enzyme function. Definitive clinical assessment requires excluding the 844ins68 insertion. Classic homocystinuria is also clinically heterogeneous with over 150 known CBS mutations not tested here.",
+      "pos_grch37": 44483184,
+      "pos_grch38": 43063074,
+      "ref": "A",
+      "role": "standard",
+      "rsid": "rs5742905",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
+    },
+    "rs5985": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "6",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016532",
+          "provenance": {
+            "accession": "VCV000016532.54",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:00:10Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=16532&retmode=json"
+          },
+          "review_status": "criteria provided, conflicting classifications",
+          "significance": "Conflicting classifications of pathogenicity",
+          "stars": 1
+        },
+        "dbsnp": {
+          "pos_grch37": 6318795,
+          "pos_grch38": 6318562,
+          "provenance": {
+            "accession": "rs5985",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T07:00:09Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/5985"
+          }
+        },
+        "gnomad": {
+          "af": 0.23308823894037897,
+          "constraint_provenance": {
+            "accession": "F13A1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:42Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.7482687006011444,
+          "pli": 1.0743954302084357e-08,
+          "provenance": {
+            "accession": "6-6318562-C-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:02:09Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000124491",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000124491",
+            "url": "https://www.proteinatlas.org/ENSG00000124491-F13A1"
+          },
+          "subcellular": [
+            "Cytoplasm",
+            "Secreted"
+          ],
+          "tissues": {
+            "adipose tissue": "High",
+            "bone marrow": "Medium",
+            "liver": "Medium",
+            "placenta": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0575,
+          "mane_select_ensembl": "ENST00000264870",
+          "mane_select_refseq": "NM_000129.4",
+          "provenance": {
+            "accession": "rs5985",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:00:27Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs5985?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "F13A1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No Factor XIII 34Leu allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Exhibits a modest protective effect against venous thrombosis; does not completely offset high-penetrance prothrombotic mutations like Factor V Leiden."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for Factor XIII 34Leu allele (plus-strand C/A). Associated with accelerated FXIII activation and ~15-20% reduced risk of venous thromboembolism (VTE).",
+          "repute": "Good",
+          "significance": "Protective"
+        },
+        "2": {
+          "category": "Risk Factor",
+          "caveats": [
+            "High 34Leu gene dosage provides significant protection against deep vein thrombosis, but may slightly increase bleeding tendency in certain surgical settings."
+          ],
+          "drug_response": null,
+          "magnitude": 2.0,
+          "phenotype": "Homozygous for Factor XIII 34Leu allele (plus-strand A/A). Associated with accelerated fibrin cross-linking and ~30-40% reduced risk of venous thromboembolism.",
+          "repute": "Good",
+          "significance": "Protective"
+        }
+      },
+      "limitation": "Single-variant test of F13A1 (c.100G>T, p.Val34Leu, plus-strand C>A); total thrombosis and bleeding risks depend on global coagulation profiles, platelets, and interaction with F5 and F2.",
+      "pos_grch37": 6318795,
+      "pos_grch38": 6318562,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs5985",
+      "tier_citation": "Kohler et al. 1998, Blood, Factor XIII Val34Leu polymorphism is associated with a protective effect against venous thromboembolism",
+      "tier_rationale": "Established functional missense polymorphism accelerating FXIII activation and providing moderate protection against venous thrombosis.",
+      "tier_source": "curated"
+    },
+    "rs601338": {
+      "allele_codes": null,
+      "alt": "A",
+      "chrom": "19",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000012945",
+          "provenance": {
+            "accession": "VCV000012945.4",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:34Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=305040%2C12945&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 49206674,
+          "pos_grch38": 48703417,
+          "provenance": {
+            "accession": "rs601338",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:26:33Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/601338"
+          }
+        },
+        "gnomad": {
+          "af": 0.4582209891579086,
+          "constraint_provenance": null,
+          "loeuf": null,
+          "pli": null,
+          "provenance": {
+            "accession": "19-48703417-G-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:26:39Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for FUT2; mucosal secretory epithelium and Golgi apparatus)",
+            "url": null
+          },
+          "subcellular": [
+            "Golgi apparatus"
+          ],
+          "tissues": {
+            "colon": "High",
+            "salivary_gland": "High",
+            "small_intestine": "High",
+            "stomach": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000425340",
+          "mane_select_refseq": "NM_000511.6",
+          "provenance": {
+            "accession": "rs601338",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:38Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs601338?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "FUT2",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Based on a single European-predominant non-secretor variant (p.Trp143Ter); other non-secretor alleles are not tested."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No FUT2 non-secretor allele detected at this position. Expected secretor phenotype (ABH blood group antigens expressed on mucosal surfaces and in saliva).",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "FUT2 secretor carrier (Se/se): One copy of the common non-secretor allele (c.428G>A, p.Trp143Ter). Typically maintains mucosal secretor status due to dominant expression of the functional allele.",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 2.0,
+          "phenotype": "FUT2 non-secretor (se/se): Lacks ABH blood group antigens in mucosal secretions and saliva. Strong resistance to common norovirus strains (GII.4); associated with altered gut microbiome composition and higher total circulating vitamin B12 (holo-haptocorrin, without altering bioavailable transcobalamin-bound B12).",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": "Single-variant test of FUT2 (c.428G>A, p.Trp143Ter); other population-specific non-secretor alleles (such as Asian se385 A>T) are not tested.",
+      "pos_grch37": 49206674,
+      "pos_grch38": 48703417,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs601338",
+      "tier_citation": "Kelly et al. 1995, Sequence analysis of FUT2; Lindesmith et al. 2003, Human susceptibility to norovirus, Nature Medicine",
+      "tier_rationale": "Well-replicated determinant of mucosal ABH antigen secretion, norovirus resistance, and plasma vitamin B12 levels.",
+      "tier_source": "curated"
     },
     "rs6025": {
       "allele_codes": null,
@@ -5544,6 +7928,135 @@
       "tier_rationale": "CPIC lists this gene-drug pair at level A.",
       "tier_source": "cpic_level"
     },
+    "rs738409": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "22",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000341932",
+          "provenance": {
+            "accession": "VCV000341932.98",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:27:24Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1247925%2C341932&retmode=json"
+          },
+          "review_status": "criteria provided, conflicting classifications",
+          "significance": "Conflicting classifications of pathogenicity; risk factor",
+          "stars": 1
+        },
+        "dbsnp": {
+          "pos_grch37": 44324727,
+          "pos_grch38": 43928847,
+          "provenance": {
+            "accession": "rs738409",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:27:23Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/738409"
+          }
+        },
+        "gnomad": {
+          "af": 0.23209785967766244,
+          "constraint_provenance": {
+            "accession": "PNPLA3",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:24Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2607805130187772,
+          "pli": 1.6275902889310134e-14,
+          "provenance": {
+            "accession": "22-43928847-C-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:27:46Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for PNPLA3; hepatic lipid droplet surface and adipocytes)",
+            "url": null
+          },
+          "subcellular": [
+            "Lipid droplet",
+            "Endoplasmic reticulum"
+          ],
+          "tissues": {
+            "adipose": "High",
+            "liver": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.3292,
+          "mane_select_ensembl": "ENST00000216180",
+          "mane_select_refseq": "NM_025225.3",
+          "provenance": {
+            "accession": "rs738409",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:27:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs738409?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "PNPLA3",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Absence of this allele does not exclude liver steatosis secondary to metabolic syndrome or high alcohol intake."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No PNPLA3 p.Ile148Met risk allele detected at this position. Baseline population genetic risk for hepatic steatosis.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Risk Factor",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 2.0,
+          "phenotype": "Heterozygous for PNPLA3 p.Ile148Met (C/G): Approximately 2-fold increased risk of hepatic steatosis (fatty liver); increased liver fat accumulation upon high dietary sucrose or alcohol consumption.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        },
+        "2": {
+          "category": "Risk Factor",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 3.0,
+          "phenotype": "Homozygous for PNPLA3 p.Ile148Met (G/G): Up to 3- to 5-fold increased susceptibility to hepatic steatosis, elevated liver enzymes (ALT/AST), and heightened sensitivity to dietary carbohydrate- and alcohol-induced liver fat accumulation.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        }
+      },
+      "limitation": "Single-variant test of PNPLA3 (c.444C>G, p.Ile148Met); overall liver fat is also modulated by dietary sugars, adiposity, TM6SF2, and HSD17B13.",
+      "pos_grch37": 44324727,
+      "pos_grch38": 43928847,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs738409",
+      "tier_citation": "Romeo et al. 2008, Genetic variation in PNPLA3 confers susceptibility to nonalcoholic fatty liver disease, Nature Genetics",
+      "tier_rationale": "Major established genetic determinant of hepatic triglyceride accumulation, non-alcoholic fatty liver disease (NAFLD), and progression to steatohepatitis.",
+      "tier_source": "curated"
+    },
     "rs7412": {
       "allele_codes": null,
       "alt": "T",
@@ -5670,6 +8183,544 @@
       "tier_citation": "Farrer et al. 1997, APOE genotype and Alzheimer disease meta-analysis (Effects of age, sex, and ethnicity on the association between apolipoprotein E genotype and Alzheimer disease), JAMA",
       "tier_rationale": "APOE e2 vs e3/e4 effects on Alzheimer risk and type III hyperlipoproteinemia are replicated in large meta-analyses.",
       "tier_source": "curated"
+    },
+    "rs7501331": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "16",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV001253021",
+          "provenance": {
+            "accession": "VCV001253021.4",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:47Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=1253021&retmode=json"
+          },
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "significance": "Benign",
+          "stars": 2
+        },
+        "dbsnp": {
+          "pos_grch37": 81314496,
+          "pos_grch38": 81280891,
+          "provenance": {
+            "accession": "rs7501331",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T05:26:45Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/7501331"
+          }
+        },
+        "gnomad": {
+          "af": 0.221276041343541,
+          "constraint_provenance": {
+            "accession": "BCO1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:23Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2036147935950074,
+          "pli": 3.865997107239834e-18,
+          "provenance": {
+            "accession": "16-81280891-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T05:26:52Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": null,
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (hand-entered for BCO1; intestinal enterocytes and hepatic carotenoid monooxygenase)",
+            "url": null
+          },
+          "subcellular": [
+            "Cytosol"
+          ],
+          "tissues": {
+            "kidney": "Medium",
+            "liver": "Medium",
+            "small_intestine": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0983,
+          "mane_select_ensembl": "ENST00000258168",
+          "mane_select_refseq": "NM_017429.3",
+          "provenance": {
+            "accession": "rs7501331",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T05:26:51Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs7501331?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier B",
+      "gene": "BCO1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No BCO1 p.Ala379Val reduced-conversion allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.0,
+          "phenotype": "Heterozygous for BCO1 p.Ala379Val: Moderately decreased enzymatic conversion of beta-carotene into active vitamin A (retinol).",
+          "repute": "Neutral",
+          "significance": "Carrier"
+        },
+        "2": {
+          "category": "Trait",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Homozygous for BCO1 p.Ala379Val: Reduced conversion efficiency of beta-carotene to retinol, especially if co-inherited with p.Arg267Ser.",
+          "repute": "Neutral",
+          "significance": "Trait"
+        }
+      },
+      "limitation": "Single-variant test of BCO1 (c.1136C>T, p.Ala379Val); double mutants with p.Arg267Ser exhibit additive enzyme impairment.",
+      "pos_grch37": 81314496,
+      "pos_grch38": 81280891,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs7501331",
+      "tier_citation": "Leung et al. 2009, Two common single nucleotide polymorphisms in the BCMO1 gene, Journal of Nutrition",
+      "tier_rationale": "Functional missense variant with additive effect on reduced beta-carotene conversion.",
+      "tier_source": "curated"
+    },
+    "rs80357906": {
+      "allele_codes": {
+        "D": "ref",
+        "I": "alt"
+      },
+      "alt": "TG",
+      "chrom": "17",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017677",
+          "provenance": {
+            "accession": "VCV000017677.176",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:06:41Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=17677&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "Pathogenic",
+          "stars": 3
+        },
+        "dbsnp": {
+          "pos_grch37": 41209079,
+          "pos_grch38": 43057062,
+          "provenance": {
+            "accession": "rs80357906",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T07:06:40Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/80357906"
+          }
+        },
+        "gnomad": {
+          "af": 6.753775918389602e-05,
+          "constraint_provenance": {
+            "accession": "BRCA1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:43Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.927589724465447,
+          "pli": 5.517117679826177e-38,
+          "provenance": {
+            "accession": "17-43057062-T-TG",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:06:50Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000012048",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000012048",
+            "url": "https://www.proteinatlas.org/ENSG00000012048-BRCA1"
+          },
+          "subcellular": [
+            "Nucleoplasm",
+            "Nuclear bodies"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "breast": "Medium",
+            "lymph node": "Medium",
+            "ovary": "Medium",
+            "testis": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": null,
+          "mane_select_refseq": null,
+          "provenance": {
+            "accession": "rs80357906",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:06:48Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs80357906?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "BRCA1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No BRCA1 5382insC allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Associated with high lifetime risk of breast and ovarian malignancies; clinical genetics evaluation is recommended."
+          ],
+          "drug_response": null,
+          "magnitude": 6.5,
+          "phenotype": "Heterozygous carrier of BRCA1 5382insC (c.5266dupC, p.Gln1756fs): Pathogenic frameshift variant conferring markedly elevated risk of hereditary breast and ovarian cancer. NCCN guidelines recommend specialized genetic evaluation and enhanced screening.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        },
+        "2": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Biallelic state indicates severe genomic repair defect; urgent medical genetics consultation warranted."
+          ],
+          "drug_response": null,
+          "magnitude": 7.0,
+          "phenotype": "Homozygous for BRCA1 5382insC (c.5266dupC): Extremely rare biallelic loss-of-function state associated with severe cellular DNA repair deficiency.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        }
+      },
+      "limitation": "ACMG Secondary Findings locus caveat: This finding represents interrogation of a single specific nucleotide locus only. It does NOT represent comprehensive clinical sequencing of the gene. A negative result at this single position does not rule out other pathogenic variants across the remainder of the gene.",
+      "pos_grch37": 41209079,
+      "pos_grch38": 43057062,
+      "ref": "T",
+      "role": "standard",
+      "rsid": "rs80357906",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
+    },
+    "rs80357914": {
+      "allele_codes": {
+        "D": "alt",
+        "I": "ref"
+      },
+      "alt": "A",
+      "chrom": "17",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017662",
+          "provenance": {
+            "accession": "VCV000017662.188",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:00:29Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=55667%2C17662&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "Pathogenic",
+          "stars": 3
+        },
+        "dbsnp": {
+          "pos_grch37": 41276044,
+          "pos_grch38": 43124027,
+          "provenance": {
+            "accession": "rs80357914",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T07:00:28Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/80357914"
+          }
+        },
+        "gnomad": {
+          "af": 0.00011848017845223947,
+          "constraint_provenance": {
+            "accession": "BRCA1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:43Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.927589724465447,
+          "pli": 5.517117679826177e-38,
+          "provenance": {
+            "accession": "17-43124027-ACT-A",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:00:40Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000012048",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000012048",
+            "url": "https://www.proteinatlas.org/ENSG00000012048-BRCA1"
+          },
+          "subcellular": [
+            "Nucleoplasm",
+            "Nuclear bodies"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "breast": "Medium",
+            "lymph node": "Medium",
+            "ovary": "Medium",
+            "testis": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000357654",
+          "mane_select_refseq": "NM_007294.4",
+          "provenance": {
+            "accession": "rs80357914",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:00:40Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs80357914?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "BRCA1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No BRCA1 185delAG allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Associated with up to ~72% cumulative lifetime risk of breast cancer and ~44% lifetime risk of ovarian cancer. Clinical confirmation and genetic counseling recommended."
+          ],
+          "drug_response": null,
+          "magnitude": 6.5,
+          "phenotype": "Heterozygous carrier of BRCA1 185delAG (c.68_69delAG, p.Glu23fs): High risk for hereditary breast and ovarian cancer (HBOC). Genetic counseling, enhanced surveillance (breast MRI), and discussion of risk-reducing options are strongly indicated.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        },
+        "2": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Biallelic BRCA1 mutations cause severe Fanconi anemia-like phenotype; immediate comprehensive medical genetics evaluation required."
+          ],
+          "drug_response": null,
+          "magnitude": 7.0,
+          "phenotype": "Homozygous for BRCA1 185delAG (c.68_69delAG): Extremely rare biallelic state associated with Fanconi anemia-like severe chromosomal breakage disorder and early-onset malignancy.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        }
+      },
+      "limitation": "ACMG Secondary Findings locus caveat: This finding represents interrogation of a single specific nucleotide locus only. It does NOT represent comprehensive clinical sequencing of the gene. A negative result at this single position does not rule out other pathogenic variants across the remainder of the gene.",
+      "pos_grch37": 41276044,
+      "pos_grch38": 43124027,
+      "ref": "ACT",
+      "role": "standard",
+      "rsid": "rs80357914",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
+    },
+    "rs80359550": {
+      "allele_codes": {
+        "D": "alt",
+        "I": "ref"
+      },
+      "alt": "G",
+      "chrom": "13",
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000009325",
+          "provenance": {
+            "accession": "VCV000009325.172",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:00:53Z",
+            "source": "NCBI ClinVar",
+            "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id=9325&retmode=json"
+          },
+          "review_status": "reviewed by expert panel",
+          "significance": "Pathogenic",
+          "stars": 3
+        },
+        "dbsnp": {
+          "pos_grch37": 32914437,
+          "pos_grch38": 32340300,
+          "provenance": {
+            "accession": "rs80359550",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-30T07:00:52Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/80359550"
+          }
+        },
+        "gnomad": {
+          "af": 0.00013941574270174079,
+          "constraint_provenance": {
+            "accession": "BRCA2",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T06:59:43Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 0.8240908463710617,
+          "pli": 3.3178956399653213e-49,
+          "provenance": {
+            "accession": "13-32340300-GT-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-30T07:01:16Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": {
+          "provenance": {
+            "accession": "ENSG00000139618",
+            "curation_mode": "manually_curated",
+            "release": null,
+            "retrieved_at": null,
+            "source": "Human Protein Atlas (HPA) ENSG00000139618",
+            "url": "https://www.proteinatlas.org/ENSG00000139618-BRCA2"
+          },
+          "subcellular": [
+            "Nucleoplasm",
+            "Cytosol"
+          ],
+          "tissues": {
+            "bone marrow": "Medium",
+            "breast": "Medium",
+            "lymph node": "Medium",
+            "ovary": "Medium",
+            "testis": "High"
+          }
+        },
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": null,
+          "mane_select_refseq": null,
+          "provenance": {
+            "accession": "rs80359550",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-30T07:01:16Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs80359550?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "BRCA2",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No BRCA2 6174delT allele detected at this position.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Confers 45-69% lifetime breast cancer risk and elevated ovarian, prostate, and pancreatic risks. Specialized surveillance advised."
+          ],
+          "drug_response": null,
+          "magnitude": 6.5,
+          "phenotype": "Heterozygous carrier of BRCA2 6174delT (c.5946delT, p.Ser1982fs): Pathogenic frameshift variant predisposing to hereditary breast, ovarian, prostate, and pancreatic malignancies. Clinical confirmation and genetic counseling indicated.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        },
+        "2": {
+          "category": "Pathogenic",
+          "caveats": [
+            "Biallelic BRCA2 mutations cause Fanconi anemia group D1; immediate comprehensive medical genetics evaluation required."
+          ],
+          "drug_response": null,
+          "magnitude": 7.0,
+          "phenotype": "Homozygous for BRCA2 6174delT (c.5946delT): Biallelic BRCA2 loss causes Fanconi anemia complementation group D1 (FA-D1), characterized by childhood solid tumor risk and chromosomal instability.",
+          "repute": "Bad",
+          "significance": "Pathogenic"
+        }
+      },
+      "limitation": "ACMG Secondary Findings locus caveat: This finding represents interrogation of a single specific nucleotide locus only. It does NOT represent comprehensive clinical sequencing of the gene. A negative result at this single position does not rule out other pathogenic variants across the remainder of the gene.",
+      "pos_grch37": 32914437,
+      "pos_grch38": 32340300,
+      "ref": "GT",
+      "role": "standard",
+      "rsid": "rs80359550",
+      "tier_citation": null,
+      "tier_rationale": null,
+      "tier_source": "clinvar_review"
     },
     "rs9263726": {
       "allele_codes": null,
@@ -5952,16 +9003,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 22,
+    "gene_count": 34,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 34,
+    "locus_count": 55,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "d11ac7d3540fb988fa5d04e35b28266bface31cc86cb99a8c6567457de5c7964"
+    "sha256": "f5f7289999c62996ce3227a7fcfad3782741ef1c1b735cd7e2a859ee842ac1fc"
   },
   "schema_version": 2
 }

@@ -60,7 +60,7 @@ def test_load_shows_reference_only_karyogram(page):
     assert len(states) == len(KB["loci"])
     assert set(states.values()) == {"reference"}
     expect(page.locator("#karyogram-error")).to_be_hidden()
-    expect(page.locator("#karyogram-loci-body tr")).to_have_count(len(KB["loci"]))
+    expect(page.locator("#karyogram-loci-body tr")).to_have_count(len(KB["genes"]))
     expect(page.locator("#karyogram-provenance")).to_contain_text("hg38")
     expect(page.locator("#karyogram-provenance")).to_contain_text(KB["manifest"]["release"])
     expect(page.locator("#karyogram-provenance")).to_contain_text("2026-10-03")
@@ -209,7 +209,7 @@ def test_clear_the_file_returns_to_the_reference_view_with_nothing_left_over(pag
     assert set(page.evaluate(LOCUS_STATES).values()) == {"reference"}
     assert page.locator("#karyogram-figure .kary-bin:not(.kary-bin-empty)").count() == 0
     rows = page.locator("#karyogram-loci-body tr")
-    expect(rows).to_have_count(len(KB["loci"]))
+    expect(rows).to_have_count(len(KB["genes"]))
     assert set(rows.evaluate_all("els => els.map((r) => r.dataset.state)")) == {"reference"}
     expect(page.locator("#karyogram-legend li")).to_have_count(1)
     expect(page.locator('#karyogram-legend [data-legend-count="reference"]')).to_have_text(str(len(KB["loci"])))
@@ -326,7 +326,8 @@ def test_the_genes_table_has_the_design_columns_topic_gene_chromosome_your_resul
     headers = page.locator(".lds-table thead th").all_inner_texts()
     assert [h.strip() for h in headers] == ["Topic", "Gene", "Chromosome", "Your result"]
     rows = page.locator("#karyogram-loci-body tr")
-    assert rows.count() == len(KB["loci"])
+    genes = [rows.nth(i).locator("td").nth(1).inner_text().strip() for i in range(rows.count())]
+    assert len(genes) == len(set(genes)) == len(KB["genes"]), f"Duplicate genes: {len(genes)} rows vs {len(set(genes))} unique"
     seen_chroms = set()
     for i in range(rows.count()):
         row = rows.nth(i)
@@ -358,7 +359,7 @@ def test_the_genes_table_has_the_design_columns_topic_gene_chromosome_your_resul
 def test_the_result_column_says_no_file_yet_until_a_file_gives_a_result(page):
     _open(page)
     cells = page.locator("#karyogram-loci-body tr td:last-child")
-    assert cells.count() == len(KB["loci"])
+    assert cells.count() == len(KB["genes"])
     for i in range(cells.count()):
         cell = cells.nth(i)
         expect(cell).to_have_text("No file yet")
@@ -366,11 +367,10 @@ def test_the_result_column_says_no_file_yet_until_a_file_gives_a_result(page):
         expect(cell.locator(".kary-swatch")).to_have_count(0)  # no result mark without a result
     page.locator("#btn-load-karyogram-sample").click()
     _wait_result(page)
-    states = page.evaluate(LOCUS_STATES)
     for i in range(cells.count()):
         cell = cells.nth(i)
         row = page.locator("#karyogram-loci-body tr").nth(i)
-        word = LEGEND_WORDS[states[row.get_attribute("data-rsid")]][0]
+        word = LEGEND_WORDS[row.get_attribute("data-state")][0]
         expect(cell).to_have_text(word)
         expect(cell.locator(".kary-swatch")).to_have_count(1)
         expect(cell.locator(".lds-na-text")).to_have_count(0)
@@ -883,7 +883,7 @@ def _assert_genes_table_never_clips(page):
     rects = page.locator("#karyogram-loci-body td, .lds-table thead th").evaluate_all(
         "els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })"
     )
-    assert len(rects) == len(KB["loci"]) * 4 + 4
+    assert len(rects) == len(KB["genes"]) * 4 + 4
     for left, right in rects:
         assert left >= box["x"] - 0.5 and right <= box["x"] + dims["scroll"] + 0.5, (
             f"a cell lies outside the scrollable extent: {(left, right, box, dims)}"
@@ -912,3 +912,73 @@ def test_on_a_phone_the_genes_table_never_clips_the_result_word(page, loaded):
         page.locator("#btn-load-karyogram-sample").click()
         _wait_result(page)
     _assert_genes_table_never_clips(page)
+
+
+def test_karyogram_jpeg_export_downloads_high_res_jpeg_on_theme_background(page, tmp_path):
+    _open(page)
+    btn_export = page.locator("#btn-karyogram-export")
+    expect(btn_export).to_be_visible()
+    expect(btn_export).to_be_enabled()
+
+    # 1. Export reference karyogram
+    with page.expect_download() as download_info:
+        btn_export.click()
+    download = download_info.value
+    assert download.suggested_filename == "Lucidase_Chromosome_Map.jpg"
+    ref_path = tmp_path / "ref_map.jpg"
+    download.save_as(ref_path)
+    assert ref_path.stat().st_size > 20000
+
+    # 2. Toggle to dark theme, load sample, and export
+    page.locator("#btn-theme-toggle").click()
+    page.locator("#btn-load-karyogram-sample").click()
+    _wait_result(page)
+
+    with page.expect_download() as download_info:
+        btn_export.click()
+    download_sample = download_info.value
+    assert "Lucidase_Chromosome_Map" in download_sample.suggested_filename
+    assert download_sample.suggested_filename.endswith(".jpg")
+    sample_path = tmp_path / "sample_map.jpg"
+    download_sample.save_as(sample_path)
+    assert sample_path.stat().st_size > 50000
+
+    # Verify resolution and JPEG validity with PIL
+    from PIL import Image
+    with Image.open(sample_path) as img:
+        assert img.format == "JPEG"
+        assert img.width >= 1400
+        assert img.height >= 1000
+        # Dark theme background corner check
+        corner = img.getpixel((5, 5))
+        assert corner[0] < 30 and corner[1] < 30 and corner[2] < 35
+
+
+
+def test_multi_locus_gene_preserves_partial_coverage_in_genes_table(page):
+    """Preserve partial coverage in gene-level results (P1-097)."""
+    _open(page)
+    # File with only 1 of 3 G6PD loci (rs1050829 reference TT)
+    partial_text = (
+        "# 23andMe format\n"
+        "# rsid\tchromosome\tposition\tgenotype\n"
+        "rs1050829\tX\t153763492\tTT\n"
+    )
+    _load_named(page, "partial_g6pd.txt", partial_text)
+    g6pd_row = page.locator('#karyogram-loci-body tr[data-gene="G6PD"]')
+    expect(g6pd_row).to_have_attribute("data-state", "supported_not_observed")
+    expect(g6pd_row).to_have_attribute("data-partial", "true")
+    expect(g6pd_row.locator("td").last).to_have_text("Not found (1 of 3 tested)")
+
+    # Clear and load a file where G6PD is entirely unassayed
+    page.locator("#btn-karyogram-clear").click()
+    unassayed_text = (
+        "# 23andMe format\n"
+        "# rsid\tchromosome\tposition\tgenotype\n"
+        "rs429358\t19\t45411941\tTT\n"
+    )
+    _load_named(page, "unassayed_g6pd.txt", unassayed_text)
+    g6pd_row_gap = page.locator('#karyogram-loci-body tr[data-gene="G6PD"]')
+    expect(g6pd_row_gap).to_have_attribute("data-state", "not_tested_by_array")
+    assert g6pd_row_gap.get_attribute("data-partial") is None
+    expect(g6pd_row_gap.locator("td").last).to_have_text("Not on your chip")
