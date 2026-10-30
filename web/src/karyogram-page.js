@@ -8,7 +8,7 @@
  */
 
 import { loadKnowledgeBase } from "./kb-loader.js";
-import { layoutKaryogram } from "./core/karyogram.js";
+import { layoutKaryogram, rollUpGeneResult } from "./core/karyogram.js";
 import { renderKaryogramSvg } from "./karyogram-view.js";
 import { RESULT_WORDS, escapeHtml, karyogramStateLabels } from "./view-model.js";
 import { initTheme } from "./theme.js";
@@ -125,21 +125,12 @@ function topicOf(gene) {
 }
 
 /** The result cell: the swatch and the plain word with a file; the muted "No file yet" while there is no result. */
-function resultCell(layout, state) {
-  if (!layout.sample) return `<span class="lds-na-text">No file yet</span>`;
+function resultCell(layout, result) {
+  if (!layout.sample || result.state === "reference") return `<span class="lds-na-text">No file yet</span>`;
   return (
-    `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(state)}" aria-hidden="true"></span>` +
-    `${escapeHtml(labels[state])}</span>`
+    `<span class="flex items-center gap-2"><span class="kary-swatch kary-state-${escapeHtml(result.state)}" aria-hidden="true"></span>` +
+    `${escapeHtml(result.label)}</span>`
   );
-}
-
-/** Roll up individual locus observation states to a single gene-level clinical result. */
-function aggregateState(states) {
-  if (states.includes("supported_and_observed")) return "supported_and_observed";
-  if (states.includes("insufficient_evidence")) return "insufficient_evidence";
-  if (states.includes("supported_not_observed")) return "supported_not_observed";
-  if (states.includes("not_tested_by_array")) return "not_tested_by_array";
-  return "reference";
 }
 
 function renderLoci(layout) {
@@ -158,14 +149,15 @@ function renderLoci(layout) {
 
   $("karyogram-loci-body").innerHTML = genes
     .map((g) => {
-      const state = layout.sample
-        ? aggregateState(g.loci.map((l) => stateOf(layout, l.rsid)))
-        : "reference";
+      const result = rollUpGeneResult(
+        g.loci,
+        layout.sample ? layout.sample.observations : null,
+      );
       return (
-        `<tr data-gene="${escapeHtml(g.gene)}" data-rsid="${escapeHtml(g.loci[0].rsid)}" data-state="${escapeHtml(state)}">` +
+        `<tr data-gene="${escapeHtml(g.gene)}" data-rsid="${escapeHtml(g.loci[0].rsid)}" data-state="${escapeHtml(result.state)}"${result.isPartial ? ` data-partial="true"` : ""}>` +
         `<td class="font-bold">${escapeHtml(topicOf(g.gene))}</td><td class="lds-data">${escapeHtml(g.gene)}</td>` +
         `<td class="lds-data">${escapeHtml(g.chrom)}</td>` +
-        `<td>${resultCell(layout, state)}</td></tr>`
+        `<td>${resultCell(layout, result)}</td></tr>`
       );
     })
     .join("");

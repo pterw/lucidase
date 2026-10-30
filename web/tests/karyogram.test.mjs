@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { loadKnowledgeBase } from "../src/kb-loader.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { CHROMOSOME_ORDER, layoutKaryogram } from "../src/core/karyogram.js";
+import { CHROMOSOME_ORDER, layoutKaryogram, rollUpGeneResult } from "../src/core/karyogram.js";
 import { COVERAGE_STATES } from "../src/core/coverage.js";
 import { parseGenotypeFile } from "../src/core/parse.js";
 import { classify } from "../src/core/classify.js";
@@ -150,4 +150,120 @@ test("the real committed karyogram sample lays out and the totals invariant hold
   assert.ok(t.placed > 15_000);
   const binned = Object.values(sample.bins).flat().reduce((a, b) => a + b, 0);
   assert.equal(binned, t.placed);
+});
+
+
+test("rollUpGeneResult validates input arguments and locus rsids", () => {
+  assert.throws(() => rollUpGeneResult(), /loci must be a non-empty array/);
+  assert.throws(() => rollUpGeneResult([]), /loci must be a non-empty array/);
+  assert.throws(() => rollUpGeneResult(["not_an_rsid"]), /invalid locus rsid/);
+  assert.throws(() => rollUpGeneResult([{ notRsid: "rs123" }]), /invalid locus rsid/);
+});
+
+test("rollUpGeneResult returns reference state and 'No file yet' when no sample observations exist", () => {
+  const res = rollUpGeneResult(["rs1050828", "rs1050829", "rs5030868"], null);
+  assert.deepEqual(res, {
+    state: "reference",
+    label: "No file yet",
+    tested: 0,
+    total: 3,
+    isPartial: false,
+  });
+});
+
+test("rollUpGeneResult throws on missing or invalid observation states (fail-fast)", () => {
+  const loci = ["rs1", "rs2"];
+  assert.throws(() => rollUpGeneResult(loci, { rs1: "supported_not_observed" }), /no observation for locus rs2/);
+  assert.throws(
+    () => rollUpGeneResult(loci, { rs1: "supported_not_observed", rs2: "invalid_state" }),
+    /unknown or missing coverage state/
+  );
+});
+
+test("rollUpGeneResult preserves partial coverage in negative multi-locus gene results (P1-097)", () => {
+  const g6pdLoci = [{ rsid: "rs1050828" }, { rsid: "rs1050829" }, { rsid: "rs5030868" }];
+
+  // 1 of 3 tested, negative
+  const partial1 = rollUpGeneResult(g6pdLoci, {
+    rs1050828: "not_tested_by_array",
+    rs1050829: "supported_not_observed",
+    rs5030868: "not_tested_by_array",
+  });
+  assert.deepEqual(partial1, {
+    state: "supported_not_observed",
+    label: "Not found (1 of 3 tested)",
+    tested: 1,
+    total: 3,
+    isPartial: true,
+  });
+
+  // 2 of 3 tested, negative
+  const partial2 = rollUpGeneResult(g6pdLoci, {
+    rs1050828: "supported_not_observed",
+    rs1050829: "supported_not_observed",
+    rs5030868: "not_tested_by_array",
+  });
+  assert.deepEqual(partial2, {
+    state: "supported_not_observed",
+    label: "Not found (2 of 3 tested)",
+    tested: 2,
+    total: 3,
+    isPartial: true,
+  });
+
+  // 3 of 3 tested, fully negative
+  const full = rollUpGeneResult(g6pdLoci, {
+    rs1050828: "supported_not_observed",
+    rs1050829: "supported_not_observed",
+    rs5030868: "supported_not_observed",
+  });
+  assert.deepEqual(full, {
+    state: "supported_not_observed",
+    label: "Not found",
+    tested: 3,
+    total: 3,
+    isPartial: false,
+  });
+
+  // 0 of 3 tested (all gaps)
+  const gaps = rollUpGeneResult(g6pdLoci, {
+    rs1050828: "not_tested_by_array",
+    rs1050829: "not_tested_by_array",
+    rs5030868: "not_tested_by_array",
+  });
+  assert.deepEqual(gaps, {
+    state: "not_tested_by_array",
+    label: "Not on your chip",
+    tested: 0,
+    total: 3,
+    isPartial: false,
+  });
+
+  // 1 observed (variant present) takes precedence
+  const observed = rollUpGeneResult(g6pdLoci, {
+    rs1050828: "supported_and_observed",
+    rs1050829: "supported_not_observed",
+    rs5030868: "not_tested_by_array",
+  });
+  assert.deepEqual(observed, {
+    state: "supported_and_observed",
+    label: "Found",
+    tested: 2,
+    total: 3,
+    isPartial: false,
+  });
+
+  // 1 unclear and none observed takes precedence over negative/gap
+  const unclear = rollUpGeneResult(g6pdLoci, {
+    rs1050828: "insufficient_evidence",
+    rs1050829: "supported_not_observed",
+    rs5030868: "not_tested_by_array",
+  });
+  assert.deepEqual(unclear, {
+    state: "insufficient_evidence",
+    label: "Unclear",
+    tested: 2,
+    total: 3,
+    isPartial: false,
+  });
 });

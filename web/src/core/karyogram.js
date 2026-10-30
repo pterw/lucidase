@@ -29,6 +29,105 @@ export function binIndex(pos, binSize) {
   return Math.floor((pos - 1) / binSize);
 }
 
+/**
+ * Rolls up individual locus observation states for a gene to a single clinical result.
+ * Pure and deterministic (contracts K-C2).
+ *
+ * Clinical honesty rules (contracts AGENTS.md 4.1 & 4.6):
+ * - If any locus has supported_and_observed: "supported_and_observed" (Found).
+ * - Else if any locus has insufficient_evidence: "insufficient_evidence" (Unclear).
+ * - Else if all loci are not_tested_by_array (0 tested): "not_tested_by_array" (Not on your chip).
+ * - Else if tested < total (partial coverage): "supported_not_observed", isPartial: true,
+ *   label: `Not found (${tested} of ${total} tested)`.
+ * - Else: "supported_not_observed", isPartial: false, label: "Not found".
+ *
+ * @param {Array<{ rsid: string }|string>} loci The gene's loci (objects with rsid or string rsIDs).
+ * @param {Record<string, string>|null} observations Locus observations map, or null for reference.
+ * @returns {{ state: string, label: string, tested: number, total: number, isPartial: boolean }}
+ */
+export function rollUpGeneResult(loci, observations) {
+  if (!Array.isArray(loci) || loci.length === 0) {
+    throw new Error("rollUpGeneResult: loci must be a non-empty array");
+  }
+  const rsids = loci.map((l) => (typeof l === "string" ? l : (l && l.rsid)));
+  for (const rsid of rsids) {
+    if (typeof rsid !== "string" || !rsid.startsWith("rs")) {
+      throw new Error(`rollUpGeneResult: invalid locus rsid "${rsid}"`);
+    }
+  }
+  const total = rsids.length;
+  if (!observations) {
+    return {
+      state: "reference",
+      label: "No file yet",
+      tested: 0,
+      total,
+      isPartial: false,
+    };
+  }
+
+  const states = rsids.map((rsid) => {
+    if (!Object.hasOwn(observations, rsid)) {
+      throw new Error(`rollUpGeneResult: no observation for locus ${rsid}`);
+    }
+    const s = observations[rsid];
+    if (!VALID_STATES.has(s)) {
+      throw new Error(`rollUpGeneResult: unknown or missing coverage state "${s}" for ${rsid}`);
+    }
+    return s;
+  });
+
+  const observed = states.filter((s) => s === COVERAGE_STATES.SUPPORTED_AND_OBSERVED).length;
+  const unclear = states.filter((s) => s === COVERAGE_STATES.INSUFFICIENT_EVIDENCE).length;
+  const gaps = states.filter((s) => s === COVERAGE_STATES.NOT_TESTED_BY_ARRAY).length;
+  const tested = total - gaps;
+
+  if (observed > 0) {
+    return {
+      state: COVERAGE_STATES.SUPPORTED_AND_OBSERVED,
+      label: "Found",
+      tested,
+      total,
+      isPartial: false,
+    };
+  }
+  if (unclear > 0) {
+    return {
+      state: COVERAGE_STATES.INSUFFICIENT_EVIDENCE,
+      label: "Unclear",
+      tested,
+      total,
+      isPartial: false,
+    };
+  }
+  if (tested === 0) {
+    return {
+      state: COVERAGE_STATES.NOT_TESTED_BY_ARRAY,
+      label: "Not on your chip",
+      tested: 0,
+      total,
+      isPartial: false,
+    };
+  }
+  if (tested < total) {
+    return {
+      state: COVERAGE_STATES.SUPPORTED_NOT_OBSERVED,
+      label: `Not found (${tested} of ${total} tested)`,
+      tested,
+      total,
+      isPartial: true,
+    };
+  }
+  return {
+    state: COVERAGE_STATES.SUPPORTED_NOT_OBSERVED,
+    label: "Not found",
+    tested,
+    total,
+    isPartial: false,
+  };
+}
+
+
 function assertLayoutInputs(kb, binSize) {
   if (!kb || typeof kb !== "object" || !kb.assemblies || typeof kb.assemblies !== "object") {
     throw new Error("layoutKaryogram: the knowledge base carries no assemblies");

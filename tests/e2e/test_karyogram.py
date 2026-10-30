@@ -953,3 +953,32 @@ def test_karyogram_jpeg_export_downloads_high_res_jpeg_on_theme_background(page,
         corner = img.getpixel((5, 5))
         assert corner[0] < 30 and corner[1] < 30 and corner[2] < 35
 
+
+
+def test_multi_locus_gene_preserves_partial_coverage_in_genes_table(page):
+    """Preserve partial coverage in gene-level results (P1-097)."""
+    _open(page)
+    # File with only 1 of 3 G6PD loci (rs1050829 reference TT)
+    partial_text = (
+        "# 23andMe format\n"
+        "# rsid\tchromosome\tposition\tgenotype\n"
+        "rs1050829\tX\t153763492\tTT\n"
+    )
+    _load_named(page, "partial_g6pd.txt", partial_text)
+    g6pd_row = page.locator('#karyogram-loci-body tr[data-gene="G6PD"]')
+    expect(g6pd_row).to_have_attribute("data-state", "supported_not_observed")
+    expect(g6pd_row).to_have_attribute("data-partial", "true")
+    expect(g6pd_row.locator("td").last).to_have_text("Not found (1 of 3 tested)")
+
+    # Clear and load a file where G6PD is entirely unassayed
+    page.locator("#btn-karyogram-clear").click()
+    unassayed_text = (
+        "# 23andMe format\n"
+        "# rsid\tchromosome\tposition\tgenotype\n"
+        "rs429358\t19\t45411941\tTT\n"
+    )
+    _load_named(page, "unassayed_g6pd.txt", unassayed_text)
+    g6pd_row_gap = page.locator('#karyogram-loci-body tr[data-gene="G6PD"]')
+    expect(g6pd_row_gap).to_have_attribute("data-state", "not_tested_by_array")
+    assert g6pd_row_gap.get_attribute("data-partial") is None
+    expect(g6pd_row_gap.locator("td").last).to_have_text("Not on your chip")
