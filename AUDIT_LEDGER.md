@@ -390,11 +390,13 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `4ef768c` | P1-096 | `fix(karyogram): deduplicate genes in the chromosome map genes table (P1-096)` |
 | `ef18d69` | Karyogram export | `feat(karyogram): add high-resolution JPEG export on current theme background` |
 | `91f8226` | P1-097 | `fix(karyogram): preserve partial coverage in gene-level results and enforce core boundary (P1-097)` |
-<<<<<<< HEAD
-| `ab1c098` | P1-098, P1-099, P1-100 | `fix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100)` |
+| b1c098 | P1-098, P1-099, P1-100 | ix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100) |
+| 8bdbc67 | Phase 4 (Metabolic) | eat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR) |
+| b1c098 | P1-098, P1-099, P1-100 | ix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100) |
+| 8bdbc67 | Phase 4 (Metabolic) | eat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR) |
 =======
-| `Pending` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
->>>>>>> ec3acc1 (feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR))
+| `b918b1d` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
+>>>>>>> 65d7c01 (docs(audit): update audit ledger with Phase 4 commit b85d3ae)
 
 ---
 
