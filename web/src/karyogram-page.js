@@ -131,14 +131,38 @@ function resultCell(layout, state) {
   );
 }
 
+/** Roll up individual locus observation states to a single gene-level clinical result. */
+function aggregateState(states) {
+  if (states.includes("supported_and_observed")) return "supported_and_observed";
+  if (states.includes("insufficient_evidence")) return "insufficient_evidence";
+  if (states.includes("supported_not_observed")) return "supported_not_observed";
+  if (states.includes("not_tested_by_array")) return "not_tested_by_array";
+  return "reference";
+}
+
 function renderLoci(layout) {
-  $("karyogram-loci-body").innerHTML = layout.reference.loci
-    .map((l) => {
-      const state = stateOf(layout, l.rsid);
+  const genes = [];
+  const seen = new Set();
+  for (const l of layout.reference.loci) {
+    if (!seen.has(l.gene)) {
+      seen.add(l.gene);
+      genes.push({
+        gene: l.gene,
+        chrom: l.chrom,
+        loci: layout.reference.loci.filter((x) => x.gene === l.gene),
+      });
+    }
+  }
+
+  $("karyogram-loci-body").innerHTML = genes
+    .map((g) => {
+      const state = layout.sample
+        ? aggregateState(g.loci.map((l) => stateOf(layout, l.rsid)))
+        : "reference";
       return (
-        `<tr data-rsid="${escapeHtml(l.rsid)}" data-state="${escapeHtml(state)}">` +
-        `<td class="font-bold">${escapeHtml(topicOf(l.gene))}</td><td class="lds-data">${escapeHtml(l.gene)}</td>` +
-        `<td class="lds-data">${escapeHtml(l.chrom)}</td>` +
+        `<tr data-gene="${escapeHtml(g.gene)}" data-rsid="${escapeHtml(g.loci[0].rsid)}" data-state="${escapeHtml(state)}">` +
+        `<td class="font-bold">${escapeHtml(topicOf(g.gene))}</td><td class="lds-data">${escapeHtml(g.gene)}</td>` +
+        `<td class="lds-data">${escapeHtml(g.chrom)}</td>` +
         `<td>${resultCell(layout, state)}</td></tr>`
       );
     })

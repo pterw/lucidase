@@ -60,7 +60,7 @@ def test_load_shows_reference_only_karyogram(page):
     assert len(states) == len(KB["loci"])
     assert set(states.values()) == {"reference"}
     expect(page.locator("#karyogram-error")).to_be_hidden()
-    expect(page.locator("#karyogram-loci-body tr")).to_have_count(len(KB["loci"]))
+    expect(page.locator("#karyogram-loci-body tr")).to_have_count(len(KB["genes"]))
     expect(page.locator("#karyogram-provenance")).to_contain_text("hg38")
     expect(page.locator("#karyogram-provenance")).to_contain_text(KB["manifest"]["release"])
     expect(page.locator("#karyogram-provenance")).to_contain_text("2026-10-03")
@@ -209,7 +209,7 @@ def test_clear_the_file_returns_to_the_reference_view_with_nothing_left_over(pag
     assert set(page.evaluate(LOCUS_STATES).values()) == {"reference"}
     assert page.locator("#karyogram-figure .kary-bin:not(.kary-bin-empty)").count() == 0
     rows = page.locator("#karyogram-loci-body tr")
-    expect(rows).to_have_count(len(KB["loci"]))
+    expect(rows).to_have_count(len(KB["genes"]))
     assert set(rows.evaluate_all("els => els.map((r) => r.dataset.state)")) == {"reference"}
     expect(page.locator("#karyogram-legend li")).to_have_count(1)
     expect(page.locator('#karyogram-legend [data-legend-count="reference"]')).to_have_text(str(len(KB["loci"])))
@@ -326,7 +326,8 @@ def test_the_genes_table_has_the_design_columns_topic_gene_chromosome_your_resul
     headers = page.locator(".lds-table thead th").all_inner_texts()
     assert [h.strip() for h in headers] == ["Topic", "Gene", "Chromosome", "Your result"]
     rows = page.locator("#karyogram-loci-body tr")
-    assert rows.count() == len(KB["loci"])
+    genes = [rows.nth(i).locator("td").nth(1).inner_text().strip() for i in range(rows.count())]
+    assert len(genes) == len(set(genes)) == len(KB["genes"]), f"Duplicate genes: {len(genes)} rows vs {len(set(genes))} unique"
     seen_chroms = set()
     for i in range(rows.count()):
         row = rows.nth(i)
@@ -358,7 +359,7 @@ def test_the_genes_table_has_the_design_columns_topic_gene_chromosome_your_resul
 def test_the_result_column_says_no_file_yet_until_a_file_gives_a_result(page):
     _open(page)
     cells = page.locator("#karyogram-loci-body tr td:last-child")
-    assert cells.count() == len(KB["loci"])
+    assert cells.count() == len(KB["genes"])
     for i in range(cells.count()):
         cell = cells.nth(i)
         expect(cell).to_have_text("No file yet")
@@ -366,11 +367,10 @@ def test_the_result_column_says_no_file_yet_until_a_file_gives_a_result(page):
         expect(cell.locator(".kary-swatch")).to_have_count(0)  # no result mark without a result
     page.locator("#btn-load-karyogram-sample").click()
     _wait_result(page)
-    states = page.evaluate(LOCUS_STATES)
     for i in range(cells.count()):
         cell = cells.nth(i)
         row = page.locator("#karyogram-loci-body tr").nth(i)
-        word = LEGEND_WORDS[states[row.get_attribute("data-rsid")]][0]
+        word = LEGEND_WORDS[row.get_attribute("data-state")][0]
         expect(cell).to_have_text(word)
         expect(cell.locator(".kary-swatch")).to_have_count(1)
         expect(cell.locator(".lds-na-text")).to_have_count(0)
@@ -883,7 +883,7 @@ def _assert_genes_table_never_clips(page):
     rects = page.locator("#karyogram-loci-body td, .lds-table thead th").evaluate_all(
         "els => els.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.right]; })"
     )
-    assert len(rects) == len(KB["loci"]) * 4 + 4
+    assert len(rects) == len(KB["genes"]) * 4 + 4
     for left, right in rects:
         assert left >= box["x"] - 0.5 and right <= box["x"] + dims["scroll"] + 0.5, (
             f"a cell lies outside the scrollable extent: {(left, right, box, dims)}"

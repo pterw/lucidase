@@ -135,6 +135,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P1-093 | `web/src/core/classify.js`, `variant_annotator.py`, `web/tests/classify.test.mjs`, `tests/test_genomic_pipeline.py` | Exact-rsID candidate filter silently discarded contradictory position-matched calls prior to conflict detection (e.g. `rs1800562 G/G` vs `i12345 G/A`), causing conflicting calls to be classified as non-variant wild-type instead of failing closed to unresolvable. | REMEDIATED (removed exact-rsID discard filter so contradictory position-matched calls preserve conflict detection and fail closed to unresolvable; verified with Node and Python regression tests) |
 | P1-094 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | Single-variant CYP2C19 (*3, *17), TPMT, and NUDT15 interpretations asserted unphased diplotypes/metabolizer status or unphased dosing recommendations; DPYD starting dose reduction cited superseded 25-50% range; negative HLA tag interpretations asserted patient-level risk reductions. | REMEDIATED (aligned single-variant interpretations with clinical guidelines, withheld unphased diplotypes, updated DPYD to 50% dose reduction with titration, scoped negative HLA tag results to tested marker) |
 | P1-095 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json` | Single-variant `SLCO1B1` `rs2306283` (`*1b`) interpretations asserted unphased `*1b/*1b` diplotype and unconditional normal/increased function, conflicting when co-inherited with `*5` (`rs4149056`). | REMEDIATED (scoped interpretations to single-variant effect, removed diplotype assertions, updated count 2 repute to Neutral, and noted multi-variant dependence) |
+| P1-096 | `web/src/karyogram-page.js`, `tests/e2e/test_karyogram.py` | `renderLoci` iterated over loci rather than unique genes, producing duplicate identical rows for multi-locus genes (e.g. 4 DPYD, 3 G6PD, 3 TPMT, 3 CYP2D6 rows) in the "Genes this report checks" table. | REMEDIATED (deduplicated by gene in chromosome coordinate order, rolled up locus observations to clinical gene state, updated e2e assertions) |
 
 ---
 
@@ -381,7 +382,8 @@ Each finding was closed test-first: a regression test written against the pre-fi
 
 | Commit | Scope | Description |
 |---|---|---|
-| `pending` | Phase 3 (PGx) | `feat(kb): add G6PD enzymopathy and CYP2D6 core star alleles (Phase 3 completion)` |
+| `ee6f68c` | Phase 3 (PGx) | `feat(kb): add G6PD enzymopathy and CYP2D6 core star alleles (Phase 3 completion)` |
+| `4ef768c` | P1-096 | `fix(karyogram): deduplicate genes in the chromosome map genes table (P1-096)` |
 
 ---
 
