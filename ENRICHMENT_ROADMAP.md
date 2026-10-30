@@ -126,7 +126,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
     - *Locus*: chr6:6318562 (GRCh38) / chr6:6318795 (GRCh37), c.100G>T (p.Val34Leu, plus-strand C>A).
     - *Why*: Synergizes with existing thrombophilia markers (`F5` Leiden, `F2` Prothrombin). The 34Leu allele accelerates fibrin cross-linking, providing protective effect against venous thromboembolism.
   - [x] **Common Founder Variants in ACMG SF Genes (`BRCA1` & `BRCA2`)**:
-    - *Loci*: `BRCA1` 185delAG (`rs80357914` / `i4000377`, c.68_69delAG), `BRCA1` 5382insC (`rs80357711` / `i4000378`, c.5266dupC), `BRCA2` 6174delT (`rs80359550` / `i4000379`, c.5946delT).
+    - *Loci*: `BRCA1` 185delAG (`rs80357914` / `i4000377`, c.68_69delAG), `BRCA1` 5382insC (`rs80357906` / `i4000378`, c.5266dupC), `BRCA2` 6174delT (`rs80359550` / `i4000379`, c.5946delT).
     - *Why*: Canonical 3-variant founder mutation panel for hereditary breast and ovarian cancer (HBOC); FDA-authorized direct-to-consumer carrier screening.
   - [x] **`SERPINA1` Alpha-1 Antitrypsin Deficiency (Pi\*Z & Pi\*S)**:
     - *Loci*: Pi\*Z (`rs28929474`, chr14:94378610 GRCh38 / 94844947 GRCh37, c.1096G>A, p.Glu366Lys) and Pi\*S (`rs17580`, chr14:94380925 GRCh38 / 94847262 GRCh37, c.863A>T, p.Glu288Val).
