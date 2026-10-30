@@ -397,7 +397,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `ab1c098` | P1-098, P1-099, P1-100 | `fix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100)` |
 | `8bdbc67` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
 | `9d77b30` | P2-025, P2-026 | `fix(kb): correct FUT2 B12 association direction and VDR FokI allele naming (P2-025, P2-026)` |
-| `fe931e8` | P2-027, P2-028 | `fix(kb): correct BCO1 conversion attribution and qualify FMO3 haplotype claims (P2-027, P2-028)` |
+| `ee746ec` | P2-027, P2-028 | `fix(kb): correct BCO1 conversion attribution and qualify FMO3 haplotype claims (P2-027, P2-028)` |
 
 ---
 
