@@ -2,7 +2,7 @@
 
 > **Status:** Active Reference & Execution Plan  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 48 curated loci across 30 genes.
+> **Current KB State:** 55 curated loci across 34 genes.
 
 ---
 
@@ -36,6 +36,8 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 - [x] **Phase 1 (Tier 2B): Thiopurine Toxicity (TPMT & NUDT15)**: `TPMT*2` (rs1800462), `TPMT*3C` (rs1142345), `TPMT*3B` (rs1800460), `NUDT15*3` (rs116855232).
 - [x] **Phase 2 (Tier 3): Severe Adverse Drug Reaction (ADR) HLA Immune Alleles**: `HLA-B*57:01` tag (`rs2395029`), `HLA-A*31:01` tag (`rs1061235`), `HLA-B*58:01` tag (`rs9263726` in `PSORS1C1`). `HLA-B*15:02` tag SNPs excluded per Clinical Honesty guardrails (`AGENTS.md` Rule 4).
 - [x] **Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies**: `CYP2D6` core star alleles (`rs3892097` *4, `rs1065852` *10, `rs28371725` *41), `G6PD` deficiency (`rs1050828` A-, `rs1050829` A+, `rs5030868` Med), `BChE` pseudocholinesterase deficiency (`rs1799807`), `SLCO1B1` statin uptake expansion (`rs2306283` *1b).
+- [x] **Phase 4: Micronutrient, Vitamin & Metabolic Pathway Modifiers**: `FUT2` (`rs601338`), `BCO1` (`rs7501331`, `rs12934922`), `PNPLA3` (`rs738409`), `FMO3` (`rs2266782`, `rs2266780`), `CBS` (`rs5742905`), `VDR` (`rs2228570`).
+- [x] **Phase 5: Hereditary Disease & Secondary Findings Expansions**: `HFE` S65C (`rs1800730`), `F13A1` Val34Leu (`rs5985`), founder `BRCA1` 185delAG (`rs80357914`), `BRCA1` 5382insC (`rs80357906`), `BRCA2` 6174delT (`rs80359550`), `SERPINA1` Pi*Z (`rs28929474`), `SERPINA1` Pi*S (`rs17580`).
 
 ---
 
@@ -90,7 +92,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 ---
 
-### Phase 4: Micronutrient, Vitamin & Metabolic Pathway Modifiers
+### Phase 4: Micronutrient, Vitamin & Metabolic Pathway Modifiers (Completed)
 
 * **Rationale**: Directly relevant to consumer DNA users exploring diet, B-vitamin supplementation, and metabolic efficiency.
 * **Target Loci**:
@@ -110,13 +112,21 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
   - [x] **`CBS` Homocystinuria & Pyridoxine Response (`rs5742905`)**:
     - *Locus*: chr21:43063074 (GRCh38) / chr21:44483184 (GRCh37), c.833T>C (p.Ile278Thr).
     - *Why*: Most common pathogenic CBS mutation causing pyridoxine (B6)-responsive homocystinuria; carrier status transmits to 50% of offspring.
-  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191`, `rs1049742`, `rs1049793`, `rs2052129`)**:
-    - *Why*: Encodes primary extracellular enzyme for degrading ingested histamine; reduced activity correlates with food histamine intolerance (parked for Phase 6).
-    - *Curation note*: Per 2024 Nutrients benchmark (PMCID: PMC11054051), the canonical functional panel comprises `rs10156191` (p.Thr16Met), `rs1049742` (p.Ser332Phe), `rs1049793` (p.His664Asp), and promoter `rs2052129` (correcting earlier drafts referencing ABCB1 `rs1045642` or ERCC5 `rs1047768`).
+---
+
+### Phase 6: Food Intolerance & Histamine Breakdown (DAO / AOC1) (Parked for Future Milestone)
+
+* **Clinical & Functional Rationale**: Encodes the primary extracellular enzyme for degrading ingested food histamine; reduced activity correlates with food-induced histamine sensitivity, gastrointestinal complaints, and headaches.
+* **Target Loci (Canonical 2024 Nutrients Benchmark, PMCID: PMC11054051)**:
+  - [ ] **`DAO` / `AOC1` p.Thr16Met (`rs10156191`)**: chr7:150827299 (GRCh38) / chr7:150529241 (GRCh37), c.47C>T. Common coding variant associated with reduced enzymatic activity.
+  - [ ] **`DAO` / `AOC1` p.Ser332Phe (`rs1049742`)**: chr7:150854228 (GRCh38) / chr7:150556170 (GRCh37), c.995C>T. Functional missense variant altering catalytic turnover.
+  - [ ] **`DAO` / `AOC1` p.His664Asp (`rs1049793`)**: chr7:150856005 (GRCh38) / chr7:150557947 (GRCh37), c.1990C>G. Functional missense variant in terminal catalytic region.
+  - [ ] **`DAO` / `AOC1` Promoter Variant (`rs2052129`)**: chr7:150826315 (GRCh38) / chr7:150528257 (GRCh37), c.-691C>T. Modulates transcriptional promoter activity.
+* *Curation Note*: Distinguishes true `AOC1` loci from bystanders `rs1045642` (`ABCB1`) and `rs1047768` (`ERCC5`).
 
 ---
 
-### Phase 5: Hereditary Disease & Secondary Findings Expansions
+### Phase 5: Hereditary Disease & Secondary Findings Expansions (Completed)
 
 * **Target Loci**:
   - [x] **`HFE` S65C (`rs1800730`)**:

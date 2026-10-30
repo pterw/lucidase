@@ -1,6 +1,6 @@
 # Lucidase Design System
 
-Lucidase reads a raw genotype file **in the browser** and interprets the 14 curated loci (12 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA, MyHeritage and VCF files and rejects anything else with a visible error. No accounts, no payments, no upload. Formerly GenomePulse.
+Lucidase reads a raw genotype file **in the browser** and interprets the 55 curated loci (34 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA, MyHeritage and VCF files and rejects anything else with a visible error. No accounts, no payments, no upload. Formerly GenomePulse.
 
 The name is *lucid* + *-ase* (the enzyme suffix). The arch from the **c** to the dot of the **i** in the wordmark is a ligature — "ligature" and "ligase", the enzyme that joins DNA strands, share a root. The dot field in the banner is a stylised karyogram. **That logo is the idea this system is built from.**
 

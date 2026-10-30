@@ -1,4 +1,4 @@
-"""One-time capture of pinned upstream payloads for the 14 curated loci.
+"""Capture of pinned upstream payloads for the curated loci.
 
 Owner-approved network use (hardening pass, ruling 5): public NCBI E-utilities
 (ClinVar), NCBI Variation Services (dbSNP), Ensembl REST VEP and the gnomAD

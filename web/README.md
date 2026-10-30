@@ -2,7 +2,7 @@
 
 See the [root README](../README.md) for an overview of Lucidase.
 
-A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 14 curated loci in 12 genes, in the browser, and nothing else.
+A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 55 curated loci in 34 genes, in the browser, and nothing else.
 
 ---
 
@@ -113,7 +113,7 @@ python -m http.server 8000
 
 ## Karyogram page
 
-`karyogram.html` (linked from the header of `index.html`, and back) draws the file's markers on the 24 chromosome columns of the build the file declares (GRCh37 or GRCh38). It reuses the analysis worker through the `"karyogram"` action, which parses, classifies and lays out with `src/core/karyogram.js`; `src/karyogram-view.js` renders the SVG and `src/karyogram-page.js` owns the DOM. Dots are 4 Mb bins; an empty bin is a faint r 0.9 dot, a bin with markers is r 1.6 to 3.2 by the square root of its count, and the busiest bin sets the largest dot. The 14 curated loci carry the coverage state the analysis assigns. When the build is unknown, nothing is placed by position, density is reported as unavailable and the loci still carry their states. Rows that cannot be placed (MT, unplaced names, out-of-range positions) are counted in the totals panel, never dropped. The page makes same-origin requests only. Its geometry comes from the KB `assemblies` section, built by `tools/build_canonical_kb.py` from the pinned UCSC tables. Both pages share the theme logic in `src/theme.js`. `demo-data/sample-karyogram-23andme.txt` is a deterministic synthetic file made by `tools/make_synthetic_karyogram_sample.py`.
+`karyogram.html` (linked from the header of `index.html`, and back) draws the file's markers on the 24 chromosome columns of the build the file declares (GRCh37 or GRCh38). It reuses the analysis worker through the `"karyogram"` action, which parses, classifies and lays out with `src/core/karyogram.js`; `src/karyogram-view.js` renders the SVG and `src/karyogram-page.js` owns the DOM. Dots are 4 Mb bins; an empty bin is a faint r 0.9 dot, a bin with markers is r 1.6 to 3.2 by the square root of its count, and the busiest bin sets the largest dot. The 55 curated loci carry the coverage state the analysis assigns. When the build is unknown, nothing is placed by position, density is reported as unavailable and the loci still carry their states. Rows that cannot be placed (MT, unplaced names, out-of-range positions) are counted in the totals panel, never dropped. The page makes same-origin requests only. Its geometry comes from the KB `assemblies` section, built by `tools/build_canonical_kb.py` from the pinned UCSC tables. Both pages share the theme logic in `src/theme.js`. `demo-data/sample-karyogram-23andme.txt` is a deterministic synthetic file made by `tools/make_synthetic_karyogram_sample.py`.
 
 ---
 
@@ -168,7 +168,7 @@ These all fail closed, with a visible error or an explicit state:
 - A headerless 23andMe file with no header signal is rejected.
 - An array file with no build comment reports build "unknown", so matching without rsIDs is unavailable.
 - A variant absent from a variants-only VCF is "not tested", not reference.
-- Only the 14 curated loci (12 genes) are interpreted.
+- Only the 55 curated loci (34 genes) are interpreted.
 - Evidence tiers for genes not tiered by ClinVar, and their citations, are manually curated from guideline and paper names: the CPIC levels and the curated tiers for APOE, F5, F2, MTHFR, LCT/MCM6 and ALDH2. They are pending verification against the primary sources.
 - Human Protein Atlas tissue and subcellular values are manually curated.
 - Multi-locus findings cover only `risk_factor` genes on different chromosomes (F5 and F2 today). This scope was set by the owner and is pinned by test vectors.
