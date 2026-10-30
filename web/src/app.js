@@ -67,6 +67,7 @@ const state = {
   karyogram: null,
   pendingAnalysis: null,
   selectedVariant: null,
+  viewMode: "cards",
   filterCategory: "every",
   searchQuery: "",
   sortBy: "magnitude",
@@ -374,17 +375,25 @@ function initEventListeners() {
     renderVariantsTable();
   });
 
-  // Filter tabs
-  const markActiveFilter = (active) => filterButtons.forEach(b => {
-    b.classList.toggle("tab-active", b === active);
-    b.setAttribute("aria-pressed", String(b === active));
+  // View switcher buttons
+  const btnViewCards = document.getElementById("btn-view-cards");
+  const btnViewTable = document.getElementById("btn-view-table");
+  if (btnViewCards) btnViewCards.addEventListener("click", () => setViewMode("cards"));
+  if (btnViewTable) btnViewTable.addEventListener("click", () => setViewMode("table"));
+
+  // Category jump links: ensure cards mode so section is visible
+  document.querySelectorAll(".lds-jump-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (state.viewMode !== "cards") {
+        setViewMode("cards");
+      }
+    });
   });
-  markActiveFilter(document.querySelector("[data-filter].tab-active"));
-  filterButtons.forEach(btn => {
+
+  // Filter tabs and toolbar filter pills
+  document.querySelectorAll("[data-filter]").forEach(btn => {
     btn.addEventListener("click", () => {
-      markActiveFilter(btn);
-      state.filterCategory = btn.getAttribute("data-filter");
-      renderVariantsTable();
+      applyFilter(btn.getAttribute("data-filter"));
     });
   });
 
@@ -504,7 +513,8 @@ function handleParseComplete(data, karyogram) {
   renderReportGroups();
   renderAssortmentSection();
   setTableOpen(false);
-  renderVariantsTable();
+  applyFilter(state.filterCategory || "every");
+  setViewMode(state.viewMode || "cards");
 }
 
 /** Opens or closes "All results as a table". Closed, only the "Show the table" button is shown. */
@@ -520,6 +530,75 @@ function setTableOpen(open) {
  * check (view-model.js groupedReport). The mark keeps its shape and carries the plain word, so colour is never the
  * only signal; the limitation is always on the row. A group with no check says so instead of disappearing.
  */
+
+/** Applies the active result-word filter across both the cards view and technical table. */
+function applyFilter(filterVal) {
+  state.filterCategory = filterVal;
+  document.querySelectorAll("[data-filter]").forEach((b) => {
+    const active = b.getAttribute("data-filter") === filterVal;
+    b.classList.toggle("tab-active", active);
+    b.classList.toggle("is-active", active);
+    b.setAttribute("aria-pressed", String(active));
+  });
+  filterFindingCards();
+  renderVariantsTable();
+}
+
+/** Filters finding cards in #report-groups and collapses empty sections when filtered. */
+function filterFindingCards() {
+  const filter = state.filterCategory;
+  const targetState = filter === "every" ? null : STATE_TABS[filter];
+  document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
+    const cardState = article.dataset.findingState;
+    const match = !targetState || cardState === targetState;
+    article.hidden = !match;
+  });
+  document.querySelectorAll("#report-groups .lds-section").forEach((sec) => {
+    const visibleCards = sec.querySelectorAll("article.lds-finding:not([hidden])").length;
+    sec.classList.toggle("is-filtered-out", visibleCards === 0);
+  });
+  const assortment = document.getElementById("assortment-section");
+  if (assortment && state.viewMode === "cards") {
+    assortment.hidden = (filter !== "every" && filter !== "observed");
+  }
+}
+
+/** Switches the primary results layout between narrative Cards and technical Table. */
+function setViewMode(mode) {
+  state.viewMode = mode;
+  const isCards = mode === "cards";
+  const btnCards = document.getElementById("btn-view-cards");
+  const btnTable = document.getElementById("btn-view-table");
+  if (btnCards) {
+    btnCards.classList.toggle("is-active", isCards);
+    btnCards.setAttribute("aria-pressed", String(isCards));
+  }
+  if (btnTable) {
+    btnTable.classList.toggle("is-active", !isCards);
+    btnTable.setAttribute("aria-pressed", String(!isCards));
+  }
+  const reportGroups = document.getElementById("report-groups");
+  const assortment = document.getElementById("assortment-section");
+  const tablePanel = document.getElementById("table-panel");
+  const btnShowTable = document.getElementById("btn-show-table");
+
+  if (isCards) {
+    if (reportGroups) reportGroups.classList.remove("hidden");
+    if (assortment) {
+      assortment.hidden = (state.filterCategory !== "every" && state.filterCategory !== "observed");
+    }
+  } else {
+    if (reportGroups) reportGroups.classList.add("hidden");
+    if (assortment) assortment.hidden = true;
+    if (tablePanel) tablePanel.classList.remove("hidden");
+    if (btnShowTable) {
+      btnShowTable.setAttribute("aria-expanded", "true");
+      btnShowTable.classList.add("hidden");
+    }
+    renderVariantsTable();
+  }
+}
+
 function renderReportGroups() {
   const container = document.getElementById("report-groups");
   container.innerHTML = groupedReport(allRows(), state.genes).map((group) => `
@@ -554,7 +633,7 @@ function findingRowHtml(row) {
     ? ""
     : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span><b>What this can’t tell you:</b> ${escapeHtml(row.limitation)}</span></p>`;
   return `
-    <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}">
+    <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}" data-finding-state="${escapeHtml(row.state)}">
       <span class="lds-mark lds-mark-16 lds-mark-${escapeHtml(row.state)}" role="img" aria-label="${escapeHtml(row.stateLabel)}"></span>
       <div class="lds-finding-main">
         <div class="lds-finding-head">

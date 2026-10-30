@@ -245,6 +245,37 @@
         </div>
       </section>
 
+      <!-- Results Toolbar (View Switcher, Status Filters, Category Anchors) -->
+      <nav id="results-toolbar" class="lds-results-toolbar" aria-label="Results navigation and filters">
+        <div class="lds-toolbar-left">
+          <div class="lds-toolbar-segment" role="group" aria-label="View mode">
+            <button type="button" id="btn-view-cards" class="lds-toolbar-btn is-active" aria-pressed="true">
+              <span class="lds-icon lds-i-file-text" aria-hidden="true"></span>Cards
+            </button>
+            <button type="button" id="btn-view-table" class="lds-toolbar-btn" aria-pressed="false">
+              <span class="lds-icon lds-i-table" aria-hidden="true"></span>Table
+            </button>
+          </div>
+          <div class="lds-toolbar-filters" role="group" aria-label="Filter results by status">
+            <span class="lds-toolbar-label">Status:</span>
+            <button type="button" data-filter="every" class="lds-filter-pill is-active" aria-pressed="true">All<span class="lds-tab-count" data-tab-count="every"></span></button>
+            <button type="button" data-filter="observed" class="lds-filter-pill" aria-pressed="false">Found<span class="lds-tab-count" data-tab-count="observed"></span></button>
+            <button type="button" data-filter="negative" class="lds-filter-pill" aria-pressed="false">Not found<span class="lds-tab-count" data-tab-count="negative"></span></button>
+            <button type="button" data-filter="insufficient" class="lds-filter-pill" aria-pressed="false">Unclear<span class="lds-tab-count" data-tab-count="insufficient"></span></button>
+          </div>
+        </div>
+        <div class="lds-toolbar-right">
+          <div class="lds-toolbar-jumps" aria-label="Jump to category">
+            <span class="lds-toolbar-label">Jump:</span>
+            <a href="#group-pharmacology" class="lds-jump-link">Pharmacology</a>
+            <a href="#group-risk" class="lds-jump-link">Health risks</a>
+            <a href="#group-carrier" class="lds-jump-link">Carrier</a>
+            <a href="#group-trait" class="lds-jump-link">Traits</a>
+            <a href="#assortment-section" class="lds-jump-link">Multi-locus</a>
+          </div>
+        </div>
+      </nav>
+
       <!-- The report: one section per group, one FindingRow per check (rendered by src/app.js from the view model) -->
       <div id="report-groups" class="flex flex-col gap-16"></div>
 

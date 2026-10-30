@@ -730,3 +730,112 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-summary-map .kary-locus:hover .kary-halo { fill-opacity: 0.28; }
 .lds-summary-map .kary-locus.is-selected .kary-halo { r: 13px; fill-opacity: 0.35; }
 .lds-summary-map .kary-locus:focus-visible .kary-halo { stroke: var(--accent); stroke-width: 2; fill-opacity: 0.35; }
+
+/* Results toolbar: docked / sticky controls for views and filters */
+.lds-results-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: var(--bg-canvas);
+  border-top: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+  padding: 10px 0;
+  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lds-toolbar-left,
+.lds-toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.lds-toolbar-segment {
+  display: inline-flex;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  padding: 2px;
+  gap: 2px;
+}
+.lds-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font: 600 13px var(--font-sans);
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-control) - 2px);
+  cursor: pointer;
+  transition: all var(--dur-fast) ease;
+}
+.lds-toolbar-btn:hover {
+  color: var(--text-body);
+}
+.lds-toolbar-btn.is-active {
+  background: var(--bg-hover);
+  color: var(--text-body);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.lds-toolbar-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lds-toolbar-label {
+  font: 600 11px var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.lds-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font: 500 12px var(--font-sans);
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all var(--dur-fast) ease;
+}
+.lds-filter-pill:hover {
+  color: var(--text-body);
+  border-color: var(--border-strong);
+}
+.lds-filter-pill.is-active,
+.lds-filter-pill.tab-active {
+  color: var(--text-body);
+  background: var(--bg-sunk);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.lds-toolbar-jumps {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lds-jump-link {
+  font: 500 12px var(--font-sans);
+  color: var(--text-link);
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: var(--radius-control);
+  transition: background var(--dur-fast) ease;
+}
+.lds-jump-link:hover {
+  background: var(--bg-hover);
+  text-decoration: underline;
+}
+.lds-section.is-filtered-out {
+  display: none !important;
+}
