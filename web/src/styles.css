@@ -805,6 +805,12 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+.lds-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 .lds-filter-pill {
   display: inline-flex;
   align-items: center;
@@ -815,6 +821,8 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
   background: var(--bg-panel);
   border: 1px solid var(--border-default);
   border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   transition: all var(--dur-fast) ease;
 }
