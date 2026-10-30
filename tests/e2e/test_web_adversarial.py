@@ -114,6 +114,8 @@ DEMO_FOUND_CATEGORIES = {
     "rs2266782": "Trait",
     "rs2266780": "Trait",
     "rs5742905": "Carrier",
+    "rs5985": "Risk Factor",
+    "rs28929474": "Carrier",
 }
 DEMO_FILTER_ROWS = {"observed": set(DEMO_FOUND_CATEGORIES)}
 
@@ -184,8 +186,8 @@ def _count(page, element_id):
 # them with the variant-present findings). Wild type: 9 Not found, 2 Not on your chip, 2 Unclear (H63D and MTHFR
 # wild type; the worker also lists them with the wild-type checks). Between them every state tab is non-empty once.
 STATE_TAB_COUNTS = {
-    "demo": {"observed": 26, "negative": 17, "gaps": 0, "insufficient": 4},
-    "wildtype": {"observed": 0, "negative": 41, "gaps": 2, "insufficient": 4},
+    "demo": {"observed": 28, "negative": 21, "gaps": 0, "insufficient": 5},
+    "wildtype": {"observed": 0, "negative": 47, "gaps": 2, "insufficient": 5},
 }
 
 
@@ -208,7 +210,7 @@ def test_each_state_tab_lists_exactly_the_checks_with_its_word_and_agrees_with_t
         assert page.locator("#showing-count").text_content().startswith(f"Showing {len(rows)} "), tab
     if sample == "demo":
         page.locator("[data-filter='insufficient']").click()
-        assert {row[0] for row in _shown_rows(page)} == {"rs1799945", "rs1801133", "rs1801131", "rs4680"}
+        assert {row[0] for row in _shown_rows(page)} == {"rs1799945", "rs1800730", "rs1801133", "rs1801131", "rs4680"}
 
 
 def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_page):
@@ -217,7 +219,7 @@ def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_p
     page.locator("[data-filter='observed']").click()
     rows = _shown_rows(page)
     found = {row[0] for row in rows}
-    assert len(found) == len(rows) == _count(page, "count-state-observed") == 26
+    assert len(found) == len(rows) == _count(page, "count-state-observed") == 28
     # The category is read off each row's own tag, not from a tab.
     categories = page.evaluate(
         "() => Object.fromEntries([...document.querySelectorAll('#variants-tbody tr')]"
@@ -226,12 +228,12 @@ def test_found_rows_say_their_category_and_agree_with_the_report_groups(loaded_p
     )
     assert categories == DEMO_FOUND_CATEGORIES
     # The report groups hold the same Found checks, one row each, each as a Found row.
-    assert page.locator("#report-groups article.lds-finding:has(> span.lds-mark-supported_and_observed)").count() == 26
+    assert page.locator("#report-groups article.lds-finding:has(> span.lds-mark-supported_and_observed)").count() == 28
     for rsid in found:
         report_row = page.locator(f'#report-groups article.lds-finding[data-finding-id="{rsid}"]')
         expect(report_row.locator(":scope > span.lds-mark-supported_and_observed")).to_have_count(1)
     assert {row[1] for row in rows} == {"Found"}
-    assert page.locator("#showing-count").text_content() == "Showing 26 of 26 findings"
+    assert page.locator("#showing-count").text_content() == "Showing 28 of 28 findings"
 
 
 
@@ -350,7 +352,7 @@ def test_the_tab_keys_are_new_and_the_old_all_key_is_gone(loaded_page):
     # The Found tab is its own key and lists only Found checks.
     page.locator("[data-filter='observed']").click()
     rows = _shown_rows(page)
-    assert len(rows) == 26 and {row[1] for row in rows} == {"Found"}, rows
+    assert len(rows) == 28 and {row[1] for row in rows} == {"Found"}, rows
     assert page.evaluate("() => window.__lucidase.state.filterCategory") == "observed"
 
 

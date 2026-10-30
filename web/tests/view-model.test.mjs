@@ -314,10 +314,12 @@ test("not detected wording states the count, never 'Normal'", () => {
   assert.equal(f5.sample_observation, "wild_type");
   assert.equal(f5.statement, "rs6025 variant not detected (1 variant tested in F5)");
   const hfe = analyse(DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG")).byRsid.rs1800562;
-  assert.equal(hfe.statement, "rs1800562 variant not detected (2 variants tested in HFE)");
+  assert.equal(hfe.statement, "rs1800562 variant not detected (3 variants tested in HFE)");
   // An array gap is not counted: with the other HFE locus not on the array, one variant was tested.
   const gapped = analyse(
-    DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG").replace(/^rs1799945[^\n]*\r?\n/m, "")
+    DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG")
+      .replace(/^rs1799945[^\n]*\r?\n/m, "")
+      .replace(/^rs1800730[^\n]*\r?\n/m, "")
   );
   assert.equal(gapped.byRsid.rs1799945.coverage_state, "not_tested_by_array");
   assert.equal(gapped.byRsid.rs1800562.statement, "rs1800562 variant not detected (1 variant tested in HFE)");
@@ -476,7 +478,9 @@ test("a backslash before a pipe is escaped too, so it cannot cancel the pipe's e
 test("the tested-variant count leaves out a sibling locus whose genotype is not interpretable", () => {
   // rs1799945 TT is neither ref/alt nor a strand flip of them: insufficient evidence, no altCount.
   const a = analyse(
-    DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG").replace(/^rs1799945\t6\t26092913\tCG/m, "rs1799945\t6\t26092913\tTT")
+    DEMO.replace(/^rs1800562\t6\t26093141\tAG/m, "rs1800562\t6\t26093141\tGG")
+      .replace(/^rs1799945\t6\t26092913\tCG/m, "rs1799945\t6\t26092913\tTT")
+      .replace(/^rs1800730[^\n]*\r?\n/m, "")
   );
   assert.equal(a.byRsid.rs1799945.coverage_state, "insufficient_evidence");
   assert.equal(a.byRsid.rs1800562.statement, "rs1800562 variant not detected (1 variant tested in HFE)");
@@ -743,7 +747,8 @@ test("the report groups are the design system's, in its order, and every KB gene
   assert.equal(groupIdForModel("risk_factor"), "risk");
   assert.equal(groupIdForModel("autosomal_recessive"), "carrier");
   assert.equal(groupIdForModel("trait"), "traits");
-  for (const other of ["autosomal_dominant", "unknown", "toString", "", null, undefined]) assert.equal(groupIdForModel(other), null, String(other));
+  assert.equal(groupIdForModel("autosomal_dominant"), "risk");
+  for (const other of ["unknown", "toString", "", null, undefined]) assert.equal(groupIdForModel(other), null, String(other));
   // Fail fast: a model added to the KB without a group breaks this test.
   const ids = new Set(REPORT_GROUPS.map((g) => g.id));
   for (const [gene, entry] of Object.entries(KB_JSON.genes)) {
@@ -835,7 +840,7 @@ test("a check's group follows its gene's KB inheritance model; a model with no g
   const movedRows = reportRows(groupedReport(workerLists(moved), moved.kb.genes));
   assert.equal(movedRows.find((r) => r.gene === "MTHFR").group, "medicines");
   const genes = structuredClone(a.kb.genes);
-  genes.MTHFR.inheritance.model = "autosomal_dominant";
+  genes.MTHFR.inheritance.model = "unknown_model";
   assert.throws(() => groupedReport(workerLists(a), genes), /MTHFR/);
 });
 
@@ -877,9 +882,11 @@ test("each finding row carries the topic, the plain word, the statement, the lim
   assert.match(byId.rs671.statement, /not detected \(1 variant tested in ALDH2\)/);
   // HFE: two loci share one topic; the KB carries no per-locus variant name, so the technical lines tell them apart.
   const hfe = rows.filter((r) => r.gene === "HFE");
-  assert.equal(hfe.length, 2);
+  assert.equal(hfe.length, 3);
   assert.equal(hfe[0].topic, hfe[1].topic);
+  assert.equal(hfe[1].topic, hfe[2].topic);
   assert.notEqual(hfe[0].technical, hfe[1].technical);
+  assert.notEqual(hfe[0].technical, hfe[2].technical);
   for (const text of rows.flatMap((r) => [r.topic, r.statement, r.technical, r.stateLabel])) {
     for (const bad of PLACEHOLDERS) assert.ok(!text.includes(bad), `${bad} in "${text}"`);
   }
@@ -1050,7 +1057,7 @@ test("a multi-locus finding whose components are all Found shows the words and n
   // Positive control for the same string: the same pairing with F2 read as Unclear carries the caution.
   const unclear = demoMultiLocusData((records) =>
     records.map((r) => (r.rsid === "rs1799963" ? { ...r, coverage_state: "insufficient_evidence" } : r)));
-  assert.equal(unclear.independentAssortment.length, 3);
+  assert.equal(unclear.independentAssortment.length, 6);
   const flagged = mdSection(markdownReport(unclear), "Co-occurring variant alleles on unlinked loci");
   assert.match(flagged, /rs1799963: Unclear/);
   assert.ok(flagged.includes(MULTI_LOCUS_CAUTION), flagged);

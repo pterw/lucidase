@@ -1026,6 +1026,94 @@
       },
       "acmg_sf": false,
       "insights": null
+    },
+    "F13A1": {
+      "model": "risk_factor",
+      "topic": "Blood clots and fibrin stability (Factor XIII Val34Leu)",
+      "inheritance": {
+        "model": "risk_factor",
+        "mendelian_disease": false,
+        "disease": null,
+        "omim": "134570",
+        "penetrance": null
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P00488",
+        "ensembl_gene_id": "ENSG00000124491",
+        "summary": "F13A1 encodes the catalytic A subunit of coagulation Factor XIII, a transglutaminase that cross-links fibrin chains to stabilize clots against mechanical shear and fibrinolysis.",
+        "mechanism": "The Val34Leu polymorphism accelerates thrombin cleavage and activation of FXIII, generating a finer, more rigid fibrin mesh with altered clot permeability, conferring protective effects against venous thrombosis.",
+        "clinical_relevance": "Carriers of the 34Leu allele exhibit a protective ~15-25% lower risk of deep vein thrombosis and pulmonary embolism, interacting with prothrombotic mutations in F5 and F2."
+      },
+      "insights_provenance": {
+        "source": "manually_curated from UniProt P00488, Ensembl ENSG00000124491, and Kohler et al. Blood 1998"
+      }
+    },
+    "BRCA1": {
+      "model": "autosomal_dominant",
+      "topic": "Hereditary breast and ovarian cancer (BRCA1)",
+      "inheritance": {
+        "model": "autosomal_dominant",
+        "mendelian_disease": true,
+        "disease": "Hereditary breast and ovarian cancer syndrome",
+        "omim": "113705",
+        "penetrance": 0.72
+      },
+      "acmg_sf": true,
+      "insights": {
+        "uniprot_id": "P38398",
+        "ensembl_gene_id": "ENSG00000012048",
+        "summary": "BRCA1 encodes an essential tumor suppressor that maintains genomic integrity through homologous recombination repair of DNA double-strand breaks and cell cycle checkpoint control.",
+        "mechanism": "Truncating frameshift and nonsense mutations eliminate critical functional domains, abolishing error-free DNA repair and predisposing epithelial tissues to genomic instability.",
+        "clinical_relevance": "Heterozygous pathogenic variant carriers have up to a ~72% cumulative lifetime risk of breast cancer and ~44% risk of ovarian cancer, requiring enhanced surveillance and consideration of risk-reducing interventions per NCCN guidelines."
+      },
+      "insights_provenance": {
+        "source": "manually_curated from UniProt P38398, Ensembl ENSG00000012048, and NCCN Genetic/Familial High-Risk Assessment Guidelines"
+      }
+    },
+    "BRCA2": {
+      "model": "autosomal_dominant",
+      "topic": "Hereditary breast and ovarian cancer (BRCA2)",
+      "inheritance": {
+        "model": "autosomal_dominant",
+        "mendelian_disease": true,
+        "disease": "Hereditary breast and ovarian cancer syndrome",
+        "omim": "600185",
+        "penetrance": 0.69
+      },
+      "acmg_sf": true,
+      "insights": {
+        "uniprot_id": "P51587",
+        "ensembl_gene_id": "ENSG00000139618",
+        "summary": "BRCA2 encodes a key mediator of homologous recombination DNA repair that loads RAD51 recombinase onto single-stranded DNA overhangs at double-strand breaks.",
+        "mechanism": "Loss-of-function frameshift variants impede RAD51 nucleofilament formation, leaving double-strand breaks to be repaired by error-prone non-homologous end joining.",
+        "clinical_relevance": "Carriers face an estimated 45-69% lifetime risk of female breast cancer, 11-17% ovarian cancer risk, and increased risks for male breast, prostate, and pancreatic cancers."
+      },
+      "insights_provenance": {
+        "source": "manually_curated from UniProt P51587, Ensembl ENSG00000139618, and NCCN Guidelines"
+      }
+    },
+    "SERPINA1": {
+      "model": "autosomal_recessive",
+      "topic": "Alpha-1 antitrypsin deficiency (SERPINA1 Pi*Z and Pi*S)",
+      "inheritance": {
+        "model": "autosomal_recessive",
+        "mendelian_disease": true,
+        "disease": "Alpha-1 antitrypsin deficiency",
+        "omim": "107400",
+        "penetrance": 0.8
+      },
+      "acmg_sf": false,
+      "insights": {
+        "uniprot_id": "P01009",
+        "ensembl_gene_id": "ENSG00000197249",
+        "summary": "SERPINA1 encodes alpha-1 antitrypsin, a circulating serine protease inhibitor synthesized by hepatocytes that protects lower respiratory tract alveoli from neutrophil elastase destruction.",
+        "mechanism": "The Pi*Z mutation alters protein folding, leading to intracellular polymerization and accumulation in hepatocytes (toxic liver gain-of-function) and severe plasma deficiency (loss of elastase inhibition in lung).",
+        "clinical_relevance": "Pi*ZZ homozygotes have markedly decreased circulating AAT levels (<15% of normal) and high susceptibility to early-onset panacinar emphysema and hepatic cirrhosis; Pi*SZ and Pi*MZ genotypes have milder risk profiles."
+      },
+      "insights_provenance": {
+        "source": "manually_curated from UniProt P01009, Ensembl ENSG00000197249, and American Thoracic Society/ERS Guidelines"
+      }
     }
   },
   "loci": {
@@ -4934,6 +5022,597 @@
           ],
           "provenance": {
             "source": "Human Protein Atlas (hand-entered for VDR; nuclear receptor expression in intestinal enterocytes and renal tubules)"
+          }
+        }
+      }
+    },
+    "rs1800730": {
+      "gene": "HFE",
+      "chrom": "6",
+      "pos_grch37": 26091185,
+      "pos_grch38": 26090957,
+      "ref": "A",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No HFE S65C allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Carrier",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous carrier of HFE S65C (c.193A>T, p.Ser65Cys). Carries 1 copy of the mild modifier allele; by itself confers minimal iron risk unless paired with C282Y.",
+          "drug_response": null,
+          "caveats": [
+            "Compound heterozygosity with C282Y (rs1800562) can produce mild or late-onset iron overload."
+          ]
+        },
+        "2": {
+          "category": "Variant present",
+          "significance": "Variant present",
+          "magnitude": 2.5,
+          "repute": "Bad",
+          "phenotype": "Homozygous for HFE S65C (c.193A>T, p.Ser65Cys). Associated with mild elevations in transferrin saturation and serum ferritin, with substantially lower clinical penetrance than C282Y homozygosity.",
+          "drug_response": null,
+          "caveats": [
+            "Periodic serum ferritin and transferrin saturation monitoring can assess actual clinical iron stores."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000000011",
+          "review_status": "criteria provided, conflicting classifications",
+          "stars": 1,
+          "significance": "Conflicting classifications of pathogenicity",
+          "provenance": {
+            "source": "ClinVar VCV000000011 (machine-imported)",
+            "accession": "VCV000000011",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/11/"
+          }
+        },
+        "gnomad": {
+          "af": 0.01364,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs1800730.json)",
+            "accession": "6-26090957-A-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "duodenum": "High",
+            "small intestine": "High",
+            "placenta": "Medium",
+            "spleen": "Medium"
+          },
+          "subcellular": [
+            "Plasma membrane",
+            "Endoplasmic reticulum"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000010704",
+            "accession": "ENSG00000010704",
+            "url": "https://www.proteinatlas.org/ENSG00000010704-HFE"
+          }
+        }
+      },
+      "limitation_ref": "ACMG_SINGLE_LOCUS_CAVEAT"
+    },
+    "rs5985": {
+      "gene": "F13A1",
+      "chrom": "6",
+      "pos_grch37": 6318795,
+      "pos_grch38": 6318562,
+      "ref": "C",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of F13A1 (c.100G>T, p.Val34Leu, plus-strand C>A); total thrombosis and bleeding risks depend on global coagulation profiles, platelets, and interaction with F5 and F2.",
+      "tier": {
+        "curated_tier": "Tier B",
+        "rationale": "Established functional missense polymorphism accelerating FXIII activation and providing moderate protection against venous thrombosis.",
+        "citation": "Kohler et al. 1998, Blood, Factor XIII Val34Leu polymorphism is associated with a protective effect against venous thromboembolism"
+      },
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No Factor XIII 34Leu allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Risk Factor",
+          "significance": "Protective",
+          "magnitude": 1.5,
+          "repute": "Good",
+          "phenotype": "Heterozygous for Factor XIII 34Leu allele (plus-strand C/A). Associated with accelerated FXIII activation and ~15-20% reduced risk of venous thromboembolism (VTE).",
+          "drug_response": null,
+          "caveats": [
+            "Exhibits a modest protective effect against venous thrombosis; does not completely offset high-penetrance prothrombotic mutations like Factor V Leiden."
+          ]
+        },
+        "2": {
+          "category": "Risk Factor",
+          "significance": "Protective",
+          "magnitude": 2.0,
+          "repute": "Good",
+          "phenotype": "Homozygous for Factor XIII 34Leu allele (plus-strand A/A). Associated with accelerated fibrin cross-linking and ~30-40% reduced risk of venous thromboembolism.",
+          "drug_response": null,
+          "caveats": [
+            "High 34Leu gene dosage provides significant protection against deep vein thrombosis, but may slightly increase bleeding tendency in certain surgical settings."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000016532",
+          "review_status": "criteria provided, conflicting classifications",
+          "stars": 1,
+          "significance": "Conflicting classifications of pathogenicity",
+          "provenance": {
+            "source": "ClinVar VCV000016532 (machine-imported)",
+            "accession": "VCV000016532",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/16532/"
+          }
+        },
+        "gnomad": {
+          "af": 0.23309,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs5985.6-6318562-C-A.json)",
+            "accession": "6-6318562-C-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "placenta": "High",
+            "adipose tissue": "High",
+            "liver": "Medium",
+            "bone marrow": "Medium"
+          },
+          "subcellular": [
+            "Cytoplasm",
+            "Secreted"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000124491",
+            "accession": "ENSG00000124491",
+            "url": "https://www.proteinatlas.org/ENSG00000124491-F13A1"
+          }
+        }
+      }
+    },
+    "rs80357914": {
+      "gene": "BRCA1",
+      "chrom": "17",
+      "pos_grch37": 41276044,
+      "pos_grch38": 43124027,
+      "ref": "ACT",
+      "alt": "A",
+      "allele_codes": {
+        "I": "ref",
+        "D": "alt"
+      },
+      "role": "standard",
+      "limitation_ref": "ACMG_SINGLE_LOCUS_CAVEAT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No BRCA1 185delAG allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 6.5,
+          "repute": "Bad",
+          "phenotype": "Heterozygous carrier of BRCA1 185delAG (c.68_69delAG, p.Glu23fs): High risk for hereditary breast and ovarian cancer (HBOC). Genetic counseling, enhanced surveillance (breast MRI), and discussion of risk-reducing options are strongly indicated.",
+          "drug_response": null,
+          "caveats": [
+            "Associated with up to ~72% cumulative lifetime risk of breast cancer and ~44% lifetime risk of ovarian cancer. Clinical confirmation and genetic counseling recommended."
+          ]
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 7.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for BRCA1 185delAG (c.68_69delAG): Extremely rare biallelic state associated with Fanconi anemia-like severe chromosomal breakage disorder and early-onset malignancy.",
+          "drug_response": null,
+          "caveats": [
+            "Biallelic BRCA1 mutations cause severe Fanconi anemia-like phenotype; immediate comprehensive medical genetics evaluation required."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017662",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "Pathogenic",
+          "provenance": {
+            "source": "ClinVar VCV000017662 (machine-imported)",
+            "accession": "VCV000017662",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17662/"
+          }
+        },
+        "gnomad": {
+          "af": 0.000118,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs80357914.json)",
+            "accession": "17-43124027-ACT-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "testis": "High",
+            "breast": "Medium",
+            "ovary": "Medium",
+            "lymph node": "Medium",
+            "bone marrow": "Medium"
+          },
+          "subcellular": [
+            "Nucleoplasm",
+            "Nuclear bodies"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000012048",
+            "accession": "ENSG00000012048",
+            "url": "https://www.proteinatlas.org/ENSG00000012048-BRCA1"
+          }
+        }
+      }
+    },
+    "rs80357906": {
+      "gene": "BRCA1",
+      "chrom": "17",
+      "pos_grch37": 41209079,
+      "pos_grch38": 43057062,
+      "ref": "T",
+      "alt": "TG",
+      "allele_codes": {
+        "D": "ref",
+        "I": "alt"
+      },
+      "role": "standard",
+      "limitation_ref": "ACMG_SINGLE_LOCUS_CAVEAT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No BRCA1 5382insC allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 6.5,
+          "repute": "Bad",
+          "phenotype": "Heterozygous carrier of BRCA1 5382insC (c.5266dupC, p.Gln1756fs): Pathogenic frameshift variant conferring markedly elevated risk of hereditary breast and ovarian cancer. NCCN guidelines recommend specialized genetic evaluation and enhanced screening.",
+          "drug_response": null,
+          "caveats": [
+            "Associated with high lifetime risk of breast and ovarian malignancies; clinical genetics evaluation is recommended."
+          ]
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 7.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for BRCA1 5382insC (c.5266dupC): Extremely rare biallelic loss-of-function state associated with severe cellular DNA repair deficiency.",
+          "drug_response": null,
+          "caveats": [
+            "Biallelic state indicates severe genomic repair defect; urgent medical genetics consultation warranted."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017677",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "Pathogenic",
+          "provenance": {
+            "source": "ClinVar VCV000017677 (machine-imported)",
+            "accession": "VCV000017677",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17677/"
+          }
+        },
+        "gnomad": {
+          "af": 6.8e-05,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs80357906.json)",
+            "accession": "17-43057062-T-TG"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "testis": "High",
+            "breast": "Medium",
+            "ovary": "Medium",
+            "lymph node": "Medium",
+            "bone marrow": "Medium"
+          },
+          "subcellular": [
+            "Nucleoplasm",
+            "Nuclear bodies"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000012048",
+            "accession": "ENSG00000012048",
+            "url": "https://www.proteinatlas.org/ENSG00000012048-BRCA1"
+          }
+        }
+      }
+    },
+    "rs80359550": {
+      "gene": "BRCA2",
+      "chrom": "13",
+      "pos_grch37": 32914437,
+      "pos_grch38": 32340300,
+      "ref": "GT",
+      "alt": "G",
+      "allele_codes": {
+        "I": "ref",
+        "D": "alt"
+      },
+      "role": "standard",
+      "limitation_ref": "ACMG_SINGLE_LOCUS_CAVEAT",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No BRCA2 6174delT allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 6.5,
+          "repute": "Bad",
+          "phenotype": "Heterozygous carrier of BRCA2 6174delT (c.5946delT, p.Ser1982fs): Pathogenic frameshift variant predisposing to hereditary breast, ovarian, prostate, and pancreatic malignancies. Clinical confirmation and genetic counseling indicated.",
+          "drug_response": null,
+          "caveats": [
+            "Confers 45-69% lifetime breast cancer risk and elevated ovarian, prostate, and pancreatic risks. Specialized surveillance advised."
+          ]
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 7.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for BRCA2 6174delT (c.5946delT): Biallelic BRCA2 loss causes Fanconi anemia complementation group D1 (FA-D1), characterized by childhood solid tumor risk and chromosomal instability.",
+          "drug_response": null,
+          "caveats": [
+            "Biallelic BRCA2 mutations cause Fanconi anemia group D1; immediate comprehensive medical genetics evaluation required."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000009325",
+          "review_status": "reviewed by expert panel",
+          "stars": 3,
+          "significance": "Pathogenic",
+          "provenance": {
+            "source": "ClinVar VCV000009325 (machine-imported)",
+            "accession": "VCV000009325",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/9325/"
+          }
+        },
+        "gnomad": {
+          "af": 0.000139,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs80359550.json)",
+            "accession": "13-32340300-GT-G"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "testis": "High",
+            "bone marrow": "Medium",
+            "lymph node": "Medium",
+            "breast": "Medium",
+            "ovary": "Medium"
+          },
+          "subcellular": [
+            "Nucleoplasm",
+            "Cytosol"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000139618",
+            "accession": "ENSG00000139618",
+            "url": "https://www.proteinatlas.org/ENSG00000139618-BRCA2"
+          }
+        }
+      }
+    },
+    "rs28929474": {
+      "gene": "SERPINA1",
+      "chrom": "14",
+      "pos_grch37": 94844947,
+      "pos_grch38": 94378610,
+      "ref": "C",
+      "alt": "T",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of SERPINA1 Pi*Z (c.1096G>A, p.Glu366Lys); does not assess Pi*S or rare deficient/non-functional alleles (e.g. Mmalton, Siiyama, Q0).",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No SERPINA1 Pi*Z allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Carrier / Risk Factor",
+          "magnitude": 2.5,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous carrier of SERPINA1 Pi*Z allele (Pi*MZ genotype, plus-strand C/T). Circulating AAT levels are approximately 50-60% of normal. Moderate increased risk for chronic obstructive pulmonary disease (especially in smokers) and cirrhosis.",
+          "drug_response": null,
+          "caveats": [
+            "Avoiding active or passive tobacco smoke exposure is the most critical preventative action to preserve lung function.",
+            "Compound heterozygosity with Pi*S (Pi*SZ) produces significantly lower AAT levels and higher pulmonary disease risk."
+          ]
+        },
+        "2": {
+          "category": "Pathogenic",
+          "significance": "Pathogenic",
+          "magnitude": 5.0,
+          "repute": "Bad",
+          "phenotype": "Homozygous for SERPINA1 Pi*Z allele (Pi*ZZ genotype, plus-strand T/T). Causes severe alpha-1 antitrypsin deficiency with plasma AAT levels typically 10-15% of normal. High lifetime risk of early-onset panacinar emphysema and chronic liver disease.",
+          "drug_response": null,
+          "caveats": [
+            "High risk of severe pulmonary emphysema and liver fibrosis/cirrhosis; pulmonary function testing, liver enzymes, and specialist referral are indicated.",
+            "Strict avoidance of all smoking and occupational lung irritants is essential."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017967",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Pathogenic/Likely pathogenic; risk factor",
+          "provenance": {
+            "source": "ClinVar VCV000017967 (machine-imported)",
+            "accession": "VCV000017967",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17967/"
+          }
+        },
+        "gnomad": {
+          "af": 0.01586,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs28929474.14-94378610-C-T.json)",
+            "accession": "14-94378610-C-T"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "lung": "Medium",
+            "small intestine": "Medium",
+            "kidney": "Medium"
+          },
+          "subcellular": [
+            "Extracellular region",
+            "Secreted",
+            "Endoplasmic reticulum",
+            "Vesicles"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000197249",
+            "accession": "ENSG00000197249",
+            "url": "https://www.proteinatlas.org/ENSG00000197249-SERPINA1"
+          }
+        }
+      }
+    },
+    "rs17580": {
+      "gene": "SERPINA1",
+      "chrom": "14",
+      "pos_grch37": 94847262,
+      "pos_grch38": 94380925,
+      "ref": "T",
+      "alt": "A",
+      "allele_codes": null,
+      "role": "standard",
+      "limitation": "Single-variant test of SERPINA1 Pi*S (c.863A>T, p.Glu288Val, plus-strand T>A); does not assess Pi*Z or rare deficient/non-functional alleles.",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "significance": "Not detected",
+          "magnitude": 0.0,
+          "repute": "Neutral",
+          "phenotype": "No SERPINA1 Pi*S allele detected at this position.",
+          "drug_response": null,
+          "caveats": []
+        },
+        "1": {
+          "category": "Carrier",
+          "significance": "Carrier / Mild Modifier",
+          "magnitude": 1.5,
+          "repute": "Neutral",
+          "phenotype": "Heterozygous carrier of SERPINA1 Pi*S allele (Pi*MS genotype, plus-strand T/A). Circulating AAT levels are approximately 80% of normal, usually sufficient to protect lung tissue unless severe smoking or environmental exposure is present.",
+          "drug_response": null,
+          "caveats": [
+            "Generally benign in isolation; compound heterozygosity with Pi*Z (Pi*SZ) causes clinically significant deficiency."
+          ]
+        },
+        "2": {
+          "category": "Variant present",
+          "significance": "Moderate Deficiency",
+          "magnitude": 2.5,
+          "repute": "Neutral",
+          "phenotype": "Homozygous for SERPINA1 Pi*S allele (Pi*SS genotype, plus-strand A/A). Produces mild-to-moderate reduction in plasma AAT (~50-60% of normal), with low risk of clinical lung disease in non-smokers.",
+          "drug_response": null,
+          "caveats": [
+            "Milder risk than Pi*ZZ; smoking abstinence prevents accelerated lung function decline."
+          ]
+        }
+      },
+      "evidence": {
+        "clinvar": {
+          "accession": "VCV000017969",
+          "review_status": "criteria provided, multiple submitters, no conflicts",
+          "stars": 2,
+          "significance": "Pathogenic/Pathogenic, low penetrance; other",
+          "provenance": {
+            "source": "ClinVar VCV000017969 (machine-imported)",
+            "accession": "VCV000017969",
+            "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17969/"
+          }
+        },
+        "gnomad": {
+          "af": 0.03636,
+          "provenance": {
+            "source": "gnomAD (machine-imported from pinned capture gnomad/rs17580.json)",
+            "accession": "14-94380925-T-A"
+          }
+        },
+        "hpa": {
+          "tissues": {
+            "liver": "High",
+            "lung": "Medium",
+            "small intestine": "Medium",
+            "kidney": "Medium"
+          },
+          "subcellular": [
+            "Extracellular region",
+            "Secreted",
+            "Endoplasmic reticulum",
+            "Vesicles"
+          ],
+          "provenance": {
+            "source": "Human Protein Atlas (HPA) ENSG00000197249",
+            "accession": "ENSG00000197249",
+            "url": "https://www.proteinatlas.org/ENSG00000197249-SERPINA1"
           }
         }
       }

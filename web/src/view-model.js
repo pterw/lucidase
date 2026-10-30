@@ -108,6 +108,7 @@ export const REPORT_GROUPS = deepFreeze([
 const GROUP_BY_MODEL = {
   pharmacogenomic: "medicines",
   risk_factor: "risk",
+  autosomal_dominant: "risk",
   autosomal_recessive: "carrier",
   trait: "traits",
 };

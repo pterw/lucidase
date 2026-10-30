@@ -129,7 +129,7 @@ def test_demo_multi_locus_cards_show_each_component_word_and_caution_on_unclear(
     compound = rows.filter(has_text="Possible compound heterozygote")
     pairing = rows.filter(has_text="Co-occurring variant alleles")
     expect(compound).to_have_count(1)
-    expect(pairing).to_have_count(3)
+    expect(pairing).to_have_count(6)
 
     # HFE: C282Y is Found, H63D's own word is Unclear, so the card carries the caution line.
     _assert_component(compound, "rs1800562", "Found", "supported_and_observed")
@@ -320,5 +320,5 @@ def test_multi_locus_card_chips_are_neutral_not_category_tones(loaded_page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible()
     cards = page.locator("#assortment-cards-container")
-    expect(cards.locator(".lds-tag-neutral")).to_have_count(8)  # positive control: two neutral chips on each card
+    expect(cards.locator(".lds-tag-neutral")).to_have_count(14)  # positive control: two neutral chips on each card
     expect(cards.locator(".lds-tag[class*='lds-tag-cat-']")).to_have_count(0)

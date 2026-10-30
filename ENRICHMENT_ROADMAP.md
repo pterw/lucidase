@@ -110,22 +110,27 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
   - [x] **`CBS` Homocystinuria & Pyridoxine Response (`rs5742905`)**:
     - *Locus*: chr21:43063074 (GRCh38) / chr21:44483184 (GRCh37), c.833T>C (p.Ile278Thr).
     - *Why*: Most common pathogenic CBS mutation causing pyridoxine (B6)-responsive homocystinuria; carrier status transmits to 50% of offspring.
-  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191` & `rs10455872`)**:
+  - [ ] **`DAO` / `AOC1` Diamine Oxidase Histamine Breakdown (`rs10156191`, `rs1049742`, `rs1049793`, `rs2052129`)**:
     - *Why*: Encodes primary extracellular enzyme for degrading ingested histamine; reduced activity correlates with food histamine intolerance (parked for Phase 6).
+    - *Curation note*: Per 2024 Nutrients benchmark (PMCID: PMC11054051), the canonical functional panel comprises `rs10156191` (p.Thr16Met), `rs1049742` (p.Ser332Phe), `rs1049793` (p.His664Asp), and promoter `rs2052129` (correcting earlier drafts referencing ABCB1 `rs1045642` or ERCC5 `rs1047768`).
 
 ---
 
 ### Phase 5: Hereditary Disease & Secondary Findings Expansions
 
 * **Target Loci**:
-  - [ ] **`HFE` S65C (`rs41512945`)**:
-    - *Locus*: chr6:26090954 (GRCh38) / chr6:26092523 (GRCh37), c.193A>T (p.Ser65Cys).
+  - [x] **`HFE` S65C (`rs1800730`)**:
+    - *Locus*: chr6:26090957 (GRCh38) / chr6:26091185 (GRCh37), c.193A>T (p.Ser65Cys).
     - *Why*: Completes the HFE hemochromatosis panel alongside existing C282Y (`rs1800562`) and H63D (`rs1799945`). Compound heterozygosity (C282Y / S65C) confers mild iron overload risk.
-  - [ ] **`F13A1` Factor XIII Val34Leu (`rs5985`)**:
-    - *Locus*: chr6:6144368 (GRCh38) / chr6:6144888 (GRCh37), c.100G>T (p.Val34Leu).
+  - [x] **`F13A1` Factor XIII Val34Leu (`rs5985`)**:
+    - *Locus*: chr6:6318562 (GRCh38) / chr6:6318795 (GRCh37), c.100G>T (p.Val34Leu, plus-strand C>A).
     - *Why*: Synergizes with existing thrombophilia markers (`F5` Leiden, `F2` Prothrombin). The 34Leu allele accelerates fibrin cross-linking, providing protective effect against venous thromboembolism.
-  - [ ] **Common Founder Variants in ACMG SF Genes (e.g. `BRCA1` 185delAG, `BRCA2` 6174delT)**:
-    - *Condition*: Only if verified to be reliably called on consumer microarrays (23andMe / Ancestry).
+  - [x] **Common Founder Variants in ACMG SF Genes (`BRCA1` & `BRCA2`)**:
+    - *Loci*: `BRCA1` 185delAG (`rs80357914` / `i4000377`, c.68_69delAG), `BRCA1` 5382insC (`rs80357711` / `i4000378`, c.5266dupC), `BRCA2` 6174delT (`rs80359550` / `i4000379`, c.5946delT).
+    - *Why*: Canonical 3-variant founder mutation panel for hereditary breast and ovarian cancer (HBOC); FDA-authorized direct-to-consumer carrier screening.
+  - [x] **`SERPINA1` Alpha-1 Antitrypsin Deficiency (Pi\*Z & Pi\*S)**:
+    - *Loci*: Pi\*Z (`rs28929474`, chr14:94378610 GRCh38 / 94844947 GRCh37, c.1096G>A, p.Glu366Lys) and Pi\*S (`rs17580`, chr14:94380925 GRCh38 / 94847262 GRCh37, c.863A>T, p.Glu288Val).
+    - *Why*: Autosomal recessive / co-dominant risk for early-onset pulmonary emphysema and liver cirrhosis. Completes high-frequency European carrier testing.
 
 ---
 

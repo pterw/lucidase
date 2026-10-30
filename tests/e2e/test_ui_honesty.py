@@ -120,7 +120,7 @@ def test_exports_list_each_check_once_under_its_own_word(loaded_page, sample):
     page = loaded_page
     _analyse(page, DEMO_FILE if sample == "demo" else WILDTYPE)
     strip = {word: int(page.locator(f"#{el}").text_content().replace(",", "")) for word, el in STATE_WORDS.items()}
-    assert strip["Unclear"] == 4, "both files have four unclear checks, each also in another worker list"
+    assert strip["Unclear"] == 5, "both files have five unclear checks, each also in another worker list"
     sections = _markdown_sections(_export(page, "exportMarkdownReport"))
     ids = []
     for word, count in strip.items():

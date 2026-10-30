@@ -100,6 +100,13 @@ EXPECTED = {
     "rs2266780": (171083241, {"G", "A"}, 171114101, {"G", "A"}, "A", "G"),
     "rs5742905": (44483183, {"G", "A", "C"}, 43063073, {"G", "A", "C"}, "A", "G"),
     "rs2228570": (48272894, {"G", "A", "T", "C"}, 47879111, {"G", "A", "T", "C"}, "A", "G"),
+    "rs1800730": (26091184, {"A", "T"}, 26090956, {"A", "T"}, "A", "T"),
+    "rs5985": (6318794, {"C", "A", "G", "T"}, 6318561, {"C", "A", "G", "T"}, "C", "A"),
+    "rs80357914": (41276043, {"ACT", "A"}, 43124026, {"ACT", "A"}, "ACT", "A"),
+    "rs80357906": (41209078, {"T", "TG"}, 43057061, {"T", "TG"}, "T", "TG"),
+    "rs80359550": (32914436, {"GT", "G"}, 32340299, {"GT", "G"}, "GT", "G"),
+    "rs28929474": (94844946, {"C", "A", "G", "T"}, 94378609, {"C", "A", "G", "T"}, "C", "T"),
+    "rs17580": (94847261, {"A", "T"}, 94380924, {"A", "T"}, "T", "A"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -153,6 +160,13 @@ EXPECTED_CLINVAR = {
     "rs2266780": "VCV000038395",
     "rs5742905": "VCV000000120",
     "rs2228570": "VCV000308887",
+    "rs1800730": "VCV000000011",
+    "rs5985": "VCV000016532",
+    "rs80357914": "VCV000017662",
+    "rs80357906": "VCV000017677",
+    "rs80359550": "VCV000009325",
+    "rs28929474": "VCV000017967",
+    "rs17580": "VCV000017969",
 }
 
 
@@ -263,8 +277,12 @@ def test_rs6025_ref_alt_is_build_independent(built):
 
 def test_indel_locus_declares_array_allele_codes(built):
     assert built["loci"]["rs113993960"]["allele_codes"] == {"D": "alt", "I": "ref"}
+    assert built["loci"]["rs80357914"]["allele_codes"] == {"I": "ref", "D": "alt"}
+    assert built["loci"]["rs80357906"]["allele_codes"] == {"D": "ref", "I": "alt"}
+    assert built["loci"]["rs80359550"]["allele_codes"] == {"I": "ref", "D": "alt"}
+    indels = {"rs113993960", "rs80357914", "rs80357906", "rs80359550"}
     assert all(
-        built["loci"][r]["allele_codes"] is None for r in built["loci"] if r != "rs113993960"
+        built["loci"][r]["allele_codes"] is None for r in built["loci"] if r not in indels
     )
 
 
@@ -485,6 +503,10 @@ EXPECTED_MODELS = {
     "FMO3": ("trait", False),
     "CBS": ("autosomal_recessive", True),
     "VDR": ("trait", False),
+    "F13A1": ("risk_factor", False),
+    "BRCA1": ("autosomal_dominant", True),
+    "BRCA2": ("autosomal_dominant", True),
+    "SERPINA1": ("autosomal_recessive", True),
 }
 
 
@@ -503,7 +525,7 @@ def test_gene_inheritance_follows_the_owner_safe_classification(built):
 def test_every_locus_gene_exists_and_acmg_flag_is_hfe_only(built):
     for rsid, locus in built["loci"].items():
         assert locus["gene"] in built["genes"], rsid
-    assert {g for g, v in built["genes"].items() if v["acmg_sf"]} == {"HFE"}
+    assert {g for g, v in built["genes"].items() if v["acmg_sf"]} == {"HFE", "BRCA1", "BRCA2"}
 
 
 def test_gene_insights_are_curated_and_null_when_absent(built):
@@ -545,6 +567,10 @@ EXPECTED_TOPICS = {
     "FMO3": "Choline & trimethylamine metabolism (FMO3)",
     "CBS": "Homocysteine transsulfuration & B6 response (CBS)",
     "VDR": "Vitamin D receptor function (VDR FokI)",
+    "F13A1": "Blood clots and fibrin stability (Factor XIII Val34Leu)",
+    "BRCA1": "Hereditary breast and ovarian cancer (BRCA1)",
+    "BRCA2": "Hereditary breast and ovarian cancer (BRCA2)",
+    "SERPINA1": "Alpha-1 antitrypsin deficiency (SERPINA1 Pi*Z and Pi*S)",
 }
 
 
@@ -655,6 +681,9 @@ EXPECTED_TIERS = {
     "rs601338": "Tier B", "rs7501331": "Tier B", "rs12934922": "Tier B",
     "rs738409": "Tier A", "rs2266782": "Tier B", "rs2266780": "Tier B",
     "rs5742905": "Tier B", "rs2228570": "Tier B",
+    "rs1800730": "Tier D", "rs5985": "Tier B",
+    "rs80357914": "Tier A", "rs80357906": "Tier A", "rs80359550": "Tier A",
+    "rs28929474": "Tier B", "rs17580": "Tier B",
 }
 
 
@@ -714,7 +743,10 @@ def test_qc_rejects_a_citation_that_looks_like_a_pmid(curation):
 
 def test_tier_source_values_per_locus(built):
     sources = {r: l["tier_source"] for r, l in built["loci"].items()}
-    assert {r for r, v in sources.items() if v == "clinvar_review"} == {"rs113993960", "rs1800562", "rs1799945", "rs5742905"}
+    assert {r for r, v in sources.items() if v == "clinvar_review"} == {
+        "rs113993960", "rs1800562", "rs1799945", "rs5742905",
+        "rs1800730", "rs80357914", "rs80357906", "rs80359550", "rs28929474", "rs17580",
+    }
     assert {r for r, v in sources.items() if v == "cpic_level"} == {
         "rs4244285", "rs9923231", "rs4149056", "rs3918290", "rs4986893", "rs12248560",
         "rs1799853", "rs1057910", "rs55886062", "rs67376798", "rs56038477",
@@ -728,7 +760,7 @@ def test_tier_source_values_per_locus(built):
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
         "rs1801131", "rs4680",
-        "rs601338", "rs7501331", "rs12934922", "rs738409", "rs2266782", "rs2266780", "rs2228570",
+        "rs601338", "rs7501331", "rs12934922", "rs738409", "rs2266782", "rs2266780", "rs2228570", "rs5985",
     }
 
 
@@ -969,6 +1001,9 @@ TIERS_BEFORE_OVERLAY = {
     "rs601338": "Tier B", "rs7501331": "Tier B", "rs12934922": "Tier B",
     "rs738409": "Tier A", "rs2266782": "Tier B", "rs2266780": "Tier B",
     "rs5742905": "Tier B", "rs2228570": "Tier B",
+    "rs1800730": "Tier D", "rs5985": "Tier B",
+    "rs80357914": "Tier A", "rs80357906": "Tier A", "rs80359550": "Tier A",
+    "rs28929474": "Tier B", "rs17580": "Tier B",
 }
 
 
@@ -1031,7 +1066,7 @@ def test_importing_evidence_changes_no_evidence_tier(built):
 
 
 def test_mendelian_tier_follows_the_imported_stars(built):
-    for rsid in ("rs113993960", "rs1799945", "rs1800562", "rs5742905"):
+    for rsid in ("rs113993960", "rs1799945", "rs1800562", "rs5742905", "rs1800730", "rs80357914", "rs80357906", "rs80359550", "rs28929474", "rs17580"):
         clinvar = built["loci"][rsid]["evidence"]["clinvar"]
         assert clinvar["provenance"]["curation_mode"] == "machine_imported"
         conflicting = "conflicting" in clinvar["review_status"]

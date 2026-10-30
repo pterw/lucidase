@@ -100,6 +100,14 @@ RSIDS = (
     "rs2266780",
     "rs5742905",
     "rs2228570",
+    "rs1800730",
+    "rs5985",
+    "rs80357914",
+    "rs80357711",
+    "rs80357906",
+    "rs80359550",
+    "rs28929474",
+    "rs17580",
 )
 # Gene symbols behind the loci ("MCM6 / LCT" is queried as both genes).
 GENES = (
@@ -134,6 +142,10 @@ GENES = (
     "FMO3",
     "CBS",
     "VDR",
+    "F13A1",
+    "BRCA1",
+    "BRCA2",
+    "SERPINA1",
 )
 
 DEFAULT_OUT = Path(__file__).resolve().parent / "fixtures" / "upstream" / "real"
