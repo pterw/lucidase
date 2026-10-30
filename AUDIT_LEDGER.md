@@ -173,6 +173,8 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-024 | `tests/e2e/test_karyogram.py` | `test_file_button_opens_the_picker_from_the_keyboard` intermittently timed out waiting for `filechooser` in CI under load when `page.keyboard.press` fired before `#btn-karyogram-browse` focus settled. | REMEDIATED (explicitly await `expect(button).to_be_focused()` and use `button.press(key)` to target keypress directly) |
 | P2-025 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | FUT2 `rs601338` non-secretor interpretation incorrectly reported lower serum vitamin B12; non-secretors have higher total circulating B12 (holo-haptocorrin, without altering bioavailable transcobalamin-bound B12). | REMEDIATED (corrected phenotype direction to higher total circulating B12 via holo-haptocorrin while noting unaltered bioavailable B12, verified by test_kb_build) |
 | P2-026 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | VDR FokI `rs2228570` allele labels were inverted against functional literature: longer 427-AA isoform was labelled F allele and shorter 424-AA isoform labelled f allele. | REMEDIATED (aligned with conventional nomenclature: longer 427-AA isoform is f allele [genotype ff] and shorter 424-AA isoform is F allele [genotype FF], verified by test_kb_build) |
+| P2-027 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | BCO1 `rs12934922` (p.Arg267Ser) interpretation misattributed a 32% reduced carotenoid conversion ratio from `rs7501331` (p.Ala379Val) reported in Leung et al. 2009. | REMEDIATED (removed misattributed 32% figure, accurately qualified single-variant and co-inherited effects with p.Ala379Val, verified by test_kb_build) |
+| P2-028 | `tools/curation/kb_curation.json`, `web/src/knowledge-base.json`, `tests/test_kb_build.py` | FMO3 `rs2266780` (p.Glu308Gly) and `rs2266782` (p.Glu158Lys) asserted clinically evident mild trimethylaminuria without qualifying by combined cis haplotype and dietary load. | REMEDIATED (qualified metabolic efficiency by combined haplotype context and dietary precursor load, avoiding unsupported single-variant TMAU claims, verified by test_kb_build) |
 
 ---
 
@@ -395,6 +397,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `ab1c098` | P1-098, P1-099, P1-100 | `fix(pgx): withhold unphased CYP2D6 metabolizer status, resolve export styles, and use RESULT_WORDS (P1-098..P1-100)` |
 | `8bdbc67` | Phase 4 (Metabolic) | `feat(kb): add Phase 4 micronutrient and metabolic modifiers (FUT2, BCO1, PNPLA3, FMO3, CBS, VDR)` |
 | `9d77b30` | P2-025, P2-026 | `fix(kb): correct FUT2 B12 association direction and VDR FokI allele naming (P2-025, P2-026)` |
+| `fe931e8` | P2-027, P2-028 | `fix(kb): correct BCO1 conversion attribution and qualify FMO3 haplotype claims (P2-027, P2-028)` |
 
 ---
 

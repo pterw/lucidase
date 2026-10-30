@@ -4410,7 +4410,7 @@
           "significance": "Carrier",
           "magnitude": 1.0,
           "repute": "Neutral",
-          "phenotype": "Heterozygous for BCO1 p.Arg267Ser: Approximately 32% reduced enzyme activity converting dietary beta-carotene into active vitamin A (retinol).",
+          "phenotype": "Carrier of BCO1 p.Arg267Ser: Reduced conversion of dietary beta-carotene to vitamin A (retinol), especially when co-inherited with p.Ala379Val (rs7501331).",
           "drug_response": null,
           "caveats": []
         },
@@ -4419,7 +4419,7 @@
           "significance": "Trait",
           "magnitude": 1.5,
           "repute": "Neutral",
-          "phenotype": "Homozygous for BCO1 p.Arg267Ser: Significantly reduced enzymatic conversion of beta-carotene to retinol; may benefit from direct dietary sources of preformed vitamin A.",
+          "phenotype": "Homozygous for BCO1 p.Arg267Ser: Moderately reduced enzymatic conversion of beta-carotene to retinol; impaired conversion is most pronounced in the presence of co-inherited p.Ala379Val.",
           "drug_response": null,
           "caveats": []
         }
@@ -4649,7 +4649,7 @@
           "significance": "Carrier",
           "magnitude": 1.0,
           "repute": "Neutral",
-          "phenotype": "Heterozygous carrier of FMO3 p.Glu158Lys: Mildly reduced trimethylamine N-oxygenation capacity; generally asymptomatic on typical diets.",
+          "phenotype": "Heterozygous carrier of FMO3 p.Glu158Lys: Minor reduction in FMO3 catalytic activity; typically asymptomatic in isolation.",
           "drug_response": null,
           "caveats": []
         },
@@ -4658,7 +4658,7 @@
           "significance": "Trait",
           "magnitude": 1.5,
           "repute": "Neutral",
-          "phenotype": "Homozygous for FMO3 p.Glu158Lys: Decreased enzyme activity converting odorous trimethylamine to odorless TMAO; higher susceptibility to mild transient fish odor following high-choline meals.",
+          "phenotype": "Homozygous for FMO3 p.Glu158Lys: Decreased FMO3 capacity, especially when co-inherited in cis with p.Glu308Gly; may have mild susceptibility to transient odor under high dietary choline intake.",
           "drug_response": null,
           "caveats": []
         }
@@ -4726,7 +4726,7 @@
           "significance": "Carrier",
           "magnitude": 1.0,
           "repute": "Neutral",
-          "phenotype": "Heterozygous carrier of FMO3 p.Glu308Gly: Moderately reduced enzymatic oxidation of trimethylamine.",
+          "phenotype": "Heterozygous carrier of FMO3 p.Glu308Gly: Mild reduction in FMO3 catalytic efficiency; typically asymptomatic in the absence of co-inherited FMO3 variants.",
           "drug_response": null,
           "caveats": []
         },
@@ -4735,9 +4735,11 @@
           "significance": "Trait",
           "magnitude": 1.5,
           "repute": "Neutral",
-          "phenotype": "Homozygous for FMO3 p.Glu308Gly: Substantially decreased FMO3 capacity; compound inheritance with p.Glu158Lys produces clinically evident mild trimethylaminuria.",
+          "phenotype": "Homozygous for FMO3 p.Glu308Gly: Moderately decreased FMO3 capacity; noticeable reduction in trimethylamine oxidation occurs primarily when co-inherited on haplotypes carrying p.Glu158Lys.",
           "drug_response": null,
-          "caveats": []
+          "caveats": [
+            "Transient mild trimethylamine accumulation may occur under high dietary choline or carnitine load; does not cause severe trimethylaminuria in isolation."
+          ]
         }
       },
       "evidence": {

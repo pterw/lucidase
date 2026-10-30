@@ -1299,3 +1299,27 @@ def test_vdr_foki_phenotype_labels_match_conventional_f_and_F(built):
     assert "427-amino-acid" in p0 and "f allele" in p0 and "ff" in p0
     assert "427-AA (f)" in p1 and "424-AA (F)" in p1 and "Ff" in p1
     assert "424-amino-acid" in p2 and "F allele" in p2 and "FF" in p2
+
+
+def test_bco1_phenotype_distinguishes_r267s_and_a379v(built):
+    p1 = built['loci']['rs12934922']['interpretations']['1']['phenotype']
+    p2 = built['loci']['rs12934922']['interpretations']['2']['phenotype']
+
+    assert '32%' not in p1
+    assert '32%' not in p2
+    assert 'Ala379Val' in p1 and 'rs7501331' in p1
+    assert 'Ala379Val' in p2
+
+
+def test_fmo3_phenotypes_qualify_activity_by_haplotype_pairing(built):
+    p1_308 = built['loci']['rs2266780']['interpretations']['1']['phenotype']
+    p2_308 = built['loci']['rs2266780']['interpretations']['2']['phenotype']
+    caveats_308 = built['loci']['rs2266780']['interpretations']['2']['caveats']
+
+    assert 'Mild reduction in FMO3 catalytic efficiency' in p1_308
+    assert 'p.Glu158Lys' in p2_308
+    assert 'clinically evident' not in p2_308.lower()
+    assert any('does not cause severe trimethylaminuria in isolation' in c for c in caveats_308)
+
+    p2_158 = built['loci']['rs2266782']['interpretations']['2']['phenotype']
+    assert 'p.Glu308Gly' in p2_158
