@@ -80,10 +80,10 @@
     </div>
   </div>
 
-  <main id="main-content-flow" class="lds-wrap flex-1 flex flex-col gap-16 pt-10 pb-16" tabindex="-1">
+  <main id="main-content-flow" class="w-full flex-1 flex flex-col gap-10 pt-8 pb-16" tabindex="-1">
 
     <!-- Start: the lockup, what Lucidase does and does not do, and the drop field (hidden while results are shown) -->
-    <section id="section-hero" class="flex flex-col gap-10">
+    <section id="section-hero" class="lds-wrap flex flex-col gap-10">
       <div class="flex flex-col gap-8">
         <h1 class="lds-display">Read your raw DNA file, on your own device</h1>
 
@@ -178,7 +178,7 @@
     </section>
 
     <!-- Progress (hidden until a file is read) -->
-    <section id="progress-section" class="hidden" style="max-width: 560px">
+    <section id="progress-section" class="lds-wrap hidden" style="max-width: 560px">
       <div class="lds-progress">
         <div class="lds-progress-head">
           <span id="parse-progress-msg" aria-live="polite">Reading your file</span>
@@ -191,7 +191,7 @@
     </section>
 
     <!-- Analysis failure (hidden until the worker fails) -->
-    <section id="analysis-error" role="alert" class="hidden lds-alert lds-alert-danger">
+    <section id="analysis-error" role="alert" class="lds-wrap hidden lds-alert lds-alert-danger">
       <span class="lds-icon lds-icon-18 lds-i-circle-alert" aria-hidden="true"></span>
       <div class="lds-alert-body">
         <p class="lds-alert-title">The analysis could not be completed.</p>
@@ -203,8 +203,8 @@
 
     <!-- Results (populated after the analysis): the list, and the docked Inspector beside it or under it (design
          system AnalysisScreen). The list's content keeps its indentation. -->
-    <section id="results-section" class="hidden lds-results" aria-labelledby="results-h">
-      <div class="lds-results-main flex flex-col gap-16">
+    <section id="results-section" class="hidden flex flex-col gap-8 w-full" aria-labelledby="results-h">
+      <div class="lds-wrap w-full flex flex-col gap-12">
         <div class="flex flex-col gap-6">
           <div class="flex flex-wrap items-end justify-between gap-4">
             <h1 id="results-h" class="lds-display" tabindex="-1">Your results</h1>
@@ -265,69 +265,95 @@
           </div>
         </section>
 
-        <!-- Summary (design system AnalysisScreen): the sentence with the counts, the map of the checks on the file's
-           chromosomes and its legend (src/app.js renders all three from the analysis) -->
+        <!-- Summary: concise editorial sentence and link to dedicated chromosome map (karyogram removed per 3-layer architecture) -->
         <section id="summary" class="lds-section" aria-labelledby="summary-h">
           <div class="lds-section-head">
             <h2 id="summary-h" class="lds-section-title">Summary</h2>
-            <p class="lds-section-aside">Each mark on the map is one of the checks. Select a mark to read that result.
-            </p>
+            <p class="lds-section-aside">High-level overview of the genetic variants evaluated in your file.</p>
           </div>
-          <div class="lds-section-body flex flex-col gap-8">
-            <div class="flex flex-col gap-5">
-              <p id="summary-prose" class="lds-summary-prose"></p>
-              <div id="summary-map" class="lds-summary-map" role="region" aria-label="Chromosome map" tabindex="0">
-              </div>
-              <div id="summary-density-notice" class="hidden lds-alert lds-alert-notice" role="note">
-                <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
-                <p class="lds-alert-text">
-                  Your file doesn't say which genome version it uses, so its markers can't be placed on the chromosomes.
-                  The
-                  genes this report checks still show your results.
-                </p>
-              </div>
-              <ul id="summary-legend" class="lds-legend lds-summary-legend" aria-label="Key to the map"></ul>
+          <div class="lds-section-body flex flex-col gap-4">
+            <p id="summary-prose" class="lds-summary-prose"></p>
+            <div class="flex items-center justify-between pt-1">
+              <a href="karyogram.html" class="lds-btn-link font-bold inline-flex items-center gap-1.5">
+                Explore full-genome chromosome distribution on the Chromosome map
+                <span class="lds-icon lds-i-arrow-up-right" aria-hidden="true"></span>
+              </a>
             </div>
+            <!-- Full-size karyogram is kept exclusively on karyogram.html. Hidden here on the results page. -->
+            <div id="summary-map" class="hidden" aria-hidden="true"></div>
+            <div id="summary-density-notice" class="hidden" role="note"></div>
+            <ul id="summary-legend" class="hidden" aria-label="Key to the map"></ul>
           </div>
         </section>
+      </div>
 
-        <!-- Results Toolbar (View Switcher, Status Filters, Category Anchors) -->
-        <nav id="results-toolbar" class="lds-results-toolbar" aria-label="Results navigation and filters">
-          <div class="lds-toolbar-left">
-            <div class="lds-toolbar-segment" role="group" aria-label="View mode">
-              <button type="button" id="btn-view-cards" class="lds-toolbar-btn is-active" aria-pressed="true">
-                <span class="lds-icon lds-i-file-text" aria-hidden="true"></span>Cards
-              </button>
-              <button type="button" id="btn-view-table" class="lds-toolbar-btn" aria-pressed="false">
-                <span class="lds-icon lds-i-table" aria-hidden="true"></span>Table
-              </button>
+      <!-- Docked Toolbar Bar: 100% full width across viewport, sticky -->
+      <div id="results-toolbar-bar" class="w-full lds-results-toolbar-bar">
+        <div class="lds-wrap py-2 flex flex-col gap-2">
+          <!-- Compact 1-line horizontal Coverage Ledger bar (replaces full-size karyogram on results page) -->
+          <div id="coverage-ledger-bar" class="lds-coverage-ledger" role="region" aria-label="Coverage ledger">
+            <div class="lds-coverage-ledger-track" id="coverage-ledger-track" aria-hidden="true">
+              <div id="cov-bar-observed" class="lds-cov-segment lds-cov-observed" style="width: 0%" title="Found"></div>
+              <div id="cov-bar-negative" class="lds-cov-segment lds-cov-negative" style="width: 0%" title="Not found"></div>
+              <div id="cov-bar-insufficient" class="lds-cov-segment lds-cov-insufficient" style="width: 0%" title="Unclear"></div>
+              <div id="cov-bar-gaps" class="lds-cov-segment lds-cov-gaps" style="width: 0%" title="Not on chip"></div>
             </div>
-            <div class="lds-toolbar-filters" role="group" aria-label="Filter results by status">
-              <span class="lds-toolbar-label">Status:</span>
-              <button type="button" data-status-filter="every" class="lds-filter-pill is-active"
-                aria-pressed="true">All<span class="lds-tab-count" data-tab-count="every"></span></button>
-              <button type="button" data-status-filter="observed" class="lds-filter-pill"
-                aria-pressed="false">Found<span class="lds-tab-count" data-tab-count="observed"></span></button>
-              <button type="button" data-status-filter="negative" class="lds-filter-pill" aria-pressed="false">Not
-                found<span class="lds-tab-count" data-tab-count="negative"></span></button>
-              <button type="button" data-status-filter="insufficient" class="lds-filter-pill"
-                aria-pressed="false">Unclear<span class="lds-tab-count" data-tab-count="insufficient"></span></button>
+            <div class="lds-coverage-ledger-meta">
+              <span id="coverage-ledger-text" class="lds-coverage-ledger-text">Evaluating coverage...</span>
+              <a href="karyogram.html" class="lds-coverage-ledger-link">Chromosome map &rarr;</a>
             </div>
           </div>
-          <div class="lds-toolbar-right">
-            <div class="lds-toolbar-jumps" aria-label="Jump to category">
-              <span class="lds-toolbar-label">Jump:</span>
-              <a href="#group-medicines" class="lds-jump-link">Pharmacology</a>
-              <a href="#group-risk" class="lds-jump-link">Health risks</a>
-              <a href="#group-carrier" class="lds-jump-link">Carrier</a>
-              <a href="#group-traits" class="lds-jump-link">Traits</a>
-              <a href="#assortment-section" class="lds-jump-link">Multi-locus</a>
-            </div>
-          </div>
-        </nav>
 
-        <!-- The report: one section per group, one FindingRow per check (rendered by src/app.js from the view model) -->
-        <div id="report-groups" class="flex flex-col gap-16"></div>
+          <nav id="results-toolbar" class="lds-results-toolbar" aria-label="Results navigation and filters">
+            <div class="lds-toolbar-left">
+              <div class="lds-toolbar-segment" role="group" aria-label="View mode">
+                <button type="button" id="btn-view-cards" class="lds-toolbar-btn is-active" aria-pressed="true">
+                  <span class="lds-icon lds-i-file-text" aria-hidden="true"></span>Cards
+                </button>
+                <button type="button" id="btn-view-table" class="lds-toolbar-btn" aria-pressed="false">
+                  <span class="lds-icon lds-i-table" aria-hidden="true"></span>Table
+                </button>
+              </div>
+              <div class="lds-toolbar-filters" role="group" aria-label="Filter results by status">
+                <span class="lds-toolbar-label">Status:</span>
+                <button type="button" data-status-filter="every" class="lds-filter-pill is-active"
+                  aria-pressed="true">All<span class="lds-tab-count" data-tab-count="every"></span></button>
+                <button type="button" data-status-filter="observed" class="lds-filter-pill"
+                  aria-pressed="false">Found<span class="lds-tab-count" data-tab-count="observed"></span></button>
+                <button type="button" data-status-filter="negative" class="lds-filter-pill" aria-pressed="false">Not
+                  found<span class="lds-tab-count" data-tab-count="negative"></span></button>
+                <button type="button" data-status-filter="gaps" class="lds-filter-pill" aria-pressed="false">Not on
+                  chip<span class="lds-tab-count" data-tab-count="gaps"></span></button>
+                <button type="button" data-status-filter="insufficient" class="lds-filter-pill"
+                  aria-pressed="false">Unclear<span class="lds-tab-count" data-tab-count="insufficient"></span></button>
+              </div>
+            </div>
+            <div class="lds-toolbar-right">
+              <div class="lds-toolbar-search">
+                <label class="lds-field lds-toolbar-field">
+                  <span class="lds-icon lds-icon-14 lds-i-search" aria-hidden="true"></span>
+                  <span class="sr-only">Search findings</span>
+                  <input type="search" id="toolbar-search-input" placeholder="Find marker or gene" class="lds-input lds-toolbar-input" autocomplete="off">
+                </label>
+              </div>
+              <div class="lds-toolbar-jumps" aria-label="Jump to category">
+                <span class="lds-toolbar-label">Jump:</span>
+                <a href="#group-medicines" class="lds-jump-link">Pharmacology</a>
+                <a href="#group-risk" class="lds-jump-link">Health risks</a>
+                <a href="#group-carrier" class="lds-jump-link">Carrier</a>
+                <a href="#group-traits" class="lds-jump-link">Traits</a>
+                <a href="#assortment-section" class="lds-jump-link">Multi-locus</a>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <div class="lds-wrap w-full">
+        <div class="lds-results">
+          <div class="lds-results-main flex flex-col gap-16">
+            <!-- The report: one section per group, one FindingRow per check (rendered by src/app.js from the view model) -->
+            <div id="report-groups" class="flex flex-col gap-16"></div>
 
         <!-- Findings across more than one locus -->
         <section id="assortment-section" class="hidden lds-section" aria-labelledby="assortment-h">
@@ -358,6 +384,11 @@
             </div>
 
             <div id="table-panel" class="hidden flex flex-col gap-4">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <button type="button" id="btn-hide-table" class="lds-btn lds-btn-ghost lds-btn-sm" aria-controls="table-panel">
+                  <span class="lds-icon lds-i-arrow-left" aria-hidden="true"></span>Back to cards
+                </button>
+              </div>
               <div class="lds-tabs" role="group" aria-label="Show">
                 <button type="button" data-filter="every" class="lds-tab tab-active">All<span class="lds-tab-count"
                     data-tab-count="every"></span></button>
@@ -512,85 +543,95 @@
               <ul id="drawer-caveats-list" class="lds-list text-ink-muted"></ul>
             </section>
 
-            <!-- Inheritance: recurrence for Mendelian genes ("If you have children"), allele transmission otherwise -->
-            <section id="drawer-segregation-container" class="lds-isec flex flex-col gap-4" aria-labelledby="isec-seg">
-              <div class="lds-isec-head">
-                <div>
-                  <h3 id="isec-seg" class="lds-isec-title mb-1" data-role="seg-title">If you have children</h3>
-                  <p class="lds-meta">The chance for each child, from your result and the other parent's status you
-                    pick.</p>
-                </div>
+            <!-- LAYER 3: Progressive Disclosure Accordions at Base of Drawer -->
+            <details id="drawer-segregation-details" class="lds-drawer-accordion" open>
+              <summary class="lds-drawer-accordion-summary">
+                <span class="font-bold flex items-center gap-2">
+                  <span class="lds-icon lds-i-chevron-right lds-accordion-chevron" aria-hidden="true"></span>
+                  Inheritance &amp; Offspring Simulator
+                </span>
                 <span id="drawer-seg-mode-badge" class="lds-tag lds-tag-neutral">Not available</span>
+              </summary>
+              <div class="p-3">
+                <section id="drawer-segregation-container" class="lds-isec flex flex-col gap-4" aria-labelledby="isec-seg">
+                  <div class="lds-isec-head">
+                    <div>
+                      <h3 id="isec-seg" class="lds-isec-title mb-1" data-role="seg-title">If you have children</h3>
+                      <p class="lds-meta">The chance for each child, from your result and the other parent's status you
+                        pick.</p>
+                    </div>
+                  </div>
+
+                  <dl class="lds-datalist">
+                    <div>
+                      <dt>Carrier frequency</dt>
+                      <dd id="drawer-seg-carrier-prior">Not available</dd>
+                    </div>
+                    <div id="drawer-seg-penetrance-row">
+                      <dt>Penetrance</dt>
+                      <dd id="drawer-seg-penetrance">Not available</dd>
+                    </div>
+                    <div>
+                      <dt>Risk if the other parent is unscreened</dt>
+                      <dd id="drawer-seg-risk-unscreened">Not available</dd>
+                    </div>
+                    <div>
+                      <dt>Risk if the other parent is a carrier</dt>
+                      <dd id="drawer-seg-risk-carrier">Not available</dd>
+                    </div>
+                  </dl>
+
+                  <div class="flex flex-col gap-3">
+                    <div class="flex flex-wrap items-baseline justify-between gap-2">
+                      <span class="lds-h3">Offspring simulator</span>
+                      <span class="lds-meta">Other parent</span>
+                    </div>
+                    <div id="drawer-partner-buttons" class="lds-segmented" role="group" aria-label="Other parent">
+                      <button type="button" data-partner="unscreened" class="partner-sim-btn lds-segment"
+                        aria-pressed="true">Unscreened</button>
+                      <button type="button" data-partner="carrier" class="partner-sim-btn lds-segment"
+                        aria-pressed="false">Carrier</button>
+                      <button type="button" data-partner="affected" class="partner-sim-btn lds-segment"
+                        aria-pressed="false">Affected</button>
+                      <button type="button" data-partner="wildtype" class="partner-sim-btn lds-segment"
+                        aria-pressed="false">No variant</button>
+                    </div>
+                    <p id="drawer-partner-model-note" class="lds-meta"></p>
+                    <p id="drawer-sim-scope" class="lds-meta" hidden></p>
+
+                    <div class="flex flex-col gap-3">
+                      <div class="lds-prob">
+                        <div class="lds-prob-head"><span>Child gets two copies</span><span id="sim-p-affected">Not
+                            available</span></div>
+                        <div class="lds-prob-track">
+                          <div id="sim-bar-affected" class="lds-prob-bar"></div>
+                        </div>
+                      </div>
+                      <div class="lds-prob">
+                        <div class="lds-prob-head"><span>Child gets one copy</span><span id="sim-p-carrier">Not
+                            available</span></div>
+                        <div class="lds-prob-track">
+                          <div id="sim-bar-carrier" class="lds-prob-bar"></div>
+                        </div>
+                      </div>
+                      <div class="lds-prob">
+                        <div class="lds-prob-head"><span>Child gets no copy</span><span id="sim-p-wildtype">Not
+                            available</span></div>
+                        <div class="lds-prob-track">
+                          <div id="sim-bar-wildtype" class="lds-prob-bar"></div>
+                        </div>
+                      </div>
+                      <div id="drawer-sim-adjusted" hidden>
+                        <div class="lds-prob-head pt-2 border-t border-line">
+                          <span>Child affected, adjusted</span><span id="sim-effective-risk">Not available</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p id="drawer-sim-method" class="lds-meta"></p>
+                  </div>
+                </section>
               </div>
-
-              <dl class="lds-datalist">
-                <div>
-                  <dt>Carrier frequency</dt>
-                  <dd id="drawer-seg-carrier-prior">Not available</dd>
-                </div>
-                <div id="drawer-seg-penetrance-row">
-                  <dt>Penetrance</dt>
-                  <dd id="drawer-seg-penetrance">Not available</dd>
-                </div>
-                <div>
-                  <dt>Risk if the other parent is unscreened</dt>
-                  <dd id="drawer-seg-risk-unscreened">Not available</dd>
-                </div>
-                <div>
-                  <dt>Risk if the other parent is a carrier</dt>
-                  <dd id="drawer-seg-risk-carrier">Not available</dd>
-                </div>
-              </dl>
-
-              <div class="flex flex-col gap-3">
-                <div class="flex flex-wrap items-baseline justify-between gap-2">
-                  <span class="lds-h3">Offspring simulator</span>
-                  <span class="lds-meta">Other parent</span>
-                </div>
-                <div id="drawer-partner-buttons" class="lds-segmented" role="group" aria-label="Other parent">
-                  <button type="button" data-partner="unscreened" class="partner-sim-btn lds-segment"
-                    aria-pressed="true">Unscreened</button>
-                  <button type="button" data-partner="carrier" class="partner-sim-btn lds-segment"
-                    aria-pressed="false">Carrier</button>
-                  <button type="button" data-partner="affected" class="partner-sim-btn lds-segment"
-                    aria-pressed="false">Affected</button>
-                  <button type="button" data-partner="wildtype" class="partner-sim-btn lds-segment"
-                    aria-pressed="false">No variant</button>
-                </div>
-                <p id="drawer-partner-model-note" class="lds-meta"></p>
-                <p id="drawer-sim-scope" class="lds-meta" hidden></p>
-
-                <div class="flex flex-col gap-3">
-                  <div class="lds-prob">
-                    <div class="lds-prob-head"><span>Child gets two copies</span><span id="sim-p-affected">Not
-                        available</span></div>
-                    <div class="lds-prob-track">
-                      <div id="sim-bar-affected" class="lds-prob-bar"></div>
-                    </div>
-                  </div>
-                  <div class="lds-prob">
-                    <div class="lds-prob-head"><span>Child gets one copy</span><span id="sim-p-carrier">Not
-                        available</span></div>
-                    <div class="lds-prob-track">
-                      <div id="sim-bar-carrier" class="lds-prob-bar"></div>
-                    </div>
-                  </div>
-                  <div class="lds-prob">
-                    <div class="lds-prob-head"><span>Child gets no copy</span><span id="sim-p-wildtype">Not
-                        available</span></div>
-                    <div class="lds-prob-track">
-                      <div id="sim-bar-wildtype" class="lds-prob-bar"></div>
-                    </div>
-                  </div>
-                  <div id="drawer-sim-adjusted" hidden>
-                    <div class="lds-prob-head pt-2 border-t border-line">
-                      <span>Child affected, adjusted</span><span id="sim-effective-risk">Not available</span>
-                    </div>
-                  </div>
-                </div>
-                <p id="drawer-sim-method" class="lds-meta"></p>
-              </div>
-            </section>
+            </details>
 
             <section class="lds-isec" aria-labelledby="isec-tech">
               <h3 id="isec-tech" class="lds-isec-title">Technical details</h3>
@@ -618,9 +659,16 @@
               </dl>
             </section>
 
-            <!-- Gene and protein context (closed by default): AlphaFold DB, Ensembl VEP, ENCODE, Human Protein Atlas -->
-            <details id="drawer-gene-context">
-              <summary class="lds-isec lds-isec-title cursor-pointer mb-0">Gene and protein context</summary>
+            <!-- Gene and protein context: Molecular & Regulatory Predictions -->
+            <details id="drawer-gene-context" class="lds-drawer-accordion">
+              <summary class="lds-drawer-accordion-summary">
+                <span class="font-bold flex items-center gap-2">
+                  <span class="lds-icon lds-i-chevron-right lds-accordion-chevron" aria-hidden="true"></span>
+                  Molecular &amp; Regulatory Predictions
+                </span>
+                <span class="lds-tag lds-tag-neutral text-11">[IN-SILICO PREDICTION — NOT A CLINICAL DIAGNOSIS]</span>
+              </summary>
+              <div class="p-3">
               <section id="drawer-biotools-container" class="lds-isec flex flex-col gap-5">
                 <div class="lds-isec-head">
                   <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
@@ -697,7 +745,9 @@
           </div>
         </aside>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
   </main>
 

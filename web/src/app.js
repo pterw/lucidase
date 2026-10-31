@@ -368,12 +368,38 @@ function initEventListeners() {
     setTableOpen(true);
     searchInput.focus();
   });
+  const btnHideTable = document.getElementById("btn-hide-table");
+  if (btnHideTable) {
+    btnHideTable.addEventListener("click", () => {
+      setTableOpen(false);
+      const reportGroups = document.getElementById("report-groups");
+      if (reportGroups) {
+        reportGroups.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
 
   // Search input
   searchInput.addEventListener("input", (e) => {
     state.searchQuery = e.target.value.toLowerCase().trim();
+    const toolbarSearch = document.getElementById("toolbar-search-input");
+    if (toolbarSearch && toolbarSearch.value !== e.target.value) {
+      toolbarSearch.value = e.target.value;
+    }
     renderVariantsTable();
+    filterFindingCards();
   });
+  const toolbarSearch = document.getElementById("toolbar-search-input");
+  if (toolbarSearch) {
+    toolbarSearch.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value.toLowerCase().trim();
+      if (searchInput && searchInput.value !== e.target.value) {
+        searchInput.value = e.target.value;
+      }
+      renderVariantsTable();
+      filterFindingCards();
+    });
+  }
 
   // View switcher buttons
   const btnViewCards = document.getElementById("btn-view-cards");
@@ -529,14 +555,34 @@ function handleParseComplete(data, karyogram) {
   setTableOpen(false);
   applyFilter(state.filterCategory || "every");
   setViewMode(state.viewMode || "cards");
+  updateToolbarHeight();
 }
 
 /** Opens or closes "All results as a table". Closed, only the "Show the table" button is shown. */
 function setTableOpen(open) {
   const button = document.getElementById("btn-show-table");
-  button.setAttribute("aria-expanded", String(open));
-  button.classList.toggle("hidden", open);
-  document.getElementById("table-panel").classList.toggle("hidden", !open);
+  if (button) {
+    button.setAttribute("aria-expanded", String(open));
+    button.classList.toggle("hidden", open);
+  }
+  const tablePanel = document.getElementById("table-panel");
+  if (tablePanel) {
+    tablePanel.classList.toggle("hidden", !open);
+  }
+  state.viewMode = open ? "table" : "cards";
+  const btnCards = document.getElementById("btn-view-cards");
+  const btnTable = document.getElementById("btn-view-table");
+  if (btnCards) {
+    btnCards.classList.toggle("is-active", !open);
+    btnCards.setAttribute("aria-pressed", String(!open));
+  }
+  if (btnTable) {
+    btnTable.classList.toggle("is-active", open);
+    btnTable.setAttribute("aria-pressed", String(open));
+  }
+  if (open) {
+    renderVariantsTable();
+  }
 }
 
 /**
@@ -579,43 +625,67 @@ function filterFindingCards() {
 }
 
 /** Switches the primary results layout between narrative Cards and technical Table. */
-function setViewMode(mode) {
-  state.viewMode = mode;
-  const isCards = mode === "cards";
-  const resultsSection = document.getElementById("results-section");
-  if (resultsSection) {
-    resultsSection.classList.toggle("is-table-view", !isCards);
+/** Dynamically measures the sticky toolbar height and sets --toolbar-h so the inspector never hides under it. */
+function updateToolbarHeight() {
+  const bar = document.getElementById("results-toolbar-bar");
+  if (!bar) return;
+  const h = bar.offsetHeight;
+  if (h > 0) {
+    document.documentElement.style.setProperty("--toolbar-h", `${h}px`);
   }
-  const btnCards = document.getElementById("btn-view-cards");
-  const btnTable = document.getElementById("btn-view-table");
-  if (btnCards) {
-    btnCards.classList.toggle("is-active", isCards);
-    btnCards.setAttribute("aria-pressed", String(isCards));
+}
+window.addEventListener("resize", updateToolbarHeight);
+if (typeof ResizeObserver !== "undefined") {
+  const bar = document.getElementById("results-toolbar-bar");
+  if (bar) {
+    const ro = new ResizeObserver(() => updateToolbarHeight());
+    ro.observe(bar);
   }
-  if (btnTable) {
-    btnTable.classList.toggle("is-active", !isCards);
-    btnTable.setAttribute("aria-pressed", String(!isCards));
-  }
-  const reportGroups = document.getElementById("report-groups");
-  const assortment = document.getElementById("assortment-section");
-  const tablePanel = document.getElementById("table-panel");
-  const btnShowTable = document.getElementById("btn-show-table");
+}
 
+function setViewMode(mode) {
+  const isCards = mode === "cards";
+  setTableOpen(!isCards);
   if (isCards) {
-    if (reportGroups) reportGroups.classList.remove("hidden");
-    if (assortment) {
-      assortment.hidden = (state.filterCategory !== "every" && state.filterCategory !== "observed");
+    const reportGroups = document.getElementById("report-groups");
+    if (reportGroups) {
+      reportGroups.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   } else {
-    if (reportGroups) reportGroups.classList.add("hidden");
-    if (assortment) assortment.hidden = true;
-    if (tablePanel) tablePanel.classList.remove("hidden");
-    if (btnShowTable) {
-      btnShowTable.setAttribute("aria-expanded", "true");
-      btnShowTable.classList.add("hidden");
+    const tablePanel = document.getElementById("table-panel");
+    if (tablePanel) {
+      tablePanel.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    renderVariantsTable();
   }
+}
+
+function renderGroupRowsHtml(rows) {
+  if (rows.length === 0) return `<p class="lds-meta">No checks in this group.</p>`;
+  const chunks = [];
+  for (const row of rows) {
+    const last = chunks[chunks.length - 1];
+    if (last && last.gene === row.gene) {
+      last.items.push(row);
+    } else {
+      chunks.push({ gene: row.gene, items: [row] });
+    }
+  }
+  return chunks.map(chunk => {
+    if (chunk.items.length > 1) {
+      return `
+        <div class="lds-gene-bracket" data-bracket-gene="${escapeHtml(chunk.gene)}">
+          <div class="lds-gene-bracket-head">
+            <span class="lds-gene-bracket-title">${escapeHtml(chunk.gene)}</span>
+            <span class="lds-gene-bracket-note">(${chunk.items.length} tested variants · Microarray data is unphased; cis/trans configuration unknown)</span>
+          </div>
+          <div class="lds-gene-bracket-rows flex flex-col">
+            ${chunk.items.map(findingRowHtml).join("")}
+          </div>
+        </div>
+      `;
+    }
+    return findingRowHtml(chunk.items[0]);
+  }).join("");
 }
 
 function renderReportGroups() {
@@ -641,7 +711,7 @@ function renderReportGroups() {
         <p class="lds-section-aside">${escapeHtml(group.aside)}</p>
       </div>
       <div id="group-${escapeHtml(group.id)}-body" class="lds-section-body">
-        ${group.rows.length === 0 ? `<p class="lds-meta">No checks in this group.</p>` : group.rows.map(findingRowHtml).join("")}
+        ${renderGroupRowsHtml(group.rows)}
       </div>
     </section>
   `;
@@ -841,8 +911,33 @@ function renderSummaryCards() {
     outside_coverage: cov.outside_coverage_count,
   };
   renderTermParts(document.getElementById("summary-prose"), summaryProseParts(counts));
+  renderCoverageLedger(counts);
   renderSummaryLegend(counts);
   renderSummaryMap(state.karyogram);
+}
+
+/** Renders the compact 1-line horizontal Coverage Ledger bar in the sticky top control strip. */
+function renderCoverageLedger(counts) {
+  const ledgerText = document.getElementById("coverage-ledger-text");
+  if (!ledgerText) return;
+  const total = counts.supported_and_observed + counts.supported_not_observed + counts.insufficient_evidence + counts.not_tested_by_array;
+  if (total === 0) return;
+  const pObserved = ((counts.supported_and_observed / total) * 100).toFixed(1);
+  const pNegative = ((counts.supported_not_observed / total) * 100).toFixed(1);
+  const pInsufficient = ((counts.insufficient_evidence / total) * 100).toFixed(1);
+  const pGaps = ((counts.not_tested_by_array / total) * 100).toFixed(1);
+
+  const barObs = document.getElementById("cov-bar-observed");
+  const barNeg = document.getElementById("cov-bar-negative");
+  const barIns = document.getElementById("cov-bar-insufficient");
+  const barGaps = document.getElementById("cov-bar-gaps");
+
+  if (barObs) barObs.style.width = `${pObserved}%`;
+  if (barNeg) barNeg.style.width = `${pNegative}%`;
+  if (barIns) barIns.style.width = `${pInsufficient}%`;
+  if (barGaps) barGaps.style.width = `${pGaps}%`;
+
+  ledgerText.textContent = `${total} loci: ${counts.supported_and_observed} found · ${counts.supported_not_observed} not found · ${counts.insufficient_evidence} unclear · ${counts.not_tested_by_array} not on chip`;
 }
 
 /**
@@ -1304,7 +1399,13 @@ function openDrawer(record, opener = document.activeElement) {
     document.getElementById("drawer-phenotype"),
     [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null
   );
-  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, record.starsText);
+  function formatStarsWithPips(stars, starsText) {
+  if (stars === null || stars === undefined) return starsText || "No ClinVar review status";
+  const num = Math.max(0, Math.min(4, Number(stars) || 0));
+  const pips = "■".repeat(num) + "□".repeat(4 - num);
+  return `${pips} ${starsText}`;
+}
+setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, formatStarsWithPips(record.stars, record.starsText));
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 
@@ -1431,6 +1532,7 @@ function openDrawer(record, opener = document.activeElement) {
   // narrow screen) it is out of sight, so it is brought into view and focused every time.
   side.hidden = false;
   document.getElementById("results-section")?.classList.add("has-drawer-open");
+  document.querySelector(".lds-results")?.classList.add("has-drawer-open");
   void side.offsetWidth;
   side.classList.add("is-open");
   markSelectedFinding(record.id);
@@ -1726,6 +1828,7 @@ function closeDrawer() {
   const resultsSection = document.getElementById("results-section");
   const focusWasInside = Boolean(drawer && drawer.contains(document.activeElement));
   if (resultsSection) resultsSection.classList.remove("has-drawer-open");
+  document.querySelector(".lds-results")?.classList.remove("has-drawer-open");
   if (side) {
     side.classList.remove("is-open");
     const onEnd = () => {

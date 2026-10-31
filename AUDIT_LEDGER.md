@@ -191,6 +191,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-038 | `web/index.html` | Results toolbar category jump links referenced `#group-pharmacology` and `#group-trait`, diverging from DOM section IDs `#group-medicines` and `#group-traits`. | REMEDIATED (updated jump link anchors to match exact DOM section IDs) |
 | P2-039 | `debruijn/debruijn_explorer.py` | Module `__getattr__` used bare `import gui`, failing with ModuleNotFoundError when imported as part of the `debruijn` package without `debruijn/` in sys.path. | REMEDIATED (added package-relative import fallback `from . import gui`) |
 | P2-040 | `tests/e2e/test_ui_honesty.py` | `_screens` helper iterated over all 5 status filter views and re-opened all row drawers for every filter (109 drawer animations per test, 327 across 3 tests), causing the E2E suite to stall for ~4 minutes at 62%. | REMEDIATED (un-nested row drawer inspections from the filter loop so every unique drawer is opened once under `every` while table text is checked for all filters, cutting 162 redundant drawer cycles and saving ~3 minutes per run) |
+| P2-041 | `web/src/styles.css`, `web/index.html`, `web/src/app.js` | Full-size karyogram cluttered results overview; results toolbar and site header were constrained within centered gutters; no mechanism to collapse expanded table back to cards; Cards/Table toggle lacked optical contrast; guardrail banner was centered; multi-locus findings lacked shared gene brackets; ClinVar review lacked geometric matrix; docked inspector drawer slid under sticky toolbar on scroll due to static top offset. | REMEDIATED (removed full-size karyogram from results page to dedicated Chromosome map and replaced with compact 1-line Coverage Ledger bar in top control strip; added multi-locus shared gene header brackets; paired ClinVar review with 4-pip geometric matrix [■■■□]; structured Layer 3 receipts into clean 1px-bordered accordions; full-bleed fluid header & toolbar stretching across browser edges; high-contrast segmented control using ink tokens; in-context table collapse button and synchronized bi-directional navigation; dynamic `--toolbar-h` CSS measurement and ResizeObserver so docked inspector drawer dynamically offsets and fits below sticky toolbar on scroll) |
 
 ---
 
@@ -423,6 +424,7 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `017e534` | P1-103, P2-032..P2-035 | `fix(web): full-width table view, cream header theming, limitation disclosures, and karyogram decluttering (P1-103, P2-032..P2-035)` |
 | `8b25c96` | P1-104, P2-036..P2-039 | `fix(ci): resolve mobile stepnav scroll overflow and remediate codex review findings (P1-104, P2-036..P2-039)` |
 | Pending | P2-040 | `test(e2e): deduplicate filter drawer inspections in honesty test suite (P2-040)` |
+| Pending | P2-041 | `fix(web): full-bleed header & toolbar, high-contrast segmented control, table collapse, and dynamic inspector offset (P2-041)` |
 
 ---
 
