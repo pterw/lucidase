@@ -199,7 +199,10 @@ def __getattr__(name: str):
         "write_clinical_csv",
         "write_clinical_markdown",
     }:
-        import gui
+        try:
+            from . import gui
+        except (ImportError, ValueError):
+            import gui
         return getattr(gui, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 from genomic_parser import (  # noqa: E402

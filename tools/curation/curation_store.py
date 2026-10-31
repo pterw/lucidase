@@ -94,116 +94,22 @@ def atomic_write_text(path: Path, content: str, encoding: str = "utf-8", newline
                 pass
 
 
-def get_default_seed_claims() -> List[Dict[str, Any]]:
-    """Returns baseline structured evidence claims for the three schema-validation archetypes."""
-    return [
-        {
-            "claim_id": "claim_apoe_e2_protective",
-            "locus_rsid": "rs7412",
-            "gene": "APOE",
-            "claim_type": "composite_diplotype",
-            "statement": "APOE epsilon2 allele confers reduced relative risk for late-onset Alzheimer disease compared to epsilon3/epsilon3 baseline.",
-            "source_type": "meta_analysis",
-            "citation_pmid": "9343463",
-            "citation_label": "Farrer et al. 1997 JAMA",
-            "review_status": "curated_tier_a",
-            "confidence_score": "definitive",
-            "limitations": "Composite finding requiring both rs429358 and rs7412; homozygosity for e2/e2 is also associated with type III hyperlipoproteinemia with variable penetrance."
-        },
-        {
-            "claim_id": "claim_apoe_e4_relative_risk",
-            "locus_rsid": "rs429358",
-            "gene": "APOE",
-            "claim_type": "composite_diplotype",
-            "statement": "APOE epsilon4 allele in homozygous (e4/e4) or heterozygous (e3/e4) configuration increases late-onset Alzheimer disease relative risk (~12-15x for e4/e4, ~3-4x for e3/e4 versus e3/e3 baseline).",
-            "source_type": "meta_analysis",
-            "citation_pmid": "9343463",
-            "citation_label": "Farrer et al. 1997 JAMA",
-            "review_status": "curated_tier_a",
-            "confidence_score": "definitive",
-            "limitations": "Requires phasing of both rs429358 and rs7412 to determine isoform; not a deterministic monogenic diagnostic test. Significant proportion of e4/e4 individuals do not develop dementia."
-        },
-        {
-            "claim_id": "claim_dpyd_star2a_toxicity",
-            "locus_rsid": "rs3918290",
-            "gene": "DPYD",
-            "claim_type": "pharmacogenomic_dosing",
-            "statement": "DPYD c.1905+1G>A (*2A) results in complete loss of dihydropyrimidine dehydrogenase activity; heterozygous carriers require at least 50% initial fluoropyrimidine dose reduction, and homozygotes require complete avoidance or severe reduction.",
-            "source_type": "cpic_guideline",
-            "citation_pmid": "29152729",
-            "citation_label": "Amstutz et al. 2018 Clin Pharmacol Ther",
-            "review_status": "cpic_level_a",
-            "confidence_score": "definitive",
-            "limitations": "Single-variant limitation: testing rs3918290 alone cannot rule out DPYD deficiency caused by *13 (rs55886062), c.2846A>T (rs67376798), or HapB3 (rs75017182). Full activity score requires comprehensive multi-variant panel."
-        },
-        {
-            "claim_id": "claim_pnpla3_hepatic_steatosis",
-            "locus_rsid": "rs738409",
-            "gene": "PNPLA3",
-            "claim_type": "epidemiological_risk",
-            "statement": "PNPLA3 p.I148M (rs738409[G]) is strongly associated with hepatic steatosis, non-alcoholic fatty liver disease (NAFLD/MASLD), and elevated liver transaminases across diverse ancestry groups.",
-            "source_type": "gwas",
-            "citation_pmid": "18820647",
-            "citation_label": "Romeo et al. 2008 Nat Genet",
-            "review_status": "curated_tier_a",
-            "confidence_score": "definitive",
-            "limitations": "GWAS epidemiological association; ClinVar review status is 1-star (single submitter) because it is a common susceptibility allele rather than monogenic determinant. Effect is strongly modified by BMI, alcohol consumption, and metabolic factors."
-        }
-    ]
+def load_authoritative_claims(path: Path) -> List[Dict[str, Any]]:
+    """Loads authoritative structured evidence claims from disk without embedding in Python."""
+    target = path if path.exists() else DEFAULT_CLAIMS_PATH
+    if target.exists():
+        with open(target, "r", encoding="utf-8") as f:
+            return json.load(f).get("claims", [])
+    return []
 
 
-def get_default_seed_coverage() -> Dict[str, Any]:
-    """Returns baseline platform probe coverage for the validation archetypes across microarrays."""
-    return {
-        "version": "1.0",
-        "platforms": list(ALLOWED_MICROARRAY_PLATFORMS),
-        "loci": {
-            "rs738409": {
-                "gene": "PNPLA3",
-                "coverage": {
-                    "23andme_v3": {"is_covered": True, "probe_id": "rs738409", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "23andme_v4": {"is_covered": True, "probe_id": "rs738409", "strand_design": "plus", "notes": "Custom Illumina chip"},
-                    "23andme_v5": {"is_covered": True, "probe_id": "rs738409", "strand_design": "plus", "notes": "Illumina Global Screening Array"},
-                    "ancestry_v1": {"is_covered": True, "probe_id": "rs738409", "strand_design": "plus", "notes": "Illumina OmniExpress"},
-                    "ancestry_v2": {"is_covered": True, "probe_id": "rs738409", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "myheritage_standard": {"is_covered": True, "probe_id": "rs738409", "strand_design": "plus", "notes": "Illumina Global Screening Array"}
-                }
-            },
-            "rs429358": {
-                "gene": "APOE",
-                "coverage": {
-                    "23andme_v3": {"is_covered": True, "probe_id": "rs429358", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "23andme_v4": {"is_covered": True, "probe_id": "rs429358", "strand_design": "plus", "notes": "Custom Illumina chip"},
-                    "23andme_v5": {"is_covered": True, "probe_id": "rs429358", "strand_design": "plus", "notes": "Illumina Global Screening Array"},
-                    "ancestry_v1": {"is_covered": True, "probe_id": "rs429358", "strand_design": "plus", "notes": "Illumina OmniExpress"},
-                    "ancestry_v2": {"is_covered": True, "probe_id": "rs429358", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "myheritage_standard": {"is_covered": True, "probe_id": "rs429358", "strand_design": "plus", "notes": "Illumina Global Screening Array"}
-                }
-            },
-            "rs7412": {
-                "gene": "APOE",
-                "coverage": {
-                    "23andme_v3": {"is_covered": True, "probe_id": "rs7412", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "23andme_v4": {"is_covered": True, "probe_id": "rs7412", "strand_design": "plus", "notes": "Custom Illumina chip"},
-                    "23andme_v5": {"is_covered": True, "probe_id": "rs7412", "strand_design": "plus", "notes": "Illumina Global Screening Array"},
-                    "ancestry_v1": {"is_covered": True, "probe_id": "rs7412", "strand_design": "plus", "notes": "Illumina OmniExpress"},
-                    "ancestry_v2": {"is_covered": True, "probe_id": "rs7412", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "myheritage_standard": {"is_covered": True, "probe_id": "rs7412", "strand_design": "plus", "notes": "Illumina Global Screening Array"}
-                }
-            },
-            "rs3918290": {
-                "gene": "DPYD",
-                "coverage": {
-                    "23andme_v3": {"is_covered": True, "probe_id": "rs3918290", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "23andme_v4": {"is_covered": True, "probe_id": "rs3918290", "strand_design": "plus", "notes": "Custom Illumina chip"},
-                    "23andme_v5": {"is_covered": True, "probe_id": "rs3918290", "strand_design": "plus", "notes": "Illumina Global Screening Array"},
-                    "ancestry_v1": {"is_covered": True, "probe_id": "rs3918290", "strand_design": "plus", "notes": "Illumina OmniExpress"},
-                    "ancestry_v2": {"is_covered": True, "probe_id": "rs3918290", "strand_design": "plus", "notes": "Illumina OmniExpress Plus"},
-                    "myheritage_standard": {"is_covered": True, "probe_id": "rs3918290", "strand_design": "plus", "notes": "Illumina Global Screening Array"}
-                }
-            }
-        }
-    }
+def load_authoritative_coverage(path: Path) -> Dict[str, Any]:
+    """Loads authoritative platform coverage from disk without embedding in Python."""
+    target = path if path.exists() else DEFAULT_COVERAGE_PATH
+    if target.exists():
+        with open(target, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"version": "1.0", "platforms": list(ALLOWED_MICROARRAY_PLATFORMS), "loci": {}}
 
 
 class CurationWorkbench:
@@ -401,13 +307,14 @@ class CurationWorkbench:
         if not self.kb_path.exists():
             raise FileNotFoundError(f"Authoritative KB curation file not found: {self.kb_path}")
 
-        # Ensure companion files exist (or seed them)
+        # Ensure companion files exist from authoritative source
         if not self.claims_path.exists() and seed_if_missing:
-            claims_data = {"version": "1.0", "claims": get_default_seed_claims()}
+            claims = load_authoritative_claims(self.claims_path)
+            claims_data = {"version": "1.0", "claims": claims}
             atomic_write_text(self.claims_path, json.dumps(claims_data, indent=2) + "\n")
 
         if not self.coverage_path.exists() and seed_if_missing:
-            coverage_data = get_default_seed_coverage()
+            coverage_data = load_authoritative_coverage(self.coverage_path)
             atomic_write_text(self.coverage_path, json.dumps(coverage_data, indent=2) + "\n")
 
         with open(self.kb_path, "r", encoding="utf-8") as f:

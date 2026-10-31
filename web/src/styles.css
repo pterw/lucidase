@@ -18,7 +18,7 @@
 [data-theme="light"] {
   --inspector-w: 520px;
   --layout-max: 1600px;
-  --bg-header: #F4F1EA;
+  --bg-header: var(--paper-sunk);
   --p: 60.864% 0.1044 210.90; --pc: 100% 0 0; --s: 21.171% 0.0263 244.63; --sc: 98.503% 0.0041 91.45;
   --a: 60.864% 0.1044 210.90; --ac: 100% 0 0; --n: 21.171% 0.0263 244.63; --nc: 98.503% 0.0041 91.45;
   --b1: 100% 0 0; --b2: 98.503% 0.0041 91.45; --b3: 95.853% 0.0098 87.47; --bc: 21.171% 0.0263 244.63;
@@ -26,7 +26,7 @@
   --wa: 60.767% 0.1243 71.52; --wac: 100% 0 0; --er: 53.328% 0.1588 11.33; --erc: 100% 0 0;
 }
 [data-theme="dark"] {
-  --bg-header: #141E28;
+  --bg-header: var(--paper-raised);
   --p: 85.149% 0.1148 204.32; --pc: 17.44% 0.0157 248.74; --s: 95.822% 0.0067 233.64; --sc: 17.44% 0.0157 248.74;
   --a: 85.149% 0.1148 204.32; --ac: 17.44% 0.0157 248.74; --n: 95.822% 0.0067 233.64; --nc: 17.44% 0.0157 248.74;
   --b1: 20.008% 0.0185 245.32; --b2: 17.44% 0.0157 248.74; --b3: 15.612% 0.0135 248.04; --bc: 95.822% 0.0067 233.64;
@@ -36,7 +36,7 @@
 /* No JS / first paint: follow the device unless a theme is set. Mirrors [data-theme="dark"] above; keep in sync. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg-header: #141E28;
+    --bg-header: var(--paper-raised);
     --p: 85.149% 0.1148 204.32; --pc: 17.44% 0.0157 248.74; --s: 95.822% 0.0067 233.64; --sc: 17.44% 0.0157 248.74;
     --a: 85.149% 0.1148 204.32; --ac: 17.44% 0.0157 248.74; --n: 95.822% 0.0067 233.64; --nc: 17.44% 0.0157 248.74;
     --b1: 20.008% 0.0185 245.32; --b2: 17.44% 0.0157 248.74; --b3: 15.612% 0.0135 248.04; --bc: 95.822% 0.0067 233.64;
@@ -142,29 +142,49 @@ button.lds-step-item { cursor: pointer; }
 @media (max-width: 559px) { .lds-masthead-art { display: none; } .lds-masthead-wordmark { display: block; } }
 .lds-display { margin: 0; font: 400 40px/1.1 var(--font-serif); letter-spacing: -0.02em; max-width: 620px; text-wrap: balance; color: var(--text-body); }
 #section-hero > div:first-child { container-type: inline-size; }
-#section-hero .lds-display {
-  white-space: nowrap;
-  text-wrap: nowrap;
-  max-width: none;
-  display: inline-block;
-  font-size: clamp(1rem, calc(2.75rem * tan(atan2(100cqi, 960px))), 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-top: -1.875rem;
-  margin-bottom: 0.09rem;
+@media (min-width: 640px) {
+  #section-hero .lds-display {
+    white-space: nowrap;
+    text-wrap: nowrap;
+    max-width: none;
+    display: inline-block;
+    font-size: clamp(1rem, calc(2.75rem * tan(atan2(100cqi, 960px))), 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-top: -1.875rem;
+    margin-bottom: 0.09rem;
+  }
+  #section-hero #intro-scope {
+    white-space: nowrap;
+    text-wrap: nowrap;
+    width: max-content;
+    max-width: none;
+    margin-top: -2.1rem;
+    margin-bottom: 0.35rem;
+    font-size: clamp(0.88rem, calc(1.21rem * tan(atan2(100cqi, 560px))), 1.21rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--text-muted);
+  }
 }
-#section-hero #intro-scope {
-  white-space: nowrap;
-  text-wrap: nowrap;
-  width: max-content;
-  max-width: none;
-  margin-top: -2.1rem;
-  margin-bottom: 0.35rem;
-  font-size: clamp(0.88rem, calc(1.21rem * tan(atan2(100cqi, 560px))), 1.21rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: var(--text-muted);
+@media (max-width: 639px) {
+  #section-hero .lds-display {
+    font-size: 28px;
+    line-height: 1.15;
+    white-space: normal;
+    text-wrap: balance;
+    max-width: var(--measure-prose);
+  }
+  #section-hero #intro-scope {
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: normal;
+    text-wrap: pretty;
+    max-width: var(--measure-prose);
+    width: 100%;
+    margin-top: 0.25rem;
+  }
 }
 .lds-lede { margin: 0; font: 400 18px/1.6 var(--font-serif); color: var(--text-muted); max-width: var(--measure-prose); text-wrap: pretty; }
 .lds-list { margin: 0; padding-left: 18px; list-style: disc; font: 400 15px/1.7 var(--font-sans); }
@@ -260,8 +280,12 @@ button.lds-step-item { cursor: pointer; }
   margin: 0;
   font: 400 12px/1.4 var(--font-sans);
   color: var(--text-muted);
-  white-space: nowrap;
-  text-wrap: nowrap;
+  text-wrap: pretty;
+}
+@media (max-width: 559px) {
+  .lds-formats-matrix {
+    padding: 18px 16px;
+  }
 }
 
 /* Dynamic scaling for 1080p and compact desktop viewports so landing proportions match 1440p */
