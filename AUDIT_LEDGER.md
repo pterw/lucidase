@@ -1,6 +1,6 @@
 # Lucidase (formerly GenomePulse) - Architecture & Ground Truth Audit Ledger
 
-> **Deployment target:** Vercel (static frontend + serverless `/api/manifest`)
+> **Deployment target:** Netlify (static edge distribution + zero-knowledge headers + edge `/api/manifest`) [formerly Vercel]
 > **Privacy model:** Local-First / Client-Side Only - raw genotyping data never leaves the browser
 > **Auditor:** Antigravity AI Coding Agent
 > **Definition of Done:** All P0 issues remediated; all P1 issues remediated; P2 documented & remediated
@@ -423,8 +423,8 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `73861b0` | P2-031 | `feat(web): compact multi-locus co-occurrence cards and ensure mobile karyogram scroll (P2-031)` |
 | `017e534` | P1-103, P2-032..P2-035 | `fix(web): full-width table view, cream header theming, limitation disclosures, and karyogram decluttering (P1-103, P2-032..P2-035)` |
 | `8b25c96` | P1-104, P2-036..P2-039 | `fix(ci): resolve mobile stepnav scroll overflow and remediate codex review findings (P1-104, P2-036..P2-039)` |
-| Pending | P2-040 | `test(e2e): deduplicate filter drawer inspections in honesty test suite (P2-040)` |
-| Pending | P2-041 | `fix(web): full-bleed header & toolbar, high-contrast segmented control, table collapse, and dynamic inspector offset (P2-041)` |
+| `35e9e42` | P2-040 | `test(e2e): deduplicate filter drawer inspections in honesty test suite (P2-040)` |
+| `e8b50e3` | P2-041 | `fix(web): prevent inspector sidebar from hiding under sticky toolbar on scroll (P2-041)` |
 
 ---
 

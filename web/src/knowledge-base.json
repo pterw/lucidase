@@ -462,6 +462,18 @@
       },
       "topic": "Alcohol flush reaction"
     },
+    "AOC1": {
+      "acmg_sf": false,
+      "inheritance": {
+        "disease": null,
+        "mendelian_disease": false,
+        "model": "risk_factor",
+        "omim": "104610",
+        "penetrance": null
+      },
+      "insights": null,
+      "topic": "Histamine intolerance & DAO activity (AOC1)"
+    },
     "APOE": {
       "acmg_sf": false,
       "diplotypes": {
@@ -1622,6 +1634,315 @@
     }
   },
   "loci": {
+    "rs10156191": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "7",
+      "evidence": {
+        "clinvar": null,
+        "dbsnp": {
+          "pos_grch37": 150553605,
+          "pos_grch38": 150856517,
+          "provenance": {
+            "accession": "rs10156191",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-31T16:23:37Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/10156191"
+          }
+        },
+        "gnomad": {
+          "af": 0.2678700906906096,
+          "constraint_provenance": {
+            "accession": "AOC1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:23:32Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2632001962236992,
+          "pli": 1.7312348758231727e-20,
+          "provenance": {
+            "accession": "7-150856517-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-31T16:23:45Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": null,
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.06,
+          "mane_select_ensembl": "ENST00000360937",
+          "mane_select_refseq": "NM_001091.4",
+          "provenance": {
+            "accession": "rs10156191",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:23:43Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs10156191?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "AOC1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Absence of this allele does not exclude histamine sensitivity driven by other AOC1 variants or secondary causes."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No AOC1 p.Thr16Met allele detected at this position. Typical diamine oxidase (DAO) baseline catalytic capacity.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for AOC1 c.47C>T (p.Thr16Met): Associated with approximately 30-40% reduced diamine oxidase (DAO) enzyme activity and increased susceptibility to food-induced histamine sensitivity.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        },
+        "2": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Homozygous for AOC1 c.47C>T (p.Thr16Met): Associated with significantly reduced diamine oxidase (DAO) catalytic efficiency and impaired gastrointestinal histamine breakdown.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        }
+      },
+      "limitation": "Single-variant test of AOC1 (c.47C>T, p.Thr16Met); diamine oxidase activity is also modulated by other AOC1 variants (p.Ser332Phe, p.His664Asp, promoter c.-691G>T) and mucosal gut health.",
+      "pos_grch37": 150553605,
+      "pos_grch38": 150856517,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs10156191",
+      "tier_citation": "García-Martín et al. 2024, Diamine oxidase variants and histamine sensitivity, Nutrients",
+      "tier_rationale": "Replicated functional diamine oxidase coding variant associated with significantly reduced serum DAO degradation capacity and increased food histamine sensitivity.",
+      "tier_source": "curated"
+    },
+    "rs1049742": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "7",
+      "evidence": {
+        "clinvar": null,
+        "dbsnp": {
+          "pos_grch37": 150554553,
+          "pos_grch38": 150857465,
+          "provenance": {
+            "accession": "rs1049742",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-31T16:23:46Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1049742"
+          }
+        },
+        "gnomad": {
+          "af": 0.07081422373913884,
+          "constraint_provenance": {
+            "accession": "AOC1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:23:32Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2632001962236992,
+          "pli": 1.7312348758231727e-20,
+          "provenance": {
+            "accession": "7-150857465-C-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-31T16:24:29Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": null,
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.1781,
+          "mane_select_ensembl": "ENST00000360937",
+          "mane_select_refseq": "NM_001091.4",
+          "provenance": {
+            "accession": "rs1049742",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:24:18Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1049742?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "AOC1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Absence of this allele does not exclude histamine sensitivity driven by other AOC1 variants or secondary causes."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No AOC1 p.Ser332Phe allele detected at this position. Typical diamine oxidase (DAO) baseline catalytic capacity.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for AOC1 c.995C>T (p.Ser332Phe): Associated with moderately reduced diamine oxidase (DAO) turnover rate and histamine clearance efficiency.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        },
+        "2": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Homozygous for AOC1 c.995C>T (p.Ser332Phe): Associated with markedly reduced diamine oxidase (DAO) activity and elevated risk of histamine sensitivity upon ingestion of histamine-rich foods.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        }
+      },
+      "limitation": "Single-variant test of AOC1 (c.995C>T, p.Ser332Phe); diamine oxidase activity is also modulated by other AOC1 variants and mucosal gut health.",
+      "pos_grch37": 150554553,
+      "pos_grch38": 150857465,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1049742",
+      "tier_citation": "Maintz et al. 2006, Association of diamine oxidase gene polymorphisms with histamine intolerance, Allergy",
+      "tier_rationale": "Functional missense variant in AOC1 catalytic domain altering enzyme turnover rate and associated with reduced histamine degradation.",
+      "tier_source": "curated"
+    },
+    "rs1049793": {
+      "allele_codes": null,
+      "alt": "G",
+      "chrom": "7",
+      "evidence": {
+        "clinvar": null,
+        "dbsnp": {
+          "pos_grch37": 150557665,
+          "pos_grch38": 150860577,
+          "provenance": {
+            "accession": "rs1049793",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-31T16:24:30Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/1049793"
+          }
+        },
+        "gnomad": {
+          "af": 0.33009540265074844,
+          "constraint_provenance": {
+            "accession": "AOC1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:23:32Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2632001962236992,
+          "pli": 1.7312348758231727e-20,
+          "provenance": {
+            "accession": "7-150860577-C-G",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-31T16:24:54Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": null,
+        "vep": {
+          "alphamissense_class": "likely_benign",
+          "alphamissense_score": 0.0561,
+          "mane_select_ensembl": "ENST00000360937",
+          "mane_select_refseq": "NM_001091.4",
+          "provenance": {
+            "accession": "rs1049793",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:24:48Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs1049793?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "AOC1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Absence of this allele does not exclude histamine sensitivity driven by other AOC1 variants or secondary causes."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No AOC1 p.His664Asp allele detected at this position. Typical diamine oxidase (DAO) baseline catalytic capacity.",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for AOC1 c.1990C>G (p.His664Asp): Associated with moderately reduced diamine oxidase (DAO) protein stability and lower basal enzyme activity.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        },
+        "2": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Homozygous for AOC1 c.1990C>G (p.His664Asp): Associated with reduced diamine oxidase (DAO) activity and decreased capacity to degrade dietary biogenic amines.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        }
+      },
+      "limitation": "Single-variant test of AOC1 (c.1990C>G, p.His664Asp); diamine oxidase activity is also modulated by other AOC1 variants and mucosal gut health.",
+      "pos_grch37": 150557665,
+      "pos_grch38": 150860577,
+      "ref": "C",
+      "role": "standard",
+      "rsid": "rs1049793",
+      "tier_citation": "García-Martín et al. 2024, Diamine oxidase variants and histamine sensitivity, Nutrients",
+      "tier_rationale": "Common functional coding variant in AOC1 terminal domain linked to altered enzyme stability and reduced histamine clearance.",
+      "tier_source": "curated"
+    },
     "rs1050828": {
       "allele_codes": null,
       "alt": "T",
@@ -4449,6 +4770,109 @@
       "rsid": "rs1801133",
       "tier_citation": "ACMG 2013 practice guideline on MTHFR polymorphism testing (Hickey et al.), Genetics in Medicine",
       "tier_rationale": "MTHFR C677T has weak, contested clinical utility and ACMG advises against clinical testing.",
+      "tier_source": "curated"
+    },
+    "rs2052129": {
+      "allele_codes": null,
+      "alt": "T",
+      "chrom": "7",
+      "evidence": {
+        "clinvar": null,
+        "dbsnp": {
+          "pos_grch37": 150548972,
+          "pos_grch38": 150851884,
+          "provenance": {
+            "accession": "rs2052129",
+            "curation_mode": "machine_imported",
+            "release": "dbSNP build 157",
+            "retrieved_at": "2026-10-31T16:24:55Z",
+            "source": "NCBI dbSNP",
+            "url": "https://api.ncbi.nlm.nih.gov/variation/v0/refsnp/2052129"
+          }
+        },
+        "gnomad": {
+          "af": 0.23465390783143616,
+          "constraint_provenance": {
+            "accession": "AOC1",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:23:32Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          },
+          "loeuf": 1.2632001962236992,
+          "pli": 1.7312348758231727e-20,
+          "provenance": {
+            "accession": "7-150851884-G-T",
+            "curation_mode": "machine_imported",
+            "release": "gnomad_r4",
+            "retrieved_at": "2026-10-31T16:25:02Z",
+            "source": "gnomAD",
+            "url": "https://gnomad.broadinstitute.org/api"
+          }
+        },
+        "hpa": null,
+        "vep": {
+          "alphamissense_class": null,
+          "alphamissense_score": null,
+          "mane_select_ensembl": "ENST00000360937",
+          "mane_select_refseq": "NM_001091.4",
+          "provenance": {
+            "accession": "rs2052129",
+            "curation_mode": "machine_imported",
+            "release": null,
+            "retrieved_at": "2026-10-31T16:24:58Z",
+            "source": "Ensembl VEP",
+            "url": "https://rest.ensembl.org/vep/human/id/rs2052129?content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1"
+          }
+        }
+      },
+      "evidence_sufficiency": "sufficient",
+      "evidence_tier": "Tier A",
+      "gene": "AOC1",
+      "interpretations": {
+        "0": {
+          "category": "Not detected",
+          "caveats": [
+            "Absence of this promoter variant does not exclude reduced DAO enzyme activity caused by AOC1 coding variants or secondary mucosal damage."
+          ],
+          "drug_response": null,
+          "magnitude": 0.0,
+          "phenotype": "No AOC1 c.-691G>T promoter allele detected at this position. Typical baseline transcriptional expression of diamine oxidase (DAO).",
+          "repute": "Neutral",
+          "significance": "Not detected"
+        },
+        "1": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 1.5,
+          "phenotype": "Heterozygous for AOC1 c.-691G>T promoter variant (G/T): Associated with reduced AOC1 transcriptional promoter activity and modestly lower diamine oxidase enzyme expression.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        },
+        "2": {
+          "category": "Risk Factor",
+          "caveats": [
+            "Dietary histamine tolerance is multifactorial and depends on total histamine intake, gut mucosal integrity, and DAO-inhibiting medications."
+          ],
+          "drug_response": null,
+          "magnitude": 2.5,
+          "phenotype": "Homozygous for AOC1 c.-691G>T promoter variant (T/T): Associated with significantly reduced AOC1 promoter activity, lower tissue and circulating DAO levels, and heightened susceptibility to dietary histamine.",
+          "repute": "Bad",
+          "significance": "Risk Factor"
+        }
+      },
+      "limitation": "Single-variant test of AOC1 promoter (c.-691G>T); diamine oxidase expression is also modulated by other AOC1 coding variants and gut mucosal integrity.",
+      "pos_grch37": 150548972,
+      "pos_grch38": 150851884,
+      "ref": "G",
+      "role": "standard",
+      "rsid": "rs2052129",
+      "tier_citation": "Maintz et al. 2006, Association of diamine oxidase gene polymorphisms with histamine intolerance, Allergy",
+      "tier_rationale": "Functional promoter polymorphism demonstrating reduced transcriptional activity in reporter gene assays, leading to lower AOC1 mRNA expression and reduced circulating DAO levels.",
       "tier_source": "curated"
     },
     "rs2108622": {
@@ -9003,16 +9427,16 @@
   },
   "manifest": {
     "acmg_sf_version": "ACMG SF v3.2",
-    "gene_count": 34,
+    "gene_count": 35,
     "guardrail": "ABSENCE OF A FINDING DOES NOT IMPLY ABSENCE OF GENETIC RISK. Lucidase analyzes only targeted single-nucleotide polymorphisms interrogated by consumer arrays. It does not perform full gene sequencing, does not analyze unprobed exonic or intronic regions, and cannot detect large copy-number variations (CNVs), balanced translocations, or structural repeats.",
-    "locus_count": 55,
+    "locus_count": 59,
     "privacy": {
       "genomic_uploads": false,
       "local_analysis": true,
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "f5f7289999c62996ce3227a7fcfad3782741ef1c1b735cd7e2a859ee842ac1fc"
+    "sha256": "de18fb070e1927ca030606b22f7ef9bf5335a98a4bda3b86885599fc3dd81ad9"
   },
   "schema_version": 2
 }

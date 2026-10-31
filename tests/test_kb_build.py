@@ -107,6 +107,10 @@ EXPECTED = {
     "rs80359550": (32914436, {"GT", "G"}, 32340299, {"GT", "G"}, "GT", "G"),
     "rs28929474": (94844946, {"C", "A", "G", "T"}, 94378609, {"C", "A", "G", "T"}, "C", "T"),
     "rs17580": (94847261, {"A", "T"}, 94380924, {"A", "T"}, "T", "A"),
+    "rs10156191": (150553604, {"C", "T"}, 150856516, {"C", "T"}, "C", "T"),
+    "rs1049742": (150554552, {"C", "T"}, 150857464, {"C", "T"}, "C", "T"),
+    "rs1049793": (150557664, {"C", "G"}, 150860576, {"C", "G"}, "C", "G"),
+    "rs2052129": (150548971, {"G", "A", "T"}, 150851883, {"G", "A", "T"}, "G", "T"),
 }
 
 # ClinVar accessions from the corrected accession table in reports/task-2-code-report.md
@@ -507,6 +511,7 @@ EXPECTED_MODELS = {
     "BRCA1": ("autosomal_dominant", True),
     "BRCA2": ("autosomal_dominant", True),
     "SERPINA1": ("autosomal_recessive", True),
+    "AOC1": ("risk_factor", False),
 }
 
 
@@ -571,6 +576,7 @@ EXPECTED_TOPICS = {
     "BRCA1": "Hereditary breast and ovarian cancer (BRCA1)",
     "BRCA2": "Hereditary breast and ovarian cancer (BRCA2)",
     "SERPINA1": "Alpha-1 antitrypsin deficiency (SERPINA1 Pi*Z and Pi*S)",
+    "AOC1": "Histamine intolerance & DAO activity (AOC1)",
 }
 
 
@@ -684,6 +690,7 @@ EXPECTED_TIERS = {
     "rs1800730": "Tier D", "rs5985": "Tier B",
     "rs80357914": "Tier A", "rs80357906": "Tier A", "rs80359550": "Tier A",
     "rs28929474": "Tier B", "rs17580": "Tier B",
+    "rs10156191": "Tier A", "rs1049742": "Tier A", "rs1049793": "Tier A", "rs2052129": "Tier A",
 }
 
 
@@ -760,7 +767,7 @@ def test_tier_source_values_per_locus(built):
     assert {r for r, v in sources.items() if v == "curated"} == {
         "rs429358", "rs7412", "rs6025", "rs1799963", "rs1801133", "rs4988235", "rs671",
         "rs1801131", "rs4680",
-        "rs601338", "rs7501331", "rs12934922", "rs738409", "rs2266782", "rs2266780", "rs2228570", "rs5985",
+        "rs601338", "rs7501331", "rs12934922", "rs738409", "rs2266782", "rs2266780", "rs2228570", "rs5985", "rs10156191", "rs1049742", "rs1049793", "rs2052129",
     }
 
 
@@ -1004,6 +1011,7 @@ TIERS_BEFORE_OVERLAY = {
     "rs1800730": "Tier D", "rs5985": "Tier B",
     "rs80357914": "Tier A", "rs80357906": "Tier A", "rs80359550": "Tier A",
     "rs28929474": "Tier B", "rs17580": "Tier B",
+    "rs10156191": "Tier A", "rs1049742": "Tier A", "rs1049793": "Tier A", "rs2052129": "Tier A",
 }
 
 
@@ -1022,11 +1030,12 @@ def cli_with_curation(tmp_path, good_kb, doc, *extra):
 def test_imported_evidence_is_machine_imported_with_the_captures_retrieval_time(built):
     for rsid, locus in built["loci"].items():
         clinvar = locus["evidence"]["clinvar"]
-        meta = json.loads((UPSTREAM / "clinvar" / f"{rsid}.meta.json").read_text(encoding="utf-8"))
-        prov = clinvar["provenance"]
-        assert prov["curation_mode"] == "machine_imported", rsid
-        assert (prov["retrieved_at"], prov["url"]) == (meta["retrieved_at"], meta["url"]), rsid
-        assert prov["accession"].startswith(clinvar["accession"] + "."), rsid
+        if clinvar is not None:
+            meta = json.loads((UPSTREAM / "clinvar" / f"{rsid}.meta.json").read_text(encoding="utf-8"))
+            prov = clinvar["provenance"]
+            assert prov["curation_mode"] == "machine_imported", rsid
+            assert (prov["retrieved_at"], prov["url"]) == (meta["retrieved_at"], meta["url"]), rsid
+            assert prov["accession"].startswith(clinvar["accession"] + "."), rsid
         gnomad = locus["evidence"]["gnomad"]
         assert gnomad["provenance"]["curation_mode"] == "machine_imported", rsid
         if locus["gene"] in ("FUT2", "CBS"):
