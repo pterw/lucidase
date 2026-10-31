@@ -1,0 +1,35 @@
+# Netlify Configuration for Lucidase
+# Ensures zero-knowledge client-side genetic analysis with strict CSP and cache policies.
+
+[build]
+  publish = "web"
+  functions = "netlify/functions"
+
+# Zero-Knowledge Security & Privacy Headers across all routes
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net; font-src 'self' https://use.typekit.net https://p.typekit.net data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'"
+
+# Cache revalidation for dynamic source modules and home entry
+[[headers]]
+  for = "/src/*"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Manifest endpoint routing
+[[redirects]]
+  from = "/api/manifest"
+  to = "/.netlify/functions/manifest"
+  status = 200
+

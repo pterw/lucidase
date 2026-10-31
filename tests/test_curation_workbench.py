@@ -73,20 +73,20 @@ def test_full_roundtrip_byte_identity(temp_curation_workspace):
 
     # 1. Sync into SQLite
     sync_res = workbench.sync()
-    assert sync_res["genes"] == 34
-    assert sync_res["loci"] == 55
+    assert sync_res["genes"] == 35
+    assert sync_res["loci"] == 59
 
     # 2. Verify in-memory export matches disk
     verify_res = workbench.verify()
     assert verify_res["byte_identical"] is True
-    assert verify_res["genes"] == 34
-    assert verify_res["loci"] == 55
+    assert verify_res["genes"] == 35
+    assert verify_res["loci"] == 59
     assert verify_res["collision_detected"] is False
 
     # 3. Export to disk and compare raw bytes
     export_res = workbench.export()
-    assert export_res["genes"] == 34
-    assert export_res["loci"] == 55
+    assert export_res["genes"] == 35
+    assert export_res["loci"] == 59
 
     exported_kb_bytes = workbench.kb_path.read_bytes()
     assert exported_kb_bytes == orig_kb_bytes, "Exported kb_curation.json must be byte-for-byte identical"

@@ -1332,6 +1332,7 @@ function navigateDrawer(delta) {
 }
 
 function openDrawer(record, opener = document.activeElement) {
+  updateToolbarHeight();
   const drawer = document.getElementById("variant-drawer");
   const side = document.getElementById("inspector-side");
   if (!drawer || !side) return;
