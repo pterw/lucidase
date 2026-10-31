@@ -7,16 +7,16 @@
 
 *The bundled synthetic demo sample, analysed in the browser.*
 
-Lucidase is a privacy-first, client-side genetic analysis workbench and plain-language alternative to Promethease. It reads a raw genotype file in your browser and interprets the 55 curated loci (34 genes) in its canonical knowledge base. It states plainly what it could not test. It supports 23andMe, AncestryDNA, MyHeritage array files and standard VCF files (GRCh37/GRCh38), rejecting any unknown or corrupted format with a clear, visible error. Formerly GenomePulse.
+Lucidase is a privacy-first, client-side genetic analysis workbench and plain-language alternative to Promethease. It reads a raw genotype file in your browser and interprets the 59 curated loci (35 genes) in its canonical knowledge base. It states plainly what it could not test. It supports 23andMe, AncestryDNA, MyHeritage array files and standard VCF files (GRCh37/GRCh38), rejecting any unknown or corrupted format with a clear, visible error. Formerly GenomePulse.
 
 ## Karyogram view
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lucidase-karyogram-dark.png">
-  <img src="docs/assets/lucidase-karyogram-light.png" alt="The Lucidase karyogram of the bundled example file: 24 chromosome columns of marker-density dots with the 34 genes this report checks marked by result">
+  <img src="docs/assets/lucidase-karyogram-light.png" alt="The Lucidase karyogram of the bundled example file: 24 chromosome columns of marker-density dots with the 35 genes this report checks marked by result">
 </picture>
 
-`web/karyogram.html` provides a dedicated chromosome distribution explorer that maps your genotype file onto all 24 human chromosomes. Each dot represents a genomic bin (~4 Mb) sized by how many markers from your file fall there, with all 34 curated genes annotated by their coverage state. If a file lacks explicit reference build metadata, the page notes the limitation while retaining gene-level checks. The map is rendered purely in SVG from UCSC chromosome geometry and centromere coordinates, with instant gene search and high-resolution JPEG export.
+`web/karyogram.html` provides a dedicated chromosome distribution explorer that maps your genotype file onto all 24 human chromosomes. Each dot represents a genomic bin (~4 Mb) sized by how many markers from your file fall there, with all 35 curated genes annotated by their coverage state. If a file lacks explicit reference build metadata, the page notes the limitation while retaining gene-level checks. The map is rendered purely in SVG from UCSC chromosome geometry and centromere coordinates, with instant gene search and high-resolution JPEG export.
 
 ## What it does
 

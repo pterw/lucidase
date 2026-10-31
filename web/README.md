@@ -2,7 +2,7 @@
 
 See the [root README](../README.md) for an overview of Lucidase.
 
-A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 55 curated loci in 34 genes, in the browser, and nothing else.
+A privacy-first consumer genomics analysis page supporting **23andMe**, **AncestryDNA**, **MyHeritage**, and **VCF 4.2** raw genotyping files. It interprets 59 curated loci in 35 genes, in the browser, and nothing else.
 
 ---
 
@@ -168,7 +168,7 @@ These all fail closed, with a visible error or an explicit state:
 - A headerless 23andMe file with no header signal is rejected.
 - An array file with no build comment reports build "unknown", so matching without rsIDs is unavailable.
 - A variant absent from a variants-only VCF is "not tested", not reference.
-- Only the 55 curated loci (34 genes) are interpreted.
+- Only the 59 curated loci (35 genes) are interpreted.
 - Evidence tiers for genes not tiered by ClinVar, and their citations, are manually curated from guideline and paper names: the CPIC levels and the curated tiers for APOE, F5, F2, MTHFR, LCT/MCM6 and ALDH2. They are pending verification against the primary sources.
 - Human Protein Atlas tissue and subcellular values are manually curated.
 - Multi-locus findings cover only `risk_factor` genes on different chromosomes (F5 and F2 today). This scope was set by the owner and is pinned by test vectors.
