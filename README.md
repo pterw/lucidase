@@ -2,12 +2,12 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lucidase-screenshot-dark.png">
-  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase results for the bundled demo sample: the Summary sentence with the counts, the karyogram with one shape-coded mark per check, and the key with the count for each result word">
+  <img src="docs/assets/lucidase-screenshot-light.png" alt="Lucidase results for the bundled demo sample: the Summary sentence, sticky toolbar with 1-line Coverage Ledger bar and view switcher, multi-locus gene brackets, and docked inspector drawer">
 </picture>
 
 *The bundled synthetic demo sample, analysed in the browser.*
 
-Lucidase reads a raw genotype file in your browser and interprets the 55 curated loci (34 genes) in its knowledge base. It says plainly what it could not test. It reads 23andMe, AncestryDNA and MyHeritage array files and VCF files, and rejects any other format with a visible error. Formerly GenomePulse.
+Lucidase is a privacy-first, client-side genetic analysis workbench and plain-language alternative to Promethease. It reads a raw genotype file in your browser and interprets the 55 curated loci (34 genes) in its canonical knowledge base. It states plainly what it could not test. It supports 23andMe, AncestryDNA, MyHeritage array files and standard VCF files (GRCh37/GRCh38), rejecting any unknown or corrupted format with a clear, visible error. Formerly GenomePulse.
 
 ## Karyogram view
 
@@ -16,20 +16,21 @@ Lucidase reads a raw genotype file in your browser and interprets the 55 curated
   <img src="docs/assets/lucidase-karyogram-light.png" alt="The Lucidase karyogram of the bundled example file: 24 chromosome columns of marker-density dots with the 34 genes this report checks marked by result">
 </picture>
 
-`web/karyogram.html` maps a genotype file onto the chromosomes. Each dot stands for a stretch of chromosome about 4 million DNA letters long, sized by how many markers from your file fall there, and the 34 genes this report checks are marked with their coverage state. A file that doesn't say which genome version it uses is not placed on the chromosomes: the page says so and still shows the results for the genes this report checks. The map is drawn in the browser from UCSC chromosome lengths and centromeres stored in the knowledge base, and your file never leaves the page.
+`web/karyogram.html` provides a dedicated chromosome distribution explorer that maps your genotype file onto all 24 human chromosomes. Each dot represents a genomic bin (~4 Mb) sized by how many markers from your file fall there, with all 34 curated genes annotated by their coverage state. If a file lacks explicit reference build metadata, the page notes the limitation while retaining gene-level checks. The map is rendered purely in SVG from UCSC chromosome geometry and centromere coordinates, with instant gene search and high-resolution JPEG export.
 
 ## What it does
 
-- Parses the file in a Web Worker, in the page.
-- Compares alleles by alt-allele count against plus-strand ref/alt. A genotype that cannot be resolved unambiguously is never reported as a match.
-- Gives every curated locus one coverage state per sample: `supported_and_observed`, `supported_not_observed`, `not_tested_by_array`, `outside_coverage` or `insufficient_evidence`.
-- Groups the results by Pharmacology, Health risk factors, Carrier status and Traits, one row per check in plain words (Found, Not found, Not on your chip, Unclear), each with what it can't tell you.
-- Shows APOE as one composite row built from rs429358 and rs7412.
-- Opens the results with a summary: the counts in one sentence, the karyogram of your file with one mark per checked locus (selecting a mark opens that result), and a key with the count for each result.
-- Shows disease or recurrence figures for inheritance only at Mendelian disease loci. Other loci get allele-transmission figures only.
-- Opens each result's details beside the list, and explains genetics words inline.
-- Exports Markdown and CSV reports.
-- Has light and dark themes.
+- **Zero-knowledge client-side analysis**: Parses and classifies genotypes in a background Web Worker in the browser—no accounts, no trackers, and DNA data never leaves your device.
+- **Fail-closed genetic classification**: Compares alleles by alt-allele count against plus-strand ref/alt. Ambiguous palindromic sites (A/T, C/G), multi-allelic collisions, and no-calls fail closed to unresolvable rather than guessing wild-type.
+- **Strict coverage taxonomy**: Assigns every curated locus exactly one coverage state per sample: `supported_and_observed`, `supported_not_observed`, `not_tested_by_array`, `outside_coverage`, or `insufficient_evidence`.
+- **Calm editorial results ledger**: Groups findings into Pharmacology, Health risk factors, Carrier status, and Traits, presented with unambiguous result words (*Found*, *Not found*, *Not on your chip*, *Unclear*) and prominent negative-finding guardrails ("Absence of a finding is not absence of risk").
+- **Multi-locus gene brackets**: Groups multiple variants within the same gene (e.g. BRCA1, HFE, DPYD) under a shared structural bracket with upfront unphased microarray caveats.
+- **Composite diplotypes**: Unifies complex multi-variant loci like APOE (rs429358 + rs7412) into a single composite finding with phenotype risk projections.
+- **Sticky control strip & 1-line Coverage Ledger**: A full-width sticky navigation bar provides a compact proportional Coverage Ledger bar, high-contrast Cards / Table segmented toggle, live status filter pills, instant text search, and category jumps.
+- **Docked non-modal Inspector drawer**: Explores deep findings alongside the results ledger with sequential keyboard navigation (`< X of Y >`), 4-pip geometric ClinVar review status (`■■■□`), CPIC/ACMG clinical alerts, Offspring Allele Simulator, and 1px-bordered technical detail accordions.
+- **Rigorous inheritance modeling**: Distinguishes Mendelian disease risk from non-disease allele transmission figures; risk percentages reflect actual patient genotype and partner models.
+- **Clean data exports**: Exports full-scope Markdown (.md) and technical CSV (.csv) reports directly from browser memory.
+- **Dual archival themes**: Crafted with Lucidase design tokens in warm archival paper light mode and deep slate-obsidian dark mode.
 
 ## What it does not do
 
