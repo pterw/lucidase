@@ -190,6 +190,7 @@ Full static and dynamic audit of all repository files and runtime paths:
 | P2-037 | `web/src/styles.css` | `--bg-header` CSS property used an unapproved hex color literal (`#141E28`) violating design-system token invariant. | REMEDIATED (realigned `--bg-header` with approved design-system tokens `var(--paper-sunk)` and `var(--paper-raised)` from `web/src/ds/colors.css`) |
 | P2-038 | `web/index.html` | Results toolbar category jump links referenced `#group-pharmacology` and `#group-trait`, diverging from DOM section IDs `#group-medicines` and `#group-traits`. | REMEDIATED (updated jump link anchors to match exact DOM section IDs) |
 | P2-039 | `debruijn/debruijn_explorer.py` | Module `__getattr__` used bare `import gui`, failing with ModuleNotFoundError when imported as part of the `debruijn` package without `debruijn/` in sys.path. | REMEDIATED (added package-relative import fallback `from . import gui`) |
+| P2-040 | `tests/e2e/test_ui_honesty.py` | `_screens` helper iterated over all 5 status filter views and re-opened all row drawers for every filter (109 drawer animations per test, 327 across 3 tests), causing the E2E suite to stall for ~4 minutes at 62%. | REMEDIATED (un-nested row drawer inspections from the filter loop so every unique drawer is opened once under `every` while table text is checked for all filters, cutting 162 redundant drawer cycles and saving ~3 minutes per run) |
 
 ---
 
@@ -420,7 +421,8 @@ Each finding was closed test-first: a regression test written against the pre-fi
 | `eea5192` | P2-030 | `feat(web): disambiguate multi-locus gene card headers and add category summary pills (P2-030)` |
 | `73861b0` | P2-031 | `feat(web): compact multi-locus co-occurrence cards and ensure mobile karyogram scroll (P2-031)` |
 | `017e534` | P1-103, P2-032..P2-035 | `fix(web): full-width table view, cream header theming, limitation disclosures, and karyogram decluttering (P1-103, P2-032..P2-035)` |
-| Pending | P1-104, P2-036..P2-039 | `fix(ci): resolve mobile stepnav scroll overflow and remediate codex review findings (P1-104, P2-036..P2-039)` |
+| `8b25c96` | P1-104, P2-036..P2-039 | `fix(ci): resolve mobile stepnav scroll overflow and remediate codex review findings (P1-104, P2-036..P2-039)` |
+| Pending | P2-040 | `test(e2e): deduplicate filter drawer inspections in honesty test suite (P2-040)` |
 
 ---
 
