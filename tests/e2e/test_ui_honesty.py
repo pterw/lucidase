@@ -139,20 +139,22 @@ def _screens(page) -> str:
     """Page text plus the text of every table under every filter and every row's drawer."""
     show_table(page)
     chunks = [page.locator("body").inner_text()]
-    for name in ("every", "observed", "negative", "gaps", "insufficient"):
+    for name in ("observed", "negative", "gaps", "insufficient"):
         page.locator(f"[data-filter='{name}']").click()
         chunks.append(page.locator("#variants-tbody").inner_text())
-        for i in range(page.locator("#variants-tbody tr").count()):
-            row = page.locator("#variants-tbody tr").nth(i)
-            if "No variants match" in row.inner_text():
-                continue
-            row.click()
-            wait_drawer_open(page)
-            open_gene_context(page)  # a closed <details> leaves its text out of innerText
-            chunks.append(page.locator("#variant-drawer").inner_text())
-            page.locator("#btn-close-drawer").click()
-            wait_drawer_closed(page)
+
     page.locator("[data-filter='every']").click()
+    chunks.append(page.locator("#variants-tbody").inner_text())
+    for i in range(page.locator("#variants-tbody tr").count()):
+        row = page.locator("#variants-tbody tr").nth(i)
+        if "No variants match" in row.inner_text():
+            continue
+        row.click()
+        wait_drawer_open(page)
+        open_gene_context(page)  # a closed <details> leaves its text out of innerText
+        chunks.append(page.locator("#variant-drawer").inner_text())
+        page.locator("#btn-close-drawer").click()
+        wait_drawer_closed(page)
     return "\n".join(chunks)
 
 
@@ -332,7 +334,7 @@ def test_static_claims_come_from_the_kb_manifest(loaded_page):
     intro = page.locator("#intro-scope").inner_text()
     assert intro == (
         f"Lucidase checks {MANIFEST['locus_count']} places in {MANIFEST['gene_count']} genes and explains each "
-        "result in plain words, including what it could not test."
+        "result in plain words."
     )
     assert page.locator("#redis-status-indicator").count() == 0
 

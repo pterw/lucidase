@@ -52,7 +52,8 @@ def _mentions(text: str, path: Path) -> bool:
     stem = re.escape(path.stem)
     imports = (
         rf"^\s*(import {stem}\b|from {stem} import\b"
-        rf"|from tools\.{stem} import\b|from tools import [^#\n(]*\b{stem}\b)"
+        rf"|from tools\.{stem} import\b|from tools import [^#\n(]*\b{stem}\b"
+        rf"|from debruijn\.{stem} import\b|from debruijn import [^#\n(]*\b{stem}\b|import debruijn\.{stem}\b)"
     )
     return bool(re.search(imports, text, re.MULTILINE)) or path.name in text
 

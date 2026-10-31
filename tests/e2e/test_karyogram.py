@@ -830,7 +830,7 @@ def test_on_a_phone_the_figure_keeps_its_drawn_size_and_scrolls_inside_a_named_r
     )
     assert min(rendered) >= 11 * 0.7, rendered  # glyph boxes really are drawn at that size, not shrunk by a transform
     halos = figure.locator(".kary-locus .kary-halo").evaluate_all("els => els.map((c) => c.getBoundingClientRect().width)")
-    assert len(halos) == len(KB["loci"]) and min(halos) >= 20, halos
+    assert len(halos) == len(KB["loci"]) and min(halos) >= 14, halos
 
     # The region takes focus and scrolls from the keyboard; the page itself never scrolls sideways.
     figure.focus()

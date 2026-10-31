@@ -138,3 +138,15 @@ def test_server_binds_loopback_only():
         assert server.socket.getsockname()[0] == "127.0.0.1"
     finally:
         server.server_close()
+
+def test_responses_disable_caching(serve):
+    port = serve(run.WEB_ROOT)
+    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=WAIT)
+    try:
+        conn.request("GET", "/index.html")
+        resp = conn.getresponse()
+        resp.read()
+        assert resp.getheader("Cache-Control") == "no-cache, no-store, must-revalidate"
+        assert resp.getheader("Pragma") == "no-cache"
+    finally:
+        conn.close()

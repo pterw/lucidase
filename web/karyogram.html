@@ -49,7 +49,7 @@
     <section class="flex flex-wrap items-center justify-between gap-8 lg:gap-12" style="max-width: 1180px;">
       <div class="flex flex-col gap-5 min-w-0" style="flex: 1 1 540px; max-width: 680px">
         <h1 class="lds-display">Chromosome map</h1>
-        <p class="lds-lede">
+        <p class="lds-lede font-sans">
           Each dot stands for a stretch of chromosome about 4 million DNA letters long. The more markers from your file
           fall in that stretch, the bigger the dot. Coloured rings mark the genes this report checks, with your result
           for each. Your file is read in this browser and never leaves it.
@@ -104,16 +104,19 @@
     <!-- The figure: the dot field belongs here, inside the figure, never as page texture -->
     <section class="border-t border-line pt-7">
       <div class="flex flex-col xl:flex-row items-start gap-8 xl:gap-12 w-full max-w-full min-w-0">
-        <aside class="kary-guide hidden xl:flex flex-col gap-3.5 text-14 text-ink-muted shrink-0 w-[280px]">
+        <aside class="kary-guide card-glass hidden xl:flex flex-col gap-4 text-14 text-ink-muted shrink-0 w-[340px] p-5 rounded-lg border border-line">
           <h2 class="lds-h3 text-ink">How to read this map</h2>
           <p class="leading-relaxed">
-            Each column represents human chromosomes <strong class="text-ink font-semibold">1 to 22, X, and Y</strong>.
+            A <strong class="text-ink font-semibold">karyogram</strong> is a visual chromosome map organizing an organism's full genome by chromosome size and centromere location. It maps your data across human chromosomes <strong class="text-ink font-semibold">1 to 22, X, and Y</strong>.
           </p>
           <p class="leading-relaxed">
-            Dots represent <strong class="text-ink font-semibold">4 Mb regions</strong>. Larger dots indicate more markers from your file fall within that stretch.
+            Each column is one chromosome, ordered left to right by reference length.
           </p>
           <p class="leading-relaxed">
-            <strong class="text-ink font-semibold">Coloured rings</strong> mark the specific genes checked in this report, coloured by your result.
+            Dots represent <strong class="text-ink font-semibold">4 Mb regions</strong>. Larger dots indicate more <button type="button" class="lds-term" data-term="marker">markers</button> from your file fall within that stretch of DNA.
+          </p>
+          <p class="leading-relaxed">
+            <strong class="text-ink font-semibold">Coloured rings</strong> mark the specific genes checked in this report, coloured by your result for each tested <button type="button" class="lds-term" data-term="variant">variant</button>.
           </p>
         </aside>
         <figure class="flex-1 w-full max-w-full min-w-0 flex flex-col gap-3">

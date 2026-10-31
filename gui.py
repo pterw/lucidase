@@ -26,13 +26,6 @@ except ImportError:  # pragma: no cover
 
 from matplotlib.figure import Figure
 
-from assembly import write_gfa
-from bio_engine import (
-    alignment_basis_text,
-    load_sequences_as_fasta,
-    write_contigs_fasta,
-    write_contigs_genbank,
-)
 from genomic_parser import (
     ParseResult,
     UnsupportedFormatError,
@@ -40,9 +33,17 @@ from genomic_parser import (
     parse_genotype_file,
     read_genotype_text,
 )
-from ml_engine import binning_caveat_lines
 from variant_annotator import APOE_ROW_ID, RESULT_WORDS, AnnotationRecord, AnnotationReport, VariantAnnotator
-from graph_core import (
+
+from debruijn.assembly import write_gfa
+from debruijn.bio_engine import (
+        alignment_basis_text,
+        load_sequences_as_fasta,
+        write_contigs_fasta,
+        write_contigs_genbank,
+    )
+from debruijn.ml_engine import binning_caveat_lines
+from debruijn.graph_core import (
     DEFAULT_K,
     EDGE,
     FUTURE,

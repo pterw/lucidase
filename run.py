@@ -31,6 +31,12 @@ class _Handler(http.server.SimpleHTTPRequestHandler):
         ".json": "application/json",
     }
 
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
 
 def make_server(root: Path, port: int) -> http.server.ThreadingHTTPServer:
     """Return a server for `root` bound to 127.0.0.1:`port`, not yet serving."""

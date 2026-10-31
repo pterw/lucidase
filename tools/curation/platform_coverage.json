@@ -1,0 +1,177 @@
+{
+  "version": "1.0",
+  "platforms": [
+    "23andme_v3",
+    "23andme_v4",
+    "23andme_v5",
+    "ancestry_v1",
+    "ancestry_v2",
+    "myheritage_standard"
+  ],
+  "loci": {
+    "rs429358": {
+      "gene": "APOE",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": true,
+          "probe_id": "rs429358",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "23andme_v4": {
+          "is_covered": true,
+          "probe_id": "rs429358",
+          "strand_design": "plus",
+          "notes": "Custom Illumina chip"
+        },
+        "23andme_v5": {
+          "is_covered": true,
+          "probe_id": "rs429358",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        },
+        "ancestry_v1": {
+          "is_covered": true,
+          "probe_id": "rs429358",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress"
+        },
+        "ancestry_v2": {
+          "is_covered": true,
+          "probe_id": "rs429358",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "myheritage_standard": {
+          "is_covered": true,
+          "probe_id": "rs429358",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        }
+      }
+    },
+    "rs7412": {
+      "gene": "APOE",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": true,
+          "probe_id": "rs7412",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "23andme_v4": {
+          "is_covered": true,
+          "probe_id": "rs7412",
+          "strand_design": "plus",
+          "notes": "Custom Illumina chip"
+        },
+        "23andme_v5": {
+          "is_covered": true,
+          "probe_id": "rs7412",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        },
+        "ancestry_v1": {
+          "is_covered": true,
+          "probe_id": "rs7412",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress"
+        },
+        "ancestry_v2": {
+          "is_covered": true,
+          "probe_id": "rs7412",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "myheritage_standard": {
+          "is_covered": true,
+          "probe_id": "rs7412",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        }
+      }
+    },
+    "rs3918290": {
+      "gene": "DPYD",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": true,
+          "probe_id": "rs3918290",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "23andme_v4": {
+          "is_covered": true,
+          "probe_id": "rs3918290",
+          "strand_design": "plus",
+          "notes": "Custom Illumina chip"
+        },
+        "23andme_v5": {
+          "is_covered": true,
+          "probe_id": "rs3918290",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        },
+        "ancestry_v1": {
+          "is_covered": true,
+          "probe_id": "rs3918290",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress"
+        },
+        "ancestry_v2": {
+          "is_covered": true,
+          "probe_id": "rs3918290",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "myheritage_standard": {
+          "is_covered": true,
+          "probe_id": "rs3918290",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        }
+      }
+    },
+    "rs738409": {
+      "gene": "PNPLA3",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": true,
+          "probe_id": "rs738409",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "23andme_v4": {
+          "is_covered": true,
+          "probe_id": "rs738409",
+          "strand_design": "plus",
+          "notes": "Custom Illumina chip"
+        },
+        "23andme_v5": {
+          "is_covered": true,
+          "probe_id": "rs738409",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        },
+        "ancestry_v1": {
+          "is_covered": true,
+          "probe_id": "rs738409",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress"
+        },
+        "ancestry_v2": {
+          "is_covered": true,
+          "probe_id": "rs738409",
+          "strand_design": "plus",
+          "notes": "Illumina OmniExpress Plus"
+        },
+        "myheritage_standard": {
+          "is_covered": true,
+          "probe_id": "rs738409",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array"
+        }
+      }
+    }
+  }
+}

@@ -67,6 +67,7 @@ const state = {
   karyogram: null,
   pendingAnalysis: null,
   selectedVariant: null,
+  viewMode: "cards",
   filterCategory: "every",
   searchQuery: "",
   sortBy: "magnitude",
@@ -367,24 +368,58 @@ function initEventListeners() {
     setTableOpen(true);
     searchInput.focus();
   });
+  const btnHideTable = document.getElementById("btn-hide-table");
+  if (btnHideTable) {
+    btnHideTable.addEventListener("click", () => {
+      setTableOpen(false);
+      const reportGroups = document.getElementById("report-groups");
+      if (reportGroups) {
+        reportGroups.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
 
   // Search input
   searchInput.addEventListener("input", (e) => {
     state.searchQuery = e.target.value.toLowerCase().trim();
+    const toolbarSearch = document.getElementById("toolbar-search-input");
+    if (toolbarSearch && toolbarSearch.value !== e.target.value) {
+      toolbarSearch.value = e.target.value;
+    }
     renderVariantsTable();
+    filterFindingCards();
+  });
+  const toolbarSearch = document.getElementById("toolbar-search-input");
+  if (toolbarSearch) {
+    toolbarSearch.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value.toLowerCase().trim();
+      if (searchInput && searchInput.value !== e.target.value) {
+        searchInput.value = e.target.value;
+      }
+      renderVariantsTable();
+      filterFindingCards();
+    });
+  }
+
+  // View switcher buttons
+  const btnViewCards = document.getElementById("btn-view-cards");
+  const btnViewTable = document.getElementById("btn-view-table");
+  if (btnViewCards) btnViewCards.addEventListener("click", () => setViewMode("cards"));
+  if (btnViewTable) btnViewTable.addEventListener("click", () => setViewMode("table"));
+
+  // Category jump links: ensure cards mode so section is visible
+  document.querySelectorAll(".lds-jump-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (state.viewMode !== "cards") {
+        setViewMode("cards");
+      }
+    });
   });
 
-  // Filter tabs
-  const markActiveFilter = (active) => filterButtons.forEach(b => {
-    b.classList.toggle("tab-active", b === active);
-    b.setAttribute("aria-pressed", String(b === active));
-  });
-  markActiveFilter(document.querySelector("[data-filter].tab-active"));
-  filterButtons.forEach(btn => {
+  // Filter tabs and toolbar filter pills
+  document.querySelectorAll("[data-filter], [data-status-filter]").forEach(btn => {
     btn.addEventListener("click", () => {
-      markActiveFilter(btn);
-      state.filterCategory = btn.getAttribute("data-filter");
-      renderVariantsTable();
+      applyFilter(btn.getAttribute("data-filter") || btn.getAttribute("data-status-filter"));
     });
   });
 
@@ -408,12 +443,26 @@ function initEventListeners() {
   document.getElementById("btn-use-another-file").addEventListener("click", () => goToStep(0));
 
 
-  // Inspector close: its close button, or Escape anywhere on the page while it is open (design system Inspector)
+  // Inspector close and sequential traversal
   if (btnCloseDrawer) {
     btnCloseDrawer.addEventListener("click", closeDrawer);
   }
+  const btnDrawerPrev = document.getElementById("btn-drawer-prev");
+  const btnDrawerNext = document.getElementById("btn-drawer-next");
+  if (btnDrawerPrev) btnDrawerPrev.addEventListener("click", () => navigateDrawer(-1));
+  if (btnDrawerNext) btnDrawerNext.addEventListener("click", () => navigateDrawer(1));
+
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && state.selectedVariant !== null) closeDrawer();
+    if (state.selectedVariant === null) return;
+    if (e.key === "Escape") {
+      closeDrawer();
+    } else if (e.key === "ArrowLeft" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      navigateDrawer(-1);
+    } else if (e.key === "ArrowRight" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      navigateDrawer(1);
+    }
   });
 }
 
@@ -504,15 +553,36 @@ function handleParseComplete(data, karyogram) {
   renderReportGroups();
   renderAssortmentSection();
   setTableOpen(false);
-  renderVariantsTable();
+  applyFilter(state.filterCategory || "every");
+  setViewMode(state.viewMode || "cards");
+  updateToolbarHeight();
 }
 
 /** Opens or closes "All results as a table". Closed, only the "Show the table" button is shown. */
 function setTableOpen(open) {
   const button = document.getElementById("btn-show-table");
-  button.setAttribute("aria-expanded", String(open));
-  button.classList.toggle("hidden", open);
-  document.getElementById("table-panel").classList.toggle("hidden", !open);
+  if (button) {
+    button.setAttribute("aria-expanded", String(open));
+    button.classList.toggle("hidden", open);
+  }
+  const tablePanel = document.getElementById("table-panel");
+  if (tablePanel) {
+    tablePanel.classList.toggle("hidden", !open);
+  }
+  state.viewMode = open ? "table" : "cards";
+  const btnCards = document.getElementById("btn-view-cards");
+  const btnTable = document.getElementById("btn-view-table");
+  if (btnCards) {
+    btnCards.classList.toggle("is-active", !open);
+    btnCards.setAttribute("aria-pressed", String(!open));
+  }
+  if (btnTable) {
+    btnTable.classList.toggle("is-active", open);
+    btnTable.setAttribute("aria-pressed", String(open));
+  }
+  if (open) {
+    renderVariantsTable();
+  }
 }
 
 /**
@@ -520,13 +590,120 @@ function setTableOpen(open) {
  * check (view-model.js groupedReport). The mark keeps its shape and carries the plain word, so colour is never the
  * only signal; the limitation is always on the row. A group with no check says so instead of disappearing.
  */
+
+/** Applies the active result-word filter across both the cards view and technical table. */
+function applyFilter(filterVal) {
+  state.filterCategory = filterVal;
+  document.querySelectorAll("[data-filter], [data-status-filter]").forEach((b) => {
+    const val = b.getAttribute("data-filter") || b.getAttribute("data-status-filter");
+    const active = val === filterVal;
+    b.classList.toggle("tab-active", active);
+    b.classList.toggle("is-active", active);
+    b.setAttribute("aria-pressed", String(active));
+  });
+  filterFindingCards();
+  renderVariantsTable();
+}
+
+/** Filters finding cards in #report-groups and collapses empty sections when filtered. */
+function filterFindingCards() {
+  const filter = state.filterCategory;
+  const targetState = filter === "every" ? null : STATE_TABS[filter];
+  document.querySelectorAll("#report-groups article.lds-finding").forEach((article) => {
+    const cardState = article.dataset.findingState;
+    const match = !targetState || cardState === targetState;
+    article.hidden = !match;
+  });
+  document.querySelectorAll("#report-groups .lds-section").forEach((sec) => {
+    const visibleCards = sec.querySelectorAll("article.lds-finding:not([hidden])").length;
+    sec.classList.toggle("is-filtered-out", visibleCards === 0);
+  });
+  const assortment = document.getElementById("assortment-section");
+  if (assortment && state.viewMode === "cards") {
+    assortment.hidden = (filter !== "every" && filter !== "observed");
+  }
+}
+
+/** Switches the primary results layout between narrative Cards and technical Table. */
+/** Dynamically measures the sticky toolbar height and sets --toolbar-h so the inspector never hides under it. */
+function updateToolbarHeight() {
+  const bar = document.getElementById("results-toolbar-bar");
+  if (!bar) return;
+  const h = bar.offsetHeight;
+  if (h > 0) {
+    document.documentElement.style.setProperty("--toolbar-h", `${h}px`);
+  }
+}
+window.addEventListener("resize", updateToolbarHeight);
+if (typeof ResizeObserver !== "undefined") {
+  const bar = document.getElementById("results-toolbar-bar");
+  if (bar) {
+    const ro = new ResizeObserver(() => updateToolbarHeight());
+    ro.observe(bar);
+  }
+}
+
+function setViewMode(mode) {
+  const isCards = mode === "cards";
+  setTableOpen(!isCards);
+  if (isCards) {
+    const reportGroups = document.getElementById("report-groups");
+    if (reportGroups) {
+      reportGroups.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  } else {
+    const tablePanel = document.getElementById("table-panel");
+    if (tablePanel) {
+      tablePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+}
+
+function renderGroupRowsHtml(rows) {
+  if (rows.length === 0) return `<p class="lds-meta">No checks in this group.</p>`;
+  const chunks = [];
+  for (const row of rows) {
+    const last = chunks[chunks.length - 1];
+    if (last && last.gene === row.gene) {
+      last.items.push(row);
+    } else {
+      chunks.push({ gene: row.gene, items: [row] });
+    }
+  }
+  return chunks.map(chunk => {
+    if (chunk.items.length > 1) {
+      return `
+        <div class="lds-gene-bracket" data-bracket-gene="${escapeHtml(chunk.gene)}">
+          <div class="lds-gene-bracket-head">
+            <span class="lds-gene-bracket-title">${escapeHtml(chunk.gene)}</span>
+            <span class="lds-gene-bracket-note">(${chunk.items.length} tested variants · Microarray data is unphased; cis/trans configuration unknown)</span>
+          </div>
+          <div class="lds-gene-bracket-rows flex flex-col">
+            ${chunk.items.map(findingRowHtml).join("")}
+          </div>
+        </div>
+      `;
+    }
+    return findingRowHtml(chunk.items[0]);
+  }).join("");
+}
+
 function renderReportGroups() {
   const container = document.getElementById("report-groups");
-  container.innerHTML = groupedReport(allRows(), state.genes).map((group) => `
+  container.innerHTML = groupedReport(allRows(), state.genes).map((group) => {
+    const totalChecks = group.rows.length;
+    const foundChecks = group.rows.filter(r => r.state === "supported_and_observed").length;
+    const summaryPill = totalChecks > 0
+      ? `<span class="lds-section-summary">${totalChecks} ${totalChecks === 1 ? "check" : "checks"} · ${foundChecks} found</span>`
+      : "";
+    return `
     <section id="group-${escapeHtml(group.id)}" class="lds-section" aria-labelledby="group-${escapeHtml(group.id)}-h">
       <div class="lds-section-head">
         <div class="flex items-center justify-between gap-3">
-          <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h2 id="group-${escapeHtml(group.id)}-h" class="lds-section-title">${escapeHtml(group.title)}</h2>
+            ${summaryPill}
+          </div>
           <button type="button" class="lds-section-toggle" aria-expanded="true" aria-controls="group-${escapeHtml(group.id)}-body" aria-label="Collapse ${escapeHtml(group.title)}">
             <span class="lds-icon lds-i-chevron-right" aria-hidden="true"></span>
           </button>
@@ -534,10 +711,11 @@ function renderReportGroups() {
         <p class="lds-section-aside">${escapeHtml(group.aside)}</p>
       </div>
       <div id="group-${escapeHtml(group.id)}-body" class="lds-section-body">
-        ${group.rows.length === 0 ? `<p class="lds-meta">No checks in this group.</p>` : group.rows.map(findingRowHtml).join("")}
+        ${renderGroupRowsHtml(group.rows)}
       </div>
     </section>
-  `).join("");
+  `;
+  }).join("");
   // Glossary words in the groups' asides: the design system's own copy (REPORT_GROUPS), never knowledge-base text.
   for (const group of REPORT_GROUPS) {
     const terms = GROUP_ASIDE_TERMS[group.id];
@@ -552,14 +730,22 @@ function findingRowHtml(row) {
   const headingId = `f-${escapeHtml(row.key)}-h`;
   const limitation = row.limitation === null
     ? ""
-    : `<p class="lds-finding-limit"><span class="lds-icon lds-i-info" aria-hidden="true"></span><span><b>What this can’t tell you:</b> ${escapeHtml(row.limitation)}</span></p>`;
+    : `<details class="lds-finding-limit">
+        <summary class="lds-finding-limit-toggle">
+          <span class="lds-icon lds-i-info" aria-hidden="true"></span>
+          <span class="lds-finding-limit-title">What this can’t tell you:</span>
+          <span class="lds-icon lds-i-chevron-right lds-finding-limit-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="lds-finding-limit-body">${escapeHtml(row.limitation)}</div>
+      </details>`;
   return `
-    <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}">
+    <article class="lds-finding" aria-labelledby="${headingId}" data-finding-id="${escapeHtml(row.id)}" data-finding-state="${escapeHtml(row.state)}">
       <span class="lds-mark lds-mark-16 lds-mark-${escapeHtml(row.state)}" role="img" aria-label="${escapeHtml(row.stateLabel)}"></span>
       <div class="lds-finding-main">
         <div class="lds-finding-head">
           <h3 id="${headingId}" class="lds-finding-topic">${escapeHtml(row.topic)}</h3>
           <span class="lds-finding-gene">${escapeHtml(row.gene)}</span>
+          <span class="lds-finding-marker font-mono text-12 font-normal text-ink-muted">· ${escapeHtml(row.markers)}</span>
         </div>
         <p class="lds-finding-statement">${escapeHtml(row.statement)}</p>
         ${limitation}
@@ -725,8 +911,33 @@ function renderSummaryCards() {
     outside_coverage: cov.outside_coverage_count,
   };
   renderTermParts(document.getElementById("summary-prose"), summaryProseParts(counts));
+  renderCoverageLedger(counts);
   renderSummaryLegend(counts);
   renderSummaryMap(state.karyogram);
+}
+
+/** Renders the compact 1-line horizontal Coverage Ledger bar in the sticky top control strip. */
+function renderCoverageLedger(counts) {
+  const ledgerText = document.getElementById("coverage-ledger-text");
+  if (!ledgerText) return;
+  const total = counts.supported_and_observed + counts.supported_not_observed + counts.insufficient_evidence + counts.not_tested_by_array;
+  if (total === 0) return;
+  const pObserved = ((counts.supported_and_observed / total) * 100).toFixed(1);
+  const pNegative = ((counts.supported_not_observed / total) * 100).toFixed(1);
+  const pInsufficient = ((counts.insufficient_evidence / total) * 100).toFixed(1);
+  const pGaps = ((counts.not_tested_by_array / total) * 100).toFixed(1);
+
+  const barObs = document.getElementById("cov-bar-observed");
+  const barNeg = document.getElementById("cov-bar-negative");
+  const barIns = document.getElementById("cov-bar-insufficient");
+  const barGaps = document.getElementById("cov-bar-gaps");
+
+  if (barObs) barObs.style.width = `${pObserved}%`;
+  if (barNeg) barNeg.style.width = `${pNegative}%`;
+  if (barIns) barIns.style.width = `${pInsufficient}%`;
+  if (barGaps) barGaps.style.width = `${pGaps}%`;
+
+  ledgerText.textContent = `${total} loci: ${counts.supported_and_observed} found · ${counts.supported_not_observed} not found · ${counts.insufficient_evidence} unclear · ${counts.not_tested_by_array} not on chip`;
 }
 
 /**
@@ -851,7 +1062,7 @@ function renderAssortmentSection() {
   container.innerHTML = "";
 
   // One row per finding, hairlines between (no nested cards). Every interpolated value is escaped.
-  const ROW = "flex flex-col gap-3 py-5 border-b border-line first:pt-0";
+  const ROW = "lds-assortment-row";
 
   // Possible compound heterozygotes (e.g. HFE C282Y / H63D).
   compounds.forEach(ch => {
@@ -883,26 +1094,31 @@ function renderAssortmentSection() {
     const row = document.createElement("div");
     row.className = ROW;
     row.innerHTML = `
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="lds-h3">Co-occurring variant alleles</span>
-        <span class="lds-tag ${NEUTRAL_TAG}">Multi-locus</span>
-        <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="lds-h3">Co-occurring variant alleles</span>
+          <span class="lds-tag ${NEUTRAL_TAG}">Multi-locus</span>
+          <span class="lds-tag ${NEUTRAL_TAG} lds-data">${escapeHtml(ia.genes.join(" + "))}</span>
+        </div>
+        <span class="lds-meta font-mono font-medium">${Math.round(ia.joint_transmission_prob * 100)}% joint inheritance</span>
       </div>
       <div class="flex flex-col gap-1">
-        <p class="lds-h3">${escapeHtml(ia.type)}</p>
+        <p class="sr-only">${escapeHtml(ia.type)}</p>
         <p class="lds-prose">${escapeHtml(ia.description)}</p>
       </div>
       ${multiLocusComponentsHtml(ia)}
-      <dl class="lds-datalist">
-        <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
-        <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>
-      </dl>
-      <div class="flex flex-wrap gap-2">
-        ${ia.genes.map(g => `
-          <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(g)}">
-            See the ${escapeHtml(g)} details
-          </button>
-        `).join("")}
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <dl class="lds-datalist">
+          <div><dt>Loci on different chromosomes</dt><dd>${escapeHtml(ia.loci.join(" · "))}</dd></div>
+          <div><dt>Child inherits all listed alleles</dt><dd title="${escapeHtml(ia.assumption)}">${Math.round(ia.joint_transmission_prob * 100)}%</dd></div>
+        </dl>
+        <div class="flex flex-wrap gap-2">
+          ${ia.genes.map(g => `
+            <button type="button" class="lds-btn lds-btn-secondary lds-btn-xs btn-inspect-gene" data-gene="${escapeHtml(g)}">
+              See the ${escapeHtml(g)} details
+            </button>
+          `).join("")}
+        </div>
       </div>
     `;
     container.appendChild(row);
@@ -1070,7 +1286,7 @@ function renderVariantsTable() {
         ${valueHtml(r.magnitudeShort)} <span class="lds-meta">${r.repute === null ? "" : `(${escapeHtml(r.repute)})`}</span>
       </td>
       <td class="text-ink-muted">
-        <div class="min-w-64 max-w-md line-clamp-2" title="${escapeHtml(guidanceTitle)}">${escapeHtml(guidance)}</div>
+        <div class="min-w-48 max-w-md line-clamp-2" title="${escapeHtml(guidanceTitle)}">${escapeHtml(guidance)}</div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1085,6 +1301,36 @@ let drawerOpener = null;
  * results, or under them on a narrow screen. It is non-modal: the list stays usable, and opening another record
  * swaps the content. The element ids are the drawer's (#variant-drawer, drawer-*), which the tests read.
  */
+
+/** The ordered list of records currently navigable in the inspector drawer. */
+function getNavigableRecords() {
+  const rows = allRows();
+  if (!state.filterCategory || state.filterCategory === "every") {
+    return rows;
+  }
+  const targetState = STATE_TABS[state.filterCategory];
+  return rows.filter((r) => !targetState || r.coverage_state === targetState);
+}
+
+/** Navigates to the adjacent record (-1 for previous, +1 for next) in the inspector drawer. */
+function navigateDrawer(delta) {
+  if (!state.selectedVariant) return;
+  const navigable = getNavigableRecords();
+  const currentIndex = navigable.findIndex((r) => r.id === state.selectedVariant.id);
+  if (currentIndex < 0) return;
+  const nextIndex = currentIndex + delta;
+  if (nextIndex >= 0 && nextIndex < navigable.length) {
+    const nextRecord = navigable[nextIndex];
+    const nextOpener = document.querySelector(`article.lds-finding[data-finding-id="${CSS.escape(nextRecord.id)}"] button.lds-finding-open`) ||
+      document.querySelector(`tr[data-record-id="${CSS.escape(nextRecord.id)}"]`);
+    openDrawer(nextRecord, nextOpener);
+    const card = document.querySelector(`article.lds-finding[data-finding-id="${CSS.escape(nextRecord.id)}"]`);
+    if (card && state.viewMode === "cards") {
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+}
+
 function openDrawer(record, opener = document.activeElement) {
   const drawer = document.getElementById("variant-drawer");
   const side = document.getElementById("inspector-side");
@@ -1095,6 +1341,22 @@ function openDrawer(record, opener = document.activeElement) {
   drawerOpener = (opener instanceof HTMLElement || opener instanceof SVGElement) && opener !== document.body ? opener : null;
 
   // Header: the KB topic (the gene when it has none), then gene · marker · position, then the result word.
+  // Traversal navigation state
+  const navigable = getNavigableRecords();
+  const currentIndex = navigable.findIndex((r) => r.id === record.id);
+  const counterEl = document.getElementById("drawer-counter");
+  const btnPrev = document.getElementById("btn-drawer-prev");
+  const btnNext = document.getElementById("btn-drawer-next");
+  if (counterEl) {
+    if (currentIndex >= 0) {
+      counterEl.textContent = `${currentIndex + 1} of ${navigable.length}`;
+    } else {
+      counterEl.textContent = `1 of ${navigable.length}`;
+    }
+  }
+  if (btnPrev) btnPrev.disabled = currentIndex <= 0;
+  if (btnNext) btnNext.disabled = currentIndex < 0 || currentIndex >= navigable.length - 1;
+
   document.getElementById("drawer-title").textContent = topicOf(record);
   // The subtitle names the gene once, then the markers ("rs429358 + rs7412" for APOE); the record id stays readable.
   const markerEl = document.getElementById("drawer-rsid");
@@ -1104,12 +1366,46 @@ function openDrawer(record, opener = document.activeElement) {
   setValue(document.getElementById("drawer-genotype"), record.genotype);
   setValue(document.getElementById("drawer-chrom"), chromosomeWords(record.chromosomes));
   setValue(document.getElementById("drawer-coord"), record.positionText);
-  document.getElementById("drawer-significance").textContent = record.significance;
+  const isecFoundTitle = document.getElementById("isec-found");
+
+  const drawerSigEl = document.getElementById("drawer-significance");
+
+  if (record.significance === "Not detected" || record.coverage_state === "supported_not_observed") {
+
+    if (isecFoundTitle) isecFoundTitle.textContent = "Not detected";
+
+    if (drawerSigEl) {
+
+      drawerSigEl.textContent = "";
+
+      drawerSigEl.classList.add("hidden");
+
+    }
+
+  } else {
+
+    if (isecFoundTitle) isecFoundTitle.textContent = "What was found";
+
+    if (drawerSigEl) {
+
+      drawerSigEl.textContent = record.significance;
+
+      drawerSigEl.classList.remove("hidden");
+
+    }
+
+  }
   setValue(
     document.getElementById("drawer-phenotype"),
     [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null
   );
-  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, record.starsText);
+  function formatStarsWithPips(stars, starsText) {
+  if (stars === null || stars === undefined) return starsText || "No ClinVar review status";
+  const num = Math.max(0, Math.min(4, Number(stars) || 0));
+  const pips = "■".repeat(num) + "□".repeat(4 - num);
+  return `${pips} ${starsText}`;
+}
+setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, formatStarsWithPips(record.stars, record.starsText));
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 
@@ -1236,6 +1532,7 @@ function openDrawer(record, opener = document.activeElement) {
   // narrow screen) it is out of sight, so it is brought into view and focused every time.
   side.hidden = false;
   document.getElementById("results-section")?.classList.add("has-drawer-open");
+  document.querySelector(".lds-results")?.classList.add("has-drawer-open");
   void side.offsetWidth;
   side.classList.add("is-open");
   markSelectedFinding(record.id);
@@ -1531,6 +1828,7 @@ function closeDrawer() {
   const resultsSection = document.getElementById("results-section");
   const focusWasInside = Boolean(drawer && drawer.contains(document.activeElement));
   if (resultsSection) resultsSection.classList.remove("has-drawer-open");
+  document.querySelector(".lds-results")?.classList.remove("has-drawer-open");
   if (side) {
     side.classList.remove("is-open");
     const onEnd = () => {

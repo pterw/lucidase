@@ -184,15 +184,6 @@ The pages use the Lucidase design system (owner ruling, 2026-10-03). Its tokens 
 
 ---
 
-## Developer tooling: Font Kit Studio
-
-Font Kit Studio is isolated as dedicated design tooling in `tools/font-kit-studio/` and is **not bundled** in the production clinical app.
-
-- **Standalone Workbench:** Open `tools/font-kit-studio/font_kit_studio_v0.1.1.html` directly in your browser.
-- **External Previewing:** Point Font Kit Studio's Target URL at your running Lucidase local instance to inspect typography tokens externally.
-
----
-
 ## Audit
 
 See [`AUDIT_LEDGER.md`](../AUDIT_LEDGER.md) for the full architecture and ground truth audit log, issue register, and remediation history.
