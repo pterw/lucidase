@@ -30,15 +30,24 @@ export default async (req, context) => {
     privacy_policy: "All primary genomic analysis is performed locally in-browser via Web Workers. No raw genotypes, rsIDs, or derived health indicators are received by this service."
   };
 
+  const headers = {
+    "Content-Type": "application/json",
+    "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400"
+  };
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || null;
+  if (allowedOrigin) {
+    headers["Access-Control-Allow-Origin"] = allowedOrigin;
+    headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
+    headers["Access-Control-Allow-Headers"] = "Content-Type";
+  }
+
+  if (req && req.method === "OPTIONS") {
+    return new Response(null, { status: 200, headers });
+  }
+
   return new Response(JSON.stringify(payload), {
     status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-      "Access-Control-Allow-Origin": process.env.ALLOWED_ORIGIN || "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
+    headers
   });
 };
 

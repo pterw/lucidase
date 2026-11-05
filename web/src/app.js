@@ -1331,8 +1331,14 @@ function navigateDrawer(delta) {
   }
 }
 
+function formatStarsWithPips(stars, starsText) {
+  if (stars === null || stars === undefined) return starsText || "No ClinVar review status";
+  const num = Math.max(0, Math.min(4, Number(stars) || 0));
+  const pips = "■".repeat(num) + "□".repeat(4 - num);
+  return `${pips} ${starsText}`;
+}
+
 function openDrawer(record, opener = document.activeElement) {
-  updateToolbarHeight();
   const drawer = document.getElementById("variant-drawer");
   const side = document.getElementById("inspector-side");
   if (!drawer || !side) return;
@@ -1400,13 +1406,7 @@ function openDrawer(record, opener = document.activeElement) {
     document.getElementById("drawer-phenotype"),
     [record.statement, record.phenotype].filter(part => part !== null).join(" ") || null
   );
-  function formatStarsWithPips(stars, starsText) {
-  if (stars === null || stars === undefined) return starsText || "No ClinVar review status";
-  const num = Math.max(0, Math.min(4, Number(stars) || 0));
-  const pips = "■".repeat(num) + "□".repeat(4 - num);
-  return `${pips} ${starsText}`;
-}
-setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, formatStarsWithPips(record.stars, record.starsText));
+  setValue(document.getElementById("drawer-stars"), record.starsMuted ? null : record.starsText, formatStarsWithPips(record.stars, record.starsText));
   setValue(document.getElementById("drawer-magnitude"), record.magnitudeText);
   setValue(document.getElementById("drawer-af"), record.afText);
 

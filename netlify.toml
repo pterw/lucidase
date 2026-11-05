@@ -5,6 +5,9 @@
   publish = "web"
   functions = "netlify/functions"
 
+[functions]
+  included_files = ["web/src/knowledge-base.json"]
+
 # Zero-Knowledge Security & Privacy Headers across all routes
 [[headers]]
   for = "/*"

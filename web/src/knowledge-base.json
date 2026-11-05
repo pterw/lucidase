@@ -1700,7 +1700,7 @@
           ],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No AOC1 p.Thr16Met allele detected at this position. Typical diamine oxidase (DAO) baseline catalytic capacity.",
+          "phenotype": "No AOC1 p.Thr16Met allele detected at this position.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -1733,7 +1733,7 @@
       "ref": "C",
       "role": "standard",
       "rsid": "rs10156191",
-      "tier_citation": "García-Martín et al. 2024, Diamine oxidase variants and histamine sensitivity, Nutrients",
+      "tier_citation": "Ayuso et al. 2007, Genetic variability of human diamine oxidase: occurrence of three nonsynonymous polymorphisms and study of their effect on serum enzyme activity, Pharmacogenetics and Genomics",
       "tier_rationale": "Replicated functional diamine oxidase coding variant associated with significantly reduced serum DAO degradation capacity and increased food histamine sensitivity.",
       "tier_source": "curated"
     },
@@ -1803,7 +1803,7 @@
           ],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No AOC1 p.Ser332Phe allele detected at this position. Typical diamine oxidase (DAO) baseline catalytic capacity.",
+          "phenotype": "No AOC1 p.Ser332Phe allele detected at this position.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -1836,7 +1836,7 @@
       "ref": "C",
       "role": "standard",
       "rsid": "rs1049742",
-      "tier_citation": "Maintz et al. 2006, Association of diamine oxidase gene polymorphisms with histamine intolerance, Allergy",
+      "tier_citation": "Maintz et al. 2011, Association of single nucleotide polymorphisms in the diamine oxidase gene with diamine oxidase serum activities, Allergy",
       "tier_rationale": "Functional missense variant in AOC1 catalytic domain altering enzyme turnover rate and associated with reduced histamine degradation.",
       "tier_source": "curated"
     },
@@ -1906,7 +1906,7 @@
           ],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No AOC1 p.His664Asp allele detected at this position. Typical diamine oxidase (DAO) baseline catalytic capacity.",
+          "phenotype": "No AOC1 p.His664Asp allele detected at this position.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -1939,7 +1939,7 @@
       "ref": "C",
       "role": "standard",
       "rsid": "rs1049793",
-      "tier_citation": "García-Martín et al. 2024, Diamine oxidase variants and histamine sensitivity, Nutrients",
+      "tier_citation": "Ayuso et al. 2007, Genetic variability of human diamine oxidase: occurrence of three nonsynonymous polymorphisms and study of their effect on serum enzyme activity, Pharmacogenetics and Genomics",
       "tier_rationale": "Common functional coding variant in AOC1 terminal domain linked to altered enzyme stability and reduced histamine clearance.",
       "tier_source": "curated"
     },
@@ -4838,7 +4838,7 @@
           ],
           "drug_response": null,
           "magnitude": 0.0,
-          "phenotype": "No AOC1 c.-691G>T promoter allele detected at this position. Typical baseline transcriptional expression of diamine oxidase (DAO).",
+          "phenotype": "No AOC1 c.-691G>T promoter allele detected at this position.",
           "repute": "Neutral",
           "significance": "Not detected"
         },
@@ -4871,7 +4871,7 @@
       "ref": "G",
       "role": "standard",
       "rsid": "rs2052129",
-      "tier_citation": "Maintz et al. 2006, Association of diamine oxidase gene polymorphisms with histamine intolerance, Allergy",
+      "tier_citation": "Maintz et al. 2011, Association of single nucleotide polymorphisms in the diamine oxidase gene with diamine oxidase serum activities, Allergy",
       "tier_rationale": "Functional promoter polymorphism demonstrating reduced transcriptional activity in reporter gene assays, leading to lower AOC1 mRNA expression and reduced circulating DAO levels.",
       "tier_source": "curated"
     },
@@ -9436,7 +9436,7 @@
       "variant_identifiers_transmitted": false
     },
     "release": "2026.10.02",
-    "sha256": "de18fb070e1927ca030606b22f7ef9bf5335a98a4bda3b86885599fc3dd81ad9"
+    "sha256": "01e5a6845399905e39f7e97438582c6b35457023f9254cac4f26fc3fd6dc4c16"
   },
   "schema_version": 2
 }

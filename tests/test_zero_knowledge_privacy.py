@@ -51,6 +51,16 @@ class TestZeroKnowledgePrivacy(unittest.TestCase):
         needed = (WEB_DIR / "api" / Path(read.group(1))).resolve().relative_to(WEB_DIR.resolve())
         self.assertEqual(function.get("includeFiles"), needed.as_posix())
 
+    def test_netlify_config_ships_csp_and_manifest_data(self):
+        """netlify.toml must bundle web/src/knowledge-base.json and enforce the same CSP isolation."""
+        root = WEB_DIR.parent
+        netlify_toml = (root / "netlify.toml").read_text(encoding="utf-8")
+        self.assertIn('included_files = ["web/src/knowledge-base.json"]', netlify_toml)
+        self.assertIn("connect-src 'self'", netlify_toml)
+        self.assertIn("frame-ancestors 'none'", netlify_toml)
+        netlify_fn = (root / "netlify" / "functions" / "manifest.mjs").read_text(encoding="utf-8")
+        self.assertNotIn('|| "*"', netlify_fn, "netlify manifest function must not default to wildcard CORS")
+
     def test_no_telemetry_or_tracking_scripts(self):
         """Verifies absence of third-party analytics/telemetry trackers."""
         forbidden_patterns = [

@@ -52,6 +52,58 @@
       "review_status": "curated_tier_a",
       "confidence_score": "definitive",
       "limitations": "GWAS epidemiological association; ClinVar review status is 1-star (single submitter) because it is a common susceptibility allele rather than monogenic determinant. Effect is strongly modified by BMI, alcohol consumption, and metabolic factors."
+    },
+    {
+      "claim_id": "claim_aoc1_thr16met_dao_activity",
+      "locus_rsid": "rs10156191",
+      "gene": "AOC1",
+      "claim_type": "functional_assay",
+      "statement": "AOC1 c.47C>T (p.Thr16Met) is associated with reduced serum diamine oxidase (DAO) catalytic activity and altered histamine degradation.",
+      "source_type": "functional_study",
+      "citation_pmid": "17700358",
+      "citation_label": "Ayuso et al. 2007 Pharmacogenet Genomics",
+      "review_status": "curated_tier_a",
+      "confidence_score": "moderate",
+      "limitations": "Single-variant test of multi-variant AOC1 panel; serum DAO activity and dietary histamine tolerance are also influenced by gut mucosal integrity and co-occurring AOC1 variants."
+    },
+    {
+      "claim_id": "claim_aoc1_ser332phe_dao_activity",
+      "locus_rsid": "rs1049742",
+      "gene": "AOC1",
+      "claim_type": "functional_assay",
+      "statement": "AOC1 c.995C>T (p.Ser332Phe) in the catalytic domain is associated with significantly reduced serum diamine oxidase activity and lower PBMC DAO mRNA levels.",
+      "source_type": "functional_study",
+      "citation_pmid": "21488903",
+      "citation_label": "Maintz et al. 2011 Allergy",
+      "review_status": "curated_tier_a",
+      "confidence_score": "moderate",
+      "limitations": "Single-variant test of multi-variant AOC1 panel; clinical histamine sensitivity is multifactorial."
+    },
+    {
+      "claim_id": "claim_aoc1_his664asp_dao_kinetics",
+      "locus_rsid": "rs1049793",
+      "gene": "AOC1",
+      "claim_type": "functional_assay",
+      "statement": "AOC1 c.1990C>G (p.His664Asp) carriers exhibit significantly lower serum diamine oxidase Vmax/Km enzyme kinetics (66% in heterozygotes and 51% in homozygotes compared to non-carriers, p < 0.001).",
+      "source_type": "functional_study",
+      "citation_pmid": "17700358",
+      "citation_label": "Ayuso et al. 2007 Pharmacogenet Genomics",
+      "review_status": "curated_tier_a",
+      "confidence_score": "definitive",
+      "limitations": "Single-variant test of multi-variant AOC1 panel; serum DAO kinetics do not alone diagnose clinical histamine intolerance."
+    },
+    {
+      "claim_id": "claim_aoc1_promoter_rs2052129_expression",
+      "locus_rsid": "rs2052129",
+      "gene": "AOC1",
+      "claim_type": "functional_assay",
+      "statement": "AOC1 promoter polymorphism rs2052129 (c.-691G>T) reduces transcriptional promoter activity in luciferase reporter assays (p = 0.016) and is associated with lower PBMC DAO mRNA and serum DAO activity.",
+      "source_type": "functional_study",
+      "citation_pmid": "21488903",
+      "citation_label": "Maintz et al. 2011 Allergy",
+      "review_status": "curated_tier_a",
+      "confidence_score": "moderate",
+      "limitations": "Single-variant test of AOC1 promoter; expression is also modulated by coding variants and intestinal mucosal health."
     }
   ]
 }

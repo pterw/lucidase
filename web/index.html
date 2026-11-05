@@ -280,9 +280,12 @@
               </a>
             </div>
             <!-- Full-size karyogram is kept exclusively on karyogram.html. Hidden here on the results page. -->
-            <div id="summary-map" class="hidden" aria-hidden="true"></div>
-            <div id="summary-density-notice" class="hidden" role="note"></div>
-            <ul id="summary-legend" class="hidden" aria-label="Key to the map"></ul>
+            <div id="summary-map" class="hidden lds-summary-map" role="region" aria-label="Chromosome map" tabindex="0"></div>
+            <div id="summary-density-notice" class="hidden lds-alert lds-alert-notice" role="note">
+              <span class="lds-icon lds-icon-18 lds-i-triangle-alert" aria-hidden="true"></span>
+              <p class="lds-alert-text">Your file doesn't say which genome version it uses, so its markers can't be placed on the chromosomes. The genes this report checks still show your results.</p>
+            </div>
+            <ul id="summary-legend" class="hidden lds-legend lds-summary-legend" aria-label="Key to the map"></ul>
           </div>
         </section>
       </div>
@@ -661,17 +664,16 @@
 
             <!-- Gene and protein context: Molecular & Regulatory Predictions -->
             <details id="drawer-gene-context" class="lds-drawer-accordion">
-              <summary class="lds-drawer-accordion-summary">
+              <summary class="lds-drawer-accordion-summary lds-isec-title">
                 <span class="font-bold flex items-center gap-2">
                   <span class="lds-icon lds-i-chevron-right lds-accordion-chevron" aria-hidden="true"></span>
-                  Molecular &amp; Regulatory Predictions
+                  Gene and protein context
                 </span>
-                <span class="lds-tag lds-tag-neutral text-11">[IN-SILICO PREDICTION — NOT A CLINICAL DIAGNOSIS]</span>
               </summary>
               <div class="p-3">
               <section id="drawer-biotools-container" class="lds-isec flex flex-col gap-5">
                 <div class="lds-isec-head">
-                  <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE</p>
+                  <p class="lds-meta">AlphaFold DB · Ensembl VEP · ENCODE <span class="lds-tag lds-tag-neutral text-11 ml-1">In-silico prediction — not a clinical diagnosis</span></p>
                   <span id="drawer-biotool-gene-badge" class="lds-tag lds-tag-neutral lds-data">Gene</span>
                 </div>
 

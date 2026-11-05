@@ -340,6 +340,7 @@ def test_count_zero_never_claims_normality(built):
         zero = locus["interpretations"]["0"]
         text = (zero["phenotype"] + " " + zero["significance"]).lower()
         assert "normal" not in text, rsid
+        assert not re.search(r"\btypical\b", text), rsid
         assert "wild-type" not in text and "wild type" not in text, rsid
         assert zero["category"] == "Not detected", rsid
         assert zero["magnitude"] == 0
@@ -861,12 +862,19 @@ def test_qc_catches_missing_interpretation(curation):
     assert has_error(errors, "rs671") and has_error(errors, "interpretations")
 
 
-def test_qc_catches_normality_wording_at_count_zero(curation):
+@pytest.mark.parametrize(
+    "wording,expected_match",
+    [
+        ("Normal ALDH2 wild-type activity.", "Normal"),
+        ("No allele detected. Typical baseline catalytic capacity.", "Typical"),
+    ],
+)
+def test_qc_catches_normality_wording_at_count_zero(curation, wording, expected_match):
     def mutate(d):
-        d["loci"]["rs671"]["interpretations"]["0"]["phenotype"] = "Normal ALDH2 wild-type activity."
+        d["loci"]["rs671"]["interpretations"]["0"]["phenotype"] = wording
 
     errors = mutated(curation, mutate)
-    assert has_error(errors, "rs671") and has_error(errors, "normal")
+    assert has_error(errors, "rs671") and has_error(errors, expected_match)
 
 
 def test_qc_catches_retrieval_time_on_curated_provenance(curation):

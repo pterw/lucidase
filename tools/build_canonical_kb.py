@@ -94,7 +94,7 @@ CPIC_LEVELS = frozenset({"A", "B", "C", "D"})
 CURATED_TIERS = frozenset({"Tier A", "Tier B", "Tier C", "Tier D"})
 # A citation names a guideline or paper. Identifiers typed from memory are refused.
 CITATION_IDENTIFIER = re.compile(r"\bPMID\b|\bdoi\b|10\.\d{4,}", re.IGNORECASE)
-NORMALITY_WORDING = re.compile(r"\bnormal\b|wild[- ]?type", re.IGNORECASE)
+NORMALITY_WORDING = re.compile(r"\b(?:normal|typical)\b|wild[- ]?type", re.IGNORECASE)
 PRIVACY = {"local_analysis": True, "genomic_uploads": False, "variant_identifiers_transmitted": False}
 
 

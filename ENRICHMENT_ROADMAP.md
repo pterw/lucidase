@@ -4,7 +4,7 @@
 > **Deployment Architecture:** Primary deployment target is **Netlify** (static edge distribution + zero-knowledge headers; `api/manifest.js` served via Netlify Functions or static manifest).  
 > **Curation Engine:** Local SQLite Workbench projection (`tools/curation/curation_workbench.db` managed by `tools/curation/curation_store.py`) syncing with Git-tracked JSON (`kb_curation.json`, `evidence_claims.json`, `platform_coverage.json`) with SHA-256 session collision protection.  
 > **Architecture Invariants:** Single source of truth (`tools/curation/kb_curation.json` -> `web/src/knowledge-base.json`), Anti-Corruption Layer (`tools/fixtures/upstream/real/`), Clinical Honesty (`AGENTS.md` Rule 4), Zero-Knowledge Client-Side Analysis.  
-> **Current KB State:** 55 curated loci across 34 genes. Target milestone: ~80–120 curated loci.
+> **Current KB State:** 59 curated loci across 35 genes. Target milestone: ~80–120 curated loci.
 
 ---
 
@@ -40,6 +40,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 - [x] **Phase 3: Expanded High-Value Pharmacogenomics & Enzymopathies**: `CYP2D6` core star alleles (`rs3892097` *4, `rs1065852` *10, `rs28371725` *41), `G6PD` deficiency (`rs1050828` A-, `rs1050829` A+, `rs5030868` Med), `BChE` pseudocholinesterase deficiency (`rs1799807`), `SLCO1B1` statin uptake expansion (`rs2306283` *1b).
 - [x] **Phase 4: Micronutrient, Vitamin & Metabolic Pathway Modifiers**: `FUT2` (`rs601338`), `BCO1` (`rs7501331`, `rs12934922`), `PNPLA3` (`rs738409`), `FMO3` (`rs2266782`, `rs2266780`), `CBS` (`rs5742905`), `VDR` (`rs2228570`).
 - [x] **Phase 5: Hereditary Disease & Secondary Findings Expansions**: `HFE` S65C (`rs1800730`), `F13A1` Val34Leu (`rs5985`), founder `BRCA1` 185delAG (`rs80357914`), `BRCA1` 5382insC (`rs80357906`), `BRCA2` 6174delT (`rs80359550`), `SERPINA1` Pi*Z (`rs28929474`), `SERPINA1` Pi*S (`rs17580`).
+- [x] **Phase 6: Food Intolerance & Histamine Breakdown (DAO / AOC1)**: `AOC1` p.Thr16Met (`rs10156191`), p.Ser332Phe (`rs1049742`), p.His664Asp (`rs1049793`), promoter c.-691G>T (`rs2052129`).
 
 ---
 
@@ -116,16 +117,16 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
     - *Why*: Most common pathogenic CBS mutation causing pyridoxine (B6)-responsive homocystinuria; carrier status transmits to 50% of offspring.
 ---
 
-### Phase 6: Food Intolerance & Histamine Breakdown (DAO / AOC1) (Active Sprint — Target: 59 loci / 35 genes)
+### Phase 6: Food Intolerance & Histamine Breakdown (DAO / AOC1) (Completed — 59 loci / 35 genes)
 
 * **Clinical & Functional Rationale**: Encodes diamine oxidase (DAO), the primary extracellular enzyme for degrading ingested food histamine in the intestinal lumen. Reduced enzymatic activity correlates with food-induced histamine sensitivity, postprandial gastrointestinal distress, flushing, and vascular headaches.
-* **Target Loci (Canonical 2024 Nutrients Benchmark, PMCID: PMC11054051)**:
-  - [ ] **`DAO` / `AOC1` p.Thr16Met (`rs10156191`)**: chr7:150827299 (GRCh38) / chr7:150529241 (GRCh37), c.47C>T. Common coding variant associated with significantly reduced enzymatic activity.
-  - [ ] **`DAO` / `AOC1` p.Ser332Phe (`rs1049742`)**: chr7:150854228 (GRCh38) / chr7:150556170 (GRCh37), c.995C>T. Functional missense variant altering catalytic turnover.
-  - [ ] **`DAO` / `AOC1` p.His664Asp (`rs1049793`)**: chr7:150856005 (GRCh38) / chr7:150557947 (GRCh37), c.1990C>G. Functional missense variant in terminal catalytic domain.
-  - [ ] **`DAO` / `AOC1` Promoter Variant (`rs2052129`)**: chr7:150826315 (GRCh38) / chr7:150528257 (GRCh37), c.-691C>T. Modulates transcriptional promoter activity.
+* **Target Loci (Ayuso et al. 2007 PMID: 17700358; Maintz et al. 2011 PMID: 21488903)**:
+  - [x] **`DAO` / `AOC1` p.Thr16Met (`rs10156191`)**: chr7:150856517 (GRCh38) / chr7:150553605 (GRCh37), c.47C>T. Common coding variant associated with significantly reduced enzymatic activity.
+  - [x] **`DAO` / `AOC1` p.Ser332Phe (`rs1049742`)**: chr7:150857465 (GRCh38) / chr7:150554553 (GRCh37), c.995C>T. Functional missense variant altering catalytic turnover.
+  - [x] **`DAO` / `AOC1` p.His664Asp (`rs1049793`)**: chr7:150860577 (GRCh38) / chr7:150557665 (GRCh37), c.1990C>G. Functional missense variant in terminal catalytic domain.
+  - [x] **`DAO` / `AOC1` Promoter Variant (`rs2052129`)**: chr7:150851884 (GRCh38) / chr7:150548972 (GRCh37), c.-691G>T. Modulates transcriptional promoter activity.
 * **Platform Coverage & Clinical Honesty**:
-  - `rs2052129` is present on 23andMe v5 (e.g. user genotype `GG` = wild-type / typical expression).
+  - `rs2052129` is present on 23andMe v5 (e.g. user genotype `GG` = variant not detected at this position).
   - `rs10156191`, `rs1049742`, and `rs1049793` are absent from 23andMe v5 but present on clinical/targeted panels and AncestryDNA.
   - Demonstrates strict platform-coverage transparency (`"Not on your chip"` status) and avoids false-negative "normal" calls when only a subset of the 4 benchmark loci are assayed.
 * *Curation Note*: Distinguishes true `AOC1` loci from bystanders `rs1045642` (`ABCB1`) and `rs1047768` (`ERCC5`).
@@ -136,7 +137,7 @@ Lucidase classifies raw genomic array and VCF data directly in the browser with 
 
 * **Clinical & Functional Rationale**: High-magnitude actionable findings and widely replicated longevity markers with high consumer DNA interest and unambiguous biochemical mechanisms.
 * **Target Loci**:
-  - [ ] **`CFH` Complement Factor H Y402H (`rs1061147`)**: chr1:196659237 (GRCh38) / chr1:196621008 (GRCh37), c.1204T>C (p.Tyr402His). Major genetic risk factor for Age-Related Macular Degeneration (AMD; ~2.8x increased risk per C-allele, 11x in CC homozygotes). Key lifestyle intervention: antioxidant lutein/zeaxanthin, smoking avoidance, UV protection.
+  - [ ] **`CFH` Complement Factor H Y402H (`rs1061170`)**: chr1:196690107 (GRCh38) / chr1:196659237 (GRCh37), c.1204T>C (p.Tyr402His). Major genetic risk factor for Age-Related Macular Degeneration (AMD; ~2.8x increased risk per C-allele, 11x in CC homozygotes). Key lifestyle intervention: antioxidant lutein/zeaxanthin, smoking avoidance, UV protection.
   - [ ] **`TCF4` Fuchs Endothelial Corneal Dystrophy (`rs613872`)**: chr18:55663737 (GRCh38) / chr18:53229641 (GRCh37), intronic surrogate for CTG trinucleotide repeat expansion. Major genetic determinant of Fuchs dystrophy requiring corneal transplantation; ~5x odds ratio in carriers.
   - [ ] **`LOXL1` Exfoliation Glaucoma Risk Haplotype (`rs3825942` & `rs2165241`)**: chr15:73934338 & chr15:73950462 (GRCh38). Lysyl oxidase-like 1 variants driving pseudoexfoliation fibrillar protein deposition and secondary open-angle glaucoma.
   - [ ] **`FOXO3` Centenarian Longevity Factor (`rs2802292`)**: chr6:108573130 (GRCh38) / chr6:108882956 (GRCh37), G-allele. Well-replicated biomarker associated with exceptional human longevity, enhanced cellular stress resistance, and preserved metabolic health.

@@ -1143,8 +1143,9 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 /* Coverage Ledger bar in sticky top control strip */
 .lds-coverage-ledger {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 8px 14px;
   width: 100%;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border-default);
@@ -1153,7 +1154,8 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 }
 .lds-coverage-ledger-track {
   display: flex;
-  flex: 1;
+  flex: 1 1 80px;
+  min-width: 80px;
   height: 6px;
   background: var(--paper-sunk);
   border: 1px solid var(--border-default);
@@ -1171,10 +1173,11 @@ button.lds-term { padding: 0; border: 0; background: none; font: inherit; color:
 .lds-cov-gaps { background: var(--state-array-gap); opacity: 0.45; }
 .lds-coverage-ledger-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  white-space: nowrap;
+  gap: 6px 12px;
+  min-width: 0;
+  white-space: normal;
 }
 .lds-coverage-ledger-text {
   font: 600 12px var(--font-mono);
