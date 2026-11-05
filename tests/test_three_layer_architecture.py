@@ -41,7 +41,8 @@ class TestThreeLayerArchitecture(unittest.TestCase):
             self.assertGreaterEqual(len(locus["alt"]), 1)
             # Evidence values are null when unknown, and every block carries provenance.
             for name in ("clinvar", "gnomad", "hpa"):
-                self.assertIn("provenance", locus["evidence"][name], f"{rsid} {name}")
+                if locus["evidence"][name] is not None:
+                    self.assertIn("provenance", locus["evidence"][name], f"{rsid} {name}")
             # Interpretations are typed knowledge, nothing else.
             for count, interp in locus["interpretations"].items():
                 self.assertEqual(interp, GenotypeInterpretation(**interp).to_dict(), f"{rsid} {count}")

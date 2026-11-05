@@ -141,11 +141,12 @@ def test_docked_beside_the_list_non_modal_and_rows_swap_the_record(loaded_page):
     expect(_details(page, second)).to_have_attribute("aria-expanded", "true")
     expect(_details(page, first)).to_have_attribute("aria-expanded", "false")
 
-    # Sticky: scrolling the page keeps the docked Inspector in view.
+    # Sticky: scrolling the page keeps the docked Inspector in view directly below the sticky toolbar.
     page.evaluate("() => window.scrollTo(0, document.documentElement.scrollHeight / 2)")
     page.wait_for_function(
         "() => { const r = document.getElementById('variant-drawer').getBoundingClientRect();"
-        " return r.top >= 0 && r.top <= 32 && r.bottom <= window.innerHeight; }",
+        " const tb = document.getElementById('results-toolbar-bar').getBoundingClientRect();"
+        " return r.top >= tb.bottom && r.top <= tb.bottom + 32 && r.bottom <= window.innerHeight; }",
         timeout=WAIT_TIMEOUT_MS,
     )
 

@@ -103,3 +103,13 @@ kills it mid-run with no summary line. That looks like a failure but is not one.
   `web/src/core/*.js` for network primitives and telemetry hosts.
 - Implementers have claimed fixes they did not make. Every task goes through review and gate-runner before push,
   never on its own report.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as GitHub issues in pterw/lucidase (via gh CLI). See docs/agents/issue-tracker.md.
+
+### Domain docs
+
+Single-context (GLOSSARY.md + docs/adr/ at the repo root). See docs/agents/domain.md.

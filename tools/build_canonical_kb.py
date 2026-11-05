@@ -53,7 +53,7 @@ from tools.coverage_taxonomy import (  # noqa: E402
     derive_evidence_tier,
     derive_tier_from_cpic_level,
 )
-from tools.source_adapters import REVIEW_STATUS_STARS, AdapterError, UpstreamSnapshot  # noqa: E402
+from tools.source_adapters import REVIEW_STATUS_STARS, AdapterError, UpstreamSnapshot, esearch_uids  # noqa: E402
 from tools.variome_models import GenotypeInterpretation  # noqa: E402
 
 SCHEMA_VERSION = 2
@@ -94,7 +94,7 @@ CPIC_LEVELS = frozenset({"A", "B", "C", "D"})
 CURATED_TIERS = frozenset({"Tier A", "Tier B", "Tier C", "Tier D"})
 # A citation names a guideline or paper. Identifiers typed from memory are refused.
 CITATION_IDENTIFIER = re.compile(r"\bPMID\b|\bdoi\b|10\.\d{4,}", re.IGNORECASE)
-NORMALITY_WORDING = re.compile(r"\bnormal\b|wild[- ]?type", re.IGNORECASE)
+NORMALITY_WORDING = re.compile(r"\b(?:normal|typical)\b|wild[- ]?type", re.IGNORECASE)
 PRIVACY = {"local_analysis": True, "genomic_uploads": False, "variant_identifiers_transmitted": False}
 
 
@@ -508,9 +508,18 @@ def _capture_problems(root: Path, rsid: str, gene: str, variant_id: str) -> list
     file or the rsid file) and the gnomAD constraint of the gene. A missing or empty file would otherwise
     switch its cross-check off without a word.
     """
+    clinvar_candidates = (f"clinvar/{rsid}.json",)
+    esearch_path = root / f"clinvar/{rsid}.esearch.json"
+    if esearch_path.is_file():
+        try:
+            if not esearch_uids(esearch_path.read_bytes()):
+                clinvar_candidates = (f"clinvar/{rsid}.esearch.json",)
+        except Exception:
+            pass
+
     expected = [
         (f"dbsnp/{rsid}.json",),
-        (f"clinvar/{rsid}.json",),
+        clinvar_candidates,
         (f"ensembl/{rsid}.json",),
         (f"gnomad/{rsid}.{variant_id}.json", f"gnomad/{rsid}.json"),
         (f"gnomad/constraint_{gene}.json",),

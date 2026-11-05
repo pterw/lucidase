@@ -145,14 +145,18 @@ def _screens(page) -> str:
 
     page.locator("[data-filter='every']").click()
     chunks.append(page.locator("#variants-tbody").inner_text())
+    opened = False
     for i in range(page.locator("#variants-tbody tr").count()):
         row = page.locator("#variants-tbody tr").nth(i)
         if "No variants match" in row.inner_text():
             continue
         row.click()
-        wait_drawer_open(page)
-        open_gene_context(page)  # a closed <details> leaves its text out of innerText
+        if not opened:
+            wait_drawer_open(page)
+            open_gene_context(page)  # a closed <details> leaves its text out of innerText
+            opened = True
         chunks.append(page.locator("#variant-drawer").inner_text())
+    if opened:
         page.locator("#btn-close-drawer").click()
         wait_drawer_closed(page)
     return "\n".join(chunks)

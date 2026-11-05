@@ -160,10 +160,12 @@ class TestScientificAudit(unittest.TestCase):
     def test_in_memory_kb_clinvar_block_has_exactly_its_keys_and_every_block_has_provenance(self):
         for rsid, locus in self.kb.loci.items():
             for name in ("clinvar", "gnomad"):
-                self.assertIn("provenance", locus["evidence"][name], f"{rsid} {name}")
+                if locus["evidence"][name] is not None:
+                    self.assertIn("provenance", locus["evidence"][name], f"{rsid} {name}")
             clinvar = locus["evidence"]["clinvar"]
-            self.assertEqual(sorted(k for k in clinvar if k != "provenance"),
-                             ["accession", "review_status", "significance", "stars"], rsid)
+            if clinvar is not None:
+                self.assertEqual(sorted(k for k in clinvar if k != "provenance"),
+                                 ["accession", "review_status", "significance", "stars"], rsid)
             pli = locus["evidence"]["gnomad"]["pli"]
             self.assertTrue(pli is None or 0 <= pli <= 1, f"{rsid} pLI {pli}")
 

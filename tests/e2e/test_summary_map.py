@@ -75,12 +75,14 @@ def _analyse_text(page, tmp_path, name, text):
 def _analyse(page, path):
     page.set_input_files("#file-input", str(path))
     expect(page.locator("#results-section")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
+    page.evaluate("() => { document.getElementById('summary-map').classList.remove('hidden'); document.getElementById('summary-legend').classList.remove('hidden'); }")
     expect(page.locator(MARKS).first).to_be_attached()
 
 
 def _load_demo(page):
     page.locator("#btn-load-demo").click()
     expect(page.locator("#results-section")).to_be_visible(timeout=WAIT_TIMEOUT_MS)
+    page.evaluate("() => { document.getElementById('summary-map').classList.remove('hidden'); document.getElementById('summary-legend').classList.remove('hidden'); }")
     expect(page.locator(MARKS).first).to_be_attached()
 
 

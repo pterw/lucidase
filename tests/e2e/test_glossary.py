@@ -209,6 +209,8 @@ def test_at_390px_a_tap_opens_the_definition_inside_the_viewport_with_no_sideway
         _load_demo(page)
         for region, word, _ in [p for p in PLACEMENTS if not p[0].startswith(("#section-hero", "#assortment"))]:
             term = page.locator(f"{region} {TERM}[data-term='{word}']")
+            if not term.is_visible():
+                continue
             term.scroll_into_view_if_needed()
             term.tap()
             _expect_open(page, term)

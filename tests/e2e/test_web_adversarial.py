@@ -186,8 +186,8 @@ def _count(page, element_id):
 # them with the variant-present findings). Wild type: 9 Not found, 2 Not on your chip, 2 Unclear (H63D and MTHFR
 # wild type; the worker also lists them with the wild-type checks). Between them every state tab is non-empty once.
 STATE_TAB_COUNTS = {
-    "demo": {"observed": 28, "negative": 21, "gaps": 0, "insufficient": 5},
-    "wildtype": {"observed": 0, "negative": 47, "gaps": 2, "insufficient": 5},
+    "demo": {"observed": 28, "negative": 25, "gaps": 0, "insufficient": 5},
+    "wildtype": {"observed": 0, "negative": 51, "gaps": 2, "insufficient": 5},
 }
 
 
@@ -289,8 +289,17 @@ def test_corrupt_binary_garbage_is_survived(loaded_page):
 
 def test_export_handlers_run(loaded_page):
     _load_demo(loaded_page)
-    loaded_page.evaluate("window.__lucidase.exportMarkdownReport()")
-    loaded_page.evaluate("window.__lucidase.exportCsvReport()")
+    with loaded_page.expect_download() as md_dl:
+        loaded_page.evaluate("window.__lucidase.exportMarkdownReport()")
+    md_text = Path(md_dl.value.path()).read_text(encoding="utf-8")
+    assert md_dl.value.suggested_filename.endswith(".md")
+    assert "# Lucidase" in md_text and "rs113993960" in md_text
+
+    with loaded_page.expect_download() as csv_dl:
+        loaded_page.evaluate("window.__lucidase.exportCsvReport()")
+    csv_text = Path(csv_dl.value.path()).read_text(encoding="utf-8")
+    assert csv_dl.value.suggested_filename.endswith(".csv")
+    assert "rs113993960" in csv_text and "CFTR" in csv_text
 
 
 def test_apoe_e3e4_upload_and_inspect(loaded_page):

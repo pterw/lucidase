@@ -172,6 +172,170 @@
           "notes": "Illumina Global Screening Array"
         }
       }
+    },
+    "rs10156191": {
+      "gene": "AOC1",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "23andme_v4": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "23andme_v5": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "ancestry_v1": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "ancestry_v2": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "myheritage_standard": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        }
+      }
+    },
+    "rs1049742": {
+      "gene": "AOC1",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "23andme_v4": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "23andme_v5": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "ancestry_v1": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "ancestry_v2": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "myheritage_standard": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        }
+      }
+    },
+    "rs1049793": {
+      "gene": "AOC1",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "23andme_v4": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "23andme_v5": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "ancestry_v1": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "ancestry_v2": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        },
+        "myheritage_standard": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard consumer array"
+        }
+      }
+    },
+    "rs2052129": {
+      "gene": "AOC1",
+      "coverage": {
+        "23andme_v3": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on Illumina OmniExpress Plus"
+        },
+        "23andme_v4": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on Custom Illumina chip"
+        },
+        "23andme_v5": {
+          "is_covered": true,
+          "probe_id": "rs2052129",
+          "strand_design": "plus",
+          "notes": "Illumina Global Screening Array v5"
+        },
+        "ancestry_v1": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on Illumina OmniExpress"
+        },
+        "ancestry_v2": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on Illumina OmniExpress Plus"
+        },
+        "myheritage_standard": {
+          "is_covered": false,
+          "probe_id": null,
+          "strand_design": "unsupported",
+          "notes": "Not on standard GSA"
+        }
+      }
     }
   }
 }
